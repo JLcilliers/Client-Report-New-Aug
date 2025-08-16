@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/components/ui/use-toast"
-import { supabaseAdmin } from "@/lib/db/supabase"
+import { supabase } from "@/lib/db/supabase"
 
 interface ClientFormProps {
   onSuccess?: () => void
@@ -32,7 +32,7 @@ export default function ClientForm({ onSuccess }: ClientFormProps) {
       // Remove trailing slash
       cleanDomain = cleanDomain.replace(/\/$/, "")
 
-      const { data, error } = await supabaseAdmin
+      const { data, error } = await supabase
         .from("clients")
         .insert({
           name: formData.name.trim(),

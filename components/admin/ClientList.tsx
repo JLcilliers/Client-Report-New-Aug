@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { supabaseAdmin } from "@/lib/db/supabase"
+import { supabase } from "@/lib/db/supabase"
 import { Client, GoogleCredentials } from "@/types"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -41,13 +41,7 @@ export default function ClientList() {
 
   const fetchClients = async () => {
     try {
-      // Check if supabaseAdmin is available
-      if (!supabaseAdmin) {
-        console.error("supabaseAdmin client not initialized - check SUPABASE_SERVICE_ROLE_KEY")
-        throw new Error("Database connection not initialized")
-      }
-
-      const { data: clientsData, error: clientsError } = await supabaseAdmin
+      const { data: clientsData, error: clientsError } = await supabase
         .from("clients")
         .select("*")
         .order("created_at", { ascending: false })
@@ -57,7 +51,7 @@ export default function ClientList() {
         throw clientsError
       }
 
-      const { data: credsData, error: credsError } = await supabaseAdmin
+      const { data: credsData, error: credsError } = await supabase
         .from("google_credentials")
         .select("*")
 
@@ -98,7 +92,7 @@ export default function ClientList() {
     if (!deleteClient) return
 
     try {
-      const { error } = await supabaseAdmin
+      const { error } = await supabase
         .from("clients")
         .delete()
         .eq("id", deleteClient.id)

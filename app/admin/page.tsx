@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { supabaseAdmin } from "@/lib/db/supabase"
+import { supabase } from "@/lib/db/supabase"
 import { Client } from "@/types"
 import Link from "next/link"
 import { 
@@ -37,7 +37,7 @@ export default function AdminDashboard() {
 
   const fetchClients = async () => {
     try {
-      const { data, error } = await supabaseAdmin
+      const { data, error } = await supabase
         .from("clients")
         .select("*")
         .order("created_at", { ascending: false })
@@ -62,15 +62,15 @@ export default function AdminDashboard() {
 
   const fetchStats = async () => {
     try {
-      const { count: totalClients } = await supabaseAdmin
+      const { count: totalClients } = await supabase
         .from("clients")
         .select("*", { count: "exact", head: true })
 
-      const { data: connectedData } = await supabaseAdmin
+      const { data: connectedData } = await supabase
         .from("google_credentials")
         .select("client_id")
 
-      const { data: lastSyncData } = await supabaseAdmin
+      const { data: lastSyncData } = await supabase
         .from("metrics_cache")
         .select("created_at")
         .order("created_at", { ascending: false })
