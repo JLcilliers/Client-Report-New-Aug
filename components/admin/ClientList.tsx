@@ -46,13 +46,19 @@ export default function ClientList() {
         .select("*")
         .order("created_at", { ascending: false })
 
-      if (clientsError) throw clientsError
+      if (clientsError) {
+        console.error("Clients fetch error:", clientsError)
+        throw clientsError
+      }
 
       const { data: credsData, error: credsError } = await supabaseAdmin
         .from("google_credentials")
         .select("*")
 
-      if (credsError) throw credsError
+      if (credsError) {
+        console.error("Credentials fetch error:", credsError)
+        // Don't throw here, credentials are optional
+      }
 
       setClients(clientsData || [])
       
@@ -62,10 +68,10 @@ export default function ClientList() {
       })
       setCredentials(credsMap)
     } catch (error: any) {
-      console.error("Error fetching clients:", error)
+      console.error("Error fetching clients - Full error:", error)
       toast({
         title: "Error",
-        description: "Failed to fetch clients",
+        description: error.message || "Failed to fetch clients",
         variant: "destructive",
       })
     } finally {

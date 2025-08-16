@@ -43,13 +43,16 @@ export default function AdminDashboard() {
         .order("created_at", { ascending: false })
         .limit(5)
 
-      if (error) throw error
+      if (error) {
+        console.error("Dashboard fetch error:", error)
+        throw error
+      }
       setClients(data || [])
     } catch (error: any) {
-      console.error("Error fetching clients:", error)
+      console.error("Error fetching clients - Full error:", error)
       toast({
-        title: "Error",
-        description: "Failed to fetch clients",
+        title: "Error fetching clients",
+        description: error.message || "Please check console for details",
         variant: "destructive",
       })
     } finally {
