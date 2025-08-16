@@ -4,9 +4,9 @@ import { ReportData } from "@/types"
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { clientId: string } }
+  { params }: { params: Promise<{ clientId: string }> }
 ) {
-  const clientId = params.clientId
+  const { clientId } = await params
   const searchParams = request.nextUrl.searchParams
   const range = searchParams.get("range") || "30d"
 
