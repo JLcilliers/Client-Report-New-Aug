@@ -57,6 +57,36 @@ export default function HomePage() {
     }
   }
 
+  const handlePasswordReset = async () => {
+    if (!email) {
+      toast({
+        title: "Error",
+        description: "Please enter your email first",
+        variant: "destructive",
+      })
+      return
+    }
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/reset-password`,
+      })
+
+      if (error) throw error
+
+      toast({
+        title: "Success",
+        description: "Password reset link sent to your email",
+      })
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send reset email",
+        variant: "destructive",
+      })
+    }
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <Card className="w-full max-w-md">
@@ -93,6 +123,15 @@ export default function HomePage() {
               {loading ? "Signing in..." : "Sign In"}
             </Button>
           </form>
+          <div className="mt-4 text-center">
+            <button
+              type="button"
+              onClick={handlePasswordReset}
+              className="text-sm text-gray-600 hover:text-gray-900 underline"
+            >
+              Forgot your password?
+            </button>
+          </div>
         </CardContent>
       </Card>
     </div>
