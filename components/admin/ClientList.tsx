@@ -57,7 +57,7 @@ export default function ClientList() {
       setClients(clientsData || [])
       
       const credsMap: Record<string, GoogleCredentials> = {}
-      credsData?.forEach(cred => {
+      credsData?.forEach((cred: GoogleCredentials) => {
         credsMap[cred.client_id] = cred
       })
       setCredentials(credsMap)
