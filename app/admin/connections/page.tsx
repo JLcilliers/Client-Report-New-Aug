@@ -94,11 +94,10 @@ export default function ConnectionsPage() {
     const params = new URLSearchParams({
       client_id: "998982098952-et4jamotfaitvlp5d1mim3ve144dbm2s.apps.googleusercontent.com",
       redirect_uri: `${window.location.origin}/api/auth/google/admin-callback`,
-      // Add Analytics and Search Console management scopes for full access
+      response_type: "code",
       scope: [
         "https://www.googleapis.com/auth/webmasters",
         "https://www.googleapis.com/auth/analytics",
-      response_type: "code",
         "https://www.googleapis.com/auth/userinfo.email",
         "https://www.googleapis.com/auth/userinfo.profile"
       ].join(" "),
