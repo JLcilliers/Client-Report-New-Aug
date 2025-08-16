@@ -1,0 +1,20 @@
+{
+  "functions": {
+    "app/api/cron/daily-update/route.ts": {
+      "maxDuration": 60
+    },
+    "app/api/cron/weekly-audit/route.ts": {
+      "maxDuration": 60
+    }
+  },
+  "crons": [
+    {
+      "path": "/api/cron/daily-update",
+      "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/weekly-audit",
+      "schedule": "0 6 * * 0"
+    }
+  ]
+}
