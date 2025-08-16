@@ -41,6 +41,12 @@ export default function ClientList() {
 
   const fetchClients = async () => {
     try {
+      // Check if supabaseAdmin is available
+      if (!supabaseAdmin) {
+        console.error("supabaseAdmin client not initialized - check SUPABASE_SERVICE_ROLE_KEY")
+        throw new Error("Database connection not initialized")
+      }
+
       const { data: clientsData, error: clientsError } = await supabaseAdmin
         .from("clients")
         .select("*")
