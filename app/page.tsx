@@ -22,8 +22,8 @@ export default function HomePage() {
   }, [])
 
   const checkUser = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (user) {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (session) {
       router.push("/admin")
     }
   }

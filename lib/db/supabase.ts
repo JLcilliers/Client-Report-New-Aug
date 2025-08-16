@@ -42,7 +42,10 @@ export async function getUser() {
 
 // Helper to check if user is admin
 export async function isAdmin(email: string): Promise<boolean> {
-  const { data, error } = await supabaseAdmin
+  // Use regular supabase client if admin client is not available
+  const client = supabaseAdmin || supabase
+  
+  const { data, error } = await client
     .from('admin_users')
     .select('email')
     .eq('email', email)
