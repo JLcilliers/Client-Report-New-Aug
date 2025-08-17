@@ -57,6 +57,10 @@ export default function ConnectionsPage() {
         errorMessage = "Database table not configured. Please run the SQL script in Supabase."
       } else if (error === 'server_configuration') {
         errorMessage = "Server configuration error. Please check environment variables."
+      } else if (error === 'database_error') {
+        errorMessage = "Database error. Please check Supabase connection and table permissions."
+      } else if (error === 'oauth_exchange_failed') {
+        errorMessage = "Failed to exchange authorization code. Please check OAuth configuration."
       }
       toast({
         title: "Connection Failed",

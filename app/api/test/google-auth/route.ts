@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 
 export async function GET(request: NextRequest) {
+  try {
   const searchParams = request.nextUrl.searchParams
   const action = searchParams.get("action")
   
@@ -103,4 +104,12 @@ export async function GET(request: NextRequest) {
       GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET ? "SET" : "NOT SET",
     }
   })
+  } catch (error: any) {
+    // Catch any unexpected errors and return a proper JSON response
+    return NextResponse.json({
+      error: "Server error",
+      message: error.message,
+      stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
+    }, { status: 500 })
+  }
 }

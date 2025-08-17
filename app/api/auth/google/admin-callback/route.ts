@@ -157,6 +157,26 @@ export async function GET(request: NextRequest) {
     )
   } catch (error: any) {
     console.error("OAuth callback error:", error)
+    console.error("Error stack:", error.stack)
+    
+    // Return a proper error response instead of 500
+    const errorMessage = error.message || "Unknown error occurred"
+    
+    // Check if it's a Supabase/database error
+    if (errorMessage.includes("store authentication")) {
+      return NextResponse.redirect(
+        new URL("/admin/connections?error=database_error", request.url)
+      )
+    }
+    
+    // Check if it's a token exchange error
+    if (errorMessage.includes("exchange code")) {
+      return NextResponse.redirect(
+        new URL("/admin/connections?error=oauth_exchange_failed", request.url)
+      )
+    }
+    
+    // Default error
     return NextResponse.redirect(
       new URL("/admin/connections?error=connection_failed", request.url)
     )
