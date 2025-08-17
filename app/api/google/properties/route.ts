@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 
+// API endpoint to fetch Google Search Console and Analytics properties
+
 export async function POST(request: NextRequest) {
   try {
     const { connectionId } = await request.json()
