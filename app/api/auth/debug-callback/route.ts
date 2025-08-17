@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 
 export async function GET(request: NextRequest) {
   // Capture everything about the request
-  const debug = {
+  const debug: any = {
     url: request.url,
     method: request.method,
     headers: Object.fromEntries(request.headers.entries()),
