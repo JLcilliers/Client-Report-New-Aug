@@ -55,7 +55,10 @@ export async function GET(request: NextRequest) {
     if (!tokenResponse.ok) {
       const errorData = await tokenResponse.text()
       console.error("Token exchange error:", errorData)
-      throw new Error("Failed to exchange code for tokens")
+      console.error("Status:", tokenResponse.status)
+      console.error("Client ID:", process.env.GOOGLE_CLIENT_ID)
+      console.error("Redirect URI:", `${request.nextUrl.origin}/api/auth/google/admin-callback`)
+      throw new Error(`Failed to exchange code for tokens: ${tokenResponse.status} - ${errorData}`)
     }
 
     const tokens = await tokenResponse.json()
@@ -122,7 +125,12 @@ export async function GET(request: NextRequest) {
     }
 
     // Upsert the connection
-    const { error: upsertError } = await supabase
+    console.log("Attempting to store connection for:", adminEmail)
+    console.log("Google email:", userInfo.email)
+    console.log("Token expiry:", tokenExpiry.toISOString())
+    console.log("Has refresh token:", !!tokens.refresh_token)
+    
+    const { data: upsertData, error: upsertError } = await supabase
       .from("admin_google_connections")
       .upsert({
         admin_email: adminEmail,
@@ -133,11 +141,15 @@ export async function GET(request: NextRequest) {
       }, {
         onConflict: "admin_email",
       })
+      .select()
 
     if (upsertError) {
       console.error("Error storing tokens:", upsertError)
-      throw new Error("Failed to store authentication")
+      console.error("Error details:", JSON.stringify(upsertError, null, 2))
+      throw new Error(`Failed to store authentication: ${upsertError.message}`)
     }
+    
+    console.log("Successfully stored connection:", upsertData)
 
     // Redirect back to connections page with success
     return NextResponse.redirect(
