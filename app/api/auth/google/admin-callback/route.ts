@@ -108,21 +108,11 @@ export async function GET(request: NextRequest) {
     const tokenExpiry = new Date()
     tokenExpiry.setSeconds(tokenExpiry.getSeconds() + tokens.expires_in)
 
-    // Get the current user's session to get their email
-    const sessionCookie = request.cookies.get("sb-bqpmpjuhjbbyouycwxgt-auth-token")
-    let adminEmail = userInfo.email // Default to Google email
-
-    if (sessionCookie) {
-      try {
-        // Parse the session to get the user email
-        const sessionData = JSON.parse(sessionCookie.value)
-        if (sessionData?.user?.email) {
-          adminEmail = sessionData.user.email
-        }
-      } catch (e) {
-        console.log("Could not parse session cookie, using Google email")
-      }
-    }
+    // For now, just use the Google email as the admin email
+    // Since the admin is connecting their own Google account
+    const adminEmail = userInfo.email
+    
+    console.log("Using admin email:", adminEmail)
 
     // Upsert the connection
     console.log("Attempting to store connection for:", adminEmail)

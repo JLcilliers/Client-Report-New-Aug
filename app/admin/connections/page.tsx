@@ -75,21 +75,22 @@ export default function ConnectionsPage() {
 
   const checkGoogleConnection = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-
-      // Check if we have stored Google credentials for this admin
+      // For now, check for any admin connection
+      // We'll refine this once we have multiple admins
       const { data, error } = await supabase
         .from("admin_google_connections")
         .select("*")
-        .eq("admin_email", user.email)
+        .limit(1)
         .single()
 
       if (data && !error) {
         setGoogleConnection(data)
+        console.log("Found connection:", data.email)
+      } else {
+        console.log("No Google connection found")
       }
     } catch (error) {
-      console.log("No Google connection found")
+      console.log("Error checking connection:", error)
     } finally {
       setLoading(false)
     }
