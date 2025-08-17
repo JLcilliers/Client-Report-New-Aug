@@ -234,10 +234,12 @@ export default function ConnectionsClient({ initialConnection }: ConnectionsClie
           </CardHeader>
           <CardContent>
             <div className="flex justify-center py-8">
-              <Button variant="outline">
-                <Settings className="h-4 w-4 mr-2" />
-                Manage Client Connections
-              </Button>
+              <a href="/admin/properties">
+                <Button variant="outline">
+                  <Settings className="h-4 w-4 mr-2" />
+                  Manage Properties
+                </Button>
+              </a>
             </div>
           </CardContent>
         </Card>

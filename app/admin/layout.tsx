@@ -12,7 +12,8 @@ import {
   LogOut,
   FileText,
   BarChart3,
-  Link2
+  Link2,
+  Database
 } from "lucide-react"
 import { cn } from "@/lib/utils/cn"
 
@@ -81,6 +82,7 @@ export default function AdminLayout({
   const navigation = [
     { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
     { name: "Connections", href: "/admin/connections", icon: Link2 },
+    { name: "Properties", href: "/admin/properties", icon: Database },
     { name: "Clients", href: "/admin/clients", icon: Users },
     { name: "Reports", href: "/admin/reports", icon: FileText },
     { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
