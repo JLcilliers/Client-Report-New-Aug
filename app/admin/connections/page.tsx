@@ -55,6 +55,8 @@ export default function ConnectionsPage() {
         errorMessage = "Invalid request. Please try again."
       } else if (error === 'database_not_configured') {
         errorMessage = "Database table not configured. Please run the SQL script in Supabase."
+      } else if (error === 'server_configuration') {
+        errorMessage = "Server configuration error. Please check environment variables."
       }
       toast({
         title: "Connection Failed",
