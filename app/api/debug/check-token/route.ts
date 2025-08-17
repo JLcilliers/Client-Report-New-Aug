@@ -85,7 +85,7 @@ export async function GET(request: NextRequest) {
     const tokenInfo = await tokenInfoResponse.json()
     
     // Test Analytics API access
-    let analyticsTest = { working: false, error: null }
+    let analyticsTest: any = { working: false, error: null }
     try {
       const testResponse = await fetch(
         "https://analyticsadmin.googleapis.com/v1alpha/accounts",
