@@ -15,6 +15,7 @@ import {
   AlertCircle
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
+import { useRouter } from "next/navigation"
 
 interface GoogleConnection {
   id: string
@@ -53,6 +54,7 @@ export default function PropertiesClient({ connection }: PropertiesClientProps) 
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedProperties, setSelectedProperties] = useState<Set<string>>(new Set())
   const { toast } = useToast()
+  const router = useRouter()
 
   useEffect(() => {
     fetchProperties()
@@ -265,7 +267,27 @@ export default function PropertiesClient({ connection }: PropertiesClientProps) 
           <Button variant="outline" onClick={() => setSelectedProperties(new Set())}>
             Clear Selection ({selectedProperties.size})
           </Button>
-          <Button>
+          <Button onClick={() => {
+            // Separate SC and GA properties
+            const scProps: string[] = []
+            const gaProps: string[] = []
+            
+            selectedProperties.forEach(prop => {
+              // Check if it's a Search Console property (starts with http or domain:)
+              if (prop.startsWith('http') || prop.startsWith('domain:') || prop.startsWith('sc-domain:')) {
+                scProps.push(prop)
+              } else {
+                gaProps.push(prop)
+              }
+            })
+            
+            // Navigate to create report page with selected properties
+            const params = new URLSearchParams()
+            if (scProps.length > 0) params.set('sc', scProps.join(','))
+            if (gaProps.length > 0) params.set('ga', gaProps.join(','))
+            
+            router.push(`/admin/reports/create?${params.toString()}`)
+          }}>
             <Link2 className="h-4 w-4 mr-2" />
             Create Client Report
           </Button>

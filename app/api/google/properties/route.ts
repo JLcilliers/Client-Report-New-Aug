@@ -99,9 +99,9 @@ export async function POST(request: NextRequest) {
     // Fetch Analytics properties
     let analyticsAccounts = []
     try {
-      // First get accounts
+      // Try GA4 Admin API first
       const accountsResponse = await fetch(
-        "https://analyticsadmin.googleapis.com/v1beta/accounts",
+        "https://analyticsadmin.googleapis.com/v1alpha/accounts",
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -109,14 +109,17 @@ export async function POST(request: NextRequest) {
         }
       )
       
+      console.log("Analytics accounts response status:", accountsResponse.status)
+      
       if (accountsResponse.ok) {
         const accountsData = await accountsResponse.json()
         const accounts = accountsData.accounts || []
+        console.log(`Found ${accounts.length} Analytics accounts`)
         
         // For each account, get properties
         for (const account of accounts) {
           const propertiesResponse = await fetch(
-            `https://analyticsadmin.googleapis.com/v1beta/${account.name}/properties`,
+            `https://analyticsadmin.googleapis.com/v1alpha/properties?filter=parent:${account.name}`,
             {
               headers: {
                 Authorization: `Bearer ${accessToken}`,
@@ -124,23 +127,51 @@ export async function POST(request: NextRequest) {
             }
           )
           
+          console.log(`Properties response for ${account.displayName}:`, propertiesResponse.status)
+          
           if (propertiesResponse.ok) {
             const propertiesData = await propertiesResponse.json()
-            analyticsAccounts.push({
-              name: account.displayName,
-              id: account.name,
-              properties: (propertiesData.properties || []).map((prop: any) => ({
-                name: prop.name,
-                id: prop.name.split('/').pop(), // Extract property ID
-                displayName: prop.displayName,
-              }))
-            })
+            if (propertiesData.properties && propertiesData.properties.length > 0) {
+              analyticsAccounts.push({
+                name: account.displayName,
+                id: account.name,
+                properties: propertiesData.properties.map((prop: any) => ({
+                  name: prop.name,
+                  id: prop.name.split('/').pop(), // Extract property ID
+                  displayName: prop.displayName,
+                }))
+              })
+            }
+          } else {
+            const errorText = await propertiesResponse.text()
+            console.error(`Failed to fetch properties for ${account.displayName}:`, errorText)
           }
         }
-        console.log(`Found ${analyticsAccounts.length} Analytics accounts`)
       } else {
-        console.error("Failed to fetch Analytics accounts:", await accountsResponse.text())
+        const errorText = await accountsResponse.text()
+        console.error("Failed to fetch Analytics accounts:", errorText)
+        
+        // Try alternative approach - Management API for Universal Analytics (if any legacy properties)
+        try {
+          const mgmtResponse = await fetch(
+            "https://www.googleapis.com/analytics/v3/management/accounts",
+            {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+              },
+            }
+          )
+          
+          if (mgmtResponse.ok) {
+            const mgmtData = await mgmtResponse.json()
+            console.log("Found legacy Analytics accounts:", mgmtData.items?.length || 0)
+          }
+        } catch (e) {
+          console.log("No legacy Analytics access")
+        }
       }
+      
+      console.log(`Total Analytics accounts with properties: ${analyticsAccounts.length}`)
     } catch (error) {
       console.error("Error fetching Analytics properties:", error)
     }

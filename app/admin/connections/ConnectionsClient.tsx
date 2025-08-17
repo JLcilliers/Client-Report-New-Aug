@@ -86,6 +86,7 @@ export default function ConnectionsClient({ initialConnection }: ConnectionsClie
       scope: [
         "https://www.googleapis.com/auth/webmasters",
         "https://www.googleapis.com/auth/analytics",
+        "https://www.googleapis.com/auth/analytics.readonly",
         "https://www.googleapis.com/auth/userinfo.email",
         "https://www.googleapis.com/auth/userinfo.profile"
       ].join(" "),
