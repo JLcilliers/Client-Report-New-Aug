@@ -119,6 +119,7 @@ export async function GET(request: NextRequest) {
     console.log("Google email:", userInfo.email)
     console.log("Token expiry:", tokenExpiry.toISOString())
     console.log("Has refresh token:", !!tokens.refresh_token)
+    console.log("Token scopes:", tokens.scope)
     
     const { data: upsertData, error: upsertError } = await supabase
       .from("admin_google_connections")
