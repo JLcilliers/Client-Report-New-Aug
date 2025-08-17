@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+// Check for required Supabase config
+if (!supabaseUrl || !supabaseServiceRoleKey) {
+  throw new Error("Missing Supabase configuration")
+}
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
@@ -24,6 +29,12 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    // Check for required environment variables
+    if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+      console.error("Missing Google OAuth environment variables")
+      throw new Error("Server configuration error - missing OAuth credentials")
+    }
+
     // Exchange code for tokens
     const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
       method: "POST",
@@ -32,8 +43,8 @@ export async function GET(request: NextRequest) {
       },
       body: new URLSearchParams({
         code,
-        client_id: process.env.GOOGLE_CLIENT_ID!,
-        client_secret: process.env.GOOGLE_CLIENT_SECRET!,
+        client_id: process.env.GOOGLE_CLIENT_ID,
+        client_secret: process.env.GOOGLE_CLIENT_SECRET,
         redirect_uri: `${request.nextUrl.origin}/api/auth/google/admin-callback`,
         grant_type: "authorization_code",
       }),
