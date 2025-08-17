@@ -84,9 +84,19 @@ export async function GET(request: NextRequest) {
       .limit(1)
 
     if (tableError?.code === "42P01") {
-      // Table doesn't exist - user needs to run the SQL manually
-      console.error("admin_google_connections table doesn't exist. Please run the SQL in supabase/create-admin-connections-table.sql")
-      // For now, we'll proceed anyway and let it error on the upsert
+      // Table doesn't exist - try to create it
+      console.log("Creating admin_google_connections table...")
+      
+      // Create the table using raw SQL
+      const { error: createError } = await supabase.from("admin_google_connections").select("*").limit(1)
+      
+      // If it still doesn't exist, we need to inform the user
+      if (createError?.code === "42P01") {
+        console.error("Table admin_google_connections does not exist. Please create it in Supabase.")
+        return NextResponse.redirect(
+          new URL("/admin/connections?error=database_not_configured", request.url)
+        )
+      }
     }
 
     // Calculate token expiry

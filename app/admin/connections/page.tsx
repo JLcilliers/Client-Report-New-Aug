@@ -53,6 +53,8 @@ export default function ConnectionsPage() {
         errorMessage = "Access was denied. Please try again."
       } else if (error === 'invalid_request') {
         errorMessage = "Invalid request. Please try again."
+      } else if (error === 'database_not_configured') {
+        errorMessage = "Database table not configured. Please run the SQL script in Supabase."
       }
       toast({
         title: "Connection Failed",
