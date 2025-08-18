@@ -1,0 +1,296 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { useToast } from "@/components/ui/use-toast"
+import { 
+  Plus, 
+  Trash2, 
+  RefreshCw, 
+  CheckCircle, 
+  XCircle,
+  Globe,
+  BarChart3,
+  Settings,
+  ArrowLeft
+} from "lucide-react"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+
+interface GoogleAccount {
+  id: string
+  account_email: string
+  account_name?: string
+  is_active: boolean
+  created_at: string
+  updated_at: string
+  token_expiry?: string
+  search_console_properties?: string[]
+  analytics_properties?: string[]
+}
+
+export default function GoogleAccountsPage() {
+  const [accounts, setAccounts] = useState<GoogleAccount[]>([])
+  const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState<string | null>(null)
+  const { toast } = useToast()
+  const router = useRouter()
+
+  useEffect(() => {
+    fetchAccounts()
+  }, [])
+
+  const fetchAccounts = async () => {
+    try {
+      const response = await fetch('/api/admin/google-accounts')
+      if (response.ok) {
+        const data = await response.json()
+        setAccounts(data.accounts || [])
+      } else {
+        throw new Error('Failed to fetch accounts')
+      }
+    } catch (error) {
+      console.error('Error fetching Google accounts:', error)
+      toast({
+        title: "Error",
+        description: "Failed to load Google accounts",
+        variant: "destructive"
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const addNewAccount = () => {
+    // Start OAuth flow for new account
+    window.location.href = '/api/auth/google/add-account'
+  }
+
+  const refreshAccount = async (accountId: string) => {
+    setRefreshing(accountId)
+    try {
+      const response = await fetch(`/api/admin/google-accounts/${accountId}/refresh`, {
+        method: 'POST'
+      })
+      
+      if (response.ok) {
+        toast({
+          title: "Success",
+          description: "Account refreshed successfully"
+        })
+        fetchAccounts()
+      } else {
+        throw new Error('Failed to refresh account')
+      }
+    } catch (error) {
+      console.error('Error refreshing account:', error)
+      toast({
+        title: "Error",
+        description: "Failed to refresh account",
+        variant: "destructive"
+      })
+    } finally {
+      setRefreshing(null)
+    }
+  }
+
+  const deleteAccount = async (accountId: string) => {
+    if (!confirm('Are you sure you want to remove this Google account?')) {
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/admin/google-accounts/${accountId}`, {
+        method: 'DELETE'
+      })
+      
+      if (response.ok) {
+        toast({
+          title: "Success",
+          description: "Account removed successfully"
+        })
+        fetchAccounts()
+      } else {
+        throw new Error('Failed to delete account')
+      }
+    } catch (error) {
+      console.error('Error deleting account:', error)
+      toast({
+        title: "Error",
+        description: "Failed to remove account",
+        variant: "destructive"
+      })
+    }
+  }
+
+  const getTokenStatus = (expiry?: string) => {
+    if (!expiry) return 'unknown'
+    const expiryDate = new Date(expiry)
+    const now = new Date()
+    return expiryDate > now ? 'valid' : 'expired'
+  }
+
+  return (
+    <div className="max-w-6xl mx-auto space-y-6">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Link href="/admin">
+            <Button variant="ghost" size="sm">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back
+            </Button>
+          </Link>
+          <div>
+            <h1 className="text-2xl font-bold">Google Accounts</h1>
+            <p className="text-gray-600">Manage connected Google accounts for data access</p>
+          </div>
+        </div>
+        <Button onClick={addNewAccount}>
+          <Plus className="h-4 w-4 mr-2" />
+          Add Google Account
+        </Button>
+      </div>
+
+      {loading ? (
+        <Card>
+          <CardContent className="py-8">
+            <div className="text-center">Loading accounts...</div>
+          </CardContent>
+        </Card>
+      ) : accounts.length === 0 ? (
+        <Card>
+          <CardContent className="py-12">
+            <div className="text-center">
+              <Settings className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-500 mb-4">No Google accounts connected</p>
+              <p className="text-sm text-gray-400 mb-6">
+                Add Google accounts to access Search Console and Analytics data
+              </p>
+              <Button onClick={addNewAccount}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add First Account
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid gap-4">
+          {accounts.map((account) => {
+            const tokenStatus = getTokenStatus(account.token_expiry)
+            return (
+              <Card key={account.id}>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div>
+                        <CardTitle className="text-lg flex items-center gap-2">
+                          {account.account_email}
+                          {account.is_active ? (
+                            <Badge variant="default" className="text-xs">Active</Badge>
+                          ) : (
+                            <Badge variant="secondary" className="text-xs">Inactive</Badge>
+                          )}
+                        </CardTitle>
+                        {account.account_name && (
+                          <p className="text-sm text-gray-500">{account.account_name}</p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => refreshAccount(account.id)}
+                        disabled={refreshing === account.id}
+                      >
+                        {refreshing === account.id ? (
+                          <RefreshCw className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <RefreshCw className="h-4 w-4" />
+                        )}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => deleteAccount(account.id)}
+                      >
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                    <div>
+                      <p className="text-gray-500 mb-1">Token Status</p>
+                      <div className="flex items-center gap-2">
+                        {tokenStatus === 'valid' ? (
+                          <>
+                            <CheckCircle className="h-4 w-4 text-green-600" />
+                            <span className="text-green-600">Valid</span>
+                          </>
+                        ) : tokenStatus === 'expired' ? (
+                          <>
+                            <XCircle className="h-4 w-4 text-red-600" />
+                            <span className="text-red-600">Expired</span>
+                          </>
+                        ) : (
+                          <>
+                            <XCircle className="h-4 w-4 text-gray-400" />
+                            <span className="text-gray-400">Unknown</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <p className="text-gray-500 mb-1">Search Console Properties</p>
+                      <div className="flex items-center gap-2">
+                        <Globe className="h-4 w-4 text-blue-600" />
+                        <span>{account.search_console_properties?.length || 0} properties</span>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <p className="text-gray-500 mb-1">Analytics Properties</p>
+                      <div className="flex items-center gap-2">
+                        <BarChart3 className="h-4 w-4 text-purple-600" />
+                        <span>{account.analytics_properties?.length || 0} properties</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 pt-4 border-t">
+                    <p className="text-xs text-gray-500">
+                      Added: {new Date(account.created_at).toLocaleDateString()}
+                      {account.updated_at !== account.created_at && (
+                        <span> • Updated: {new Date(account.updated_at).toLocaleDateString()}</span>
+                      )}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            )
+          })}
+        </div>
+      )}
+
+      <Card className="bg-blue-50 border-blue-200">
+        <CardHeader>
+          <CardTitle className="text-lg">How it works</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ol className="list-decimal list-inside space-y-2 text-sm text-gray-700">
+            <li>Click "Add Google Account" to connect a new Google account</li>
+            <li>Authorize access to Search Console and Analytics</li>
+            <li>The account will appear here with available properties</li>
+            <li>When creating reports, select which account's data to use</li>
+            <li>Each report can use data from different Google accounts</li>
+          </ol>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
