@@ -51,12 +51,23 @@ export async function GET(
       last_updated: null,
     }
     
-    if (reportData) {
+    if (reportData && reportData.length > 0) {
       for (const item of reportData) {
-        result[item.data_type] = item.data
+        // Handle combined data format
+        if (item.data_type === 'combined' && item.data) {
+          result.search_console = item.data.search_console || null
+          result.analytics = item.data.analytics || null
+          result.last_updated = item.data.fetched_at || item.fetched_at
+        } 
+        // Handle legacy separate format
+        else if (item.data_type === 'search_console') {
+          result.search_console = item.data
+        } else if (item.data_type === 'analytics') {
+          result.analytics = item.data
+        }
         
         // Track most recent update
-        if (!result.last_updated || new Date(item.fetched_at) > new Date(result.last_updated)) {
+        if (item.fetched_at && (!result.last_updated || new Date(item.fetched_at) > new Date(result.last_updated))) {
           result.last_updated = item.fetched_at
         }
       }
