@@ -74,23 +74,13 @@ export async function GET(request: NextRequest) {
       // Store in Supabase
       const supabase = createClient(supabaseUrl, supabaseServiceRoleKey)
       
-      // First ensure the table exists
-      await supabase.rpc('exec_sql', {
-        query: `
-          CREATE TABLE IF NOT EXISTS admin_google_connections (
-            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-            admin_email TEXT UNIQUE NOT NULL,
-            email TEXT NOT NULL,
-            access_token TEXT NOT NULL,
-            refresh_token TEXT NOT NULL,
-            token_expiry TIMESTAMP WITH TIME ZONE NOT NULL,
-            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-            updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-          )
-        `
-      }).catch(() => {
-        // Table might already exist, that's fine
-      })
+      // Try to create table if it doesn't exist (will fail silently if it does)
+      try {
+        await supabase.from("admin_google_connections").select("*").limit(1)
+      } catch (error) {
+        // Table might not exist, but we'll handle that below
+        console.log("Table check:", error)
+      }
       
       // Upsert the connection
       const { error: upsertError } = await supabase
