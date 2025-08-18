@@ -60,7 +60,7 @@ export default function CreateReportPage() {
           setSearchConsoleProperties(properties)
           
           // Auto-select a suitable property
-          const goodProperty = properties.find(p => 
+          const goodProperty = properties.find((p: SearchConsoleProperty) => 
             p.siteUrl.includes('themachinemarket') ||
             p.siteUrl.includes('vocalegalglobal') ||
             p.siteUrl.includes('shopdualthreads')
