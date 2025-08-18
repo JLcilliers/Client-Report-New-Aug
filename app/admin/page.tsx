@@ -14,7 +14,8 @@ import {
   Plus,
   Copy,
   ExternalLink,
-  RefreshCw
+  RefreshCw,
+  Settings
 } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
 import { formatDate, getRelativeTimeLabel } from "@/lib/utils/date-helpers"
