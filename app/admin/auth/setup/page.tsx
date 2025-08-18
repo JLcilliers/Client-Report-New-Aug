@@ -24,19 +24,8 @@ export default function AdminAuthSetupPage() {
   }
 
   const initiateOAuth = () => {
-    const params = new URLSearchParams({
-      client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "",
-      redirect_uri: `${process.env.NEXT_PUBLIC_URL}/api/auth/admin-google/callback`,
-      response_type: "code",
-      scope: [
-        "https://www.googleapis.com/auth/webmasters.readonly",
-        "https://www.googleapis.com/auth/analytics.readonly",
-      ].join(" "),
-      access_type: "offline",
-      prompt: "consent",
-    })
-
-    window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params}`
+    // Use the API endpoint to initiate OAuth, which has access to server-side env vars
+    window.location.href = "/api/auth/admin-google/initiate"
   }
 
   return (
