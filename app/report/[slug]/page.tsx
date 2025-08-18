@@ -339,9 +339,9 @@ export default function PublicReportPage() {
               {reportData?.search_console?.topQueries && reportData.search_console.topQueries.length > 0 ? (
                 <div className="space-y-3">
                   {reportData.search_console.topQueries.slice(0, 5).map((query: any, index: number) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <div className="flex-1">
-                        <p className="text-sm font-medium truncate">
+                    <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium break-words">
                           {query.keys?.[0] || 'Direct traffic'}
                         </p>
                         <div className="flex gap-4 mt-1 text-xs text-gray-500">
@@ -349,7 +349,7 @@ export default function PublicReportPage() {
                           <span>{formatPercentage(query.ctr || 0)} CTR</span>
                         </div>
                       </div>
-                      <div className="text-right">
+                      <div className="text-right flex-shrink-0">
                         <p className="text-sm font-semibold">#{formatPosition(query.position || 0)}</p>
                       </div>
                     </div>
@@ -377,9 +377,9 @@ export default function PublicReportPage() {
                     const url = page.keys?.[0] || ''
                     const path = url.replace(/^https?:\/\/[^\/]+/, '') || '/'
                     return (
-                      <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                        <div className="flex-1">
-                          <p className="text-sm font-medium truncate" title={url}>
+                      <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium break-all" title={url}>
                             {path}
                           </p>
                           <div className="flex gap-4 mt-1 text-xs text-gray-500">
@@ -387,7 +387,7 @@ export default function PublicReportPage() {
                             <span>{formatNumber(page.impressions || 0)} impressions</span>
                           </div>
                         </div>
-                        <div className="text-right">
+                        <div className="text-right flex-shrink-0">
                           <p className="text-sm font-semibold">{formatPercentage(page.ctr || 0)}</p>
                           <p className="text-xs text-gray-500">CTR</p>
                         </div>
