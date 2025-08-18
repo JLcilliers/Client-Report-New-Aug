@@ -52,18 +52,22 @@ export default function CreateReportPage() {
         console.log('Search Console data:', data)
         
         if (data.searchConsole?.sites) {
-          const properties = data.searchConsole.sites.map((siteUrl: string) => ({
-            siteUrl,
+          console.log('Raw sites data:', data.searchConsole.sites)
+          const properties = data.searchConsole.sites.map((site: any) => ({
+            siteUrl: typeof site === 'string' ? site : site.siteUrl,
             verified: true
           }))
           console.log('Properties found:', properties.length)
+          console.log('Mapped properties:', properties)
           setSearchConsoleProperties(properties)
           
           // Auto-select a suitable property
           const goodProperty = properties.find((p: SearchConsoleProperty) => 
-            p.siteUrl.includes('themachinemarket') ||
-            p.siteUrl.includes('vocalegalglobal') ||
-            p.siteUrl.includes('shopdualthreads')
+            p.siteUrl && (
+              p.siteUrl.includes('themachinemarket') ||
+              p.siteUrl.includes('vocalegalglobal') ||
+              p.siteUrl.includes('shopdualthreads')
+            )
           )
           
           if (goodProperty) {
