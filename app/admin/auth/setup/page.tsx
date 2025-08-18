@@ -51,6 +51,12 @@ export default function AdminAuthSetupPage() {
               <Button onClick={initiateOAuth} variant="default">
                 Connect Google Account
               </Button>
+              <Button 
+                onClick={() => window.location.href = "/api/auth/simple-admin?action=start"} 
+                variant="outline"
+              >
+                Simple Auth (Alternative)
+              </Button>
             </div>
 
             {status && (
