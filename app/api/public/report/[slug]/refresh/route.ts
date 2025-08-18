@@ -51,9 +51,9 @@ export async function POST(
 
     console.log('Found report:', report.name, 'with ID:', report.id)
 
-    // Get admin user tokens (you'll need to adjust this based on your auth setup)
+    // Get admin user tokens
     const { data: adminUser, error: adminError } = await supabase
-      .from("users")
+      .from("admin_users")
       .select("*")
       .eq("email", "johanlcilliers@gmail.com")
       .single()

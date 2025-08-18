@@ -1,79 +1,46 @@
-import { NextRequest, NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
     const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
     
     if (!supabaseUrl || !supabaseServiceRoleKey) {
-      return NextResponse.json({ error: "Missing configuration" })
+      return NextResponse.json({ error: "Server configuration error" }, { status: 500 })
     }
     
     const supabase = createClient(supabaseUrl, supabaseServiceRoleKey)
     
-    const results: any = {
-      tables: {}
-    }
+    // Try admin_users table
+    const { data: adminUsers, error: adminError } = await supabase
+      .from("admin_users")
+      .select("*")
+      .limit(5)
     
-    // Check clients table
-    const { error: clientsError } = await supabase
+    // Try clients table
+    const { data: clients, error: clientsError } = await supabase
       .from("clients")
       .select("*")
-      .limit(1)
+      .limit(5)
     
-    results.tables.clients = {
-      exists: !clientsError || clientsError.code !== "42P01",
-      error: clientsError?.message || null
-    }
-    
-    // Check reports table
-    const { error: reportsError } = await supabase
-      .from("reports")
-      .select("*")
-      .limit(1)
-    
-    results.tables.reports = {
-      exists: !reportsError || reportsError.code !== "42P01",
-      error: reportsError?.message || null,
-      errorCode: reportsError?.code || null
-    }
-    
-    // Check admin_google_connections table
-    const { error: connectionsError } = await supabase
-      .from("admin_google_connections")
-      .select("*")
-      .limit(1)
-    
-    results.tables.admin_google_connections = {
-      exists: !connectionsError || connectionsError.code !== "42P01",
-      error: connectionsError?.message || null
-    }
-    
-    // Get count of clients
-    const { count: clientCount } = await supabase
-      .from("clients")
-      .select("*", { count: 'exact', head: true })
-    
-    results.counts = {
-      clients: clientCount || 0
-    }
-    
-    // Try to get reports count if table exists
-    if (results.tables.reports.exists) {
-      const { count: reportCount } = await supabase
-        .from("reports")
-        .select("*", { count: 'exact', head: true })
-      
-      results.counts.reports = reportCount || 0
-    }
-    
-    return NextResponse.json(results)
-    
-  } catch (error: any) {
-    return NextResponse.json({ 
-      error: "Check failed",
-      details: error.message 
+    return NextResponse.json({
+      admin_users: {
+        data: adminUsers || [],
+        count: adminUsers?.length || 0,
+        error: adminError
+      },
+      clients: {
+        data: clients || [],
+        count: clients?.length || 0,
+        error: clientsError
+      }
     })
+  } catch (error: any) {
+    console.error('Error checking tables:', error)
+    return NextResponse.json({
+      error: "Failed to check tables",
+      details: error.message
+    }, { status: 500 })
   }
 }

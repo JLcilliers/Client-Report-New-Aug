@@ -20,7 +20,7 @@ export async function GET() {
     
     // Get admin user
     const { data: adminUser, error: adminError } = await supabase
-      .from("users")
+      .from("admin_users")
       .select("*")
       .eq("email", "johanlcilliers@gmail.com")
       .single()
