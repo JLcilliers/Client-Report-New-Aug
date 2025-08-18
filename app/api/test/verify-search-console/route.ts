@@ -67,28 +67,30 @@ export async function GET() {
     if (sitesResponse.data.siteEntry && sitesResponse.data.siteEntry.length > 0) {
       const testSite = sitesResponse.data.siteEntry[0].siteUrl
       
-      const endDate = new Date()
-      const startDate = new Date()
-      startDate.setDate(startDate.getDate() - 7)
-      
-      const formatDate = (date: Date) => date.toISOString().split('T')[0]
-      
-      try {
-        const queryResponse = await searchconsole.searchanalytics.query({
-          auth: oauth2Client,
-          siteUrl: testSite,
-          requestBody: {
-            startDate: formatDate(startDate),
-            endDate: formatDate(endDate),
-            dimensions: [],
-            rowLimit: 1,
-          },
-        })
+      if (testSite) {
+        const endDate = new Date()
+        const startDate = new Date()
+        startDate.setDate(startDate.getDate() - 7)
         
-        testData = queryResponse.data
-      } catch (error: any) {
-        console.error('Error fetching test data:', error)
-        testData = { error: error.message }
+        const formatDate = (date: Date) => date.toISOString().split('T')[0]
+        
+        try {
+          const queryResponse = await searchconsole.searchanalytics.query({
+            auth: oauth2Client,
+            siteUrl: testSite,
+            requestBody: {
+              startDate: formatDate(startDate),
+              endDate: formatDate(endDate),
+              dimensions: [],
+              rowLimit: 1,
+            },
+          })
+          
+          testData = queryResponse.data
+        } catch (error: any) {
+          console.error('Error fetching test data:', error)
+          testData = { error: error.message }
+        }
       }
     }
     
