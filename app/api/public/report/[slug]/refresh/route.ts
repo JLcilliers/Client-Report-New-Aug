@@ -4,6 +4,7 @@ import { google } from "googleapis"
 import { OAuth2Client } from "google-auth-library"
 
 const searchconsole = google.searchconsole("v1")
+const analyticsData = google.analyticsdata("v1beta")
 
 interface SearchConsoleMetrics {
   clicks: number
@@ -30,7 +31,7 @@ export async function POST(
 
     const supabase = createClient(supabaseUrl, supabaseServiceRoleKey)
 
-    // Get report by slug
+    // Get report by slug with Google account info
     const { data: report, error: reportError } = await supabase
       .from("reports")
       .select(`
@@ -39,6 +40,13 @@ export async function POST(
           id,
           name,
           domain
+        ),
+        google_account:google_accounts!google_account_id (
+          id,
+          account_email,
+          refresh_token,
+          access_token,
+          token_expiry
         )
       `)
       .eq("slug", slug)
@@ -50,20 +58,38 @@ export async function POST(
     }
 
     console.log('Found report:', report.name, 'with ID:', report.id)
+    
+    // Check if report has a Google account associated
+    let googleAccount = report.google_account
+    
+    // Fallback to admin connection if no Google account is associated (for legacy reports)
+    if (!googleAccount || !googleAccount.refresh_token) {
+      console.log('No Google account associated with report, trying admin fallback')
+      
+      const { data: adminConnection, error: adminError } = await supabase
+        .from("admin_google_connections")
+        .select("*")
+        .eq("admin_email", "johanlcilliers@gmail.com")
+        .single()
 
-    // Get admin Google connection tokens
-    const { data: adminConnection, error: adminError } = await supabase
-      .from("admin_google_connections")
-      .select("*")
-      .eq("admin_email", "johanlcilliers@gmail.com")
-      .single()
-
-    if (adminError || !adminConnection || !adminConnection.refresh_token) {
-      console.error('Admin connection not found or no refresh token:', adminError)
-      return NextResponse.json({ error: "Authentication required - please connect Google account at /admin/auth/setup" }, { status: 401 })
+      if (adminError || !adminConnection || !adminConnection.refresh_token) {
+        console.error('No Google account found for data refresh')
+        return NextResponse.json({ 
+          error: "No Google account configured for this report. Please edit the report to select a Google account." 
+        }, { status: 401 })
+      }
+      
+      // Transform admin connection to match google_accounts structure
+      googleAccount = {
+        id: 'admin',
+        account_email: adminConnection.admin_email,
+        refresh_token: adminConnection.refresh_token,
+        access_token: adminConnection.access_token,
+        token_expiry: adminConnection.token_expiry
+      }
     }
 
-    console.log('Found admin user with refresh token')
+    console.log('Using Google account:', googleAccount.account_email)
 
     // Auto-detect URL if needed
     const baseUrl = process.env.NEXT_PUBLIC_URL || 
@@ -78,7 +104,7 @@ export async function POST(
     )
 
     oauth2Client.setCredentials({
-      refresh_token: adminConnection.refresh_token,
+      refresh_token: googleAccount.refresh_token,
     })
 
     // Get new access token
@@ -87,7 +113,18 @@ export async function POST(
 
     console.log('OAuth2 client configured with refreshed token')
 
-    // Fetch Search Console data
+    // Update stored access token if using google_accounts table
+    if (googleAccount.id !== 'admin') {
+      await supabase
+        .from("google_accounts")
+        .update({
+          access_token: credentials.access_token,
+          token_expiry: credentials.expiry_date ? new Date(credentials.expiry_date).toISOString() : null,
+        })
+        .eq("id", googleAccount.id)
+    }
+
+    // Initialize data structures
     const searchConsoleData: any = {
       summary: {},
       byDate: [],
@@ -95,24 +132,35 @@ export async function POST(
       topPages: [],
     }
 
+    const analyticsResult: any = {
+      summary: {},
+      trafficSources: [],
+      topPages: [],
+    }
+
+    // Date range for data fetching
+    const endDate = new Date()
+    const startDate = new Date()
+    startDate.setDate(startDate.getDate() - 30)
+    const formatDate = (date: Date) => date.toISOString().split('T')[0]
+
+    // Fetch Search Console data
     if (report.search_console_properties && report.search_console_properties.length > 0) {
       console.log('Fetching Search Console data for properties:', report.search_console_properties)
       
+      let aggregatedMetrics: SearchConsoleMetrics = {
+        clicks: 0,
+        impressions: 0,
+        ctr: 0,
+        position: 0
+      }
+
       for (const property of report.search_console_properties) {
         try {
-          // Calculate date range (last 30 days)
-          const endDate = new Date()
-          const startDate = new Date()
-          startDate.setDate(startDate.getDate() - 30)
-
-          const formatDate = (date: Date) => {
-            return date.toISOString().split('T')[0]
-          }
-
-          console.log(`Fetching data for property: ${property} from ${formatDate(startDate)} to ${formatDate(endDate)}`)
-
-          // Fetch summary metrics
-          const summaryResponse = await searchconsole.searchanalytics.query({
+          console.log('Fetching data for property:', property)
+          
+          // Overall metrics
+          const overallResponse = await searchconsole.searchanalytics.query({
             auth: oauth2Client,
             siteUrl: property,
             requestBody: {
@@ -123,81 +171,214 @@ export async function POST(
             },
           })
 
-          console.log('Summary response:', JSON.stringify(summaryResponse.data, null, 2))
-
-          if (summaryResponse.data.rows && summaryResponse.data.rows[0]) {
-            const row = summaryResponse.data.rows[0]
-            searchConsoleData.summary = {
-              clicks: row.clicks || 0,
-              impressions: row.impressions || 0,
-              ctr: row.ctr || 0,
-              position: row.position || 0,
-            }
+          if (overallResponse.data.rows && overallResponse.data.rows[0]) {
+            const row = overallResponse.data.rows[0]
+            aggregatedMetrics.clicks += row.clicks || 0
+            aggregatedMetrics.impressions += row.impressions || 0
           }
 
-          // Fetch data by date
-          const byDateResponse = await searchconsole.searchanalytics.query({
-            auth: oauth2Client,
-            siteUrl: property,
-            requestBody: {
-              startDate: formatDate(startDate),
-              endDate: formatDate(endDate),
-              dimensions: ["date"],
-              rowLimit: 30,
-            },
-          })
-
-          if (byDateResponse.data.rows) {
-            searchConsoleData.byDate = byDateResponse.data.rows
-          }
-
-          // Fetch top queries
+          // Get top queries
           const queriesResponse = await searchconsole.searchanalytics.query({
             auth: oauth2Client,
             siteUrl: property,
             requestBody: {
               startDate: formatDate(startDate),
               endDate: formatDate(endDate),
-              dimensions: ["query"],
+              dimensions: ['query'],
               rowLimit: 10,
             },
           })
 
           if (queriesResponse.data.rows) {
-            searchConsoleData.topQueries = queriesResponse.data.rows
+            searchConsoleData.topQueries.push(...queriesResponse.data.rows)
           }
 
-          // Fetch top pages
+          // Get top pages
           const pagesResponse = await searchconsole.searchanalytics.query({
             auth: oauth2Client,
             siteUrl: property,
             requestBody: {
               startDate: formatDate(startDate),
               endDate: formatDate(endDate),
-              dimensions: ["page"],
+              dimensions: ['page'],
               rowLimit: 10,
             },
           })
 
           if (pagesResponse.data.rows) {
-            searchConsoleData.topPages = pagesResponse.data.rows
+            searchConsoleData.topPages.push(...pagesResponse.data.rows)
           }
 
-          console.log('Successfully fetched all Search Console data')
+          // Get data by date
+          const dateResponse = await searchconsole.searchanalytics.query({
+            auth: oauth2Client,
+            siteUrl: property,
+            requestBody: {
+              startDate: formatDate(startDate),
+              endDate: formatDate(endDate),
+              dimensions: ['date'],
+              rowLimit: 30,
+            },
+          })
+
+          if (dateResponse.data.rows) {
+            searchConsoleData.byDate.push(...dateResponse.data.rows)
+          }
+
         } catch (error: any) {
-          console.error(`Error fetching data for property ${property}:`, error)
-          // Continue with other properties if one fails
+          console.error(`Error fetching Search Console data for ${property}:`, error.message)
         }
+      }
+
+      // Calculate aggregated metrics
+      if (aggregatedMetrics.impressions > 0) {
+        aggregatedMetrics.ctr = (aggregatedMetrics.clicks / aggregatedMetrics.impressions) * 100
+      }
+
+      // Calculate average position
+      if (searchConsoleData.topQueries.length > 0) {
+        const totalPosition = searchConsoleData.topQueries.reduce((sum: number, q: any) => 
+          sum + (q.position || 0), 0)
+        aggregatedMetrics.position = totalPosition / searchConsoleData.topQueries.length
+      }
+
+      searchConsoleData.summary = aggregatedMetrics
+
+      // Sort and limit results
+      searchConsoleData.topQueries = searchConsoleData.topQueries
+        .sort((a: any, b: any) => (b.clicks || 0) - (a.clicks || 0))
+        .slice(0, 10)
+      
+      searchConsoleData.topPages = searchConsoleData.topPages
+        .sort((a: any, b: any) => (b.clicks || 0) - (a.clicks || 0))
+        .slice(0, 10)
+    }
+
+    // Fetch Analytics data
+    if (report.analytics_properties && report.analytics_properties.length > 0) {
+      console.log('Fetching Analytics data for properties:', report.analytics_properties)
+      
+      for (const propertyId of report.analytics_properties) {
+        try {
+          console.log('Fetching Analytics data for property:', propertyId)
+          
+          // Overall metrics
+          const response = await analyticsData.properties.runReport({
+            property: `properties/${propertyId}`,
+            requestBody: {
+              dateRanges: [{
+                startDate: formatDate(startDate),
+                endDate: formatDate(endDate)
+              }],
+              dimensions: [
+                { name: "sessionDefaultChannelGroup" }
+              ],
+              metrics: [
+                { name: "sessions" },
+                { name: "activeUsers" },
+                { name: "newUsers" },
+                { name: "bounceRate" },
+                { name: "averageSessionDuration" },
+                { name: "screenPageViews" }
+              ]
+            },
+            auth: oauth2Client
+          })
+
+          // Process Analytics data
+          if (response.data.rows) {
+            response.data.rows.forEach(row => {
+              const channel = row.dimensionValues?.[0]?.value || "Unknown"
+              const sessions = parseInt(row.metricValues?.[0]?.value || "0")
+              const users = parseInt(row.metricValues?.[1]?.value || "0")
+              const newUsers = parseInt(row.metricValues?.[2]?.value || "0")
+              const bounceRate = parseFloat(row.metricValues?.[3]?.value || "0")
+              const avgDuration = parseFloat(row.metricValues?.[4]?.value || "0")
+              const pageviews = parseInt(row.metricValues?.[5]?.value || "0")
+              
+              // Add to summary
+              analyticsResult.summary.sessions = (analyticsResult.summary.sessions || 0) + sessions
+              analyticsResult.summary.users = (analyticsResult.summary.users || 0) + users
+              analyticsResult.summary.newUsers = (analyticsResult.summary.newUsers || 0) + newUsers
+              analyticsResult.summary.pageviews = (analyticsResult.summary.pageviews || 0) + pageviews
+              
+              // Add to traffic sources
+              analyticsResult.trafficSources.push({
+                source: channel,
+                users,
+                sessions,
+                bounceRate,
+                avgDuration
+              })
+            })
+          }
+
+          // Get top pages
+          const pagesResponse = await analyticsData.properties.runReport({
+            property: `properties/${propertyId}`,
+            requestBody: {
+              dateRanges: [{
+                startDate: formatDate(startDate),
+                endDate: formatDate(endDate)
+              }],
+              dimensions: [
+                { name: "pagePath" }
+              ],
+              metrics: [
+                { name: "sessions" },
+                { name: "activeUsers" },
+                { name: "bounceRate" },
+                { name: "averageSessionDuration" }
+              ],
+              orderBys: [{
+                metric: { metricName: "sessions" },
+                desc: true
+              }],
+              limit: "10"
+            },
+            auth: oauth2Client
+          })
+
+          if (pagesResponse.data.rows) {
+            analyticsResult.topPages = pagesResponse.data.rows.map(row => ({
+              page: row.dimensionValues?.[0]?.value || "",
+              sessions: parseInt(row.metricValues?.[0]?.value || "0"),
+              users: parseInt(row.metricValues?.[1]?.value || "0"),
+              bounceRate: parseFloat(row.metricValues?.[2]?.value || "0"),
+              avgSessionDuration: parseFloat(row.metricValues?.[3]?.value || "0")
+            }))
+          }
+
+        } catch (error: any) {
+          console.error(`Error fetching Analytics data for ${propertyId}:`, error.message)
+        }
+      }
+
+      // Calculate averages
+      if (analyticsResult.summary.sessions > 0) {
+        const totalSessions = analyticsResult.summary.sessions
+        analyticsResult.trafficSources.forEach((source: any) => {
+          source.percentage = (source.sessions / totalSessions) * 100
+        })
       }
     }
 
-    // Store the fetched data
-    const { data: storedData, error: storeError } = await supabase
+    // Combine all data
+    const combinedData = {
+      search_console: searchConsoleData,
+      analytics: analyticsResult,
+      fetched_at: new Date().toISOString()
+    }
+
+    console.log('Data fetched successfully')
+
+    // Store in report_data table
+    const { error: storeError } = await supabase
       .from("report_data")
       .upsert({
         report_id: report.id,
-        data_type: "search_console",
-        data: searchConsoleData,
+        data_type: "combined",
+        data: combinedData,
         date_range: "last30days",
         fetched_at: new Date().toISOString(),
       }, {
@@ -206,13 +387,13 @@ export async function POST(
 
     if (storeError) {
       console.error('Error storing data:', storeError)
-      // Try insert if upsert fails due to missing unique constraint
+      // Try insert if upsert fails
       const { error: insertError } = await supabase
         .from("report_data")
         .insert({
           report_id: report.id,
-          data_type: "search_console",
-          data: searchConsoleData,
+          data_type: "combined",
+          data: combinedData,
           date_range: "last30days",
         })
       
@@ -226,7 +407,7 @@ export async function POST(
     return NextResponse.json({ 
       success: true, 
       message: "Data refreshed successfully",
-      data: searchConsoleData
+      data: combinedData
     })
   } catch (error: any) {
     console.error("Error refreshing report data:", error)
