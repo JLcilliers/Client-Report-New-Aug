@@ -18,25 +18,29 @@ export async function GET() {
     
     const supabase = createClient(supabaseUrl, supabaseServiceRoleKey)
     
-    // Get admin user
-    const { data: adminUser, error: adminError } = await supabase
-      .from("admin_users")
+    // Get admin Google connection
+    const { data: adminConnection, error: adminError } = await supabase
+      .from("admin_google_connections")
       .select("*")
-      .eq("email", "johanlcilliers@gmail.com")
+      .eq("admin_email", "johanlcilliers@gmail.com")
       .single()
     
-    if (adminError || !adminUser) {
+    if (adminError || !adminConnection) {
       return NextResponse.json({ 
-        error: "Admin user not found",
-        details: adminError
+        error: "Admin Google connection not found",
+        details: adminError,
+        adminUser: {
+          email: "johanlcilliers@gmail.com",
+          hasRefreshToken: false
+        }
       }, { status: 404 })
     }
     
-    if (!adminUser.google_refresh_token) {
+    if (!adminConnection.refresh_token) {
       return NextResponse.json({ 
         error: "No refresh token for admin user",
         adminUser: {
-          email: adminUser.email,
+          email: adminConnection.admin_email,
           hasRefreshToken: false
         }
       }, { status: 401 })
@@ -50,7 +54,7 @@ export async function GET() {
     )
     
     oauth2Client.setCredentials({
-      refresh_token: adminUser.google_refresh_token,
+      refresh_token: adminConnection.refresh_token,
     })
     
     // Refresh the access token
@@ -97,7 +101,7 @@ export async function GET() {
     return NextResponse.json({
       success: true,
       adminUser: {
-        email: adminUser.email,
+        email: adminConnection.admin_email,
         hasRefreshToken: true
       },
       searchConsole: {

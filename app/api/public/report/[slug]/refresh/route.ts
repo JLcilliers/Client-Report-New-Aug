@@ -51,16 +51,16 @@ export async function POST(
 
     console.log('Found report:', report.name, 'with ID:', report.id)
 
-    // Get admin user tokens
-    const { data: adminUser, error: adminError } = await supabase
-      .from("admin_users")
+    // Get admin Google connection tokens
+    const { data: adminConnection, error: adminError } = await supabase
+      .from("admin_google_connections")
       .select("*")
-      .eq("email", "johanlcilliers@gmail.com")
+      .eq("admin_email", "johanlcilliers@gmail.com")
       .single()
 
-    if (adminError || !adminUser || !adminUser.google_refresh_token) {
-      console.error('Admin user not found or no refresh token:', adminError)
-      return NextResponse.json({ error: "Authentication required" }, { status: 401 })
+    if (adminError || !adminConnection || !adminConnection.refresh_token) {
+      console.error('Admin connection not found or no refresh token:', adminError)
+      return NextResponse.json({ error: "Authentication required - please connect Google account at /admin/auth/setup" }, { status: 401 })
     }
 
     console.log('Found admin user with refresh token')
@@ -78,7 +78,7 @@ export async function POST(
     )
 
     oauth2Client.setCredentials({
-      refresh_token: adminUser.google_refresh_token,
+      refresh_token: adminConnection.refresh_token,
     })
 
     // Get new access token

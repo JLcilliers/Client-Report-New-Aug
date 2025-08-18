@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
       `https://${request.headers.get('host')}` ||
       'https://online-client-reporting.vercel.app'
     
-    const redirectUri = `${baseUrl}/api/auth/admin-google/callback`
+    const redirectUri = `${baseUrl}/api/auth/google/admin-callback`
     
     if (!clientId) {
       return NextResponse.json({ 
@@ -32,6 +32,7 @@ export async function GET(request: NextRequest) {
       ].join(" "),
       access_type: "offline",
       prompt: "consent",
+      state: "admin_connection", // Required by the admin-callback endpoint
     })
     
     const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?${params}`
