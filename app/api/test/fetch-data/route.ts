@@ -51,10 +51,41 @@ export async function GET() {
     })
     
     let testData = null
-    if (sitesResponse.data.siteEntry && sitesResponse.data.siteEntry.length > 0) {
-      const testSite = sitesResponse.data.siteEntry[0].siteUrl
-      
-      if (testSite) {
+    let testSite = null
+    let siteError = null
+    
+    // Try to find a site we have access to, preferring lancerskincare.com
+    const preferredSites = [
+      'sc-domain:lancerskincare.com',
+      'https://www.lancerskincare.com/',
+      'https://lancerskincare.com/',
+      'sc-domain:vocalegalglobal.com',
+      'https://www.vocalegalglobal.com/'
+    ]
+    
+    // First try preferred sites
+    for (const site of preferredSites) {
+      const siteEntry = sitesResponse.data.siteEntry?.find(s => s.siteUrl === site)
+      if (siteEntry) {
+        testSite = siteEntry.siteUrl
+        break
+      }
+    }
+    
+    // If no preferred site found, try any site until we find one that works
+    if (!testSite && sitesResponse.data.siteEntry && sitesResponse.data.siteEntry.length > 0) {
+      for (const site of sitesResponse.data.siteEntry) {
+        testSite = site.siteUrl
+        // Skip sites that commonly have permission issues
+        if (testSite?.includes('laasinvest.com')) {
+          continue
+        }
+        break
+      }
+    }
+    
+    if (testSite) {
+      try {
         const endDate = new Date()
         const startDate = new Date()
         startDate.setDate(startDate.getDate() - 7)
@@ -73,6 +104,9 @@ export async function GET() {
         })
         
         testData = queryResponse.data
+      } catch (error: any) {
+        siteError = error.message
+        console.error(`Error fetching data for ${testSite}:`, error.message)
       }
     }
     
@@ -123,7 +157,9 @@ export async function GET() {
       },
       searchConsole: {
         sites: sitesResponse.data.siteEntry?.map(s => s.siteUrl) || [],
-        siteCount: sitesResponse.data.siteEntry?.length || 0
+        siteCount: sitesResponse.data.siteEntry?.length || 0,
+        testedSite: testSite,
+        siteError: siteError
       },
       testData,
       storeResult,
