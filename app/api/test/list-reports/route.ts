@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
         client:clients (
           id,
           name,
-          url
+          domain
         )
       `)
       .order('created_at', { ascending: false })

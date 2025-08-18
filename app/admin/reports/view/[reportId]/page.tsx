@@ -98,6 +98,7 @@ export default function ReportViewPage() {
           <h1 className="text-3xl font-bold text-gray-900">{report.name}</h1>
           <p className="text-gray-600 mt-1">
             Client: {report.client?.name || "Unknown"}
+            {report.client?.domain && ` - ${report.client.domain}`}
           </p>
         </div>
       </div>

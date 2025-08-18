@@ -29,7 +29,7 @@ export async function GET(
         client:clients (
           id,
           name,
-          url
+          domain
         )
       `)
       .eq("id", reportId)
