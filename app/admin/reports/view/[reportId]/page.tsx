@@ -30,17 +30,21 @@ export default function ReportViewPage() {
   
   const fetchReport = async () => {
     try {
+      console.log('Fetching report with ID:', reportId)
       const response = await fetch(`/api/reports/${reportId}`)
-      if (!response.ok) {
-        throw new Error('Report not found')
-      }
       const data = await response.json()
+      console.log('Report API response:', data)
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Report not found')
+      }
+      
       setReport(data)
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching report:', error)
       toast({
         title: "Error",
-        description: "Failed to load report",
+        description: error.message || "Failed to load report",
         variant: "destructive"
       })
     } finally {
