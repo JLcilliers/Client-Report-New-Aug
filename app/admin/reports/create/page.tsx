@@ -1,241 +1,287 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Checkbox } from "@/components/ui/checkbox"
 import { useToast } from "@/components/ui/use-toast"
-import { ArrowLeft, Save, Globe, BarChart3 } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
+import { ArrowLeft, Plus, Loader2 } from "lucide-react"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+
+interface SearchConsoleProperty {
+  siteUrl: string
+  verified: boolean
+}
 
 export default function CreateReportPage() {
-  const router = useRouter()
-  const { toast } = useToast()
   const [loading, setLoading] = useState(false)
-  
-  // Get selected properties from URL params
-  const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '')
-  const selectedSC = params.get('sc')?.split(',').filter(Boolean) || []
-  const selectedGA = params.get('ga')?.split(',').filter(Boolean) || []
-  
+  const [searchConsoleProperties, setSearchConsoleProperties] = useState<SearchConsoleProperty[]>([])
   const [formData, setFormData] = useState({
-    clientName: "",
-    clientEmail: "",
-    clientUrl: "",
-    reportName: "",
-    description: "",
+    newClientName: 'Lancer Skincare',
+    newClientDomain: 'lancerskincare.com',
+    reportName: 'Lancer Skincare - Monthly SEO Report',
+    reportDescription: 'Monthly performance overview and insights',
+    selectedSearchConsoleProps: [] as string[],
+    sections: {
+      overview: true,
+      traffic: true,
+      keywords: true,
+      technical: true,
+      content: true,
+    }
   })
   
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    
+  const { toast } = useToast()
+  const router = useRouter()
+
+  useEffect(() => {
+    fetchSearchConsoleProperties()
+  }, [])
+
+  const fetchSearchConsoleProperties = async () => {
     try {
-      const payload = {
-        ...formData,
-        searchConsoleProperties: selectedSC,
-        analyticsProperties: selectedGA,
+      const response = await fetch('/api/test/verify-search-console')
+      if (response.ok) {
+        const data = await response.json()
+        if (data.searchConsole?.sites) {
+          const properties = data.searchConsole.sites.map((siteUrl: string) => ({
+            siteUrl,
+            verified: true
+          }))
+          setSearchConsoleProperties(properties)
+          
+          // Auto-select a suitable property
+          const goodProperty = properties.find(p => 
+            p.siteUrl.includes('themachinemarket') ||
+            p.siteUrl.includes('vocalegalglobal') ||
+            p.siteUrl.includes('shopdualthreads')
+          )
+          
+          if (goodProperty) {
+            setFormData(prev => ({
+              ...prev,
+              selectedSearchConsoleProps: [goodProperty.siteUrl]
+            }))
+          }
+        }
       }
-      console.log('Sending to API:', payload)
-      
-      const response = await fetch('/api/reports/create', {
+    } catch (error) {
+      console.error('Error fetching Search Console properties:', error)
+      toast({
+        title: "Warning",
+        description: "Could not load Search Console properties.",
+        variant: "destructive"
+      })
+    }
+  }
+
+  const handleSubmit = async () => {
+    if (formData.selectedSearchConsoleProps.length === 0) {
+      toast({
+        title: "Please select at least one Search Console property",
+        variant: "destructive"
+      })
+      return
+    }
+
+    setLoading(true)
+    try {
+      // Create client first
+      const clientResponse = await fetch('/api/admin/clients', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.newClientName,
+          domain: formData.newClientDomain.startsWith('http') 
+            ? formData.newClientDomain 
+            : `https://${formData.newClientDomain}`
+        })
       })
       
-      const data = await response.json()
-      console.log('Response from API:', data)
-      
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to create report')
+      if (!clientResponse.ok) {
+        const errorText = await clientResponse.text()
+        console.error('Client creation failed:', errorText)
+        throw new Error('Failed to create client')
       }
       
-      if (data.error) {
-        throw new Error(data.error + (data.details ? `: ${data.details}` : ''))
+      const clientData = await clientResponse.json()
+      const clientId = clientData.client?.id || clientData.id
+
+      // Create the report
+      const reportResponse = await fetch('/api/reports/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          clientId,
+          name: formData.reportName,
+          description: formData.reportDescription,
+          searchConsoleProperties: formData.selectedSearchConsoleProps,
+          analyticsProperties: [],
+          settings: {
+            reportSections: Object.keys(formData.sections).filter(key => 
+              formData.sections[key as keyof typeof formData.sections]
+            )
+          }
+        })
+      })
+
+      if (!reportResponse.ok) {
+        const errorData = await reportResponse.json()
+        console.error('Report creation failed:', errorData)
+        throw new Error(errorData.error || 'Failed to create report')
       }
+
+      const reportData = await reportResponse.json()
       
       toast({
-        title: "Success",
-        description: "Report created successfully!",
+        title: "Report created successfully!",
+        description: "Redirecting to the new report...",
       })
+
+      // Copy report URL to clipboard
+      const reportUrl = `${window.location.origin}/report/${reportData.slug}`
+      await navigator.clipboard.writeText(reportUrl)
+
+      // Redirect to the new report
+      router.push(`/report/${reportData.slug}`)
       
-      router.push(`/admin/reports/view/${data.reportId}`)
     } catch (error: any) {
       console.error('Error creating report:', error)
       toast({
-        title: "Error",
-        description: error.message || "Failed to create report. Please try again.",
+        title: "Error creating report",
+        description: error.message,
         variant: "destructive"
       })
     } finally {
       setLoading(false)
     }
   }
-  
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => router.back()}
+    <div className="max-w-2xl mx-auto space-y-6">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Link href="/admin">
+            <Button variant="ghost" size="sm">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back
+            </Button>
+          </Link>
+          <div>
+            <h1 className="text-2xl font-bold">Create Report</h1>
+            <p className="text-gray-600">Set up a new SEO report</p>
+          </div>
+        </div>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Report Configuration</CardTitle>
+          <CardDescription>Create a new SEO report with real data</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="clientName">Client Name</Label>
+              <Input
+                id="clientName"
+                value={formData.newClientName}
+                onChange={(e) => setFormData(prev => ({ ...prev, newClientName: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="clientDomain">Domain</Label>
+              <Input
+                id="clientDomain"
+                value={formData.newClientDomain}
+                onChange={(e) => setFormData(prev => ({ ...prev, newClientDomain: e.target.value }))}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="reportName">Report Name</Label>
+            <Input
+              id="reportName"
+              value={formData.reportName}
+              onChange={(e) => setFormData(prev => ({ ...prev, reportName: e.target.value }))}
+            />
+          </div>
+
+          <div>
+            <Label className="text-base font-medium">Search Console Properties</Label>
+            <p className="text-sm text-gray-500 mb-3">Select which properties to include (you have {searchConsoleProperties.length} available)</p>
+            <div className="space-y-2 max-h-48 overflow-y-auto border rounded-lg p-4">
+              {searchConsoleProperties.length === 0 ? (
+                <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <p className="text-sm text-yellow-800">
+                    No Search Console properties found. Please authenticate at{' '}
+                    <Link href="/admin/auth/setup" className="underline">
+                      /admin/auth/setup
+                    </Link>
+                  </p>
+                </div>
+              ) : (
+                searchConsoleProperties.map((property) => (
+                  <div key={property.siteUrl} className="flex items-center space-x-2 p-2 border rounded">
+                    <Checkbox
+                      id={property.siteUrl}
+                      checked={formData.selectedSearchConsoleProps.includes(property.siteUrl)}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setFormData(prev => ({
+                            ...prev,
+                            selectedSearchConsoleProps: [...prev.selectedSearchConsoleProps, property.siteUrl]
+                          }))
+                        } else {
+                          setFormData(prev => ({
+                            ...prev,
+                            selectedSearchConsoleProps: prev.selectedSearchConsoleProps.filter(p => p !== property.siteUrl)
+                          }))
+                        }
+                      }}
+                    />
+                    <Label htmlFor={property.siteUrl} className="text-sm flex-1">
+                      {property.siteUrl}
+                    </Label>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="flex justify-end">
+        <Button 
+          onClick={handleSubmit} 
+          disabled={loading || formData.selectedSearchConsoleProps.length === 0}
+          className="min-w-[200px]"
         >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back
+          {loading ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              Creating Report...
+            </>
+          ) : (
+            <>
+              <Plus className="h-4 w-4 mr-2" />
+              Create Report
+            </>
+          )}
         </Button>
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Create Client Report</h1>
-          <p className="text-gray-600 mt-1">Set up a new report with selected properties</p>
-        </div>
       </div>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Form */}
-        <div className="lg:col-span-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Report Details</CardTitle>
-              <CardDescription>
-                Configure the client report settings
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="clientName">Client Name *</Label>
-                    <Input
-                      id="clientName"
-                      required
-                      value={formData.clientName}
-                      onChange={(e) => setFormData({...formData, clientName: e.target.value})}
-                      placeholder="Acme Corp"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="clientEmail">Client Email</Label>
-                    <Input
-                      id="clientEmail"
-                      type="email"
-                      value={formData.clientEmail}
-                      onChange={(e) => setFormData({...formData, clientEmail: e.target.value})}
-                      placeholder="client@example.com"
-                    />
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="clientUrl">Client Website</Label>
-                  <Input
-                    id="clientUrl"
-                    type="url"
-                    value={formData.clientUrl}
-                    onChange={(e) => setFormData({...formData, clientUrl: e.target.value})}
-                    placeholder="https://example.com"
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="reportName">Report Name *</Label>
-                  <Input
-                    id="reportName"
-                    required
-                    value={formData.reportName}
-                    onChange={(e) => setFormData({...formData, reportName: e.target.value})}
-                    placeholder="Monthly SEO Report"
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea
-                    id="description"
-                    value={formData.description}
-                    onChange={(e) => setFormData({...formData, description: e.target.value})}
-                    placeholder="Additional notes about this report..."
-                    rows={3}
-                  />
-                </div>
-                
-                <div className="flex justify-end gap-3 pt-4">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => router.back()}
-                    disabled={loading}
-                  >
-                    Cancel
-                  </Button>
-                  <Button type="submit" disabled={loading}>
-                    <Save className="h-4 w-4 mr-2" />
-                    Create Report
-                  </Button>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
+
+      {formData.selectedSearchConsoleProps.length === 0 && searchConsoleProperties.length > 0 && (
+        <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+          <p className="text-sm text-orange-800">
+            Please select at least one Search Console property to create the report.
+          </p>
         </div>
-        
-        {/* Selected Properties */}
-        <div className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Globe className="h-5 w-5 text-blue-600" />
-                Search Console
-              </CardTitle>
-              <CardDescription>
-                {selectedSC.length} properties selected
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {selectedSC.length === 0 ? (
-                <p className="text-sm text-gray-500">No properties selected</p>
-              ) : (
-                <div className="space-y-2">
-                  {selectedSC.map((url) => (
-                    <div key={url} className="text-sm p-2 bg-gray-50 rounded">
-                      {url}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5 text-purple-600" />
-                Analytics 4
-              </CardTitle>
-              <CardDescription>
-                {selectedGA.length} properties selected
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {selectedGA.length === 0 ? (
-                <p className="text-sm text-gray-500">No properties selected</p>
-              ) : (
-                <div className="space-y-2">
-                  {selectedGA.map((id) => (
-                    <div key={id} className="text-sm p-2 bg-gray-50 rounded">
-                      Property {id}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+      )}
     </div>
   )
 }

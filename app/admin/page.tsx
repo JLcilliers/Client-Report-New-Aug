@@ -104,10 +104,10 @@ export default function AdminDashboard() {
           <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
           <p className="text-gray-600 mt-1">Welcome to your SEO Reporting Platform</p>
         </div>
-        <Link href="/admin/clients">
+        <Link href="/admin/reports/create">
           <Button>
             <Plus className="h-4 w-4 mr-2" />
-            Add Client
+            Create Report
           </Button>
         </Link>
       </div>
@@ -174,10 +174,10 @@ export default function AdminDashboard() {
           ) : clients.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-gray-500 mb-4">No clients added yet</p>
-              <Link href="/admin/clients">
+              <Link href="/admin/reports/create">
                 <Button>
                   <Plus className="h-4 w-4 mr-2" />
-                  Add Your First Client
+                  Create Your First Report
                 </Button>
               </Link>
             </div>
