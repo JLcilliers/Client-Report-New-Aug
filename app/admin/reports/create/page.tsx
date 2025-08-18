@@ -34,23 +34,27 @@ export default function CreateReportPage() {
     setLoading(true)
     
     try {
+      const payload = {
+        ...formData,
+        searchConsoleProperties: selectedSC,
+        analyticsProperties: selectedGA,
+      }
+      console.log('Sending to API:', payload)
+      
       const response = await fetch('/api/reports/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          ...formData,
-          searchConsoleProperties: selectedSC,
-          analyticsProperties: selectedGA,
-        }),
+        body: JSON.stringify(payload),
       })
       
-      if (!response.ok) {
-        throw new Error('Failed to create report')
-      }
-      
       const data = await response.json()
+      console.log('Response from API:', data)
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create report')
+      }
       
       if (data.error) {
         throw new Error(data.error + (data.details ? `: ${data.details}` : ''))
