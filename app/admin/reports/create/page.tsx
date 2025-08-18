@@ -65,7 +65,7 @@ export default function CreateReportPage() {
         description: "Report created successfully!",
       })
       
-      router.push(`/admin/reports/${data.reportId}`)
+      router.push(`/admin/reports/view/${data.reportId}`)
     } catch (error: any) {
       console.error('Error creating report:', error)
       toast({
