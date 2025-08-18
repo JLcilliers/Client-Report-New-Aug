@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
           metric: { metricName: "sessions" },
           desc: true
         }],
-        limit: 10
+        limit: "10"
       },
       auth: oauth2Client
     })
