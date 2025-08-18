@@ -24,7 +24,17 @@ export async function GET(request: NextRequest) {
     )
   }
 
-  if (!code || state !== "admin_connection") {
+  // Check if this is for multiple accounts (no state) or admin connection (state=admin_connection)
+  const isMultipleAccountsFlow = !state
+  
+  if (!code) {
+    const redirectUrl = isMultipleAccountsFlow ? "/admin/google-accounts" : "/admin/connections"
+    return NextResponse.redirect(
+      new URL(`${redirectUrl}?error=invalid_request`, request.url)
+    )
+  }
+  
+  if (state && state !== "admin_connection") {
     return NextResponse.redirect(
       new URL("/admin/connections?error=invalid_request", request.url)
     )
@@ -82,70 +92,106 @@ export async function GET(request: NextRequest) {
     // Store tokens in Supabase
     const supabase = createClient(supabaseUrl, supabaseServiceRoleKey)
 
-    // First, check if table exists by trying to query it
-    const { error: tableError } = await supabase
-      .from("admin_google_connections")
-      .select("*")
-      .limit(1)
+    // Calculate token expiry
+    const tokenExpiry = new Date()
+    tokenExpiry.setSeconds(tokenExpiry.getSeconds() + tokens.expires_in)
 
-    if (tableError?.code === "42P01") {
-      // Table doesn't exist - try to create it
-      console.log("Creating admin_google_connections table...")
+    if (isMultipleAccountsFlow) {
+      // Store in google_accounts table for multiple accounts
+      console.log("Storing Google account for multiple accounts flow:", userInfo.email)
       
-      // Create the table using raw SQL
-      const { error: createError } = await supabase.from("admin_google_connections").select("*").limit(1)
+      // Check if account already exists
+      const { data: existing } = await supabase
+        .from("google_accounts")
+        .select("*")
+        .eq("account_email", userInfo.email)
+        .single()
       
-      // If it still doesn't exist, we need to inform the user
-      if (createError?.code === "42P01") {
+      if (existing) {
+        // Update existing account
+        const { error: updateError } = await supabase
+          .from("google_accounts")
+          .update({
+            account_name: userInfo.name || existing.account_name,
+            access_token: tokens.access_token,
+            refresh_token: tokens.refresh_token || existing.refresh_token,
+            token_expiry: tokenExpiry.toISOString(),
+            scopes: tokens.scope ? tokens.scope.split(' ') : existing.scopes,
+            is_active: true,
+            updated_at: new Date().toISOString()
+          })
+          .eq("id", existing.id)
+        
+        if (updateError) {
+          console.error("Error updating Google account:", updateError)
+          throw new Error(`Failed to update account: ${updateError.message}`)
+        }
+      } else {
+        // Create new account
+        const { error: insertError } = await supabase
+          .from("google_accounts")
+          .insert({
+            account_email: userInfo.email,
+            account_name: userInfo.name,
+            access_token: tokens.access_token,
+            refresh_token: tokens.refresh_token,
+            token_expiry: tokenExpiry.toISOString(),
+            scopes: tokens.scope ? tokens.scope.split(' ') : [],
+            is_active: true
+          })
+        
+        if (insertError) {
+          console.error("Error creating Google account:", insertError)
+          throw new Error(`Failed to create account: ${insertError.message}`)
+        }
+      }
+      
+      console.log("Successfully stored Google account")
+      return NextResponse.redirect(
+        new URL("/admin/google-accounts?success=account_added", request.url)
+      )
+    } else {
+      // Original admin connection flow
+      // First, check if table exists by trying to query it
+      const { error: tableError } = await supabase
+        .from("admin_google_connections")
+        .select("*")
+        .limit(1)
+
+      if (tableError?.code === "42P01") {
         console.error("Table admin_google_connections does not exist. Please create it in Supabase.")
         return NextResponse.redirect(
           new URL("/admin/connections?error=database_not_configured", request.url)
         )
       }
+
+      const adminEmail = userInfo.email
+      console.log("Using admin email:", adminEmail)
+
+      // Upsert the connection
+      const { data: upsertData, error: upsertError } = await supabase
+        .from("admin_google_connections")
+        .upsert({
+          admin_email: adminEmail,
+          access_token: tokens.access_token,
+          refresh_token: tokens.refresh_token || "",
+          token_expiry: tokenExpiry.toISOString(),
+          email: userInfo.email,
+        }, {
+          onConflict: "admin_email",
+        })
+        .select()
+
+      if (upsertError) {
+        console.error("Error storing tokens:", upsertError)
+        throw new Error(`Failed to store authentication: ${upsertError.message}`)
+      }
+      
+      console.log("Successfully stored connection:", upsertData)
+      return NextResponse.redirect(
+        new URL("/admin/connections?success=connected", request.url)
+      )
     }
-
-    // Calculate token expiry
-    const tokenExpiry = new Date()
-    tokenExpiry.setSeconds(tokenExpiry.getSeconds() + tokens.expires_in)
-
-    // For now, just use the Google email as the admin email
-    // Since the admin is connecting their own Google account
-    const adminEmail = userInfo.email
-    
-    console.log("Using admin email:", adminEmail)
-
-    // Upsert the connection
-    console.log("Attempting to store connection for:", adminEmail)
-    console.log("Google email:", userInfo.email)
-    console.log("Token expiry:", tokenExpiry.toISOString())
-    console.log("Has refresh token:", !!tokens.refresh_token)
-    console.log("Token scopes:", tokens.scope)
-    
-    const { data: upsertData, error: upsertError } = await supabase
-      .from("admin_google_connections")
-      .upsert({
-        admin_email: adminEmail,
-        access_token: tokens.access_token,
-        refresh_token: tokens.refresh_token || "",
-        token_expiry: tokenExpiry.toISOString(),
-        email: userInfo.email,
-      }, {
-        onConflict: "admin_email",
-      })
-      .select()
-
-    if (upsertError) {
-      console.error("Error storing tokens:", upsertError)
-      console.error("Error details:", JSON.stringify(upsertError, null, 2))
-      throw new Error(`Failed to store authentication: ${upsertError.message}`)
-    }
-    
-    console.log("Successfully stored connection:", upsertData)
-
-    // Redirect back to connections page with success
-    return NextResponse.redirect(
-      new URL("/admin/connections?success=connected", request.url)
-    )
   } catch (error: any) {
     console.error("OAuth callback error:", error)
     console.error("Error stack:", error.stack)
