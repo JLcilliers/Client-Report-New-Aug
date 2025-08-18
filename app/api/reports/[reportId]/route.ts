@@ -29,7 +29,6 @@ export async function GET(
         client:clients (
           id,
           name,
-          email,
           url
         )
       `)
