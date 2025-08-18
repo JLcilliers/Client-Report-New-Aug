@@ -50,6 +50,24 @@ export async function POST(request: NextRequest) {
     
     const supabase = createClient(supabaseUrl, supabaseServiceRoleKey)
     
+    // Check if client with this domain already exists
+    const { data: existingClient, error: checkError } = await supabase
+      .from("clients")
+      .select("*")
+      .eq("domain", domain.trim())
+      .single()
+    
+    if (existingClient) {
+      // Return the existing client instead of creating a duplicate
+      console.log('Client already exists with domain:', domain)
+      return NextResponse.json({
+        client: existingClient,
+        message: "Using existing client",
+        existing: true
+      })
+    }
+    
+    // Create new client if it doesn't exist
     const { data: client, error } = await supabase
       .from("clients")
       .insert({
@@ -65,7 +83,8 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({
       client,
-      message: "Client created successfully"
+      message: "Client created successfully",
+      existing: false
     })
   } catch (error: any) {
     console.error('Error creating client:', error)

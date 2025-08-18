@@ -139,6 +139,15 @@ export default function CreateReportPage() {
       
       const clientData = await clientResponse.json()
       console.log('Client created:', clientData)
+      
+      if (clientData.existing) {
+        console.log('Using existing client:', clientData.client)
+        toast({
+          title: "Using existing client",
+          description: `Client "${clientData.client.name}" already exists with this domain`,
+        })
+      }
+      
       const clientId = clientData.client?.id || clientData.id
 
       // Create the report
