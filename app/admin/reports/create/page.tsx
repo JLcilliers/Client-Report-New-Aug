@@ -52,17 +52,21 @@ export default function CreateReportPage() {
       
       const data = await response.json()
       
+      if (data.error) {
+        throw new Error(data.error + (data.details ? `: ${data.details}` : ''))
+      }
+      
       toast({
         title: "Success",
         description: "Report created successfully!",
       })
       
       router.push(`/admin/reports/${data.reportId}`)
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating report:', error)
       toast({
         title: "Error",
-        description: "Failed to create report. Please try again.",
+        description: error.message || "Failed to create report. Please try again.",
         variant: "destructive"
       })
     } finally {

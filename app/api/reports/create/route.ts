@@ -88,64 +88,40 @@ export async function POST(request: NextRequest) {
       })
     
     if (reportError) {
-      // If table doesn't exist, create it
+      console.error("Error creating report:", reportError)
+      console.error("Error code:", reportError.code)
+      console.error("Error message:", reportError.message)
+      
+      // If table doesn't exist, provide helpful message
       if (reportError.code === "42P01") {
-        // Create reports table
-        const { error: createTableError } = await supabase.rpc("exec_sql", {
-          sql: `
-            CREATE TABLE IF NOT EXISTS reports (
-              id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-              client_id UUID REFERENCES clients(id) ON DELETE CASCADE,
-              name TEXT NOT NULL,
-              description TEXT,
-              slug TEXT UNIQUE NOT NULL,
-              search_console_properties TEXT[] DEFAULT '{}',
-              analytics_properties TEXT[] DEFAULT '{}',
-              created_at TIMESTAMPTZ DEFAULT NOW(),
-              updated_at TIMESTAMPTZ DEFAULT NOW()
-            );
-            
-            -- Enable RLS
-            ALTER TABLE reports ENABLE ROW LEVEL SECURITY;
-            
-            -- Create policy
-            CREATE POLICY "Service role can manage reports" ON reports
-              FOR ALL USING (auth.jwt() ->> 'role' = 'service_role');
-          `,
-        })
-        
-        if (createTableError) {
-          // Try without rpc
-          console.log("Please create reports table manually in Supabase")
-        }
-        
-        // Try to insert again
-        const { error: retryError } = await supabase
-          .from("reports")
-          .insert({
-            id: reportId,
-            client_id: clientId,
-            name: reportName,
-            description: description || null,
-            slug: reportSlug,
-            search_console_properties: searchConsoleProperties || [],
-            analytics_properties: analyticsProperties || [],
-          })
-        
-        if (retryError) {
-          console.error("Error creating report after table creation:", retryError)
-          return NextResponse.json(
-            { error: "Failed to create report. Please create reports table in Supabase." },
-            { status: 500 }
-          )
-        }
-      } else {
-        console.error("Error creating report:", reportError)
         return NextResponse.json(
-          { error: "Failed to create report" },
+          { 
+            error: "Reports table does not exist. Please run the SQL in supabase/create-reports-table.sql",
+            details: reportError.message 
+          },
           { status: 500 }
         )
       }
+      
+      // If it's a foreign key constraint error
+      if (reportError.code === "23503") {
+        return NextResponse.json(
+          { 
+            error: "Client ID does not exist",
+            details: reportError.message 
+          },
+          { status: 500 }
+        )
+      }
+      
+      return NextResponse.json(
+        { 
+          error: "Failed to create report",
+          code: reportError.code,
+          details: reportError.message 
+        },
+        { status: 500 }
+      )
     }
     
     return NextResponse.json({
