@@ -60,9 +60,11 @@ export async function GET() {
     // Find a working site that could be for Lancer Skincare
     let lancerSite = null
     const possibleLancerSites = availableSites.filter(site => 
-      site.includes('lancer') || 
-      site.includes('skincare') ||
-      site.includes('themachinemarket') // This might be the agency site
+      site && (
+        site.includes('lancer') || 
+        site.includes('skincare') ||
+        site.includes('themachinemarket') // This might be the agency site
+      )
     )
     
     // If no direct match, use a site we know works
