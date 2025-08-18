@@ -65,11 +65,16 @@ export async function POST(
 
     console.log('Found admin user with refresh token')
 
+    // Auto-detect URL if needed
+    const baseUrl = process.env.NEXT_PUBLIC_URL || 
+      `https://${request.headers.get('host')}` ||
+      'https://online-client-reporting.vercel.app'
+    
     // Create OAuth2 client
     const oauth2Client = new OAuth2Client(
       process.env.GOOGLE_CLIENT_ID,
       process.env.GOOGLE_CLIENT_SECRET,
-      `${process.env.NEXT_PUBLIC_URL}/api/auth/google/callback`
+      `${baseUrl}/api/auth/google/callback`
     )
 
     oauth2Client.setCredentials({

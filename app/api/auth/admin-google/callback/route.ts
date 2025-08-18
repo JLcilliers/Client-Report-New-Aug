@@ -28,6 +28,11 @@ export async function GET(request: NextRequest) {
     
     const supabase = createClient(supabaseUrl, supabaseServiceRoleKey)
 
+    // Auto-detect URL if NEXT_PUBLIC_URL is not set
+    const baseUrl = process.env.NEXT_PUBLIC_URL || 
+      `https://${request.headers.get('host')}` ||
+      'https://online-client-reporting.vercel.app'
+    
     // Exchange code for tokens
     const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
       method: "POST",
@@ -38,7 +43,7 @@ export async function GET(request: NextRequest) {
         code,
         client_id: process.env.GOOGLE_CLIENT_ID,
         client_secret: process.env.GOOGLE_CLIENT_SECRET,
-        redirect_uri: `${process.env.NEXT_PUBLIC_URL}/api/auth/admin-google/callback`,
+        redirect_uri: `${baseUrl}/api/auth/admin-google/callback`,
         grant_type: "authorization_code",
       }),
     })
