@@ -6,7 +6,7 @@ export async function GET(request: NextRequest) {
     `https://${request.headers.get('host')}` ||
     'https://online-client-reporting.vercel.app'
     
-  const redirectUri = `${baseUrl}/api/auth/admin-google/callback`
+  const redirectUri = `${baseUrl}/api/auth/google/admin-callback`
   
   const clientId = process.env.GOOGLE_CLIENT_ID
   
@@ -39,9 +39,9 @@ export async function GET(request: NextRequest) {
       "5. Save the changes",
       "",
       "Common redirect URIs to add:",
-      "- https://online-client-reporting.vercel.app/api/auth/admin-google/callback",
+      "- https://online-client-reporting.vercel.app/api/auth/google/admin-callback",
       "- https://online-client-reporting.vercel.app/api/auth/google/callback",
-      "- http://localhost:3000/api/auth/admin-google/callback (for local development)"
+      "- http://localhost:3000/api/auth/google/admin-callback (for local development)"
     ]
   })
 }
