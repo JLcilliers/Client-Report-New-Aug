@@ -85,24 +85,27 @@ export default function PublicReportPage() {
     
     setFetchingData(true)
     try {
-      // Trigger data fetch from Google APIs
-      const response = await fetch('/api/data/fetch-search-console', {
+      // Trigger data fetch from Google APIs using the public refresh endpoint
+      const response = await fetch(`/api/public/report/${slug}/refresh`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          reportId: report.id,
-          dateRange: 'last30days',
-        }),
       })
       
       if (response.ok) {
+        const result = await response.json()
+        console.log('Data refreshed:', result)
         // Refetch the report data after update
         await fetchReportData()
+      } else {
+        const error = await response.json()
+        console.error('Error response:', error)
+        alert(`Failed to refresh data: ${error.error || 'Unknown error'}`)
       }
     } catch (error: any) {
       console.error('Error refreshing data:', error)
+      alert('Failed to refresh data. Please try again.')
     } finally {
       setFetchingData(false)
     }
