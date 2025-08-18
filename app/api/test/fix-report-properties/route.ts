@@ -70,8 +70,8 @@ export async function GET() {
     // If no direct match, use a site we know works
     if (possibleLancerSites.length === 0) {
       // Use vocalegalglobal.com as a test site since it's in your list
-      lancerSite = availableSites.find(s => s.includes('vocalegalglobal')) || 
-                   availableSites.find(s => s.includes('shopdualthreads')) ||
+      lancerSite = availableSites.find(s => s && s.includes('vocalegalglobal')) || 
+                   availableSites.find(s => s && s.includes('shopdualthreads')) ||
                    availableSites[0] // Fallback to first available site
     } else {
       lancerSite = possibleLancerSites[0]
