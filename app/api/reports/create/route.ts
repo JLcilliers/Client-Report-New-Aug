@@ -5,18 +5,32 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     const {
+      clientId,
       clientName,
       clientEmail,
       clientUrl,
+      name,
       reportName,
       description,
       searchConsoleProperties,
       analyticsProperties,
+      settings,
     } = body
 
-    if (!clientName || !reportName) {
+    // Support both ways of passing the data
+    const actualReportName = reportName || name
+    const actualClientId = clientId
+    
+    if (!actualClientId && !clientName) {
       return NextResponse.json(
-        { error: "Client name and report name are required" },
+        { error: "Client ID or client name is required" },
+        { status: 400 }
+      )
+    }
+    
+    if (!actualReportName) {
+      return NextResponse.json(
+        { error: "Report name is required" },
         { status: 400 }
       )
     }
@@ -34,38 +48,43 @@ export async function POST(request: NextRequest) {
     const supabase = createClient(supabaseUrl, supabaseServiceRoleKey)
     
     // First, create or get the client
-    let clientId: string
+    let finalClientId: string
     
-    // Check if client exists
-    const { data: existingClient } = await supabase
-      .from("clients")
-      .select("id")
-      .eq("name", clientName)
-      .single()
-    
-    if (existingClient) {
-      clientId = existingClient.id
+    if (actualClientId) {
+      // Use the provided client ID
+      finalClientId = actualClientId
     } else {
-      // Create new client
-      const { data: newClient, error: clientError } = await supabase
+      // Check if client exists by name
+      const { data: existingClient } = await supabase
         .from("clients")
-        .insert({
-          name: clientName,
-          email: clientEmail || null,
-          url: clientUrl || null,
-        })
-        .select()
+        .select("id")
+        .eq("name", clientName)
         .single()
       
-      if (clientError || !newClient) {
-        console.error("Error creating client:", clientError)
-        return NextResponse.json(
-          { error: "Failed to create client" },
-          { status: 500 }
-        )
+      if (existingClient) {
+        finalClientId = existingClient.id
+      } else {
+        // Create new client
+        const { data: newClient, error: clientError } = await supabase
+          .from("clients")
+          .insert({
+            name: clientName,
+            email: clientEmail || null,
+            url: clientUrl || null,
+          })
+          .select()
+          .single()
+        
+        if (clientError || !newClient) {
+          console.error("Error creating client:", clientError)
+          return NextResponse.json(
+            { error: "Failed to create client" },
+            { status: 500 }
+          )
+        }
+        
+        finalClientId = newClient.id
       }
-      
-      clientId = newClient.id
     }
     
     // Create the report
@@ -77,8 +96,8 @@ export async function POST(request: NextRequest) {
       .from("reports")
       .insert({
         id: reportId,
-        client_id: clientId,
-        name: reportName,
+        client_id: finalClientId,
+        name: actualReportName,
         description: description || null,
         slug: reportSlug,
         search_console_properties: searchConsoleProperties || [],
@@ -127,8 +146,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       reportId,
-      clientId,
-      reportSlug,
+      clientId: finalClientId,
+      slug: reportSlug,
       message: "Report created successfully",
     })
     
