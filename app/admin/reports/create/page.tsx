@@ -43,14 +43,20 @@ export default function CreateReportPage() {
 
   const fetchSearchConsoleProperties = async () => {
     try {
+      console.log('Fetching Search Console properties...')
       const response = await fetch('/api/test/verify-search-console')
+      console.log('Search Console response:', response.status, response.ok)
+      
       if (response.ok) {
         const data = await response.json()
+        console.log('Search Console data:', data)
+        
         if (data.searchConsole?.sites) {
           const properties = data.searchConsole.sites.map((siteUrl: string) => ({
             siteUrl,
             verified: true
           }))
+          console.log('Properties found:', properties.length)
           setSearchConsoleProperties(properties)
           
           // Auto-select a suitable property
@@ -61,18 +67,29 @@ export default function CreateReportPage() {
           )
           
           if (goodProperty) {
+            console.log('Auto-selecting property:', goodProperty.siteUrl)
             setFormData(prev => ({
               ...prev,
               selectedSearchConsoleProps: [goodProperty.siteUrl]
             }))
           }
+        } else {
+          console.log('No sites in Search Console data:', data)
         }
+      } else {
+        const errorText = await response.text()
+        console.error('Search Console API error:', response.status, errorText)
+        toast({
+          title: "Search Console API Error",
+          description: `Status ${response.status}: ${errorText.substring(0, 100)}`,
+          variant: "destructive"
+        })
       }
     } catch (error) {
       console.error('Error fetching Search Console properties:', error)
       toast({
-        title: "Warning",
-        description: "Could not load Search Console properties.",
+        title: "Network Error",
+        description: "Could not connect to Search Console API. Check console for details.",
         variant: "destructive"
       })
     }
@@ -89,6 +106,13 @@ export default function CreateReportPage() {
 
     setLoading(true)
     try {
+      console.log('Creating client with data:', {
+        name: formData.newClientName,
+        domain: formData.newClientDomain.startsWith('http') 
+          ? formData.newClientDomain 
+          : `https://${formData.newClientDomain}`
+      })
+      
       // Create client first
       const clientResponse = await fetch('/api/admin/clients', {
         method: 'POST',
@@ -101,13 +125,16 @@ export default function CreateReportPage() {
         })
       })
       
+      console.log('Client creation response:', clientResponse.status, clientResponse.ok)
+      
       if (!clientResponse.ok) {
-        const errorText = await clientResponse.text()
-        console.error('Client creation failed:', errorText)
-        throw new Error('Failed to create client')
+        const errorData = await clientResponse.json()
+        console.error('Client creation failed:', errorData)
+        throw new Error(errorData.details || errorData.error || 'Failed to create client')
       }
       
       const clientData = await clientResponse.json()
+      console.log('Client created:', clientData)
       const clientId = clientData.client?.id || clientData.id
 
       // Create the report
@@ -214,15 +241,62 @@ export default function CreateReportPage() {
           <div>
             <Label className="text-base font-medium">Search Console Properties</Label>
             <p className="text-sm text-gray-500 mb-3">Select which properties to include (you have {searchConsoleProperties.length} available)</p>
+            
+            {/* Debug panel */}
+            <div className="mb-4 p-3 bg-gray-50 border rounded-lg text-xs">
+              <details>
+                <summary className="cursor-pointer font-medium">🔧 Debug Info (click to expand)</summary>
+                <div className="mt-2 space-y-1 text-gray-600">
+                  <div>Properties loaded: {searchConsoleProperties.length}</div>
+                  <div>Selected: {formData.selectedSearchConsoleProps.length}</div>
+                  <div>Auth endpoint: /api/test/verify-search-console</div>
+                  <div className="text-xs">
+                    <details>
+                      <summary>Raw properties:</summary>
+                      <pre className="mt-1 text-xs bg-white p-2 rounded border overflow-auto max-h-20">
+                        {JSON.stringify(searchConsoleProperties.map(p => p.siteUrl), null, 2)}
+                      </pre>
+                    </details>
+                  </div>
+                </div>
+              </details>
+            </div>
+            
             <div className="space-y-2 max-h-48 overflow-y-auto border rounded-lg p-4">
               {searchConsoleProperties.length === 0 ? (
-                <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                  <p className="text-sm text-yellow-800">
-                    No Search Console properties found. Please authenticate at{' '}
-                    <Link href="/admin/auth/setup" className="underline">
-                      /admin/auth/setup
+                <div className="space-y-3">
+                  <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <p className="text-sm text-yellow-800">
+                      No Search Console properties found. This could mean:
+                    </p>
+                    <ul className="text-xs text-yellow-700 mt-2 list-disc list-inside">
+                      <li>Authentication expired</li>
+                      <li>API endpoint error</li>
+                      <li>Network connectivity issue</li>
+                    </ul>
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    <Link href="/admin/auth/setup">
+                      <Button variant="outline" size="sm">
+                        Check Auth Status
+                      </Button>
                     </Link>
-                  </p>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => window.open('/api/debug/report-creation', '_blank')}
+                    >
+                      Debug API
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={fetchSearchConsoleProperties}
+                    >
+                      Retry
+                    </Button>
+                  </div>
                 </div>
               ) : (
                 searchConsoleProperties.map((property) => (
