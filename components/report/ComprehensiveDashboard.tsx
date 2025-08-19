@@ -71,47 +71,72 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
   };
 
   const loadExistingData = async () => {
+    console.log('📖 Loading existing data for slug:', reportSlug);
     try {
       const dataResponse = await fetch(`/api/public/report/${reportSlug}/data`);
+      console.log('📖 Data response status:', dataResponse.status);
+      
       if (dataResponse.ok) {
         const data = await dataResponse.json();
+        console.log('📖 Loaded existing data:', data);
         const transformedMetrics = transformLegacyData(data);
+        console.log('📖 Transformed existing data:', transformedMetrics);
         setMetrics(transformedMetrics);
+      } else {
+        const error = await dataResponse.text();
+        console.error('❌ Failed to load existing data:', error);
       }
     } catch (error) {
-      console.error('Error loading existing data:', error);
+      console.error('💥 Error loading existing data:', error);
     }
   };
 
   const fetchMetrics = async () => {
     setRefreshing(true);
+    console.log('🔄 Starting data refresh for slug:', reportSlug);
+    
     try {
       // First try to refresh the data using the working refresh endpoint
+      console.log('📡 Calling refresh endpoint...');
       const refreshResponse = await fetch(`/api/public/report/${reportSlug}/refresh`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       });
 
+      console.log('📡 Refresh response status:', refreshResponse.status);
+
       if (refreshResponse.ok) {
-        console.log('Data refreshed successfully');
+        const refreshResult = await refreshResponse.json();
+        console.log('✅ Data refreshed successfully:', refreshResult);
         
         // Now fetch the refreshed data
+        console.log('📥 Fetching updated data...');
         const dataResponse = await fetch(`/api/public/report/${reportSlug}/data`);
+        console.log('📥 Data response status:', dataResponse.status);
+        
         if (dataResponse.ok) {
           const data = await dataResponse.json();
+          console.log('📊 Received data:', data);
           
           // Transform the data to match our expected format
           const transformedMetrics = transformLegacyData(data);
+          console.log('🔄 Transformed metrics:', transformedMetrics);
           setMetrics(transformedMetrics);
+        } else {
+          const dataError = await dataResponse.text();
+          console.error('❌ Data fetch failed:', dataError);
         }
       } else {
-        const error = await refreshResponse.json();
-        console.error('Refresh failed:', error);
+        const error = await refreshResponse.text();
+        console.error('❌ Refresh failed:', error);
+        alert(`Refresh failed: ${error}`);
       }
-    } catch (error) {
-      console.error('Error fetching metrics:', error);
+    } catch (error: any) {
+      console.error('💥 Error during refresh:', error);
+      alert(`Error: ${error?.message || 'Unknown error'}`);
     } finally {
       setRefreshing(false);
+      console.log('🏁 Refresh process completed');
     }
   };
 

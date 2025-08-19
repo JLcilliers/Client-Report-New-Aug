@@ -191,6 +191,16 @@ export default function PublicReportPage() {
                 Auto-refreshing data{fetchingData && '...'}
               </p>
               <Button
+                onClick={refreshData}
+                disabled={fetchingData}
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <RefreshCw className={`h-4 w-4 ${fetchingData ? 'animate-spin' : ''}`} />
+                Refresh Data
+              </Button>
+              <Button
                 onClick={() => setShowLegacyView(!showLegacyView)}
                 variant="outline"
                 size="sm"
