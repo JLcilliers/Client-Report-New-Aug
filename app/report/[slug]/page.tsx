@@ -14,8 +14,10 @@ import {
   Globe,
   BarChart3,
   RefreshCw,
-  Calendar
+  Calendar,
+  Search
 } from "lucide-react"
+import Link from "next/link"
 
 interface ReportData {
   search_console?: {
@@ -187,6 +189,16 @@ export default function PublicReportPage() {
                 <RefreshCw className={`h-4 w-4 ${fetchingData ? 'animate-spin' : ''}`} />
                 {fetchingData ? 'Fetching...' : 'Refresh Data'}
               </Button>
+              <Link href={`/report/${slug}/seo-dashboard`}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  <Search className="h-4 w-4" />
+                  SEO Analysis
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
@@ -272,6 +284,45 @@ export default function PublicReportPage() {
             </CardContent>
           </Card>
         </div>
+        
+        {/* SEO Analysis Card */}
+        <Card className="mb-8 border-blue-200 bg-blue-50/50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Search className="h-5 w-5 text-blue-600" />
+              Technical SEO Analysis Available
+            </CardTitle>
+            <CardDescription>
+              Comprehensive SEO audit tools with no monthly fees
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+              <div className="text-sm">
+                <p className="font-medium">✓ Technical Audit</p>
+                <p className="text-gray-500">Site health check</p>
+              </div>
+              <div className="text-sm">
+                <p className="font-medium">✓ Meta Tags</p>
+                <p className="text-gray-500">Title & description</p>
+              </div>
+              <div className="text-sm">
+                <p className="font-medium">✓ PageSpeed</p>
+                <p className="text-gray-500">Core Web Vitals</p>
+              </div>
+              <div className="text-sm">
+                <p className="font-medium">✓ Content Analysis</p>
+                <p className="text-gray-500">Readability & keywords</p>
+              </div>
+            </div>
+            <Link href={`/report/${slug}/seo-dashboard`}>
+              <Button className="w-full" variant="default">
+                <Search className="h-4 w-4 mr-2" />
+                Open SEO Dashboard
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
         
         {/* Connected Properties */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
