@@ -15,13 +15,16 @@ import {
   Copy,
   ExternalLink,
   RefreshCw,
-  Settings
+  Settings,
+  BarChart3,
+  Eye
 } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
 import { formatDate, getRelativeTimeLabel } from "@/lib/utils/date-helpers"
 
 export default function AdminDashboard() {
   const [clients, setClients] = useState<Client[]>([])
+  const [reports, setReports] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState({
     totalClients: 0,
@@ -34,6 +37,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     fetchClients()
     fetchStats()
+    fetchRecentReports()
   }, [])
 
   const fetchClients = async () => {
@@ -71,6 +75,10 @@ export default function AdminDashboard() {
         .from("google_credentials")
         .select("client_id")
 
+      const { count: totalReports } = await supabase
+        .from("reports")
+        .select("*", { count: "exact", head: true })
+
       const { data: lastSyncData } = await supabase
         .from("metrics_cache")
         .select("created_at")
@@ -81,11 +89,23 @@ export default function AdminDashboard() {
       setStats({
         totalClients: totalClients || 0,
         connectedClients: connectedData?.length || 0,
-        totalReports: totalClients || 0,
+        totalReports: totalReports || 0,
         lastSync: lastSyncData ? new Date(lastSyncData.created_at) : null
       })
     } catch (error) {
       console.error("Error fetching stats:", error)
+    }
+  }
+
+  const fetchRecentReports = async () => {
+    try {
+      const response = await fetch("/api/admin/reports")
+      if (response.ok) {
+        const data = await response.json()
+        setReports(data.slice(0, 5)) // Get only 5 most recent
+      }
+    } catch (error) {
+      console.error("Error fetching reports:", error)
     }
   }
 
@@ -260,6 +280,95 @@ export default function AdminDashboard() {
           )}
         </CardContent>
       </Card>
+
+      {/* Recent Reports */}
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle>Recent Reports</CardTitle>
+              <Link href="/admin/reports">
+                <Button variant="outline" size="sm">View All</Button>
+              </Link>
+            </div>
+            <CardDescription>Latest client reports</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <div className="text-center py-4">Loading...</div>
+            ) : reports.length === 0 ? (
+              <div className="text-center py-8">
+                <BarChart3 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-500 mb-4">No reports created yet</p>
+                <Link href="/admin/reports/create">
+                  <Button>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create First Report
+                  </Button>
+                </Link>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {reports.map((report) => (
+                  <div key={report.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 transition-colors">
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-3">
+                        <h3 className="font-medium text-sm">{report.report_name || report.name}</h3>
+                        <span className="text-xs text-gray-500">{report.client_name}</span>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Created {formatDate(new Date(report.created_at))}
+                      </p>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Link href={`/report/${report.slug}`}>
+                        <Button variant="outline" size="sm">
+                          <Eye className="h-3 w-3 mr-1" />
+                          View
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Quick Actions */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Quick Actions</CardTitle>
+            <CardDescription>Common tasks</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Link href="/admin/reports/create">
+              <Button className="w-full justify-start">
+                <Plus className="h-4 w-4 mr-2" />
+                Create New Report
+              </Button>
+            </Link>
+            <Link href="/admin/google-accounts">
+              <Button variant="outline" className="w-full justify-start">
+                <Globe className="h-4 w-4 mr-2" />
+                Manage Google Accounts
+              </Button>
+            </Link>
+            <Link href="/admin/reports">
+              <Button variant="outline" className="w-full justify-start">
+                <BarChart3 className="h-4 w-4 mr-2" />
+                View All Reports
+              </Button>
+            </Link>
+            <Link href="/admin/settings">
+              <Button variant="outline" className="w-full justify-start">
+                <Settings className="h-4 w-4 mr-2" />
+                Settings
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }
