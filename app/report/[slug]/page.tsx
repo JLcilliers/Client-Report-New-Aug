@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useParams } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import ComprehensiveDashboard from "@/components/report/ComprehensiveDashboard"
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -43,6 +44,7 @@ export default function PublicReportPage() {
   const [loading, setLoading] = useState(true)
   const [fetchingData, setFetchingData] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showLegacyView, setShowLegacyView] = useState(false)
   
   useEffect(() => {
     fetchReport()
@@ -51,6 +53,10 @@ export default function PublicReportPage() {
   useEffect(() => {
     if (report) {
       fetchReportData()
+      // Auto-refresh data on page load
+      if (!reportData || isDataStale()) {
+        refreshData()
+      }
     }
   }, [report])
   
@@ -80,6 +86,13 @@ export default function PublicReportPage() {
     } catch (error: any) {
       console.error('Error fetching report data:', error)
     }
+  }
+
+  const isDataStale = () => {
+    if (!reportData?.last_updated) return true
+    const lastUpdate = new Date(reportData.last_updated)
+    const hoursSinceUpdate = (Date.now() - lastUpdate.getTime()) / (1000 * 60 * 60)
+    return hoursSinceUpdate > 1 // Consider stale if older than 1 hour
   }
   
   const refreshData = async () => {
@@ -175,19 +188,14 @@ export default function PublicReportPage() {
             </p>
             <div className="flex items-center gap-4 mt-2">
               <p className="text-sm text-gray-500">
-                Last updated: {reportData?.last_updated 
-                  ? new Date(reportData.last_updated).toLocaleString()
-                  : 'Never'}
+                Auto-refreshing data{fetchingData && '...'}
               </p>
               <Button
-                onClick={refreshData}
-                disabled={fetchingData}
+                onClick={() => setShowLegacyView(!showLegacyView)}
                 variant="outline"
                 size="sm"
-                className="flex items-center gap-2"
               >
-                <RefreshCw className={`h-4 w-4 ${fetchingData ? 'animate-spin' : ''}`} />
-                {fetchingData ? 'Fetching...' : 'Refresh Data'}
+                {showLegacyView ? 'Show Dashboard' : 'Show Legacy View'}
               </Button>
               <Link href={`/report/${slug}/seo-dashboard`}>
                 <Button
@@ -196,7 +204,7 @@ export default function PublicReportPage() {
                   className="flex items-center gap-2"
                 >
                   <Search className="h-4 w-4" />
-                  SEO Analysis
+                  Technical SEO
                 </Button>
               </Link>
             </div>
@@ -206,6 +214,14 @@ export default function PublicReportPage() {
       
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {!showLegacyView ? (
+          /* Comprehensive Dashboard */
+          <ComprehensiveDashboard 
+            reportId={report.id}
+            reportSlug={slug}
+            googleAccountId={report.google_account_id}
+          />
+        ) : (
         {/* Overview Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Card>
@@ -502,6 +518,7 @@ export default function PublicReportPage() {
             <span className="ml-1">Report ID: {report.slug}</span>
           </p>
         </div>
+        )}
       </div>
     </div>
   )
