@@ -24,6 +24,11 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error('Error fetching agency updates:', error);
+      // If table doesn't exist, return empty array instead of error
+      if (error.code === '42P01') {
+        console.log('agency_updates table does not exist, returning empty array');
+        return NextResponse.json([]);
+      }
       return NextResponse.json({ error: 'Failed to fetch updates' }, { status: 500 });
     }
 

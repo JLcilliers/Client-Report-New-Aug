@@ -24,6 +24,8 @@ export async function POST(request: NextRequest) {
 
     const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
 
+    console.log('Attempting to save SEO data:', { reportId, dataType, dataSize: JSON.stringify(data).length });
+
     // Store SEO data in report_data table
     const { error: upsertError } = await supabase
       .from('report_data')
@@ -39,10 +41,30 @@ export async function POST(request: NextRequest) {
 
     if (upsertError) {
       console.error('Error saving SEO data:', upsertError);
-      return NextResponse.json(
-        { error: 'Failed to save SEO data' },
-        { status: 500 }
-      );
+      
+      // Try insert if upsert fails
+      console.log('Upsert failed, trying insert...');
+      const { error: insertError } = await supabase
+        .from('report_data')
+        .insert({
+          report_id: reportId,
+          data_type: dataType,
+          data,
+          date_range: 'current',
+          fetched_at: new Date().toISOString()
+        });
+
+      if (insertError) {
+        console.error('Insert also failed:', insertError);
+        return NextResponse.json(
+          { error: 'Failed to save SEO data', details: insertError.message },
+          { status: 500 }
+        );
+      }
+      
+      console.log('Insert succeeded after upsert failure');
+    } else {
+      console.log('SEO data saved successfully');
     }
 
     return NextResponse.json({ success: true });

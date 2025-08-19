@@ -79,18 +79,23 @@ export default function AdminDashboard() {
         .from("reports")
         .select("*", { count: "exact", head: true })
 
-      const { data: lastSyncData } = await supabase
-        .from("metrics_cache")
-        .select("created_at")
-        .order("created_at", { ascending: false })
+      const { data: lastSyncData, error: syncError } = await supabase
+        .from("report_data")
+        .select("fetched_at")
+        .order("fetched_at", { ascending: false })
         .limit(1)
         .single()
+
+      // Handle case where no data exists yet
+      if (syncError && syncError.code !== 'PGRST116') {
+        console.error('Error fetching sync data:', syncError)
+      }
 
       setStats({
         totalClients: totalClients || 0,
         connectedClients: connectedData?.length || 0,
         totalReports: totalReports || 0,
-        lastSync: lastSyncData ? new Date(lastSyncData.created_at) : null
+        lastSync: lastSyncData ? new Date(lastSyncData.fetched_at) : null
       })
     } catch (error) {
       console.error("Error fetching stats:", error)
