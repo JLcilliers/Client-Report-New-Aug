@@ -77,14 +77,23 @@ export default function PublicReportPage() {
   }
   
   const fetchReportData = async () => {
+    console.log('📥 Fetching report data for slug:', slug)
     try {
       const response = await fetch(`/api/public/report/${slug}/data`)
+      console.log('📥 Data fetch response status:', response.status)
       if (response.ok) {
         const data = await response.json()
+        console.log('📥 Received report data:', data)
         setReportData(data)
+        // Force a re-render of the dashboard
+        if (!showLegacyView) {
+          console.log('🔄 Updating comprehensive dashboard with new data')
+        }
+      } else {
+        console.error('❌ Failed to fetch report data:', response.status)
       }
     } catch (error: any) {
-      console.error('Error fetching report data:', error)
+      console.error('💥 Error fetching report data:', error)
     }
   }
 

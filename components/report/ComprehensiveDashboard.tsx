@@ -53,8 +53,10 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
   const [agencyUpdates, setAgencyUpdates] = useState<any[]>([]);
   const [comparisonPeriod, setComparisonPeriod] = useState<'week' | 'month' | 'year'>('week');
   const [activeTab, setActiveTab] = useState('overview');
+  const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
 
   useEffect(() => {
+    console.log('📊 ComprehensiveDashboard mounted/updated - reportId:', reportId, 'slug:', reportSlug);
     fetchAllData();
   }, [reportId]);
 
@@ -122,6 +124,7 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
           const transformedMetrics = transformLegacyData(data);
           console.log('🔄 Transformed metrics:', transformedMetrics);
           setMetrics(transformedMetrics);
+          setLastRefresh(new Date());
         } else {
           const dataError = await dataResponse.text();
           console.error('❌ Data fetch failed:', dataError);
@@ -307,7 +310,8 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
         <div>
           <h2 className="text-2xl font-bold">Performance Dashboard</h2>
           <p className="text-gray-600">
-            Last updated: {metrics?.fetchedAt ? new Date(metrics.fetchedAt).toLocaleString() : 'Never'}
+            Last updated: {lastRefresh ? lastRefresh.toLocaleString() : (metrics?.fetchedAt ? new Date(metrics.fetchedAt).toLocaleString() : 'Never')}
+            {refreshing && ' - Refreshing...'}
           </p>
         </div>
         <div className="flex items-center gap-4">
