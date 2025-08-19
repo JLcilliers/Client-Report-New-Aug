@@ -470,10 +470,9 @@ export default function PublicReportPage() {
               )}
             </CardContent>
           </Card>
-        </div>
-        
-        {/* Performance Over Time */}
-        <Card>
+          
+          {/* Performance Over Time */}
+          <Card>
           <CardHeader>
             <CardTitle>Performance Over Time</CardTitle>
             <CardDescription>
@@ -509,7 +508,7 @@ export default function PublicReportPage() {
             )}
           </CardContent>
         </Card>
-      </div>
+        </div>
       
       {/* Footer */}
       <div className="bg-white border-t mt-12">
@@ -519,6 +518,7 @@ export default function PublicReportPage() {
             <span className="ml-1">Report ID: {report.slug}</span>
           </p>
         </div>
+      </div>
         </>
         )}
       </div>

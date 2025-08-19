@@ -615,9 +615,9 @@ function extractLandingPages(data: any) {
 }
 
 function calculateAnalyticsTrends(current: any, prevWeek: any, prevMonth: any, yearAgo: any) {
-  const prevWeekMetrics = prevWeek ? parseAnalyticsRow(prevWeek) : {};
-  const prevMonthMetrics = prevMonth ? parseAnalyticsRow(prevMonth) : {};
-  const yearAgoMetrics = yearAgo ? parseAnalyticsRow(yearAgo) : {};
+  const prevWeekMetrics = prevWeek ? parseAnalyticsRow(prevWeek) : { sessions: 0, users: 0, engagementRate: 0, conversions: 0 };
+  const prevMonthMetrics = prevMonth ? parseAnalyticsRow(prevMonth) : { sessions: 0, users: 0, engagementRate: 0, conversions: 0 };
+  const yearAgoMetrics = yearAgo ? parseAnalyticsRow(yearAgo) : { sessions: 0, users: 0, engagementRate: 0, conversions: 0 };
 
   return {
     weekOverWeek: {
