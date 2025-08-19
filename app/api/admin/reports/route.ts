@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
 
     const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
 
-    // Fetch all reports with their properties
+    // Fetch all reports with their properties and stored audit data
     const { data: reports, error } = await supabase
       .from("reports")
       .select(`
@@ -23,6 +23,11 @@ export async function GET(request: NextRequest) {
         report_properties (
           property_id,
           property_type
+        ),
+        report_data (
+          data_type,
+          data,
+          fetched_at
         )
       `)
       .order("created_at", { ascending: false });
@@ -35,7 +40,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Transform the data to include properties as arrays
+    // Transform the data to include properties as arrays and audit data
     const transformedReports = reports?.map(report => {
       const searchConsoleProps = report.report_properties
         ?.filter((p: any) => p.property_type === "search_console")
@@ -44,6 +49,29 @@ export async function GET(request: NextRequest) {
       const analyticsProps = report.report_properties
         ?.filter((p: any) => p.property_type === "analytics")
         .map((p: any) => p.property_id) || [];
+
+      // Extract audit data
+      const auditData = report.report_data?.find((rd: any) => rd.data_type === "technical_seo");
+      const lastDataFetch = report.report_data?.find((rd: any) => rd.data_type === "combined");
+
+      let auditSummary = null;
+      if (auditData?.data) {
+        // Calculate audit summary from stored data
+        const data = auditData.data;
+        const totalChecks = Object.keys(data).length;
+        const passCount = Object.values(data).filter((check: any) => check.status === 'pass').length;
+        const warningCount = Object.values(data).filter((check: any) => check.status === 'warning').length;
+        const failCount = Object.values(data).filter((check: any) => check.status === 'fail').length;
+        
+        auditSummary = {
+          score: Math.round((passCount / totalChecks) * 100),
+          totalChecks,
+          passCount,
+          warningCount,
+          failCount,
+          lastRun: auditData.fetched_at
+        };
+      }
 
       return {
         id: report.id,
@@ -57,7 +85,9 @@ export async function GET(request: NextRequest) {
         is_public: report.is_public !== false,
         google_account_id: report.google_account_id,
         search_console_properties: searchConsoleProps,
-        analytics_properties: analyticsProps
+        analytics_properties: analyticsProps,
+        audit_summary: auditSummary,
+        last_data_fetch: lastDataFetch?.fetched_at
       };
     }) || [];
 

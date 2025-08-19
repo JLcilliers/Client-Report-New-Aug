@@ -34,6 +34,15 @@ interface Report {
   google_account_id?: string
   search_console_properties?: string[]
   analytics_properties?: string[]
+  audit_summary?: {
+    score: number
+    totalChecks: number
+    passCount: number
+    warningCount: number
+    failCount: number
+    lastRun: string
+  }
+  last_data_fetch?: string
 }
 
 export default function ReportsPage() {
@@ -197,11 +206,32 @@ export default function ReportsPage() {
                     ) : null}
                   </div>
 
+                  {/* Audit Score */}
+                  {report.audit_summary && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <div className="flex items-center gap-1">
+                        <BarChart3 className="w-4 h-4 text-green-500" />
+                        <span className="font-medium">SEO Score: {report.audit_summary.score}%</span>
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        ({report.audit_summary.passCount}/{report.audit_summary.totalChecks} passed)
+                      </div>
+                    </div>
+                  )}
+
                   {/* Created Date */}
                   <div className="flex items-center gap-2 text-sm text-gray-500">
                     <Calendar className="w-4 h-4" />
                     <span>Created {formatDate(report.created_at)}</span>
                   </div>
+
+                  {/* Last Data Fetch */}
+                  {report.last_data_fetch && (
+                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                      <RefreshCw className="w-4 h-4" />
+                      <span>Data: {formatDate(report.last_data_fetch)}</span>
+                    </div>
+                  )}
 
                   {/* Actions */}
                   <div className="flex items-center gap-2 pt-2 border-t">
@@ -224,7 +254,7 @@ export default function ReportsPage() {
                       )}
                     </Button>
                     <Link href={`/report/${report.slug}/seo-dashboard`}>
-                      <Button variant="outline" size="sm" className="px-3">
+                      <Button variant="outline" size="sm" className="px-3" title="Run Full Audit">
                         <Search className="w-4 h-4" />
                       </Button>
                     </Link>
@@ -284,9 +314,9 @@ export default function ReportsPage() {
           <Card>
             <CardContent className="pt-6">
               <div className="text-2xl font-bold">
-                {new Set(reports.map(r => r.client_name).filter(Boolean)).size}
+                {reports.filter(r => r.audit_summary).length}
               </div>
-              <p className="text-xs text-gray-500">Clients</p>
+              <p className="text-xs text-gray-500">With SEO Audits</p>
             </CardContent>
           </Card>
         </div>
