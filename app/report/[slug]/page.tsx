@@ -222,6 +222,7 @@ export default function PublicReportPage() {
             googleAccountId={report.google_account_id}
           />
         ) : (
+        <>
         {/* Overview Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Card>
@@ -518,6 +519,7 @@ export default function PublicReportPage() {
             <span className="ml-1">Report ID: {report.slug}</span>
           </p>
         </div>
+        </>
         )}
       </div>
     </div>
