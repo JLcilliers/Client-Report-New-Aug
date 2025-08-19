@@ -6,7 +6,7 @@ export async function GET() {
     const oauth2Client = new OAuth2Client(
       process.env.GOOGLE_CLIENT_ID,
       process.env.GOOGLE_CLIENT_SECRET,
-      `${process.env.NEXT_PUBLIC_URL || 'https://online-client-reporting.vercel.app'}/api/auth/google/admin-callback`
+      `${process.env.NEXT_PUBLIC_URL || 'https://online-client-reporting.vercel.app'}/api/auth/google/callback`
     )
 
     const scopes = [
