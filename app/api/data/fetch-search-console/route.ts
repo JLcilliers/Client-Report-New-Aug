@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
         const report = await prisma.clientReport.findUnique({
           where: { id: reportId }
         })
-        searchConsoleProperties = report?.searchConsoleProperties || []
+        searchConsoleProperties = report?.searchConsolePropertyId ? [report.searchConsolePropertyId] : []
       } catch (dbError) {
         console.log('Database error, using provided properties:', dbError)
       }
@@ -228,14 +228,24 @@ export async function POST(request: NextRequest) {
       allData.summary.position = totalPosition / allData.byProperty.length
     }
     
-    // Store data in database if reportId provided
+    // Store data in ReportCache if reportId provided
     if (reportId) {
       try {
-        await prisma.clientReport.update({
-          where: { id: reportId },
+        // Delete existing cache for this report and dataType
+        await prisma.reportCache.deleteMany({
+          where: {
+            reportId: reportId,
+            dataType: 'searchConsole'
+          }
+        })
+        
+        // Create new cache entry
+        await prisma.reportCache.create({
           data: {
-            searchConsoleData: JSON.stringify(allData),
-            lastUpdated: new Date(),
+            reportId: reportId,
+            dataType: 'searchConsole',
+            data: JSON.stringify(allData),
+            expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
           }
         })
       } catch (dbError) {
