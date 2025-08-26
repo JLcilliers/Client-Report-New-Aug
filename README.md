@@ -1,125 +1,219 @@
-# SEO Reporting Platform
+# Search Insights Hub - Client Reporting Platform
 
-A comprehensive SEO reporting platform built with Next.js 14, TypeScript, Supabase, and Vercel.
+A comprehensive SEO reporting platform that integrates with Google Analytics, Search Console, and PageSpeed Insights to provide automated client reporting.
 
 ## Features
 
-- **Admin Dashboard**: Manage multiple clients and their SEO reports
-- **Google Integration**: Connect to Google Search Console and Analytics 4
-- **Automated Data Fetching**: Daily cron jobs to fetch fresh data
-- **Public Report URLs**: Each client gets a unique, shareable report URL
-- **Real-time Metrics**: Track clicks, impressions, CTR, and rankings
-- **Core Web Vitals**: Monitor technical SEO performance
-- **PDF Export**: Download reports as PDF documents
+### 🚀 Core Features
+- **Google OAuth Integration** - Secure authentication with Google accounts
+- **Multi-Account Support** - Manage multiple Google accounts and properties
+- **Automated Data Fetching** - Real-time data from Google Analytics GA4 and Search Console
+- **Interactive Dashboards** - Comprehensive reporting with charts and visualizations
+- **Date Range Analytics** - Week, month, year, and custom date range comparisons
+- **Shareable Reports** - Generate secure, shareable report links for clients
+
+### 📊 Reporting Capabilities
+- **Search Console Metrics** - Clicks, impressions, CTR, average position
+- **Analytics Data** - Sessions, users, bounce rate, engagement metrics
+- **PageSpeed Insights** - Core Web Vitals and performance metrics
+- **Traffic Analysis** - Channel breakdown and conversion tracking
+- **Actionable Insights** - AI-generated recommendations with priority scoring
+- **Technical SEO** - Meta tags, robots.txt, sitemap analysis
+
+### 📈 Visualizations
+- **Interactive Charts** - Recharts-powered visualizations
+- **Trend Analysis** - Performance over time with comparison periods
+- **Traffic Distribution** - Source breakdown with percentage analysis
+- **Competitive Intelligence** - Industry benchmarking
+- **Impact vs Effort Matrix** - Prioritized task recommendations
 
 ## Tech Stack
 
-- **Frontend**: Next.js 14, TypeScript, Tailwind CSS
-- **Database**: Supabase (PostgreSQL)
-- **Authentication**: Supabase Auth
-- **Charts**: Recharts
-- **Deployment**: Vercel
-- **APIs**: Google Search Console, Google Analytics 4, PageSpeed Insights
+- **Framework**: Next.js 14 with TypeScript
+- **Database**: Prisma ORM with SQLite (local) / PostgreSQL (production)
+- **Authentication**: Custom Google OAuth implementation
+- **Styling**: Tailwind CSS + shadcn/ui components
+- **Charts**: Recharts library
+- **APIs**: Google Analytics Data API, Search Console API, PageSpeed Insights API
+- **Deployment**: Vercel (recommended)
 
-## Setup Instructions
+## Environment Variables
 
-### 1. Database Setup
+Create a `.env.local` file with the following variables:
 
-Run the SQL schema in your Supabase project:
-```sql
--- See supabase/schema.sql
-```
-
-### 2. Environment Variables
-
-Create a `.env.local` file with your credentials:
 ```env
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+# Database
+DATABASE_URL="file:./dev.db"
+
+# NextAuth Configuration
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=your_nextauth_secret_here
+
+# Google OAuth Credentials
 GOOGLE_CLIENT_ID=your_google_client_id
 GOOGLE_CLIENT_SECRET=your_google_client_secret
+
+# Google API Keys
 PAGESPEED_API_KEY=your_pagespeed_api_key
-ENCRYPTION_KEY=your_encryption_key
-NEXT_PUBLIC_APP_URL=https://your-domain.vercel.app
+
+# Google Service Account
+GOOGLE_SERVICE_ACCOUNT_EMAIL=your_service_account_email
+GOOGLE_PROJECT_ID=your_google_project_id
+
+# Application Settings
+APP_URL=http://localhost:3000
+NEXT_PUBLIC_URL=http://localhost:3000
+NODE_ENV=development
 ```
 
-### 3. Admin User Setup
+## Getting Started
 
-Add your email to the `admin_users` table in Supabase:
-```sql
-INSERT INTO admin_users (email) VALUES ('your-email@example.com');
+### Prerequisites
+- Node.js 18+ and npm
+- Google Cloud Console project with Analytics and Search Console APIs enabled
+- Google OAuth 2.0 credentials
+
+### Installation
+
+1. **Clone the repository**
+```bash
+git clone https://github.com/JLcilliers/Client-Report-New-Aug.git
+cd Client-Report-New-Aug
 ```
 
-### 4. Google OAuth Setup
-
-1. Go to [Google Cloud Console](https://console.cloud.google.com)
-2. Create OAuth 2.0 credentials
-3. Add authorized redirect URIs:
-   - `http://localhost:3000/api/auth/google/callback`
-   - `https://your-domain.vercel.app/api/auth/google/callback`
-
-### 5. Development
-
+2. **Install dependencies**
 ```bash
 npm install
+```
+
+3. **Set up environment variables**
+```bash
+cp .env.example .env.local
+# Edit .env.local with your actual values
+```
+
+4. **Set up the database**
+```bash
+npx prisma migrate dev
+npx prisma generate
+```
+
+5. **Start the development server**
+```bash
 npm run dev
 ```
 
-### 6. Deployment
+6. **Open your browser**
+Navigate to [http://localhost:3000](http://localhost:3000)
 
-Deploy to Vercel:
+## Google OAuth Setup
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project or select existing
+3. Enable the following APIs:
+   - Google Analytics Data API
+   - Google Search Console API
+   - PageSpeed Insights API
+4. Create OAuth 2.0 credentials
+5. Add authorized redirect URIs:
+   - `http://localhost:3000/api/auth/admin-google/callback` (development)
+   - `https://yourdomain.com/api/auth/admin-google/callback` (production)
+
+## Database Schema
+
+The application uses Prisma with the following main models:
+- `User` - User accounts with Google profile information
+- `Account` - OAuth account linking with Google
+- `ClientReport` - Client report configurations
+- `ReportCache` - Cached report data for performance
+
+## API Endpoints
+
+### Authentication
+- `POST /api/auth/admin-google/initiate` - Start OAuth flow
+- `GET /api/auth/admin-google/callback` - OAuth callback
+- `GET /api/auth/check-session` - Verify session
+
+### Reports
+- `GET /api/admin/reports` - List all reports
+- `POST /api/reports/create` - Create new report
+- `GET /api/public/report/[slug]` - Public report access
+- `POST /api/public/report/[slug]/refresh` - Refresh report data
+
+### Google APIs
+- `GET /api/google/fetch-properties` - Get user's properties
+- `GET /api/admin/google-accounts` - List connected accounts
+
+## Deployment
+
+### Vercel (Recommended)
+
+1. **Prepare for deployment**
 ```bash
+npm run build
+```
+
+2. **Install Vercel CLI**
+```bash
+npm install -g vercel
+```
+
+3. **Deploy**
+```bash
+vercel login
 vercel
+```
+
+4. **Set up production database**
+   - Use Vercel Postgres, Supabase, or PlanetScale
+   - Update `DATABASE_URL` in Vercel environment variables
+
+5. **Configure environment variables**
+   - Copy all variables from `.env.local` to Vercel dashboard
+   - Update URLs to your production domain
+
+6. **Run migrations**
+```bash
+vercel env pull
+npx prisma migrate deploy
 ```
 
 ## Usage
 
-### Admin Access
-
-1. Navigate to your app URL
-2. Login with your admin email
-3. Add clients from the dashboard
-4. Connect Google accounts for each client
-5. Share the unique report URL with clients
+### Admin Dashboard
+1. Navigate to `/admin` 
+2. Connect your Google account via OAuth
+3. Select Analytics and Search Console properties
+4. Create reports for your clients
 
 ### Client Reports
+1. Create a new report from the admin dashboard
+2. Configure date ranges and metrics
+3. Share the generated URL with clients
+4. Reports auto-refresh and provide real-time insights
 
-Clients can access their reports at:
-```
-https://your-domain.vercel.app/report/[clientId]/[token]
-```
+### Features Overview
+- **Connections**: Manage Google account connections
+- **Properties**: View available Analytics and Search Console properties  
+- **Reports**: Create and manage client reports
+- **Insights**: AI-powered recommendations and action items
 
-## Project Structure
+## Contributing
 
-```
-├── app/
-│   ├── admin/           # Admin dashboard pages
-│   ├── report/          # Public report pages
-│   └── api/             # API routes
-├── components/
-│   ├── admin/           # Admin components
-│   ├── report/          # Report components
-│   └── ui/              # Shared UI components
-├── lib/
-│   ├── apis/            # External API integrations
-│   ├── db/              # Database configuration
-│   └── utils/           # Utility functions
-└── types/               # TypeScript definitions
-```
-
-## Cron Jobs
-
-- **Daily Update** (6 AM UTC): Fetches GSC and GA4 data
-- **Weekly Audit** (Sundays, 6 AM UTC): Runs PageSpeed tests
-
-## Security
-
-- All Google tokens are encrypted before storage
-- Row-level security enabled on all tables
-- Admin-only access to sensitive operations
-- Public reports use unguessable UUID tokens
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## License
 
-Private project - All rights reserved
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Support
+
+For support, please open an issue on GitHub or contact [your-email@example.com].
+
+---
+
+Built with ❤️ using Next.js, TypeScript, and Claude Code
