@@ -52,7 +52,7 @@ export default function GoogleAccountsPage() {
         throw new Error('Failed to fetch accounts')
       }
     } catch (error) {
-      console.error('Error fetching Google accounts:', error)
+      
       toast({
         title: "Error",
         description: "Failed to load Google accounts",
@@ -85,7 +85,7 @@ export default function GoogleAccountsPage() {
         throw new Error('Failed to refresh account')
       }
     } catch (error) {
-      console.error('Error refreshing account:', error)
+      
       toast({
         title: "Error",
         description: "Failed to refresh account",
@@ -116,7 +116,7 @@ export default function GoogleAccountsPage() {
         throw new Error('Failed to delete account')
       }
     } catch (error) {
-      console.error('Error deleting account:', error)
+      
       toast({
         title: "Error",
         description: "Failed to remove account",

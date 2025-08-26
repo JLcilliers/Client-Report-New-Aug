@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
       .single();
 
     if (error && error.code !== 'PGRST116') { // PGRST116 = no rows found
-      console.error('Error fetching SEO data:', error);
+      
       return NextResponse.json(
         { error: 'Failed to fetch SEO data' },
         { status: 500 }
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
       fetched_at: data.fetched_at 
     });
   } catch (error) {
-    console.error('Get SEO data error:', error);
+    
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

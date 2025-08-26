@@ -7,7 +7,7 @@ const searchconsole = google.searchconsole("v1")
 
 export async function GET() {
   try {
-    console.log('Testing Search Console API connection...')
+    
     
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
     const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -92,7 +92,7 @@ export async function GET() {
           
           testData = queryResponse.data
         } catch (error: any) {
-          console.error('Error fetching test data:', error)
+          
           testData = { error: error.message }
         }
       }
@@ -116,7 +116,7 @@ export async function GET() {
       }
     })
   } catch (error: any) {
-    console.error('Error verifying Search Console connection:', error)
+    
     return NextResponse.json({
       error: "Failed to verify Search Console connection",
       details: error.message,

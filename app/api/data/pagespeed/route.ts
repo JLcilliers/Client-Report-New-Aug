@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     
     if (!response.ok) {
       const error = await response.text();
-      console.error('PageSpeed API error:', error);
+      
       return NextResponse.json(
         { error: 'Failed to fetch PageSpeed data' },
         { status: response.status }
@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(metrics);
   } catch (error) {
-    console.error('PageSpeed API error:', error);
+    
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -113,7 +113,7 @@ export async function GET(request: NextRequest) {
       message: 'PageSpeed data not yet collected for this report'
     });
   } catch (error) {
-    console.error('Error fetching PageSpeed data:', error);
+    
     return NextResponse.json(
       { error: 'Failed to fetch PageSpeed data' },
       { status: 500 }

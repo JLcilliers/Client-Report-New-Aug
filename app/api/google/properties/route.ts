@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
     let accessToken = connection.access_token
     
     if (now >= tokenExpiry) {
-      console.log("Token expired, refreshing...")
+      
       
       // Refresh the token
       const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
       })
       
       if (!tokenResponse.ok) {
-        console.error("Failed to refresh token")
+        
         return NextResponse.json({ error: "Failed to refresh Google token" }, { status: 401 })
       }
       
@@ -90,12 +90,12 @@ export async function POST(request: NextRequest) {
       if (scResponse.ok) {
         const scData = await scResponse.json()
         searchConsoleProperties = scData.siteEntry || []
-        console.log(`Found ${searchConsoleProperties.length} Search Console properties`)
+        
       } else {
-        console.error("Failed to fetch Search Console properties:", await scResponse.text())
+        // Handle error
       }
     } catch (error) {
-      console.error("Error fetching Search Console properties:", error)
+      
     }
     
     // Fetch Analytics properties
@@ -111,12 +111,12 @@ export async function POST(request: NextRequest) {
         }
       )
       
-      console.log("Analytics accounts response status:", accountsResponse.status)
+      
       
       if (accountsResponse.ok) {
         const accountsData = await accountsResponse.json()
         const accounts = accountsData.accounts || []
-        console.log(`Found ${accounts.length} Analytics accounts`)
+        
         
         // For each account, get properties
         for (const account of accounts) {
@@ -129,7 +129,7 @@ export async function POST(request: NextRequest) {
             }
           )
           
-          console.log(`Properties response for ${account.displayName}:`, propertiesResponse.status)
+          
           
           if (propertiesResponse.ok) {
             const propertiesData = await propertiesResponse.json()
@@ -146,12 +146,12 @@ export async function POST(request: NextRequest) {
             }
           } else {
             const errorText = await propertiesResponse.text()
-            console.error(`Failed to fetch properties for ${account.displayName}:`, errorText)
+            
           }
         }
       } else {
         const errorText = await accountsResponse.text()
-        console.error("Failed to fetch Analytics accounts:", errorText)
+        
         
         // Try alternative approach - Management API for Universal Analytics (if any legacy properties)
         try {
@@ -166,16 +166,16 @@ export async function POST(request: NextRequest) {
           
           if (mgmtResponse.ok) {
             const mgmtData = await mgmtResponse.json()
-            console.log("Found legacy Analytics accounts:", mgmtData.items?.length || 0)
+            
           }
         } catch (e) {
-          console.log("No legacy Analytics access")
+          
         }
       }
       
-      console.log(`Total Analytics accounts with properties: ${analyticsAccounts.length}`)
+      
     } catch (error) {
-      console.error("Error fetching Analytics properties:", error)
+      
     }
     
     return NextResponse.json({
@@ -183,7 +183,7 @@ export async function POST(request: NextRequest) {
       analytics: analyticsAccounts,
     })
   } catch (error: any) {
-    console.error("Properties API error:", error)
+    
     return NextResponse.json({ 
       error: "Failed to fetch properties",
       details: error.message 

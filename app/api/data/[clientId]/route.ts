@@ -162,7 +162,7 @@ export async function GET(
 
     return NextResponse.json(mockData)
   } catch (error: any) {
-    console.error("Error fetching report data:", error)
+    
     return NextResponse.json(
       { error: "Failed to fetch report data" },
       { status: 500 }

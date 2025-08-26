@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { supabase } from "@/lib/db/supabase"
+// import { supabase } from "@/lib/db/supabase"
 import { Client } from "@/types"
 import Link from "next/link"
 import { 
@@ -23,38 +23,45 @@ import { useToast } from "@/components/ui/use-toast"
 import { formatDate, getRelativeTimeLabel } from "@/lib/utils/date-helpers"
 
 export default function AdminDashboard() {
-  const [clients, setClients] = useState<Client[]>([])
+  const [connectedClients, setConnectedClients] = useState<any[]>([])
   const [reports, setReports] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState({
     totalClients: 0,
-    connectedClients: 0,
+    activeClients: 0,
     totalReports: 0,
     lastSync: null as Date | null
   })
   const { toast } = useToast()
 
   useEffect(() => {
-    fetchClients()
+    fetchConnectedClients()
     fetchStats()
     fetchRecentReports()
   }, [])
 
-  const fetchClients = async () => {
+  const fetchConnectedClients = async () => {
     try {
-      const { data, error } = await supabase
-        .from("clients")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(5)
-
-      if (error) {
-        console.error("Dashboard fetch error:", error)
-        throw error
+      // Fetch reports which represent connected clients
+      const response = await fetch("/api/admin/reports")
+      if (response.ok) {
+        const data = await response.json()
+        // Group reports by client to show connected clients
+        const clientsMap = new Map()
+        data.forEach((report: any) => {
+          if (!clientsMap.has(report.client_name)) {
+            clientsMap.set(report.client_name, {
+              name: report.client_name,
+              domain: report.domain,
+              reports: [],
+              lastUpdated: report.updated_at
+            })
+          }
+          clientsMap.get(report.client_name).reports.push(report)
+        })
+        setConnectedClients(Array.from(clientsMap.values()))
       }
-      setClients(data || [])
     } catch (error: any) {
-      console.error("Error fetching clients - Full error:", error)
       toast({
         title: "Error fetching clients",
         description: error.message || "Please check console for details",
@@ -67,36 +74,19 @@ export default function AdminDashboard() {
 
   const fetchStats = async () => {
     try {
-      const { count: totalClients } = await supabase
-        .from("clients")
-        .select("*", { count: "exact", head: true })
-
-      const { data: connectedData } = await supabase
-        .from("google_credentials")
-        .select("client_id")
-
-      const { count: totalReports } = await supabase
-        .from("reports")
-        .select("*", { count: "exact", head: true })
-
-      const { data: lastSyncData, error: syncError } = await supabase
-        .from("report_data")
-        .select("fetched_at")
-        .order("fetched_at", { ascending: false })
-        .limit(1)
-        .single()
-
-      // Handle case where no data exists yet
-      if (syncError && syncError.code !== 'PGRST116') {
-        console.error('Error fetching sync data:', syncError)
+      // Fetch reports to get stats
+      const response = await fetch("/api/admin/reports")
+      if (response.ok) {
+        const reports = await response.json()
+        // Count unique clients from reports
+        const uniqueClients = new Set(reports.map((r: any) => r.client_name)).size
+        setStats({
+          totalClients: uniqueClients,
+          activeClients: uniqueClients,
+          totalReports: reports.length,
+          lastSync: reports[0]?.last_data_fetch ? new Date(reports[0].last_data_fetch) : null
+        })
       }
-
-      setStats({
-        totalClients: totalClients || 0,
-        connectedClients: connectedData?.length || 0,
-        totalReports: totalReports || 0,
-        lastSync: lastSyncData ? new Date(lastSyncData.fetched_at) : null
-      })
     } catch (error) {
       console.error("Error fetching stats:", error)
     }
@@ -110,7 +100,7 @@ export default function AdminDashboard() {
         setReports(data.slice(0, 5)) // Get only 5 most recent
       }
     } catch (error) {
-      console.error("Error fetching reports:", error)
+      
     }
   }
 
@@ -197,14 +187,14 @@ export default function AdminDashboard() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Connected</CardTitle>
+            <CardTitle className="text-sm font-medium">Active Clients</CardTitle>
             <CheckCircle className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.connectedClients}</div>
+            <div className="text-2xl font-bold">{stats.activeClients}</div>
             <p className="text-xs text-muted-foreground">
               {stats.totalClients > 0 
-                ? `${Math.round((stats.connectedClients / stats.totalClients) * 100)}% connected`
+                ? `${Math.round((stats.activeClients / stats.totalClients) * 100)}% active`
                 : "No clients yet"}
             </p>
           </CardContent>
@@ -220,31 +210,44 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card 
+          className="cursor-pointer hover:shadow-md transition-shadow"
+          onClick={() => {
+            setLoading(true);
+            fetchConnectedClients();
+            fetchStats();
+            fetchRecentReports();
+            toast({
+              title: "Refreshing data...",
+              description: "Fetching latest information",
+            });
+          }}
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Last Sync</CardTitle>
-            <RefreshCw className="h-4 w-4 text-muted-foreground" />
+            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''} text-muted-foreground`} />
           </CardHeader>
           <CardContent>
             <div className="text-sm font-medium">
               {stats.lastSync ? getRelativeTimeLabel(stats.lastSync) : "Never"}
             </div>
+            <p className="text-xs text-gray-500 mt-1">Click to refresh</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Recent Clients */}
+      {/* Connected Clients */}
       <Card>
         <CardHeader>
-          <CardTitle>Recent Clients</CardTitle>
-          <CardDescription>Your latest added clients</CardDescription>
+          <CardTitle>Connected Clients</CardTitle>
+          <CardDescription>Clients with active reports and Google connections</CardDescription>
         </CardHeader>
         <CardContent>
           {loading ? (
             <div className="text-center py-4">Loading...</div>
-          ) : clients.length === 0 ? (
+          ) : connectedClients.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-gray-500 mb-4">No clients added yet</p>
+              <p className="text-gray-500 mb-4">No connected clients yet</p>
               <Link href="/admin/reports/create">
                 <Button>
                   <Plus className="h-4 w-4 mr-2" />
@@ -254,30 +257,26 @@ export default function AdminDashboard() {
             </div>
           ) : (
             <div className="space-y-4">
-              {clients.map((client) => (
-                <div key={client.id} className="flex items-center justify-between p-4 border rounded-lg">
+              {connectedClients.map((client) => (
+                <div key={client.name} className="flex items-center justify-between p-4 border rounded-lg">
                   <div className="flex-1">
                     <div className="flex items-center space-x-3">
                       <h3 className="font-medium">{client.name}</h3>
-                      <span className="text-sm text-gray-500">{client.domain}</span>
+                      {client.domain && <span className="text-sm text-gray-500">{client.domain}</span>}
                     </div>
                     <p className="text-sm text-gray-500 mt-1">
-                      Added {formatDate(client.created_at)}
+                      {client.reports.length} report{client.reports.length !== 1 ? 's' : ''} • Last updated {getRelativeTimeLabel(new Date(client.lastUpdated))}
                     </p>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => copyReportUrl(client)}
-                    >
-                      <Copy className="h-4 w-4" />
-                    </Button>
-                    <Link href={`/admin/clients/${client.id}`}>
-                      <Button variant="outline" size="sm">
-                        <ExternalLink className="h-4 w-4" />
-                      </Button>
-                    </Link>
+                    {client.reports[0] && (
+                      <Link href={`/report/${client.reports[0].slug || client.reports[0].shareableId}`}>
+                        <Button variant="outline" size="sm">
+                          <Eye className="h-4 w-4 mr-1" />
+                          View Report
+                        </Button>
+                      </Link>
+                    )}
                   </div>
                 </div>
               ))}
@@ -318,8 +317,9 @@ export default function AdminDashboard() {
                   <div key={report.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 transition-colors">
                     <div className="flex-1">
                       <div className="flex items-center space-x-3">
-                        <h3 className="font-medium text-sm">{report.report_name || report.name}</h3>
-                        <span className="text-xs text-gray-500">{report.client_name}</span>
+                        <h3 className="font-medium text-sm">
+                          {report.client_name} - {report.report_name || report.name || 'Report'}
+                        </h3>
                       </div>
                       <p className="text-xs text-gray-500 mt-1">
                         Created {formatDate(new Date(report.created_at))}

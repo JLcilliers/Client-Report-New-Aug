@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
     } as SitemapAnalysis);
 
   } catch (error) {
-    console.error('Sitemap analysis error:', error);
+    
     return NextResponse.json(
       { error: 'Failed to analyze sitemap' },
       { status: 500 }

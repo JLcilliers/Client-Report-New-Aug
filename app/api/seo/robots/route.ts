@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
       } as RobotsAnalysis);
     }
   } catch (error) {
-    console.error('Robots.txt analysis error:', error);
+    
     return NextResponse.json(
       { error: 'Failed to analyze robots.txt' },
       { status: 500 }

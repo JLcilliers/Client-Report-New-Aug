@@ -5,11 +5,13 @@ export async function GET(request: NextRequest) {
     const clientId = process.env.GOOGLE_CLIENT_ID
     
     // Auto-detect URL if NEXT_PUBLIC_URL is not set
+    const host = request.headers.get('host')
+    const protocol = host?.includes('localhost') ? 'http' : 'https'
     const baseUrl = process.env.NEXT_PUBLIC_URL || 
-      `https://${request.headers.get('host')}` ||
-      'https://online-client-reporting.vercel.app'
+      `${protocol}://${host}` ||
+      'http://localhost:3000'
     
-    const redirectUri = `${baseUrl}/api/auth/google/admin-callback`
+    const redirectUri = `${baseUrl}/api/auth/admin-google/callback`
     
     if (!clientId) {
       return NextResponse.json({ 
@@ -29,6 +31,8 @@ export async function GET(request: NextRequest) {
       scope: [
         "https://www.googleapis.com/auth/webmasters.readonly",
         "https://www.googleapis.com/auth/analytics.readonly",
+        "https://www.googleapis.com/auth/userinfo.email",
+        "https://www.googleapis.com/auth/userinfo.profile",
       ].join(" "),
       access_type: "offline",
       prompt: "consent",
@@ -39,7 +43,7 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.redirect(authUrl)
   } catch (error: any) {
-    console.error("Error initiating OAuth:", error)
+    
     return NextResponse.json({ 
       error: "Failed to initiate OAuth",
       details: error.message 

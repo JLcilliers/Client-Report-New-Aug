@@ -113,7 +113,7 @@ export default function ConnectionsClient({ initialConnection }: ConnectionsClie
         description: "Google account disconnected successfully"
       })
     } catch (error: any) {
-      console.error("Disconnect error:", error)
+      
       toast({
         title: "Error",
         description: "Failed to disconnect Google account",

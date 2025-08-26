@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createClient } from "@supabase/supabase-js"
+import { PrismaClient } from "@prisma/client"
+
+const prisma = new PrismaClient()
 
 export async function GET(
   request: NextRequest,
@@ -7,64 +9,73 @@ export async function GET(
 ) {
   try {
     const { slug } = await params
-    console.log('Fetching public report with slug:', slug)
     
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    console.log("Looking for report with slug:", slug)
     
-    if (!supabaseUrl || !supabaseServiceRoleKey) {
-      return NextResponse.json(
-        { error: "Server configuration error" },
-        { status: 500 }
-      )
-    }
-    
-    const supabase = createClient(supabaseUrl, supabaseServiceRoleKey)
-    
-    // Get report by slug with client info
-    const { data: report, error } = await supabase
-      .from("reports")
-      .select(`
-        *,
-        client:clients (
-          id,
-          name,
-          domain
-        )
-      `)
-      .eq("slug", slug)
-      .single()
-    
-    if (error) {
-      console.error('Database error:', error)
-      return NextResponse.json(
-        { error: "Report not found", details: error.message },
-        { status: 404 }
-      )
-    }
+    // Get report by shareableId (which is used as the slug)
+    const report = await prisma.clientReport.findUnique({
+      where: { shareableId: slug },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true
+          }
+        }
+      }
+    })
     
     if (!report) {
+      console.log("Report not found for slug:", slug)
       return NextResponse.json(
         { error: "Report not found" },
         { status: 404 }
       )
     }
     
+    console.log("Found report:", report.id)
+    
+    // Get cached data if available
+    let cachedData = null
+    try {
+      const cache = await prisma.reportCache.findFirst({
+        where: {
+          reportId: report.id,
+          dataType: 'combined',
+          expiresAt: {
+            gt: new Date()
+          }
+        },
+        orderBy: {
+          cachedAt: 'desc'
+        }
+      })
+      if (cache) {
+        cachedData = JSON.parse(cache.data)
+      }
+    } catch (cacheError) {
+      console.log("Cache retrieval error:", cacheError)
+    }
+    
     // Return public data only (no sensitive info)
     return NextResponse.json({
       id: report.id,
-      name: report.name,
-      description: report.description,
-      slug: report.slug,
-      search_console_properties: report.search_console_properties,
-      analytics_properties: report.analytics_properties,
-      client: report.client,
-      created_at: report.created_at,
-      updated_at: report.updated_at,
+      name: report.reportName,
+      clientName: report.clientName,
+      slug: report.shareableId,
+      shareableLink: report.shareableLink,
+      search_console_properties: [report.searchConsolePropertyId],
+      analytics_properties: [report.ga4PropertyId],
+      isActive: report.isActive,
+      refreshInterval: report.refreshInterval,
+      created_at: report.createdAt,
+      updated_at: report.updatedAt,
+      cachedData: cachedData
     })
     
   } catch (error: any) {
-    console.error("Error fetching public report:", error)
+    
     return NextResponse.json(
       { error: "Failed to fetch report", details: error.message },
       { status: 500 }

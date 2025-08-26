@@ -16,7 +16,7 @@ export default function AdminAuthSetupPage() {
       const data = await response.json()
       setStatus(data)
     } catch (error) {
-      console.error("Error checking auth status:", error)
+      
       setStatus({ error: "Failed to check authentication status" })
     } finally {
       setChecking(false)

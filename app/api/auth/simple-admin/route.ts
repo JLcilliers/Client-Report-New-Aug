@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
       const tokenData = await tokenResponse.json()
       
       if (!tokenResponse.ok) {
-        console.error("Token exchange failed:", tokenData)
+        
         throw new Error(tokenData.error_description || "Failed to exchange code")
       }
       
@@ -79,7 +79,7 @@ export async function GET(request: NextRequest) {
         await supabase.from("admin_google_connections").select("*").limit(1)
       } catch (error) {
         // Table might not exist, but we'll handle that below
-        console.log("Table check:", error)
+        
       }
       
       // Upsert the connection
@@ -96,7 +96,7 @@ export async function GET(request: NextRequest) {
         })
       
       if (upsertError) {
-        console.error("Error storing tokens:", upsertError)
+        
         // Try without upsert
         await supabase
           .from("admin_google_connections")
@@ -178,7 +178,7 @@ export async function GET(request: NextRequest) {
       })
       
     } catch (error: any) {
-      console.error("OAuth error:", error)
+      
       return new NextResponse(`
         <!DOCTYPE html>
         <html>

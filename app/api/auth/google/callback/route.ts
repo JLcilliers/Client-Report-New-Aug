@@ -129,7 +129,7 @@ export async function GET(request: NextRequest) {
       headers: { "Content-Type": "text/html" },
     })
   } catch (error: any) {
-    console.error("OAuth callback error:", error)
+    
     
     const html = `
       <!DOCTYPE html>

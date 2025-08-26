@@ -125,7 +125,7 @@ export async function POST(request: NextRequest) {
           })
           .eq('id', googleAccountId);
       } catch (refreshError) {
-        console.error('Token refresh failed:', refreshError);
+        
         return NextResponse.json({ error: 'Authentication failed' }, { status: 401 });
       }
     }
@@ -215,7 +215,7 @@ export async function POST(request: NextRequest) {
           [property.property_id]: processedData
         };
       } catch (error) {
-        console.error(`Error fetching Search Console data for ${property.property_id}:`, error);
+        
       }
     }
 
@@ -294,7 +294,7 @@ export async function POST(request: NextRequest) {
           [property.property_id]: processedAnalytics
         };
       } catch (error) {
-        console.error(`Error fetching Analytics data for ${property.property_id}:`, error);
+        
       }
     }
 
@@ -315,12 +315,12 @@ export async function POST(request: NextRequest) {
       });
 
     if (saveError) {
-      console.error('Error saving metrics:', saveError);
+      
     }
 
     return NextResponse.json(metrics);
   } catch (error) {
-    console.error('Comprehensive metrics error:', error);
+    
     return NextResponse.json(
       { error: 'Failed to fetch comprehensive metrics' },
       { status: 500 }

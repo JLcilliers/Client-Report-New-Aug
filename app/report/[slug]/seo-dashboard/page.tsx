@@ -26,7 +26,7 @@ export default function SEODashboardPage() {
       const data = await response.json();
       setReport(data);
     } catch (err) {
-      console.error('Error fetching report:', err);
+      
     } finally {
       setLoading(false);
     }
@@ -79,7 +79,7 @@ export default function SEODashboardPage() {
           reportId={report.id}
           domain={report.client?.domain || report.client_name}
           onDataUpdate={(data) => {
-            console.log('SEO data updated:', data);
+            
           }}
         />
       </div>

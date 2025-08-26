@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 
 export async function GET() {
   try {
-    console.log('=== DEBUG: Report Creation Issues ===')
+    
     
     // Test 1: Check Search Console endpoint
     let searchConsoleResult

@@ -53,8 +53,10 @@ export default function PublicReportPage() {
   useEffect(() => {
     if (report) {
       fetchReportData()
-      // Auto-refresh data on page load
-      if (!reportData || isDataStale()) {
+      // Only refresh if data is stale (older than 1 hour)
+      // Don't auto-refresh on every page load
+      if (isDataStale()) {
+        console.log('Data is stale, refreshing...')
         refreshData()
       }
     }
@@ -62,14 +64,21 @@ export default function PublicReportPage() {
   
   const fetchReport = async () => {
     try {
+      console.log('Fetching report with slug:', slug)
       const response = await fetch(`/api/public/report/${slug}`)
+      console.log('Response status:', response.status)
+      
       if (!response.ok) {
+        const errorData = await response.text()
+        console.error('Error fetching report:', errorData)
         throw new Error('Report not found')
       }
+      
       const data = await response.json()
+      console.log('Report data received:', data)
       setReport(data)
     } catch (error: any) {
-      console.error('Error fetching report:', error)
+      console.error('Error in fetchReport:', error)
       setError(error.message)
     } finally {
       setLoading(false)
@@ -77,23 +86,23 @@ export default function PublicReportPage() {
   }
   
   const fetchReportData = async () => {
-    console.log('📥 Fetching report data for slug:', slug)
+    
     try {
       const response = await fetch(`/api/public/report/${slug}/data`)
-      console.log('📥 Data fetch response status:', response.status)
+      
       if (response.ok) {
         const data = await response.json()
-        console.log('📥 Received report data:', data)
+        
         setReportData(data)
         // Force a re-render of the dashboard
         if (!showLegacyView) {
-          console.log('🔄 Updating comprehensive dashboard with new data')
+          
         }
       } else {
-        console.error('❌ Failed to fetch report data:', response.status)
+        
       }
     } catch (error: any) {
-      console.error('💥 Error fetching report data:', error)
+      
     }
   }
 
@@ -119,16 +128,16 @@ export default function PublicReportPage() {
       
       if (response.ok) {
         const result = await response.json()
-        console.log('Data refreshed:', result)
+        
         // Refetch the report data after update
         await fetchReportData()
       } else {
         const error = await response.json()
-        console.error('Error response:', error)
+        
         alert(`Failed to refresh data: ${error.error || 'Unknown error'}`)
       }
     } catch (error: any) {
-      console.error('Error refreshing data:', error)
+      
       alert('Failed to refresh data. Please try again.')
     } finally {
       setFetchingData(false)

@@ -29,34 +29,22 @@ export default function AdminLayout({
 
   useEffect(() => {
     checkAuth()
-    
-    // Set up auth listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_OUT') {
-        router.push("/")
-      } else if (session) {
-        setUserEmail(session.user.email!)
-        setLoading(false)
-      }
-    })
-
-    return () => subscription.unsubscribe()
   }, [])
 
   const checkAuth = async () => {
     try {
-      const { data: { session } } = await supabase.auth.getSession()
+      // Check if user has valid session via our API
+      const response = await fetch('/api/auth/check-session')
+      const data = await response.json()
       
-      if (!session) {
+      if (!data.authenticated) {
         router.push("/")
         return
       }
 
-      // For now, trust that if they're logged in, they're an admin
-      // since only admins can create accounts in Supabase
-      setUserEmail(session.user.email!)
+      setUserEmail(data.email || 'Admin')
     } catch (error) {
-      console.error("Auth check error:", error)
+      
       router.push("/")
     } finally {
       setLoading(false)
@@ -83,9 +71,7 @@ export default function AdminLayout({
     { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
     { name: "Connections", href: "/admin/connections", icon: Link2 },
     { name: "Properties", href: "/admin/properties", icon: Database },
-    { name: "Clients", href: "/admin/clients", icon: Users },
     { name: "Reports", href: "/admin/reports", icon: FileText },
-    { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
     { name: "Settings", href: "/admin/settings", icon: Settings },
   ]
 

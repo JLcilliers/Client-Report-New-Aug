@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
 
   // Check for required Supabase config
   if (!supabaseUrl || !supabaseServiceRoleKey) {
-    console.error("Missing Supabase configuration")
+    
     return NextResponse.redirect(
       new URL("/admin/connections?error=server_configuration", request.url)
     )
@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
   try {
     // Check for required environment variables
     if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
-      console.error("Missing Google OAuth environment variables")
+      
       throw new Error("Server configuration error - missing OAuth credentials")
     }
 
@@ -64,10 +64,10 @@ export async function GET(request: NextRequest) {
 
     if (!tokenResponse.ok) {
       const errorData = await tokenResponse.text()
-      console.error("Token exchange error:", errorData)
-      console.error("Status:", tokenResponse.status)
-      console.error("Client ID:", process.env.GOOGLE_CLIENT_ID)
-      console.error("Redirect URI:", `${request.nextUrl.origin}/api/auth/google/admin-callback`)
+      
+      
+      
+      
       throw new Error(`Failed to exchange code for tokens: ${tokenResponse.status} - ${errorData}`)
     }
 
@@ -98,7 +98,7 @@ export async function GET(request: NextRequest) {
 
     if (isMultipleAccountsFlow) {
       // Store in google_accounts table for multiple accounts
-      console.log("Storing Google account for multiple accounts flow:", userInfo.email)
+      
       
       // Check if account already exists
       const { data: existing } = await supabase
@@ -123,7 +123,7 @@ export async function GET(request: NextRequest) {
           .eq("id", existing.id)
         
         if (updateError) {
-          console.error("Error updating Google account:", updateError)
+          
           throw new Error(`Failed to update account: ${updateError.message}`)
         }
       } else {
@@ -141,12 +141,12 @@ export async function GET(request: NextRequest) {
           })
         
         if (insertError) {
-          console.error("Error creating Google account:", insertError)
+          
           throw new Error(`Failed to create account: ${insertError.message}`)
         }
       }
       
-      console.log("Successfully stored Google account")
+      
       return NextResponse.redirect(
         new URL("/admin/google-accounts?success=account_added", request.url)
       )
@@ -159,14 +159,14 @@ export async function GET(request: NextRequest) {
         .limit(1)
 
       if (tableError?.code === "42P01") {
-        console.error("Table admin_google_connections does not exist. Please create it in Supabase.")
+        
         return NextResponse.redirect(
           new URL("/admin/connections?error=database_not_configured", request.url)
         )
       }
 
       const adminEmail = userInfo.email
-      console.log("Using admin email:", adminEmail)
+      
 
       // Upsert the connection
       const { data: upsertData, error: upsertError } = await supabase
@@ -183,18 +183,18 @@ export async function GET(request: NextRequest) {
         .select()
 
       if (upsertError) {
-        console.error("Error storing tokens:", upsertError)
+        
         throw new Error(`Failed to store authentication: ${upsertError.message}`)
       }
       
-      console.log("Successfully stored connection:", upsertData)
+      
       return NextResponse.redirect(
         new URL("/admin/connections?success=connected", request.url)
       )
     }
   } catch (error: any) {
-    console.error("OAuth callback error:", error)
-    console.error("Error stack:", error.stack)
+    
+    
     
     // Return a proper error response instead of 500
     const errorMessage = error.message || "Unknown error occurred"

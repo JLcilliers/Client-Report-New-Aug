@@ -35,5 +35,23 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# credentials
+# Local development files
+prisma/*.db*
+*.txt
+nul
+checkpoints/
+analytics-dashboard/
+__tests__/
+scripts/
+automation/
+generated/
+*.json
+google_authentication_code_compilation.txt
+new-online-client-reporting-*.json
+
+# Prisma
+prisma/dev.db*
+prisma/migrations/
+
+# Credentials
 Credentials.txt

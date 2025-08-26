@@ -76,7 +76,7 @@ export async function GET(
       
       result.searchConsole.sites = sitesResponse.data.siteEntry || []
     } catch (error: any) {
-      console.error(`Error fetching Search Console for ${account.account_email}:`, error)
+      
       result.searchConsole.error = error.message
     }
     
@@ -114,20 +114,20 @@ export async function GET(
               }
             }
           } catch (propError: any) {
-            console.error(`Error fetching properties for account ${analyticsAccount.name}:`, propError)
+            
           }
         }
       }
       
       result.analytics.properties = analyticsProperties
     } catch (error: any) {
-      console.error(`Error fetching Analytics for ${account.account_email}:`, error)
+      
       result.analytics.error = error.message
     }
     
     return NextResponse.json(result)
   } catch (error: any) {
-    console.error('Error fetching properties:', error)
+    
     return NextResponse.json({
       error: "Failed to fetch properties",
       details: error.message

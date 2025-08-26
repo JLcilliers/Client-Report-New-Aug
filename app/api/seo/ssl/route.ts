@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     const analysis = await checkSSL(parsedUrl.hostname);
     return NextResponse.json(analysis);
   } catch (error) {
-    console.error('SSL check error:', error);
+    
     return NextResponse.json(
       { error: 'Failed to check SSL certificate' },
       { status: 500 }

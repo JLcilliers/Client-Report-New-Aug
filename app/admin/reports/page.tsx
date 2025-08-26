@@ -64,16 +64,16 @@ export default function ReportsPage() {
         setReports(data)
       }
     } catch (error) {
-      console.error("Error fetching reports:", error)
+      
     } finally {
       setLoading(false)
     }
   }
 
-  const copyReportUrl = (slug: string) => {
-    const url = `${window.location.origin}/report/${slug}`
+  const copyReportUrl = (report: Report) => {
+    const url = `${window.location.origin}/report/${report.slug}`
     navigator.clipboard.writeText(url)
-    setCopiedSlug(slug)
+    setCopiedSlug(report.slug)
     setTimeout(() => setCopiedSlug(null), 2000)
   }
 
@@ -238,19 +238,26 @@ export default function ReportsPage() {
                     <Link href={`/report/${report.slug}`} className="flex-1">
                       <Button variant="outline" size="sm" className="w-full">
                         <Eye className="w-4 h-4 mr-2" />
-                        View Report
+                        View
                       </Button>
                     </Link>
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => copyReportUrl(report.slug)}
-                      className="px-3"
+                      onClick={() => copyReportUrl(report)}
+                      className="flex-1"
+                      title="Copy report link to share with client"
                     >
                       {copiedSlug === report.slug ? (
-                        <CheckCircle className="w-4 h-4 text-green-500" />
+                        <>
+                          <CheckCircle className="w-4 h-4 mr-1 text-green-500" />
+                          Copied!
+                        </>
                       ) : (
-                        <Copy className="w-4 h-4" />
+                        <>
+                          <Copy className="w-4 h-4 mr-1" />
+                          Share
+                        </>
                       )}
                     </Button>
                     <Link href={`/report/${report.slug}/seo-dashboard`}>

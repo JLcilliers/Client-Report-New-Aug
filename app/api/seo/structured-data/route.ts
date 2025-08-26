@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(analysis);
   } catch (error) {
-    console.error('Structured data analysis error:', error);
+    
     return NextResponse.json(
       { error: 'Failed to analyze structured data' },
       { status: 500 }

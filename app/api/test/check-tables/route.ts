@@ -37,7 +37,7 @@ export async function GET() {
       }
     })
   } catch (error: any) {
-    console.error('Error checking tables:', error)
+    
     return NextResponse.json({
       error: "Failed to check tables",
       details: error.message

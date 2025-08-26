@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createClient } from "@supabase/supabase-js"
+import { cookies } from "next/headers"
+import { PrismaClient } from "@prisma/client"
 
 interface SearchConsoleMetrics {
   clicks: number
@@ -9,85 +10,64 @@ interface SearchConsoleMetrics {
   date?: string
 }
 
+const prisma = new PrismaClient()
+
 export async function POST(request: NextRequest) {
   try {
-    const { reportId, dateRange = 'last30days' } = await request.json()
+    const { reportId, properties, dateRange = 'last30days' } = await request.json()
     
-    if (!reportId) {
-      return NextResponse.json({ error: "Report ID required" }, { status: 400 })
+    if (!reportId && !properties) {
+      return NextResponse.json({ error: "Report ID or properties required" }, { status: 400 })
     }
     
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    // Get tokens from cookies
+    const cookieStore = cookies()
+    const accessToken = cookieStore.get('google_access_token')
+    const refreshToken = cookieStore.get('google_refresh_token')
     
-    if (!supabaseUrl || !supabaseServiceRoleKey) {
-      return NextResponse.json({ error: "Server configuration error" }, { status: 500 })
+    if (!accessToken || !refreshToken) {
+      return NextResponse.json({ 
+        error: "Google authentication required",
+        details: "No valid Google tokens found"
+      }, { status: 401 })
     }
     
-    const supabase = createClient(supabaseUrl, supabaseServiceRoleKey)
+    let currentAccessToken = accessToken.value
     
-    // Get report details
-    const { data: report, error: reportError } = await supabase
-      .from("reports")
-      .select("*")
-      .eq("id", reportId)
-      .single()
-    
-    if (reportError || !report) {
-      return NextResponse.json({ error: "Report not found" }, { status: 404 })
-    }
-    
-    // Get admin connection
-    const { data: connection, error: connError } = await supabase
-      .from("admin_google_connections")
-      .select("*")
-      .limit(1)
-      .single()
-    
-    if (connError || !connection) {
-      return NextResponse.json({ error: "No Google connection found" }, { status: 404 })
-    }
-    
-    // Check if token needs refresh
-    const tokenExpiry = new Date(connection.token_expiry)
-    const now = new Date()
-    let accessToken = connection.access_token
-    
-    if (now >= tokenExpiry) {
-      console.log("Token expired, refreshing...")
-      
+    // Try to refresh token if needed
+    try {
       const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },
         body: new URLSearchParams({
-          refresh_token: connection.refresh_token,
+          refresh_token: refreshToken.value,
           client_id: process.env.GOOGLE_CLIENT_ID!,
           client_secret: process.env.GOOGLE_CLIENT_SECRET!,
           grant_type: "refresh_token",
         }),
       })
       
-      if (!tokenResponse.ok) {
-        return NextResponse.json({ error: "Failed to refresh token" }, { status: 401 })
+      if (tokenResponse.ok) {
+        const newTokens = await tokenResponse.json()
+        currentAccessToken = newTokens.access_token
       }
-      
-      const newTokens = await tokenResponse.json()
-      accessToken = newTokens.access_token
-      
-      // Update tokens in database
-      const newExpiry = new Date()
-      newExpiry.setSeconds(newExpiry.getSeconds() + newTokens.expires_in)
-      
-      await supabase
-        .from("admin_google_connections")
-        .update({
-          access_token: accessToken,
-          token_expiry: newExpiry.toISOString(),
-          updated_at: new Date().toISOString(),
+    } catch (refreshError) {
+      console.log('Token refresh failed, using existing token:', refreshError)
+    }
+    
+    // Get report details from database if reportId provided
+    let searchConsoleProperties = properties || []
+    if (reportId && !properties) {
+      try {
+        const report = await prisma.clientReport.findUnique({
+          where: { id: reportId }
         })
-        .eq("id", connection.id)
+        searchConsoleProperties = report?.searchConsoleProperties || []
+      } catch (dbError) {
+        console.log('Database error, using provided properties:', dbError)
+      }
     }
     
     // Calculate date range
@@ -118,12 +98,12 @@ export async function POST(request: NextRequest) {
     }
     
     // Fetch data for each Search Console property
-    for (const property of report.search_console_properties || []) {
+    for (const property of searchConsoleProperties) {
       try {
         // Clean up property URL (remove sc-domain: prefix if present)
         const siteUrl = property.replace('sc-domain:', 'domain:')
         
-        console.log(`Fetching data for property: ${siteUrl}`)
+        
         
         // Fetch overall metrics
         const metricsResponse = await fetch(
@@ -131,7 +111,7 @@ export async function POST(request: NextRequest) {
           {
             method: "POST",
             headers: {
-              Authorization: `Bearer ${accessToken}`,
+              Authorization: `Bearer ${currentAccessToken}`,
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
@@ -167,7 +147,7 @@ export async function POST(request: NextRequest) {
           {
             method: "POST",
             headers: {
-              Authorization: `Bearer ${accessToken}`,
+              Authorization: `Bearer ${currentAccessToken}`,
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
@@ -190,7 +170,7 @@ export async function POST(request: NextRequest) {
           {
             method: "POST",
             headers: {
-              Authorization: `Bearer ${accessToken}`,
+              Authorization: `Bearer ${currentAccessToken}`,
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
@@ -213,7 +193,7 @@ export async function POST(request: NextRequest) {
           {
             method: "POST",
             headers: {
-              Authorization: `Bearer ${accessToken}`,
+              Authorization: `Bearer ${currentAccessToken}`,
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
@@ -231,7 +211,7 @@ export async function POST(request: NextRequest) {
         }
         
       } catch (error: any) {
-        console.error(`Error fetching data for ${property}:`, error)
+        
       }
     }
     
@@ -248,23 +228,19 @@ export async function POST(request: NextRequest) {
       allData.summary.position = totalPosition / allData.byProperty.length
     }
     
-    // Store data in database
-    const { error: storeError } = await supabase
-      .from("report_data")
-      .upsert({
-        report_id: reportId,
-        data_type: "search_console",
-        data: allData,
-        date_range: dateRange,
-        fetched_at: new Date().toISOString(),
-      }, {
-        onConflict: "report_id,data_type",
-      })
-    
-    if (storeError && storeError.code === "42P01") {
-      // Table doesn't exist, create it
-      console.log("Creating report_data table...")
-      // Return data without storing for now
+    // Store data in database if reportId provided
+    if (reportId) {
+      try {
+        await prisma.clientReport.update({
+          where: { id: reportId },
+          data: {
+            searchConsoleData: JSON.stringify(allData),
+            lastUpdated: new Date(),
+          }
+        })
+      } catch (dbError) {
+        console.log('Database storage failed, returning data anyway:', dbError)
+      }
     }
     
     return NextResponse.json({
@@ -277,7 +253,7 @@ export async function POST(request: NextRequest) {
     })
     
   } catch (error: any) {
-    console.error("Search Console fetch error:", error)
+    
     return NextResponse.json({ 
       error: "Failed to fetch Search Console data",
       details: error.message 

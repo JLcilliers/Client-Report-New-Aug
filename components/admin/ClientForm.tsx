@@ -37,13 +37,13 @@ export default function ClientForm({ onSuccess }: ClientFormProps) {
         .insert({
           name: formData.name.trim(),
           domain: cleanDomain,
-        })
+        } as any)
         .select()
         .single()
 
       if (error) throw error
 
-      const reportUrl = `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/report/${data.id}/${data.report_token}`
+      const reportUrl = `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/report/${(data as any).id}/${(data as any).report_token}`
       
       // Copy report URL to clipboard
       await navigator.clipboard.writeText(reportUrl)

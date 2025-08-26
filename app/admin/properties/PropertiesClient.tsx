@@ -79,7 +79,7 @@ export default function PropertiesClient({ connection }: PropertiesClientProps) 
       setSearchConsoleProperties(data.searchConsole || [])
       setAnalyticsAccounts(data.analytics || [])
     } catch (error: any) {
-      console.error('Error fetching properties:', error)
+      
       toast({
         title: "Error",
         description: "Failed to fetch Google properties. Please try again.",

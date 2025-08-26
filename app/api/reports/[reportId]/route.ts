@@ -7,7 +7,7 @@ export async function GET(
 ) {
   try {
     const { reportId } = await params
-    console.log('API: Fetching report with ID:', reportId)
+    
     
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
     const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -35,10 +35,10 @@ export async function GET(
       .eq("id", reportId)
       .single()
     
-    console.log('Database query result:', { report, error })
+    
     
     if (error) {
-      console.error('Database error:', error)
+      
       return NextResponse.json(
         { error: "Database error", details: error.message },
         { status: 500 }
@@ -55,7 +55,7 @@ export async function GET(
     return NextResponse.json(report)
     
   } catch (error: any) {
-    console.error("Error fetching report:", error)
+    
     return NextResponse.json(
       { error: "Failed to fetch report", details: error.message },
       { status: 500 }

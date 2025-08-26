@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(audit);
   } catch (error) {
-    console.error('Technical audit error:', error);
+    
     return NextResponse.json(
       { error: 'Failed to perform technical audit' },
       { status: 500 }

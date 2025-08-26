@@ -92,7 +92,7 @@ CREATE POLICY "Public can read report data" ON report_data
     })
     
   } catch (error: any) {
-    console.error("Error ensuring table:", error)
+    
     return NextResponse.json({ 
       error: "Failed to ensure table exists", 
       details: error.message 

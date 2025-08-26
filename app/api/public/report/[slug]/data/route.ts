@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createClient } from "@supabase/supabase-js"
+import { PrismaClient } from "@prisma/client"
+
+const prisma = new PrismaClient()
 
 export async function GET(
   request: NextRequest,
@@ -8,41 +10,30 @@ export async function GET(
   try {
     const { slug } = await params
     
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    // Get report by shareableId (slug)
+    const report = await prisma.clientReport.findUnique({
+      where: { shareableId: slug }
+    })
     
-    if (!supabaseUrl || !supabaseServiceRoleKey) {
-      return NextResponse.json(
-        { error: "Server configuration error" },
-        { status: 500 }
-      )
-    }
-    
-    const supabase = createClient(supabaseUrl, supabaseServiceRoleKey)
-    
-    // Get report by slug
-    const { data: report, error: reportError } = await supabase
-      .from("reports")
-      .select("id")
-      .eq("slug", slug)
-      .single()
-    
-    if (reportError || !report) {
+    if (!report) {
       return NextResponse.json(
         { error: "Report not found" },
         { status: 404 }
       )
     }
     
-    // Get stored data for this report
-    const { data: reportData, error: dataError } = await supabase
-      .from("report_data")
-      .select("*")
-      .eq("report_id", report.id)
-    
-    if (dataError && dataError.code !== "42P01") {
-      console.error("Error fetching report data:", dataError)
-    }
+    // Get cached data for this report
+    const reportCache = await prisma.reportCache.findMany({
+      where: { 
+        reportId: report.id,
+        expiresAt: {
+          gt: new Date()
+        }
+      },
+      orderBy: {
+        cachedAt: 'desc'
+      }
+    })
     
     // Transform data by type
     const result: any = {
@@ -51,24 +42,26 @@ export async function GET(
       last_updated: null,
     }
     
-    if (reportData && reportData.length > 0) {
-      for (const item of reportData) {
+    if (reportCache && reportCache.length > 0) {
+      for (const item of reportCache) {
+        const parsedData = JSON.parse(item.data)
+        
         // Handle combined data format
-        if (item.data_type === 'combined' && item.data) {
-          result.search_console = item.data.search_console || null
-          result.analytics = item.data.analytics || null
-          result.last_updated = item.data.fetched_at || item.fetched_at
+        if (item.dataType === 'combined' && parsedData) {
+          result.search_console = parsedData.search_console || null
+          result.analytics = parsedData.analytics || null
+          result.last_updated = parsedData.fetched_at || item.cachedAt.toISOString()
         } 
         // Handle legacy separate format
-        else if (item.data_type === 'search_console') {
-          result.search_console = item.data
-        } else if (item.data_type === 'analytics') {
-          result.analytics = item.data
+        else if (item.dataType === 'search_console') {
+          result.search_console = parsedData
+        } else if (item.dataType === 'analytics') {
+          result.analytics = parsedData
         }
         
         // Track most recent update
-        if (item.fetched_at && (!result.last_updated || new Date(item.fetched_at) > new Date(result.last_updated))) {
-          result.last_updated = item.fetched_at
+        if (item.cachedAt && (!result.last_updated || item.cachedAt > new Date(result.last_updated))) {
+          result.last_updated = item.cachedAt.toISOString()
         }
       }
     }
@@ -106,7 +99,7 @@ export async function GET(
     return NextResponse.json(result)
     
   } catch (error: any) {
-    console.error("Error fetching report data:", error)
+    
     return NextResponse.json(
       { error: "Failed to fetch report data", details: error.message },
       { status: 500 }

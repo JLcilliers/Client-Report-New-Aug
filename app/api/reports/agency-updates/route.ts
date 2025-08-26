@@ -23,10 +23,10 @@ export async function GET(request: NextRequest) {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Error fetching agency updates:', error);
+      
       // If table doesn't exist, return empty array instead of error
       if (error.code === '42P01') {
-        console.log('agency_updates table does not exist, returning empty array');
+        
         return NextResponse.json([]);
       }
       return NextResponse.json({ error: 'Failed to fetch updates' }, { status: 500 });
@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(updates || []);
   } catch (error) {
-    console.error('Agency updates error:', error);
+    
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -69,13 +69,13 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Error creating agency update:', error);
+      
       return NextResponse.json({ error: 'Failed to create update' }, { status: 500 });
     }
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error('Agency updates error:', error);
+    
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -111,13 +111,13 @@ export async function PATCH(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Error updating agency update:', error);
+      
       return NextResponse.json({ error: 'Failed to update' }, { status: 500 });
     }
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error('Agency updates error:', error);
+    
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -143,13 +143,13 @@ export async function DELETE(request: NextRequest) {
       .eq('id', id);
 
     if (error) {
-      console.error('Error deleting agency update:', error);
+      
       return NextResponse.json({ error: 'Failed to delete update' }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Agency updates error:', error);
+    
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

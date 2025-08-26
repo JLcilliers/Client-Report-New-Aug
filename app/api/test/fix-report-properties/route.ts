@@ -123,7 +123,7 @@ export async function GET() {
         "No suitable Search Console property found"
     })
   } catch (error: any) {
-    console.error('Error fixing report properties:', error)
+    
     return NextResponse.json({
       error: "Failed to fix report properties",
       details: error.message

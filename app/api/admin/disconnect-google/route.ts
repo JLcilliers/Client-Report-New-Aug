@@ -19,13 +19,13 @@ export async function POST(request: NextRequest) {
       .neq("id", "00000000-0000-0000-0000-000000000000") // Delete all rows
     
     if (error) {
-      console.error("Delete error:", error)
+      
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
     
     return NextResponse.json({ success: true })
   } catch (error: any) {
-    console.error("Disconnect error:", error)
+    
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }

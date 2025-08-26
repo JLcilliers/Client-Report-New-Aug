@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createClient } from "@supabase/supabase-js"
+import { cookies } from "next/headers"
+import { PrismaClient } from "@prisma/client"
 import { google } from "googleapis"
 import { OAuth2Client } from "google-auth-library"
 
 const searchconsole = google.searchconsole("v1")
 const analyticsData = google.analyticsdata("v1beta")
+const prisma = new PrismaClient()
 
 interface SearchConsoleMetrics {
   clicks: number
@@ -20,108 +22,58 @@ export async function POST(
 ) {
   try {
     const { slug } = await params
-    console.log('Refreshing data for report with slug:', slug)
-
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-    if (!supabaseUrl || !supabaseServiceRoleKey) {
-      return NextResponse.json({ error: "Server configuration error" }, { status: 500 })
+    
+    // Get optional date range from request body
+    let body: any = {}
+    try {
+      body = await request.json()
+    } catch (e) {
+      // Body is optional, continue without it
     }
+    
+    const { dateRange } = body // 'week', 'month', 'year', or custom days number
+    
+    // Get report by slug
+    const report = await prisma.clientReport.findUnique({
+      where: { shareableId: slug }
+    })
 
-    const supabase = createClient(supabaseUrl, supabaseServiceRoleKey)
-
-    // Get report by slug with Google account info
-    const { data: report, error: reportError } = await supabase
-      .from("reports")
-      .select(`
-        *,
-        client:clients (
-          id,
-          name,
-          domain
-        ),
-        google_account:google_accounts!google_account_id (
-          id,
-          account_email,
-          refresh_token,
-          access_token,
-          token_expiry
-        )
-      `)
-      .eq("slug", slug)
-      .single()
-
-    if (reportError || !report) {
-      console.error('Report not found:', reportError)
+    if (!report) {
       return NextResponse.json({ error: "Report not found" }, { status: 404 })
     }
 
-    console.log('Found report:', report.name, 'with ID:', report.id)
+    // Get tokens from cookies (this endpoint should work with authenticated users)
+    const cookieStore = cookies()
+    const accessToken = cookieStore.get('google_access_token')
+    const refreshToken = cookieStore.get('google_refresh_token')
     
-    // Check if report has a Google account associated
-    let googleAccount = report.google_account
-    
-    // Fallback to admin connection if no Google account is associated (for legacy reports)
-    if (!googleAccount || !googleAccount.refresh_token) {
-      console.log('No Google account associated with report, trying admin fallback')
-      
-      const { data: adminConnection, error: adminError } = await supabase
-        .from("admin_google_connections")
-        .select("*")
-        .eq("admin_email", "johanlcilliers@gmail.com")
-        .single()
-
-      if (adminError || !adminConnection || !adminConnection.refresh_token) {
-        console.error('No Google account found for data refresh')
-        return NextResponse.json({ 
-          error: "No Google account configured for this report. Please edit the report to select a Google account." 
-        }, { status: 401 })
-      }
-      
-      // Transform admin connection to match google_accounts structure
-      googleAccount = {
-        id: 'admin',
-        account_email: adminConnection.admin_email,
-        refresh_token: adminConnection.refresh_token,
-        access_token: adminConnection.access_token,
-        token_expiry: adminConnection.token_expiry
-      }
+    if (!accessToken || !refreshToken) {
+      return NextResponse.json({ 
+        error: "Google authentication required",
+        details: "No valid Google tokens found"
+      }, { status: 401 })
     }
 
-    console.log('Using Google account:', googleAccount.account_email)
-
-    // Auto-detect URL if needed
-    const baseUrl = process.env.NEXT_PUBLIC_URL || 
-      `https://${request.headers.get('host')}` ||
-      'https://online-client-reporting.vercel.app'
     
+
     // Create OAuth2 client
     const oauth2Client = new OAuth2Client(
       process.env.GOOGLE_CLIENT_ID,
       process.env.GOOGLE_CLIENT_SECRET,
-      `${baseUrl}/api/auth/google/callback`
+      `${process.env.NEXT_PUBLIC_URL}/api/auth/admin-google/callback`
     )
 
     oauth2Client.setCredentials({
-      refresh_token: googleAccount.refresh_token,
+      access_token: accessToken.value,
+      refresh_token: refreshToken.value,
     })
 
-    // Get new access token
-    const { credentials } = await oauth2Client.refreshAccessToken()
-    oauth2Client.setCredentials(credentials)
-
-    console.log('OAuth2 client configured with refreshed token')
-
-    // Update stored access token if using google_accounts table
-    if (googleAccount.id !== 'admin') {
-      await supabase
-        .from("google_accounts")
-        .update({
-          access_token: credentials.access_token,
-          token_expiry: credentials.expiry_date ? new Date(credentials.expiry_date).toISOString() : null,
-        })
-        .eq("id", googleAccount.id)
+    // Refresh the access token if needed
+    try {
+      const { credentials } = await oauth2Client.refreshAccessToken()
+      oauth2Client.setCredentials(credentials)
+    } catch (refreshError) {
+      console.log('Token refresh failed, using existing token:', refreshError)
     }
 
     // Initialize data structures
@@ -139,14 +91,108 @@ export async function POST(
     }
 
     // Date range for data fetching
-    const endDate = new Date()
-    const startDate = new Date()
-    startDate.setDate(startDate.getDate() - 30)
+    let endDate = new Date()
+    let startDate = new Date()
+    let previousStartDate = new Date()
+    let previousEndDate = new Date()
+    
+    // Calculate start date based on dateRange parameter
+    switch(dateRange) {
+      case 'week':
+        // Last 7 days
+        startDate.setDate(startDate.getDate() - 7)
+        // Previous 7 days for comparison
+        previousEndDate.setDate(previousEndDate.getDate() - 7)
+        previousStartDate.setDate(previousStartDate.getDate() - 14)
+        break
+        
+      case 'month': {
+        // Last completed month (e.g., if today is Aug 26, we want July 1-31)
+        const today = new Date()
+        const year = today.getFullYear()
+        const month = today.getMonth()
+        
+        // Start date is first day of last month
+        startDate = new Date(year, month - 1, 1)
+        
+        // End date is last day of last month
+        endDate = new Date(year, month, 0)
+        
+        // Previous period: month before last  
+        previousStartDate = new Date(year, month - 2, 1)
+        previousEndDate = new Date(year, month - 1, 0)
+        
+        break
+      }
+        
+      case 'year':
+        // Year to date (from Jan 1 to today)
+        startDate.setMonth(0)
+        startDate.setDate(1)
+        startDate.setHours(0, 0, 0, 0)
+        
+        // Keep endDate as today
+        endDate.setHours(23, 59, 59, 999)
+        
+        // Same period last year
+        previousStartDate.setFullYear(startDate.getFullYear() - 1)
+        previousStartDate.setMonth(0)
+        previousStartDate.setDate(1)
+        previousStartDate.setHours(0, 0, 0, 0)
+        
+        previousEndDate.setFullYear(endDate.getFullYear() - 1)
+        previousEndDate.setMonth(endDate.getMonth())
+        previousEndDate.setDate(endDate.getDate())
+        previousEndDate.setHours(23, 59, 59, 999)
+        break
+        
+      case 'last30':
+        // Last 30 days
+        startDate.setDate(startDate.getDate() - 30)
+        // Previous 30 days
+        previousEndDate.setDate(previousEndDate.getDate() - 30)
+        previousStartDate.setDate(previousStartDate.getDate() - 60)
+        break
+        
+      case 'last90':
+        // Last 90 days
+        startDate.setDate(startDate.getDate() - 90)
+        // Previous 90 days
+        previousEndDate.setDate(previousEndDate.getDate() - 90)
+        previousStartDate.setDate(previousStartDate.getDate() - 180)
+        break
+        
+      case 'monthToDate':
+        // This month so far
+        startDate.setDate(1)
+        // Last month same period
+        previousStartDate.setMonth(previousStartDate.getMonth() - 1)
+        previousStartDate.setDate(1)
+        previousEndDate.setMonth(previousEndDate.getMonth() - 1)
+        previousEndDate.setDate(Math.min(endDate.getDate(), new Date(previousEndDate.getFullYear(), previousEndDate.getMonth() + 1, 0).getDate()))
+        break
+        
+      case 'yearOverYear':
+        // Last 30 days vs same period last year
+        startDate.setDate(startDate.getDate() - 30)
+        previousStartDate.setFullYear(previousStartDate.getFullYear() - 1)
+        previousStartDate.setDate(previousStartDate.getDate() - 30)
+        previousEndDate.setFullYear(previousEndDate.getFullYear() - 1)
+        break
+        
+      default:
+        // Default to last 7 days
+        startDate.setDate(startDate.getDate() - 7)
+        previousEndDate.setDate(previousEndDate.getDate() - 7)
+        previousStartDate.setDate(previousStartDate.getDate() - 14)
+    }
+    
+    console.log(`Fetching data for ${dateRange || 'month'}: ${startDate.toISOString()} to ${endDate.toISOString()}`)
     const formatDate = (date: Date) => date.toISOString().split('T')[0]
 
     // Fetch Search Console data
-    if (report.search_console_properties && report.search_console_properties.length > 0) {
-      console.log('Fetching Search Console data for properties:', report.search_console_properties)
+    if (report.searchConsolePropertyId) {
+      
       
       let aggregatedMetrics: SearchConsoleMetrics = {
         clicks: 0,
@@ -155,9 +201,10 @@ export async function POST(
         position: 0
       }
 
-      for (const property of report.search_console_properties) {
+      const properties = [report.searchConsolePropertyId]
+      for (const property of properties) {
         try {
-          console.log('Fetching data for property:', property)
+          
           
           // Overall metrics
           const overallResponse = await searchconsole.searchanalytics.query({
@@ -226,7 +273,7 @@ export async function POST(
           }
 
         } catch (error: any) {
-          console.error(`Error fetching Search Console data for ${property}:`, error.message)
+          
         }
       }
 
@@ -255,12 +302,13 @@ export async function POST(
     }
 
     // Fetch Analytics data
-    if (report.analytics_properties && report.analytics_properties.length > 0) {
-      console.log('Fetching Analytics data for properties:', report.analytics_properties)
+    if (report.ga4PropertyId) {
       
-      for (const propertyId of report.analytics_properties) {
+      
+      const propertyIds = [report.ga4PropertyId]
+      for (const propertyId of propertyIds) {
         try {
-          console.log('Fetching Analytics data for property:', propertyId)
+          
           
           // Overall metrics
           const response = await analyticsData.properties.runReport({
@@ -279,7 +327,8 @@ export async function POST(
                 { name: "newUsers" },
                 { name: "bounceRate" },
                 { name: "averageSessionDuration" },
-                { name: "screenPageViews" }
+                { name: "screenPageViews" },
+                { name: "eventCount" }
               ]
             },
             auth: oauth2Client
@@ -295,12 +344,14 @@ export async function POST(
               const bounceRate = parseFloat(row.metricValues?.[3]?.value || "0")
               const avgDuration = parseFloat(row.metricValues?.[4]?.value || "0")
               const pageviews = parseInt(row.metricValues?.[5]?.value || "0")
+              const eventCount = parseInt(row.metricValues?.[6]?.value || "0")
               
               // Add to summary
               analyticsResult.summary.sessions = (analyticsResult.summary.sessions || 0) + sessions
               analyticsResult.summary.users = (analyticsResult.summary.users || 0) + users
               analyticsResult.summary.newUsers = (analyticsResult.summary.newUsers || 0) + newUsers
               analyticsResult.summary.pageviews = (analyticsResult.summary.pageviews || 0) + pageviews
+              analyticsResult.summary.events = (analyticsResult.summary.events || 0) + eventCount
               
               // Add to traffic sources
               analyticsResult.trafficSources.push({
@@ -350,7 +401,7 @@ export async function POST(
           }
 
         } catch (error: any) {
-          console.error(`Error fetching Analytics data for ${propertyId}:`, error.message)
+          
         }
       }
 
@@ -367,42 +418,50 @@ export async function POST(
     const combinedData = {
       search_console: searchConsoleData,
       analytics: analyticsResult,
-      fetched_at: new Date().toISOString()
-    }
-
-    console.log('Data fetched successfully')
-
-    // Store in report_data table
-    const { error: storeError } = await supabase
-      .from("report_data")
-      .upsert({
-        report_id: report.id,
-        data_type: "combined",
-        data: combinedData,
-        date_range: "last30days",
-        fetched_at: new Date().toISOString(),
-      }, {
-        onConflict: "report_id,data_type",
-      })
-
-    if (storeError) {
-      console.error('Error storing data:', storeError)
-      // Try insert if upsert fails
-      const { error: insertError } = await supabase
-        .from("report_data")
-        .insert({
-          report_id: report.id,
-          data_type: "combined",
-          data: combinedData,
-          date_range: "last30days",
-        })
-      
-      if (insertError) {
-        console.error('Error inserting data:', insertError)
+      fetched_at: new Date().toISOString(),
+      date_range: {
+        type: dateRange,
+        current: {
+          start: startDate.toISOString(),
+          end: endDate.toISOString()
+        },
+        previous: {
+          start: previousStartDate.toISOString(),
+          end: previousEndDate.toISOString()
+        }
       }
     }
 
-    console.log('Data stored successfully')
+    
+
+    // Store combined data using ReportCache model
+    try {
+      const expiresAt = new Date()
+      expiresAt.setHours(expiresAt.getHours() + 1) // Cache for 1 hour
+      
+      // Delete existing cache entries for this report and dataType
+      await prisma.reportCache.deleteMany({
+        where: { 
+          reportId: report.id,
+          dataType: 'combined'
+        }
+      })
+      
+      // Create new cache entry
+      await prisma.reportCache.create({
+        data: {
+          reportId: report.id,
+          dataType: 'combined',
+          data: JSON.stringify(combinedData),
+          cachedAt: new Date(),
+          expiresAt: expiresAt,
+        }
+      })
+    } catch (dbError) {
+      console.log('Database caching failed:', dbError)
+    }
+
+    
 
     return NextResponse.json({ 
       success: true, 
@@ -410,7 +469,7 @@ export async function POST(
       data: combinedData
     })
   } catch (error: any) {
-    console.error("Error refreshing report data:", error)
+    
     return NextResponse.json(
       { error: "Failed to refresh data", details: error.message },
       { status: 500 }

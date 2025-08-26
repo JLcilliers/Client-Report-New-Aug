@@ -90,7 +90,7 @@ export default function CreateReportPage() {
         })
       }
     } catch (error) {
-      console.error('Error fetching Google accounts:', error)
+      
       toast({
         title: "Error",
         description: "Failed to load Google accounts",
@@ -102,16 +102,16 @@ export default function CreateReportPage() {
   const fetchProperties = async (accountId: string) => {
     setLoadingProperties(true)
     try {
-      // Fetch properties for the selected Google account
-      const response = await fetch(`/api/admin/google-accounts/${accountId}/properties`)
+      // Fetch properties using the new endpoint
+      const response = await fetch('/api/google/fetch-properties')
       
       if (response.ok) {
         const data = await response.json()
         
         // Set Search Console properties
-        if (data.searchConsole?.sites) {
-          const properties = data.searchConsole.sites.map((site: any) => ({
-            siteUrl: typeof site === 'string' ? site : site.siteUrl,
+        if (data.properties?.searchConsole) {
+          const properties = data.properties.searchConsole.map((site: any) => ({
+            siteUrl: site.siteUrl,
             verified: true
           }))
           setSearchConsoleProperties(properties)
@@ -120,15 +120,30 @@ export default function CreateReportPage() {
         }
         
         // Set Analytics properties
-        if (data.analytics?.properties) {
-          setAnalyticsProperties(data.analytics.properties)
+        if (data.properties?.analytics) {
+          // Transform analytics properties to match expected format
+          const analyticsProps = data.properties.analytics.map((prop: any) => ({
+            account: prop.account,
+            property: prop.name,
+            propertyId: prop.propertyId,
+            displayName: prop.name
+          }))
+          setAnalyticsProperties(analyticsProps)
         } else {
           setAnalyticsProperties([])
         }
         
+        if (data.properties?.searchConsole?.length === 0 && data.properties?.analytics?.length === 0) {
+          toast({
+            title: "No properties found",
+            description: "Make sure you have access to Google Analytics or Search Console properties",
+            variant: "default"
+          })
+        }
+        
       } else {
         const errorText = await response.text()
-        console.error('Properties fetch error:', errorText)
+        
         toast({
           title: "Error loading properties",
           description: "Failed to load properties for this account",
@@ -136,7 +151,7 @@ export default function CreateReportPage() {
         })
       }
     } catch (error) {
-      console.error('Error fetching properties:', error)
+      
       toast({
         title: "Network Error",
         description: "Could not connect to fetch properties",
@@ -242,7 +257,7 @@ export default function CreateReportPage() {
       router.push(`/report/${reportData.slug}`)
       
     } catch (error: any) {
-      console.error('Error creating report:', error)
+      
       toast({
         title: "Error creating report",
         description: error.message,

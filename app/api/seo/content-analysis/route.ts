@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(analysis);
   } catch (error) {
-    console.error('Content analysis error:', error);
+    
     return NextResponse.json(
       { error: 'Failed to analyze content' },
       { status: 500 }

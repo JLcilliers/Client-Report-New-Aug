@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { google } from "googleapis"
 import { OAuth2Client } from "google-auth-library"
-import { createClient } from "@supabase/supabase-js"
+import { cookies } from "next/headers"
 
 const analyticsData = google.analyticsdata("v1beta")
 
@@ -13,26 +13,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Property ID is required" }, { status: 400 })
     }
     
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    // Get tokens from cookies
+    const cookieStore = cookies()
+    const accessToken = cookieStore.get('google_access_token')
+    const refreshToken = cookieStore.get('google_refresh_token')
     
-    if (!supabaseUrl || !supabaseServiceRoleKey) {
-      return NextResponse.json({ error: "Server configuration error" }, { status: 500 })
-    }
-    
-    const supabase = createClient(supabaseUrl, supabaseServiceRoleKey)
-    
-    // Get admin Google connection
-    const { data: adminConnection, error: adminError } = await supabase
-      .from("admin_google_connections")
-      .select("*")
-      .eq("admin_email", "johanlcilliers@gmail.com")
-      .single()
-    
-    if (adminError || !adminConnection || !adminConnection.refresh_token) {
+    if (!accessToken || !refreshToken) {
       return NextResponse.json({ 
-        error: "Admin Google connection not found or invalid",
-        details: adminError
+        error: "Google authentication required",
+        details: "No valid Google tokens found"
       }, { status: 401 })
     }
     
@@ -40,16 +29,21 @@ export async function POST(request: NextRequest) {
     const oauth2Client = new OAuth2Client(
       process.env.GOOGLE_CLIENT_ID,
       process.env.GOOGLE_CLIENT_SECRET,
-      `${process.env.NEXT_PUBLIC_URL}/api/auth/google/callback`
+      `${process.env.NEXT_PUBLIC_URL}/api/auth/admin-google/callback`
     )
     
     oauth2Client.setCredentials({
-      refresh_token: adminConnection.refresh_token,
+      access_token: accessToken.value,
+      refresh_token: refreshToken.value,
     })
     
-    // Refresh the access token
-    const { credentials } = await oauth2Client.refreshAccessToken()
-    oauth2Client.setCredentials(credentials)
+    // Refresh the access token if needed
+    try {
+      const { credentials } = await oauth2Client.refreshAccessToken()
+      oauth2Client.setCredentials(credentials)
+    } catch (refreshError) {
+      console.log('Token refresh failed, using existing token:', refreshError)
+    }
     
     // Format dates
     const endDateObj = endDate ? new Date(endDate) : new Date()
@@ -198,7 +192,7 @@ export async function POST(request: NextRequest) {
     })
     
   } catch (error: any) {
-    console.error("Error fetching Analytics data:", error)
+    
     return NextResponse.json({
       error: "Failed to fetch Analytics data",
       details: error.message,

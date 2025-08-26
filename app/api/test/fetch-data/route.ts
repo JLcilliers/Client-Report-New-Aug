@@ -106,7 +106,7 @@ export async function GET() {
         testData = queryResponse.data
       } catch (error: any) {
         siteError = error.message
-        console.error(`Error fetching data for ${testSite}:`, error.message)
+        
       }
     }
     
@@ -166,7 +166,7 @@ export async function GET() {
       report: reports
     })
   } catch (error: any) {
-    console.error('Error testing data fetch:', error)
+    
     return NextResponse.json({
       error: "Failed to fetch data",
       details: error.message,

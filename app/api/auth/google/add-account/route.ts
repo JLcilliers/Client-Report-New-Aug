@@ -25,7 +25,7 @@ export async function GET() {
 
     return NextResponse.redirect(authUrl)
   } catch (error: any) {
-    console.error('Error initiating Google OAuth:', error)
+    
     return NextResponse.redirect('/admin/google-accounts?error=oauth_init_failed')
   }
 }

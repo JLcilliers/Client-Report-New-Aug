@@ -28,8 +28,14 @@ import {
   Minus,
   FileText,
   MessageSquare,
-  CheckSquare
+  CheckSquare,
+  XCircle,
+  DollarSign,
+  Lightbulb
 } from 'lucide-react';
+import EnhancedMetrics from './EnhancedMetrics';
+import ActionableInsights from './ActionableInsights';
+import DataVisualizations from './DataVisualizations';
 
 interface DashboardProps {
   reportId: string;
@@ -51,14 +57,60 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
   const [refreshing, setRefreshing] = useState(false);
   const [metrics, setMetrics] = useState<any>(null);
   const [agencyUpdates, setAgencyUpdates] = useState<any[]>([]);
-  const [comparisonPeriod, setComparisonPeriod] = useState<'week' | 'month' | 'year'>('week');
+  const [comparisonPeriod, setComparisonPeriod] = useState<'week' | 'month' | 'year' | 'last30' | 'last90' | 'monthToDate' | 'yearOverYear'>('week');
   const [activeTab, setActiveTab] = useState('overview');
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
+  const [seoAuditData, setSeoAuditData] = useState<any>(null);
+  const [loadingSEO, setLoadingSEO] = useState(false);
 
   useEffect(() => {
     console.log('📊 ComprehensiveDashboard mounted/updated - reportId:', reportId, 'slug:', reportSlug);
     fetchAllData();
   }, [reportId]);
+
+  // Auto-refresh when comparison period changes
+  useEffect(() => {
+    console.log('📅 Comparison period changed to:', comparisonPeriod);
+    // Skip initial mount
+    if (metrics) {
+      console.log('🔄 Auto-refreshing data for new period:', comparisonPeriod);
+      fetchMetrics(comparisonPeriod);
+    }
+  }, [comparisonPeriod]);
+
+  // Get date range explanation
+  const getDateRangeExplanation = (period: string) => {
+    const today = new Date();
+    const currentMonth = today.getMonth();
+    const currentYear = today.getFullYear();
+    const currentDate = today.getDate();
+    
+    switch(period) {
+      case 'week':
+        return 'Last 7 days vs previous 7 days';
+      case 'month': {
+        // Get last completed month
+        const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+        const lastMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+        const prevMonth = lastMonth === 0 ? 11 : lastMonth - 1;
+        const prevMonthYear = lastMonth === 0 ? currentYear - 1 : lastMonthYear;
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        return `${monthNames[lastMonth]} ${lastMonthYear} vs ${monthNames[prevMonth]} ${prevMonthYear}`;
+      }
+      case 'year':
+        return `${currentYear} YTD vs ${currentYear - 1} YTD`;
+      case 'last30':
+        return 'Last 30 days vs previous 30 days';
+      case 'last90':
+        return 'Last 90 days vs previous 90 days';
+      case 'monthToDate':
+        return `This month so far vs last month same period`;
+      case 'yearOverYear':
+        return 'Last 30 days vs same period last year';
+      default:
+        return '';
+    }
+  };
 
   const fetchAllData = async () => {
     setLoading(true);
@@ -93,16 +145,18 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
     }
   };
 
-  const fetchMetrics = async () => {
+  const fetchMetrics = async (period?: string) => {
     setRefreshing(true);
-    console.log('🔄 Starting data refresh for slug:', reportSlug);
+    const dateRange = period || comparisonPeriod;
+    console.log('🔄 Starting data refresh for slug:', reportSlug, 'with period:', dateRange);
     
     try {
       // First try to refresh the data using the working refresh endpoint
-      console.log('📡 Calling refresh endpoint...');
+      console.log('📡 Calling refresh endpoint with date range:', dateRange);
       const refreshResponse = await fetch(`/api/public/report/${reportSlug}/refresh`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dateRange })
       });
 
       console.log('📡 Refresh response status:', refreshResponse.status);
@@ -143,6 +197,103 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
     }
   };
 
+  // Helper functions to calculate metrics from analytics data
+  const calculateAverageBounceRate = (analytics: any) => {
+    if (!analytics.trafficSources || analytics.trafficSources.length === 0) return 0;
+    
+    // Calculate weighted average bounce rate
+    let totalSessions = 0;
+    let weightedBounceRate = 0;
+    
+    analytics.trafficSources.forEach((source: any) => {
+      const sessions = source.sessions || 0;
+      const bounceRate = source.bounceRate || 0;
+      totalSessions += sessions;
+      weightedBounceRate += bounceRate * sessions;
+    });
+    
+    return totalSessions > 0 ? weightedBounceRate / totalSessions : 0;
+  };
+
+  const calculateAverageSessionDuration = (analytics: any) => {
+    if (!analytics.trafficSources || analytics.trafficSources.length === 0) return 0;
+    
+    // Calculate weighted average session duration
+    let totalSessions = 0;
+    let weightedDuration = 0;
+    
+    analytics.trafficSources.forEach((source: any) => {
+      const sessions = source.sessions || 0;
+      const duration = source.avgDuration || 0;
+      totalSessions += sessions;
+      weightedDuration += duration * sessions;
+    });
+    
+    return totalSessions > 0 ? weightedDuration / totalSessions : 0;
+  };
+
+  const calculateEngagementRate = (analytics: any) => {
+    // Engagement rate is the inverse of bounce rate
+    const bounceRate = calculateAverageBounceRate(analytics);
+    return 1 - bounceRate;
+  };
+
+  const calculateTotalEvents = (analytics: any) => {
+    // Use actual events data if available, otherwise return 0
+    return analytics.summary?.events || 0;
+  };
+
+  const runSEOAudit = async () => {
+    setLoadingSEO(true);
+    try {
+      // Get the domain from the report data
+      const reportResponse = await fetch(`/api/public/report/${reportSlug}`);
+      const reportData = await reportResponse.json();
+      const domain = reportData.client?.domain || reportData.client_name || 'shopdualthreads.com';
+      
+      console.log('🔍 Running SEO audit for domain:', domain);
+      
+      const response = await fetch('/api/seo/technical-audit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ domain, includePageSpeed: true })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to run SEO audit');
+      }
+
+      const auditData = await response.json();
+      console.log('✅ SEO audit completed:', auditData);
+      setSeoAuditData(auditData);
+      
+      // Save audit data if we have a report ID
+      if (reportSlug) {
+        await fetch('/api/reports/save-seo-data', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            reportId: reportSlug,
+            dataType: 'technical_seo',
+            data: auditData
+          })
+        });
+      }
+    } catch (error) {
+      console.error('SEO audit error:', error);
+      alert('Failed to run SEO audit. Please try again.');
+    } finally {
+      setLoadingSEO(false);
+    }
+  };
+
+  const getScoreColor = (score: number) => {
+    if (score >= 90) return 'text-green-600';
+    if (score >= 70) return 'text-yellow-600';
+    if (score >= 50) return 'text-orange-600';
+    return 'text-red-600';
+  };
+
   const transformLegacyData = (data: any) => {
     // Transform the legacy data format to match our comprehensive metrics format
     const searchConsole = data.search_console || {};
@@ -170,7 +321,10 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
           impressions: p.impressions || 0,
           ctr: (p.ctr || 0) / 100,
           position: p.position || 0
-        }))
+        })),
+        // Add raw data for charts
+        byDate: searchConsole.byDate || [],
+        summary: searchConsole.summary || {}
       },
       analytics: {
         current: {
@@ -178,14 +332,25 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
           users: analytics.summary?.users || 0,
           newUsers: analytics.summary?.newUsers || 0,
           pageViews: analytics.summary?.pageviews || 0,
-          engagementRate: 0.65, // Default placeholder
-          bounceRate: 0.45, // Default placeholder
-          avgSessionDuration: 120, // Default placeholder
-          events: 0,
-          conversions: 0
+          engagementRate: calculateEngagementRate(analytics),
+          bounceRate: calculateAverageBounceRate(analytics),
+          avgSessionDuration: calculateAverageSessionDuration(analytics),
+          events: calculateTotalEvents(analytics),
+          conversions: analytics.summary?.conversions || 0
         },
-        byChannel: analytics.trafficSources || [],
-        topLandingPages: analytics.topPages || []
+        byChannel: (analytics.trafficSources || []).map((source: any) => ({
+          channel: source.source || 'Unknown',
+          users: source.users || 0,
+          sessions: source.sessions || 0,
+          bounceRate: source.bounceRate || 0,
+          avgDuration: source.avgDuration || 0
+        })),
+        topLandingPages: analytics.topPages || [],
+        dailyData: searchConsole.byDate || [],
+        // Add raw data for charts
+        trafficSources: analytics.trafficSources || [],
+        summary: analytics.summary || {},
+        topPages: analytics.topPages || []
       },
       comparisons: {
         weekOverWeek: {
@@ -315,31 +480,69 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
           </p>
         </div>
         <div className="flex items-center gap-4">
-          <div className="flex gap-2">
-            <Button
-              variant={comparisonPeriod === 'week' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setComparisonPeriod('week')}
-            >
-              Week
-            </Button>
-            <Button
-              variant={comparisonPeriod === 'month' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setComparisonPeriod('month')}
-            >
-              Month
-            </Button>
-            <Button
-              variant={comparisonPeriod === 'year' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setComparisonPeriod('year')}
-            >
-              Year
-            </Button>
+          <div className="flex flex-col gap-1">
+            <div className="flex gap-2">
+              <Button
+                variant={comparisonPeriod === 'week' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setComparisonPeriod('week')}
+                title="Last 7 days vs previous 7 days"
+              >
+                Week
+              </Button>
+              <Button
+                variant={comparisonPeriod === 'month' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setComparisonPeriod('month')}
+                title="Last completed month vs previous month"
+              >
+                Month
+              </Button>
+              <Button
+                variant={comparisonPeriod === 'year' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setComparisonPeriod('year')}
+                title="Year to date vs previous year to date"
+              >
+                Year
+              </Button>
+              <Button
+                variant={comparisonPeriod === 'last30' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setComparisonPeriod('last30')}
+                title="Last 30 days vs previous 30 days"
+              >
+                30 Days
+              </Button>
+              <Button
+                variant={comparisonPeriod === 'last90' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setComparisonPeriod('last90')}
+                title="Last 90 days vs previous 90 days"
+              >
+                90 Days
+              </Button>
+              <Button
+                variant={comparisonPeriod === 'monthToDate' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setComparisonPeriod('monthToDate')}
+                title="This month so far vs last month same period"
+              >
+                MTD
+              </Button>
+              <Button
+                variant={comparisonPeriod === 'yearOverYear' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setComparisonPeriod('yearOverYear')}
+                title="Last 30 days vs same period last year"
+              >
+                YoY
+              </Button>
+            </div>
+            <p className="text-xs text-gray-500">{getDateRangeExplanation(comparisonPeriod)}</p>
           </div>
           <Button
-            onClick={fetchMetrics}
+            onClick={() => fetchMetrics(comparisonPeriod)}
             disabled={refreshing}
             className="flex items-center gap-2"
           >
@@ -351,13 +554,15 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
 
       {/* Main Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-4 md:grid-cols-8">
           <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="insights">Insights</TabsTrigger>
+          <TabsTrigger value="metrics">Metrics</TabsTrigger>
           <TabsTrigger value="search">Search</TabsTrigger>
           <TabsTrigger value="traffic">Traffic</TabsTrigger>
-          <TabsTrigger value="engagement">Engagement</TabsTrigger>
+          <TabsTrigger value="engagement">Engage</TabsTrigger>
           <TabsTrigger value="technical">Technical</TabsTrigger>
-          <TabsTrigger value="updates">Updates</TabsTrigger>
+          <TabsTrigger value="visualize">Visualize</TabsTrigger>
         </TabsList>
 
         {/* Overview Tab */}
@@ -406,31 +611,43 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
                 <CardDescription>Clicks and impressions over time</CardDescription>
               </CardHeader>
               <CardContent>
-                {/* Add chart component here */}
-                <div className="h-64 flex items-center justify-center text-gray-400">
-                  Chart visualization
-                </div>
+                <DataVisualizations 
+                  searchData={metrics?.searchConsole} 
+                  analyticsData={metrics?.analytics}
+                  chartType="search"
+                />
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
-                <CardTitle>Traffic Sources</CardTitle>
-                <CardDescription>Breakdown by channel</CardDescription>
+                <CardTitle>Traffic by Channel</CardTitle>
+                <CardDescription>Sessions breakdown by acquisition channel</CardDescription>
               </CardHeader>
               <CardContent>
-                {metrics?.analytics?.byChannel?.map((channel: any) => (
-                  <div key={channel.channel} className="flex items-center justify-between py-2">
-                    <span className="text-sm">{channel.channel}</span>
-                    <div className="flex items-center gap-4">
-                      <span className="text-sm font-medium">{formatNumber(channel.sessions)}</span>
-                      <Progress value={(channel.sessions / metrics.analytics.current.sessions) * 100} className="w-20" />
-                    </div>
-                  </div>
-                ))}
+                <DataVisualizations 
+                  searchData={metrics?.searchConsole} 
+                  analyticsData={metrics?.analytics}
+                  chartType="traffic-bar"
+                />
               </CardContent>
             </Card>
           </div>
+
+          {/* Traffic Distribution */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Traffic Distribution</CardTitle>
+              <CardDescription>Percentage breakdown of traffic sources</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <DataVisualizations 
+                searchData={metrics?.searchConsole} 
+                analyticsData={metrics?.analytics}
+                chartType="traffic-pie"
+              />
+            </CardContent>
+          </Card>
         </TabsContent>
 
         {/* Search Performance Tab */}
@@ -615,17 +832,144 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
 
         {/* Technical SEO Tab */}
         <TabsContent value="technical" className="space-y-6">
-          <div className="text-center py-8">
-            <Globe className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Technical SEO Analysis</h3>
-            <p className="text-gray-600 mb-4">Run comprehensive technical audits</p>
-            <a href={`/report/${reportSlug}/seo-dashboard`} target="_blank">
-              <Button>
-                <Search className="w-4 h-4 mr-2" />
-                Open SEO Dashboard
-              </Button>
-            </a>
-          </div>
+          {/* SEO Audit Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <span className="flex items-center gap-2">
+                  <Globe className="w-5 h-5" />
+                  Technical SEO Analysis
+                </span>
+                <Button 
+                  onClick={runSEOAudit}
+                  disabled={loadingSEO}
+                  size="sm"
+                >
+                  {loadingSEO ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                      Running Audit...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="w-4 h-4 mr-2" />
+                      Run SEO Audit
+                    </>
+                  )}
+                </Button>
+              </CardTitle>
+              <CardDescription>
+                Comprehensive technical analysis of your website's SEO health
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {seoAuditData ? (
+                <div className="space-y-6">
+                  {/* Overall Score */}
+                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div>
+                      <p className="text-sm font-medium">Overall SEO Score</p>
+                      <p className={`text-3xl font-bold mt-1 ${getScoreColor(seoAuditData.score)}`}>
+                        {seoAuditData.score}/100
+                      </p>
+                    </div>
+                    <div className="flex gap-6">
+                      <div className="text-center">
+                        <p className="text-2xl font-bold text-red-500">{seoAuditData.summary?.critical || 0}</p>
+                        <p className="text-xs text-gray-500">Critical</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-2xl font-bold text-yellow-500">{seoAuditData.summary?.warnings || 0}</p>
+                        <p className="text-xs text-gray-500">Warnings</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-2xl font-bold text-green-500">{seoAuditData.summary?.passed || 0}</p>
+                        <p className="text-xs text-gray-500">Passed</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Category Scores */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {Object.entries(seoAuditData.categories || {}).map(([category, data]: [string, any]) => (
+                      <div key={category} className="p-4 border rounded-lg">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium capitalize">{category}</span>
+                          <span className={`text-lg font-bold ${getScoreColor(data.score)}`}>
+                            {data.score}%
+                          </span>
+                        </div>
+                        <Progress value={data.score} className="mb-2" />
+                        <div className="space-y-1">
+                          {data.checks?.slice(0, 3).map((check: any, idx: number) => (
+                            <div key={idx} className="flex items-center gap-2 text-xs">
+                              {check.status === 'pass' ? (
+                                <CheckCircle className="w-3 h-3 text-green-500" />
+                              ) : check.status === 'warning' ? (
+                                <AlertCircle className="w-3 h-3 text-yellow-500" />
+                              ) : (
+                                <XCircle className="w-3 h-3 text-red-500" />
+                              )}
+                              <span className="truncate">{check.name}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Top Recommendations */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base">Priority Recommendations</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        {seoAuditData.recommendations?.slice(0, 5).map((rec: any, idx: number) => (
+                          <div key={idx} className="border-l-4 border-red-500 pl-3 py-2">
+                            <div className="flex items-center justify-between">
+                              <p className="text-sm font-medium">{rec.issue}</p>
+                              <Badge variant={rec.priority === 'high' ? 'destructive' : rec.priority === 'medium' ? 'default' : 'secondary'}>
+                                {rec.priority}
+                              </Badge>
+                            </div>
+                            <p className="text-xs text-gray-600 mt-1">{rec.recommendation}</p>
+                            <p className="text-xs text-gray-500 mt-1">Impact: {rec.impact}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <Globe className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                  <p className="text-gray-500 mb-4">No SEO audit data available yet</p>
+                  <Button onClick={runSEOAudit} disabled={loadingSEO}>
+                    {loadingSEO ? 'Running Audit...' : 'Run Your First SEO Audit'}
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Actionable Insights Tab */}
+        <TabsContent value="insights" className="space-y-6">
+          <ActionableInsights reportId={reportId} metrics={metrics} />
+        </TabsContent>
+
+        {/* Enhanced Metrics Tab */}
+        <TabsContent value="metrics" className="space-y-6">
+          <EnhancedMetrics reportId={reportId} domain={reportSlug} />
+        </TabsContent>
+
+        {/* Data Visualizations Tab */}
+        <TabsContent value="visualize" className="space-y-6">
+          <DataVisualizations 
+            searchData={metrics?.searchConsole} 
+            analyticsData={metrics?.analytics}
+          />
         </TabsContent>
 
         {/* Agency Updates Tab */}
