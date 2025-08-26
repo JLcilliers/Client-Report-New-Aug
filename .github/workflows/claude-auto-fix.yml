@@ -1,0 +1,35 @@
+name: Claude Auto-Fix
+on:
+  pull_request:
+    types: [opened, synchronize]
+  workflow_dispatch:
+
+jobs:
+  auto-fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run tests
+        id: test
+        run: |
+          npm test 2>&1 | tee test-output.txt
+          echo "exit_code=$?" >> $GITHUB_OUTPUT
+        continue-on-error: true
+      
+      - name: Claude Auto-Fix
+        if: steps.test.outputs.exit_code != '0'
+        uses: anthropic/claude-code-action@v1
+        with:
+          task: |
+            Tests are failing. Analyze test-output.txt and:
+            1. Fix all failing tests
+            2. Ensure the fix doesn't break other tests
+            3. Commit the fixes
+            4. Re-run tests to verify

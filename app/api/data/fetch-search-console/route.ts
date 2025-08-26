@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server"
 import { cookies } from "next/headers"
 import { PrismaClient } from "@prisma/client"
 
+export const dynamic = 'force-dynamic'
+
 interface SearchConsoleMetrics {
   clicks: number
   impressions: number

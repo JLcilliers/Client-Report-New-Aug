@@ -3,6 +3,8 @@ import { google } from "googleapis"
 import { OAuth2Client } from "google-auth-library"
 import { createClient } from "@supabase/supabase-js"
 
+export const dynamic = 'force-dynamic'
+
 const searchconsole = google.searchconsole("v1")
 
 export async function GET() {

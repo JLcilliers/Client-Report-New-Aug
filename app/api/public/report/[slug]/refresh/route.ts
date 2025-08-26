@@ -4,6 +4,8 @@ import { PrismaClient } from "@prisma/client"
 import { google } from "googleapis"
 import { OAuth2Client } from "google-auth-library"
 
+export const dynamic = 'force-dynamic'
+
 const searchconsole = google.searchconsole("v1")
 const analyticsData = google.analyticsdata("v1beta")
 const prisma = new PrismaClient()

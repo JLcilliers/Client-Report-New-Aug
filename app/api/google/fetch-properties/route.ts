@@ -3,6 +3,8 @@ import { cookies } from "next/headers"
 import { google } from "googleapis"
 import { OAuth2Client } from "google-auth-library"
 
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
   try {
     const cookieStore = cookies()

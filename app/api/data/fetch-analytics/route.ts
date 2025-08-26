@@ -3,6 +3,8 @@ import { google } from "googleapis"
 import { OAuth2Client } from "google-auth-library"
 import { cookies } from "next/headers"
 
+export const dynamic = 'force-dynamic'
+
 const analyticsData = google.analyticsdata("v1beta")
 
 export async function POST(request: NextRequest) {
