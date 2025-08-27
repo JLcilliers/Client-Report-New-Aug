@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server"
 import { cookies } from "next/headers"
-import { PrismaClient } from "@prisma/client"
+import { getPrisma } from "@/lib/db/prisma"
 
 export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
 
 interface SearchConsoleMetrics {
   clicks: number
@@ -11,8 +12,6 @@ interface SearchConsoleMetrics {
   position: number
   date?: string
 }
-
-const prisma = new PrismaClient()
 
 export async function POST(request: NextRequest) {
   try {
@@ -63,6 +62,7 @@ export async function POST(request: NextRequest) {
     let searchConsoleProperties = properties || []
     if (reportId && !properties) {
       try {
+        const prisma = getPrisma()
         const report = await prisma.clientReport.findUnique({
           where: { id: reportId }
         })
@@ -233,6 +233,7 @@ export async function POST(request: NextRequest) {
     // Store data in ReportCache if reportId provided
     if (reportId) {
       try {
+        const prisma = getPrisma()
         // Delete existing cache for this report and dataType
         await prisma.reportCache.deleteMany({
           where: {

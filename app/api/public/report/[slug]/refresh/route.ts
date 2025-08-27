@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server"
 import { cookies } from "next/headers"
-import { PrismaClient } from "@prisma/client"
+import { getPrisma } from "@/lib/db/prisma"
 import { google } from "googleapis"
 import { OAuth2Client } from "google-auth-library"
 
 export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
 
 const searchconsole = google.searchconsole("v1")
 const analyticsData = google.analyticsdata("v1beta")
-const prisma = new PrismaClient()
 
 interface SearchConsoleMetrics {
   clicks: number
@@ -24,6 +24,7 @@ export async function POST(
 ) {
   try {
     const { slug } = await params
+    const prisma = getPrisma()
     
     // Get optional date range from request body
     let body: any = {}

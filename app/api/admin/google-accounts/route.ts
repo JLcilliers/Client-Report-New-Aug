@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server"
 import { cookies } from "next/headers"
-import { PrismaClient } from "@prisma/client"
+import { getPrisma } from "@/lib/db/prisma"
 
 export const dynamic = 'force-dynamic'
-
-const prisma = new PrismaClient()
+export const runtime = 'nodejs'
 
 export async function GET() {
   try {
+    const prisma = getPrisma()
     // Get all accounts from database
     const accounts = await prisma.account.findMany({
       include: {
