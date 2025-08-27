@@ -8,12 +8,10 @@ export async function GET(request: NextRequest) {
   
   // All possible redirect URIs in the app
   const redirectUris = [
-    `${baseUrl1}/api/auth/google/admin-callback`,
-    `${baseUrl2}/api/auth/google/admin-callback`,
-    `${baseUrl3}/api/auth/google/admin-callback`,
-    `https://online-client-reporting.vercel.app/api/auth/google/admin-callback`,
-    `https://online-client-reporting.vercel.app/api/auth/google/callback`,
-    `https://online-client-reporting.vercel.app/api/auth/admin-google/callback`,
+    `${baseUrl1}/api/auth/callback/google`,
+    `${baseUrl2}/api/auth/callback/google`,
+    `${baseUrl3}/api/auth/callback/google`,
+    `https://online-client-reporting.vercel.app/api/auth/callback/google`,
   ]
   
   // What the initiate endpoint is actually using

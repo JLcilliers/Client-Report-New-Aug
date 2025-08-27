@@ -18,6 +18,7 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { signIn } from "next-auth/react"
 
 interface GoogleAccount {
   id: string
@@ -64,8 +65,8 @@ export default function GoogleAccountsPage() {
   }
 
   const addNewAccount = () => {
-    // Start OAuth flow for new account
-    window.location.href = '/api/auth/google/add-account'
+    // Start OAuth flow for new account using NextAuth
+    signIn('google')
   }
 
   const refreshAccount = async (accountId: string) => {

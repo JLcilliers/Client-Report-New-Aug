@@ -17,6 +17,7 @@ import {
   ExternalLink
 } from "lucide-react"
 import Link from "next/link"
+import { signIn } from "next-auth/react"
 
 interface GoogleAccount {
   id: string
@@ -156,7 +157,7 @@ export default function ConnectionsPage() {
   const refreshToken = async (accountId: string) => {
     try {
       // Re-authenticate with Google
-      window.location.href = "/api/auth/admin-google/initiate"
+      signIn('google')
     } catch (error) {
       toast({
         title: "Error",
@@ -180,7 +181,7 @@ export default function ConnectionsPage() {
           <p className="text-gray-600 mt-1">Manage your connected Google accounts</p>
         </div>
         <Button
-          onClick={() => window.location.href = "/api/auth/admin-google/initiate"}
+          onClick={() => signIn('google')}
         >
           <Plus className="h-4 w-4 mr-2" />
           Add Google Account
@@ -201,7 +202,7 @@ export default function ConnectionsPage() {
               Connect a Google account to start pulling data from Google Analytics and Search Console
             </p>
             <Button
-              onClick={() => window.location.href = "/api/auth/admin-google/initiate"}
+              onClick={() => signIn('google')}
             >
               <Plus className="h-4 w-4 mr-2" />
               Connect Google Account

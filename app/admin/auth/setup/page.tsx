@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Key, CheckCircle, XCircle } from "lucide-react"
+import { signIn } from "next-auth/react"
 
 export default function AdminAuthSetupPage() {
   const [checking, setChecking] = useState(false)
@@ -24,8 +25,8 @@ export default function AdminAuthSetupPage() {
   }
 
   const initiateOAuth = () => {
-    // Use the API endpoint to initiate OAuth, which has access to server-side env vars
-    window.location.href = "/api/auth/admin-google/initiate"
+    // Use NextAuth signIn with Google provider
+    signIn('google')
   }
 
   return (

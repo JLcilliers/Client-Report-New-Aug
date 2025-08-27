@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useState } from "react"
+import { signIn } from "next-auth/react"
 
 export default function HomePage() {
   const router = useRouter()
@@ -12,8 +13,8 @@ export default function HomePage() {
 
   const handleGoogleLogin = () => {
     setLoading(true)
-    // Redirect to Google OAuth
-    window.location.href = "/api/auth/admin-google/initiate"
+    // Use NextAuth signIn with Google provider
+    signIn('google', { callbackUrl: '/admin' })
   }
 
   const handleSimpleAdminLogin = () => {
