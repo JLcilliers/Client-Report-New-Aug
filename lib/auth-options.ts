@@ -14,4 +14,26 @@ export const authOptions: NextAuthOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
   ],
+  debug: true,
+  logger: {
+    error(code, metadata) {
+      console.error('Auth error:', code, metadata);
+    },
+    warn(code) {
+      console.warn('Auth warning:', code);
+    },
+    debug(code, metadata) {
+      console.debug('Auth debug:', code, metadata);
+    },
+  },
+  callbacks: {
+    async signIn({ user, account, profile }) {
+      console.log('SignIn callback:', { user, account: account?.provider });
+      return true;
+    },
+    async session({ session, token }) {
+      console.log('Session callback:', { session: session.user?.email });
+      return session;
+    },
+  },
 };
