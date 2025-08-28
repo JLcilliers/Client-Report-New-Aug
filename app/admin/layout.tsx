@@ -58,7 +58,7 @@ export default function AdminLayout({
 
   const navigation = [
     { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
-    { name: "Connections", href: "/admin/connections", icon: Link2 },
+    { name: "Google Accounts", href: "/admin/google-accounts", icon: Link2 },
     { name: "Properties", href: "/admin/properties", icon: Database },
     { name: "Reports", href: "/admin/reports", icon: FileText },
     { name: "Settings", href: "/admin/settings", icon: Settings },

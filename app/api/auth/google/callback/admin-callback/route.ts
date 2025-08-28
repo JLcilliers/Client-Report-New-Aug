@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
   if (!supabaseUrl || !supabaseServiceRoleKey) {
     
     return NextResponse.redirect(
-      new URL("/admin/connections?error=server_configuration", request.url)
+      new URL("/admin/google-accounts?error=server_configuration", request.url)
     )
   }
   const searchParams = request.nextUrl.searchParams
@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
   // Handle error from Google
   if (error) {
     return NextResponse.redirect(
-      new URL(`/admin/connections?error=${error}`, request.url)
+      new URL(`/admin/google-accounts?error=${error}`, request.url)
     )
   }
 
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
   const isMultipleAccountsFlow = !state
   
   if (!code) {
-    const redirectUrl = isMultipleAccountsFlow ? "/admin/google-accounts" : "/admin/connections"
+    const redirectUrl = "/admin/google-accounts"
     return NextResponse.redirect(
       new URL(`${redirectUrl}?error=invalid_request`, request.url)
     )
@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
   
   if (state && state !== "admin_connection") {
     return NextResponse.redirect(
-      new URL("/admin/connections?error=invalid_request", request.url)
+      new URL("/admin/google-accounts?error=invalid_request", request.url)
     )
   }
 
@@ -161,7 +161,7 @@ export async function GET(request: NextRequest) {
       if (tableError?.code === "42P01") {
         
         return NextResponse.redirect(
-          new URL("/admin/connections?error=database_not_configured", request.url)
+          new URL("/admin/google-accounts?error=database_not_configured", request.url)
         )
       }
 
@@ -189,7 +189,7 @@ export async function GET(request: NextRequest) {
       
       
       return NextResponse.redirect(
-        new URL("/admin/connections?success=connected", request.url)
+        new URL("/admin/google-accounts?success=connected", request.url)
       )
     }
   } catch (error: any) {
@@ -202,20 +202,20 @@ export async function GET(request: NextRequest) {
     // Check if it's a Supabase/database error
     if (errorMessage.includes("store authentication")) {
       return NextResponse.redirect(
-        new URL("/admin/connections?error=database_error", request.url)
+        new URL("/admin/google-accounts?error=database_error", request.url)
       )
     }
     
     // Check if it's a token exchange error
     if (errorMessage.includes("exchange code")) {
       return NextResponse.redirect(
-        new URL("/admin/connections?error=oauth_exchange_failed", request.url)
+        new URL("/admin/google-accounts?error=oauth_exchange_failed", request.url)
       )
     }
     
     // Default error
     return NextResponse.redirect(
-      new URL("/admin/connections?error=connection_failed", request.url)
+      new URL("/admin/google-accounts?error=connection_failed", request.url)
     )
   }
 }

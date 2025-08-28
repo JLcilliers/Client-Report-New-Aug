@@ -46,7 +46,7 @@ export default function ConnectionsClient({ initialConnection }: ConnectionsClie
         description: "Google account connected successfully!"
       })
       // Remove params from URL
-      window.history.replaceState({}, '', '/admin/connections')
+      window.history.replaceState({}, '', '/admin/google-accounts')
       // Reload to get fresh data
       window.location.reload()
     } else if (error) {
@@ -70,7 +70,7 @@ export default function ConnectionsClient({ initialConnection }: ConnectionsClie
         variant: "destructive"
       })
       // Remove params from URL
-      window.history.replaceState({}, '', '/admin/connections')
+      window.history.replaceState({}, '', '/admin/google-accounts')
       setConnecting(false)
     }
   }, [toast])
