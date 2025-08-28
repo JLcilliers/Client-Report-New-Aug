@@ -217,3 +217,4 @@ For support, please open an issue on GitHub or contact [your-email@example.com].
 ---
 
 Built with ❤️ using Next.js, TypeScript, and Claude Code
+<!-- Deploy trigger: Thu, Aug 28, 2025 12:37:37 PM -->
