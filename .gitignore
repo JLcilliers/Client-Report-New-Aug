@@ -55,3 +55,4 @@ prisma/migrations/
 
 # Credentials
 Credentials.txt
+VERCEL_ENV_SETUP.md
