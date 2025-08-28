@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { auth } from '@/auth';
 
-export function middleware(request: NextRequest) {
+export default auth(async function middleware(request: NextRequest) {
   const response = NextResponse.next();
   
   // Security headers for production
@@ -14,9 +15,27 @@ export function middleware(request: NextRequest) {
   // HSTS for production (uncomment when using HTTPS)
   // response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
   
+  // Get the pathname of the request
+  const pathname = request.nextUrl.pathname;
+  
+  // Check if the path is protected (admin routes)
+  if (pathname.startsWith('/admin')) {
+    const session = await auth();
+    
+    // Redirect to sign in if no session exists
+    if (!session) {
+      const signInUrl = new URL('/api/auth/signin', request.url);
+      signInUrl.searchParams.set('callbackUrl', request.url);
+      return NextResponse.redirect(signInUrl);
+    }
+  }
+  
   return response;
-}
+});
 
 export const config = {
-  matcher: '/:path*',
+  matcher: [
+    '/((?!_next/static|_next/image|favicon.ico|public).*)',
+    '/admin/:path*'
+  ],
 };
