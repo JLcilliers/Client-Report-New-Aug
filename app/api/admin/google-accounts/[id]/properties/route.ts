@@ -45,7 +45,7 @@ type GscSite = { siteUrl: string; permissionLevel?: string };
 type Ga4AccountSummary = { account: string; propertySummaries?: { property: string; displayName?: string }[] };
 type Ga4Property = { propertyId: string; displayName: string; account: string };
 
-export async function GET(_req: Request, { params }: { params: { tokenId: string } }) {
+export async function GET(_req: Request, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) return NextResponse.json({ error: 'unauthenticated' }, { status: 401 });
 
@@ -53,7 +53,7 @@ export async function GET(_req: Request, { params }: { params: { tokenId: string
   if (!user) return NextResponse.json({ error: 'user_not_found' }, { status: 404 });
 
   try {
-    const accessToken = await getBearer(params.tokenId, user.id);
+    const accessToken = await getBearer(params.id, user.id);
 
     // GSC
     let gsc: GscSite[] = [];
