@@ -68,7 +68,7 @@ export async function GET() {
       analytics_properties: []
     }))
     
-    return NextResponse.json({ accounts: formattedAccounts })
+    return NextResponse.json({ accounts: formattedAccounts }, { headers: { 'Cache-Control': 'no-store' } })
   } catch (error: any) {
     console.error("Error in google-accounts:", error)
     return NextResponse.json({ 
