@@ -114,3 +114,16 @@ model ReportCache {
   cachedAt    DateTime     @default(now())
   expiresAt   DateTime
 }
+
+model Log {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  level     String   // 'debug' | 'info' | 'warn' | 'error'
+  source    String   // e.g. 'api/google/properties'
+  requestId String?
+  userId    String?
+  accountId String?
+  message   String
+  meta      Json?
+  @@index([createdAt, source])
+}
