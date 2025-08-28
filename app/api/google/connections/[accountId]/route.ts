@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
+import prisma from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import prisma from '@/lib/prisma';
 
 export async function DELETE(
   _req: Request,
@@ -12,26 +12,19 @@ export async function DELETE(
     return NextResponse.json({ error: 'unauthenticated' }, { status: 401 });
   }
 
-  // Resolve the signed-in user
   const user = await prisma.user.findUnique({
     where: { email: session.user.email },
-    select: { id: true }
+    select: { id: true },
   });
   if (!user) return NextResponse.json({ error: 'user_not_found' }, { status: 404 });
 
-  // Support either the Account.id *or* providerAccountId in the URL
-  const byPk = await prisma.account.findFirst({
-    where: { id: params.accountId, userId: user.id }
+  // Delete by primary key for this user
+  const result = await prisma.account.deleteMany({
+    where: { id: params.accountId, userId: user.id, provider: 'google' },
   });
 
-  const where = byPk
-    ? { id: params.accountId }
-    : { provider: 'google', providerAccountId: params.accountId, userId: user.id };
-
-  const deleted = await prisma.account.deleteMany({ where });
-
-  // Optional: also clear sessions for a clean slate
+  // optional: clear sessions so the UI forces a fresh read
   await prisma.session.deleteMany({ where: { userId: user.id } });
 
-  return NextResponse.json({ ok: true, deleted: deleted.count });
+  return NextResponse.json({ ok: true, deleted: result.count });
 }

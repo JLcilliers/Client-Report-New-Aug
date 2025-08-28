@@ -16,12 +16,11 @@ export const authOptions: NextAuthOptions = {
         params: {
           prompt: 'consent select_account',
           access_type: 'offline',
+          include_granted_scopes: 'true',
           scope: [
-            'openid',
-            'email',
-            'profile',
+            'openid','email','profile',
             'https://www.googleapis.com/auth/analytics.readonly',
-            'https://www.googleapis.com/auth/webmasters.readonly',
+            'https://www.googleapis.com/auth/webmasters.readonly'
           ].join(' ')
         }
       }
