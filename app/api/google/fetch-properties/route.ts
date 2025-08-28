@@ -1,91 +1,66 @@
-import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { google } from "googleapis"
-import { OAuth2Client } from "google-auth-library"
 
-export const dynamic = 'force-dynamic'
+type GscSite = { siteUrl: string; permissionLevel?: string };
+type Ga4AccountSummary = {
+  account: string;
+  displayName?: string;
+  propertySummaries?: { property: string; displayName?: string }[];
+};
+type Ga4Property = { propertyId: string; displayName: string; account: string };
 
 export async function GET() {
-  try {
-    const session = await getServerSession(authOptions);
-    const g = (session as any)?.google;
-    
-    if (!g?.access_token) {
-      return NextResponse.json({ 
-        error: "Not authenticated - no Google token",
-        properties: { searchConsole: [], analytics: [] }
-      }, { status: 401 })
-    }
-    
-    // Create OAuth2 client with session tokens
-    const oauth2Client = new OAuth2Client(
-      process.env.GOOGLE_CLIENT_ID,
-      process.env.GOOGLE_CLIENT_SECRET
-    )
-    
-    oauth2Client.setCredentials({
-      access_token: g.access_token,
-      refresh_token: g.refresh_token
-    })
-    
-    const analytics = google.analytics({ version: 'v3', auth: oauth2Client })
-    const analyticsAdmin = google.analyticsadmin({ version: 'v1beta', auth: oauth2Client })
-    const searchConsole = google.webmasters({ version: 'v3', auth: oauth2Client })
-    
-    console.log('Fetching properties with session token...')
-    
-    let searchConsoleProperties = []
-    let analyticsProperties = []
-    
-    try {
-      // Fetch Search Console properties
-      const searchConsoleResponse = await searchConsole.sites.list()
-      searchConsoleProperties = searchConsoleResponse.data.siteEntry?.map((site: any) => ({
-        siteUrl: site.siteUrl,
-        permissionLevel: site.permissionLevel
-      })) || []
-      console.log('Search Console properties:', searchConsoleProperties.length)
-    } catch (error) {
-      console.error('Search Console error:', error)
-    }
-    
-    try {
-      // Fetch GA4 properties using Analytics Admin API
-      const accountSummariesResponse = await analyticsAdmin.accountSummaries.list()
-      const accountSummaries = accountSummariesResponse.data.accountSummaries || []
-      
-      analyticsProperties = accountSummaries.flatMap((account: any) =>
-        (account.propertySummaries || []).map((property: any) => ({
-          propertyId: property.property?.replace('properties/', ''),
-          displayName: property.displayName,
-          propertyType: property.propertyType,
-          parent: property.parent
-        }))
-      )
-      console.log('Analytics properties:', analyticsProperties.length)
-    } catch (error) {
-      console.error('Analytics error:', error)
-    }
-    
-    return NextResponse.json({
-      success: true,
-      properties: {
-        searchConsole: searchConsoleProperties,
-        analytics: analyticsProperties
-      },
-      counts: {
-        searchConsole: searchConsoleProperties.length,
-        analytics: analyticsProperties.length
-      }
-    })
-    
-  } catch (error) {
-    console.error('Fetch properties error:', error)
-    return NextResponse.json({ 
-      error: "Failed to fetch properties",
-      details: error instanceof Error ? error.message : 'Unknown error',
-      properties: { searchConsole: [], analytics: [] }
-    }, { status: 500 })
+  const session = await getServerSession(authOptions);
+  const g = (session as any)?.google;
+
+  if (!g?.access_token) {
+    return new Response(JSON.stringify({ error: 'no_google_token' }), { status: 401 });
   }
+
+  let searchConsoleProperties: GscSite[] = [];
+  let analyticsProperties: Ga4Property[] = [];
+
+  // ---- Search Console sites
+  try {
+    const gscResp = await fetch('https://www.googleapis.com/webmasters/v3/sites', {
+      headers: { Authorization: `Bearer ${g.access_token}` },
+      // next: { revalidate: 0 } // optional
+    });
+    if (gscResp.ok) {
+      const gscJson = (await gscResp.json()) as { siteEntry?: GscSite[] };
+      searchConsoleProperties = gscJson.siteEntry ?? [];
+    } else if (gscResp.status === 401) {
+      return new Response(JSON.stringify({ error: 'google_unauthorised_gsc' }), { status: 401 });
+    }
+  } catch {
+    // keep empty
+  }
+
+  // ---- GA4 properties via Admin API
+  try {
+    const gaResp = await fetch('https://analyticsadmin.googleapis.com/v1beta/accountSummaries', {
+      headers: { Authorization: `Bearer ${g.access_token}` },
+      // next: { revalidate: 0 } // optional
+    });
+    if (gaResp.ok) {
+      const gaJson = (await gaResp.json()) as { accountSummaries?: Ga4AccountSummary[] };
+      analyticsProperties =
+        gaJson.accountSummaries?.flatMap(as =>
+          (as.propertySummaries ?? []).map(ps => ({
+            propertyId: ps.property,
+            displayName: ps.displayName ?? '',
+            account: as.account
+          }))
+        ) ?? [];
+    } else if (gaResp.status === 401) {
+      return new Response(JSON.stringify({ error: 'google_unauthorised_ga4' }), { status: 401 });
+    }
+  } catch {
+    // keep empty
+  }
+
+  return new Response(
+    JSON.stringify({ ok: true, gsc: searchConsoleProperties, ga4: analyticsProperties }),
+    { status: 200, headers: { 'content-type': 'application/json' } }
+  );
 }
