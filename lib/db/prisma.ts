@@ -1,21 +1,25 @@
-import { PrismaClient } from "@prisma/client"
+import { PrismaClient } from '@prisma/client';
 
-let prisma: PrismaClient | undefined
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClient | undefined;
+};
 
+export const prisma =
+  globalForPrisma.prisma ??
+  new PrismaClient({
+    log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+  });
+
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+
+export default prisma;
+
+// For backwards compatibility
 export function getPrisma() {
-  if (!prisma) {
-    prisma = new PrismaClient()
-  }
-  return prisma
+  return prisma;
 }
 
-// For backwards compatibility and ease of migration
-export { getPrisma as prisma }
-
 // Cleanup function for testing
-export function disconnectPrisma() {
-  if (prisma) {
-    prisma.$disconnect()
-    prisma = undefined
-  }
+export async function disconnectPrisma() {
+  await prisma.$disconnect();
 }
