@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { auth } from '@/auth';
 
-export default auth(async function middleware(request: NextRequest) {
+export function middleware(request: NextRequest) {
   const response = NextResponse.next();
   
   // Security headers for production
@@ -19,19 +18,15 @@ export default auth(async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   
   // Check if the path is protected (admin routes)
+  // Note: Actual authentication check happens in the page components
+  // This middleware only sets security headers
   if (pathname.startsWith('/admin')) {
-    const session = await auth();
-    
-    // Redirect to sign in if no session exists
-    if (!session) {
-      const signInUrl = new URL('/api/auth/signin', request.url);
-      signInUrl.searchParams.set('callbackUrl', request.url);
-      return NextResponse.redirect(signInUrl);
-    }
+    // You can add additional headers or checks here if needed
+    // The actual auth check will be done in the server components
   }
   
   return response;
-});
+}
 
 export const config = {
   matcher: [

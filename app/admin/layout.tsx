@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter, usePathname } from "next/navigation"
-import { supabase, isAdmin } from "@/lib/db/supabase"
+import { useSession, signOut } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { 
@@ -24,39 +24,24 @@ export default function AdminLayout({
 }) {
   const router = useRouter()
   const pathname = usePathname()
+  const { data: session, status } = useSession()
   const [loading, setLoading] = useState(true)
-  const [userEmail, setUserEmail] = useState("")
 
   useEffect(() => {
-    checkAuth()
-  }, [])
-
-  const checkAuth = async () => {
-    try {
-      // Check if user has valid session via our API
-      const response = await fetch('/api/auth/check-session')
-      const data = await response.json()
-      
-      if (!data.authenticated) {
-        router.push("/")
-        return
-      }
-
-      setUserEmail(data.email || 'Admin')
-    } catch (error) {
-      
-      router.push("/")
-    } finally {
+    if (status === "loading") {
+      setLoading(true)
+    } else if (status === "unauthenticated") {
+      router.push("/api/auth/signin?callbackUrl=/admin")
+    } else {
       setLoading(false)
     }
-  }
+  }, [status, router])
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut()
-    router.push("/")
+    await signOut({ callbackUrl: "/" })
   }
 
-  if (loading) {
+  if (loading || status === "loading") {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -65,6 +50,10 @@ export default function AdminLayout({
         </div>
       </div>
     )
+  }
+
+  if (!session) {
+    return null
   }
 
   const navigation = [
@@ -83,7 +72,7 @@ export default function AdminLayout({
           <div className="flex flex-col h-full">
             <div className="p-4 border-b">
               <h2 className="text-xl font-bold text-gray-800">SEO Platform</h2>
-              <p className="text-sm text-gray-600 mt-1">{userEmail}</p>
+              <p className="text-sm text-gray-600 mt-1">{session.user?.email || 'Admin'}</p>
             </div>
             
             <nav className="flex-1 p-4">
