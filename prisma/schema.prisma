@@ -48,6 +48,7 @@ model User {
   sessions      Session[]
   reports       Report[]
   clientReports ClientReport[]
+  googleTokens  GoogleTokens[]
 }
 
 model VerificationToken {
@@ -126,4 +127,24 @@ model Log {
   message   String
   meta      Json?
   @@index([createdAt, source])
+}
+
+model GoogleTokens {
+  id            String   @id @default(cuid())
+  userId        String
+  sub           String   // Google's stable user ID
+  access_token  String   @db.Text
+  refresh_token String?  @db.Text
+  expires_at    Int?
+  scope         String?
+  account_email String?
+  account_name  String?
+  picture       String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, sub], name: "userId_sub")
+  @@map("google_tokens")
 }

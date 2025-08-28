@@ -20,10 +20,18 @@ export async function DELETE(
   });
   if (!user) return NextResponse.json({ error: 'user_not_found' }, { status: 404 });
 
-  // Delete by PK, scoped to this user & provider
-  const out = await prisma.account.deleteMany({
-    where: { id: params.accountId, userId: user.id, provider: 'google' },
+  // Check if this is a google_tokens ID (new flow) or Account ID (legacy)
+  // Try google_tokens first
+  let deleted = await prisma.googleTokens.deleteMany({ 
+    where: { id: params.accountId, userId: user.id } 
   });
+  
+  // If no google_tokens deleted, try legacy Account table
+  if (deleted.count === 0) {
+    deleted = await prisma.account.deleteMany({
+      where: { id: params.accountId, userId: user.id, provider: 'google' },
+    });
+  }
 
-  return NextResponse.json({ ok: true, deleted: out.count });
+  return NextResponse.json({ ok: true, deleted: deleted.count });
 }

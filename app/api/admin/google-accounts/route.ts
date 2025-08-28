@@ -1,15 +1,39 @@
 import { NextRequest, NextResponse } from "next/server"
 import { cookies } from "next/headers"
 import { getPrisma } from "@/lib/db/prisma"
+import { getServerSession } from "next-auth"
+import { authOptions } from '@/lib/auth-options'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
 export async function GET() {
   try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'unauthenticated' }, { status: 401 })
+    }
+
     const prisma = getPrisma()
-    // Get all accounts from database
+    
+    // Get user first
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      select: { id: true }
+    })
+    if (!user) {
+      return NextResponse.json({ error: 'user_not_found' }, { status: 404 })
+    }
+    
+    // Get google_tokens for this user
+    const googleTokens = await prisma.googleTokens.findMany({
+      where: { userId: user.id },
+      orderBy: { createdAt: 'desc' }
+    })
+    
+    // Also get legacy accounts for backwards compatibility
     const accounts = await prisma.account.findMany({
+      where: { userId: user.id, provider: 'google' },
       include: {
         user: true
       }
@@ -54,21 +78,42 @@ export async function GET() {
       accounts.push(newAccount);
     }
     
-    // Format accounts for the frontend
-    const formattedAccounts = accounts.map((account, index) => ({
-      id: account.id,
-      account_email: account.user?.email || account.providerAccountId,
-      account_name: account.user?.name || `Google Account ${index + 1}`,
-      picture: account.user?.image || null,
-      is_active: account.expires_at ? account.expires_at > Math.floor(Date.now() / 1000) : true,
-      created_at: account.id,
-      updated_at: account.id,
-      token_expiry: account.expires_at ? new Date(account.expires_at * 1000).toISOString() : null,
+    // Format google_tokens for the frontend (prioritize these)
+    const formattedTokens = googleTokens.map(token => ({
+      id: token.id,
+      account_email: token.account_email || token.sub,
+      account_name: token.account_name || token.account_email || 'Google Account',
+      picture: token.picture || null,
+      is_active: token.expires_at ? token.expires_at > Math.floor(Date.now() / 1000) : true,
+      created_at: token.createdAt.toISOString(),
+      updated_at: token.updatedAt.toISOString(),
+      token_expiry: token.expires_at ? new Date(token.expires_at * 1000).toISOString() : null,
       search_console_properties: [],
-      analytics_properties: []
+      analytics_properties: [],
+      is_new_flow: true // Flag to identify new flow accounts
     }))
     
-    return NextResponse.json({ accounts: formattedAccounts }, { headers: { 'Cache-Control': 'no-store' } })
+    // Format legacy accounts for backwards compatibility
+    const formattedAccounts = accounts
+      .filter(account => !googleTokens.some(t => t.account_email === account.providerAccountId))
+      .map((account, index) => ({
+        id: account.id,
+        account_email: account.user?.email || account.providerAccountId,
+        account_name: account.user?.name || `Google Account ${index + 1}`,
+        picture: account.user?.image || null,
+        is_active: account.expires_at ? account.expires_at > Math.floor(Date.now() / 1000) : true,
+        created_at: account.id,
+        updated_at: account.id,
+        token_expiry: account.expires_at ? new Date(account.expires_at * 1000).toISOString() : null,
+        search_console_properties: [],
+        analytics_properties: [],
+        is_new_flow: false // Flag to identify legacy accounts
+      }))
+    
+    // Combine both, with google_tokens first
+    const allAccounts = [...formattedTokens, ...formattedAccounts]
+    
+    return NextResponse.json({ accounts: allAccounts }, { headers: { 'Cache-Control': 'no-store' } })
   } catch (error: any) {
     console.error("Error in google-accounts:", error)
     return NextResponse.json({ 
