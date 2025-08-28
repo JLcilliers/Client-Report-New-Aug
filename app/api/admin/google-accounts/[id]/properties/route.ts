@@ -5,7 +5,12 @@ import prisma from '@/lib/prisma';
 
 async function getBearer(tokenRowId: string, userId: string) {
   const row = await prisma.googleTokens.findFirst({
-    where: { id: tokenRowId, userId },
+    where: { 
+      OR: [
+        { id: tokenRowId, userId },
+        { id: tokenRowId, userId: null } // Support rows without userId for flexibility
+      ]
+    },
     select: { access_token: true, refresh_token: true, expires_at: true, scope: true, id: true }
   });
   if (!row) throw new Error('connector_not_found');

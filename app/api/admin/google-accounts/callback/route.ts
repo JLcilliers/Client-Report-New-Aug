@@ -52,28 +52,29 @@ export async function GET(req: Request) {
 
     const expiresAt = Math.floor(Date.now() / 1000) + (tok.expires_in ?? 0);
 
-    // Upsert by (userId, sub) so the same Google account cannot duplicate
+    // Upsert by (userId, google_sub) so the same Google account cannot duplicate
     await prisma.googleTokens.upsert({
-      where: { userId_sub: { userId: user.id, sub: ui.sub } },
+      where: { 
+        google_tokens_userid_google_sub_key: { 
+          userId: user.id, 
+          google_sub: ui.sub 
+        } 
+      },
       update: {
         access_token: tok.access_token,
         refresh_token: tok.refresh_token ?? undefined,
-        expires_at: expiresAt,
+        expires_at: BigInt(expiresAt),
         scope: 'openid email profile analytics.readonly webmasters.readonly',
-        account_email: ui.email ?? null,
-        account_name: ui.name ?? null,
-        picture: ui.picture ?? null,
+        email: ui.email ?? null,
       },
       create: {
         userId: user.id,
-        sub: ui.sub,
+        google_sub: ui.sub,
         access_token: tok.access_token,
         refresh_token: tok.refresh_token ?? null,
-        expires_at: expiresAt,
+        expires_at: BigInt(expiresAt),
         scope: 'openid email profile analytics.readonly webmasters.readonly',
-        account_email: ui.email ?? null,
-        account_name: ui.name ?? null,
-        picture: ui.picture ?? null,
+        email: ui.email ?? null,
       }
     });
 

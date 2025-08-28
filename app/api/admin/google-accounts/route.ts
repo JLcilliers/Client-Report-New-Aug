@@ -1,124 +1,76 @@
-import { NextRequest, NextResponse } from "next/server"
-import { cookies } from "next/headers"
-import { getPrisma } from "@/lib/db/prisma"
-import { getServerSession } from "next-auth"
-import { authOptions } from '@/lib/auth-options'
+import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth-options';
+import prisma from '@/lib/prisma';
 
-export const dynamic = 'force-dynamic'
-export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic';
+
+type Row = {
+  id: string;
+  google_sub: string;
+  email: string | null;
+  scope: string | null;
+  expires_at: bigint | number | null; // BIGINT in DB → BigInt in JS
+};
 
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      return NextResponse.json({ error: 'unauthenticated' }, { status: 401 })
+      return NextResponse.json({ error: 'unauthenticated' }, { status: 401 });
     }
 
-    const prisma = getPrisma()
-    
-    // Get user first
+    // Resolve current app user
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
-      select: { id: true }
-    })
-    if (!user) {
-      return NextResponse.json({ error: 'user_not_found' }, { status: 404 })
-    }
-    
-    // Get google_tokens for this user
-    const googleTokens = await prisma.googleTokens.findMany({
-      where: { userId: user.id },
-      orderBy: { createdAt: 'desc' }
-    })
-    
-    // Also get legacy accounts for backwards compatibility
+      select: { id: true },
+    });
+    if (!user) return NextResponse.json({ error: 'user_not_found' }, { status: 404 });
+
+    // Get all Google providerAccountIds for THIS app user from NextAuth Account table
     const accounts = await prisma.account.findMany({
-      where: { userId: user.id, provider: 'google' },
-      include: {
-        user: true
-      }
-    })
-    
-    // If no accounts in DB but we have a token, create one
-    const cookieStore = cookies()
-    const accessToken = cookieStore.get('google_access_token')
-    const userEmail = cookieStore.get('user_email')
-    
-    if (accounts.length === 0 && accessToken) {
-      // First, create or get a user
-      const email = userEmail?.value || 'user@example.com';
-      let user = await prisma.user.findUnique({
-        where: { email }
-      });
-      
-      if (!user) {
-        user = await prisma.user.create({
-          data: {
-            email,
-            name: 'Google User'
-          }
-        });
-      }
-      
-      // Create account from current session
-      const newAccount = await prisma.account.create({
-        data: {
-          userId: user.id,
-          type: 'oauth',
-          provider: 'google',
-          providerAccountId: email,
-          access_token: accessToken.value,
-          refresh_token: cookieStore.get('google_refresh_token')?.value || null,
-          expires_at: Math.floor(Date.now() / 1000) + 3600 // 1 hour from now
-        },
-        include: {
-          user: true
-        }
-      });
-      accounts.push(newAccount);
+      where: { provider: 'google', userId: user.id },
+      select: { providerAccountId: true },
+    });
+    const subs = accounts.map(a => a.providerAccountId);
+
+    // If no Google accounts linked via NextAuth yet, short-circuit
+    if (subs.length === 0) {
+      return NextResponse.json({ ok: true, items: [] }, { headers: { 'Cache-Control': 'no-store' } });
     }
-    
-    // Format google_tokens for the frontend (prioritize these)
-    const formattedTokens = googleTokens.map(token => ({
-      id: token.id,
-      account_email: token.account_email || token.sub,
-      account_name: token.account_name || token.account_email || 'Google Account',
-      picture: token.picture || null,
-      is_active: token.expires_at ? Number(token.expires_at) > Math.floor(Date.now() / 1000) : true,
-      created_at: token.createdAt.toISOString(),
-      updated_at: token.updatedAt.toISOString(),
-      token_expiry: token.expires_at ? new Date(Number(token.expires_at) * 1000).toISOString() : null,
-      search_console_properties: [],
-      analytics_properties: [],
-      is_new_flow: true // Flag to identify new flow accounts
-    }))
-    
-    // Format legacy accounts for backwards compatibility
-    const formattedAccounts = accounts
-      .filter(account => !googleTokens.some(t => t.account_email === account.providerAccountId))
-      .map((account, index) => ({
-        id: account.id,
-        account_email: account.user?.email || account.providerAccountId,
-        account_name: account.user?.name || `Google Account ${index + 1}`,
-        picture: account.user?.image || null,
-        is_active: account.expires_at ? Number(account.expires_at) > Math.floor(Date.now() / 1000) : true,
-        created_at: account.id,
-        updated_at: account.id,
-        token_expiry: account.expires_at ? new Date(Number(account.expires_at) * 1000).toISOString() : null,
-        search_console_properties: [],
-        analytics_properties: [],
-        is_new_flow: false // Flag to identify legacy accounts
-      }))
-    
-    // Combine both, with google_tokens first
-    const allAccounts = [...formattedTokens, ...formattedAccounts]
-    
-    return NextResponse.json({ accounts: allAccounts }, { headers: { 'Cache-Control': 'no-store' } })
-  } catch (error: any) {
-    console.error("Error in google-accounts:", error)
-    return NextResponse.json({ 
-      error: "Failed to fetch Google accounts",
-      details: error.message 
-    }, { status: 500 })
+
+    // Fetch rows directly from google_tokens via a raw query
+    // (works even if you haven't declared a Prisma model for google_tokens yet)
+    const items: Row[] = await prisma.$queryRawUnsafe(
+      `SELECT id, google_sub, email, scope, expires_at
+         FROM google_tokens
+        WHERE google_sub = ANY($1::text[])
+        ORDER BY email NULLS LAST, google_sub`,
+      subs
+    );
+
+    // Normalise expires for the client (number in seconds + readable)
+    const now = Math.floor(Date.now() / 1000);
+    const serialised = items.map(r => {
+      const expSec = r.expires_at == null ? null : Number(r.expires_at);
+      return {
+        id: r.id,
+        googleSub: r.google_sub,
+        email: r.email,
+        scope: r.scope,
+        expiresAt: expSec,                    // epoch seconds (or null)
+        expiresInSec: expSec ? Math.max(0, expSec - now) : null,
+      };
+    });
+
+    return NextResponse.json(
+      { ok: true, items: serialised },
+      { headers: { 'Cache-Control': 'no-store' } }
+    );
+  } catch (e: any) {
+    // Surface the precise reason to the frontend so we can see what's wrong
+    const message = e?.message ?? String(e);
+    const code = e?.code ?? null;
+    return NextResponse.json({ error: 'internal', code, message }, { status: 500 });
   }
 }

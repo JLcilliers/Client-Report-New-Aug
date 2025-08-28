@@ -23,7 +23,13 @@ export async function DELETE(
   // Check if this is a google_tokens ID (new flow) or Account ID (legacy)
   // Try google_tokens first
   let deleted = await prisma.googleTokens.deleteMany({ 
-    where: { id: params.id, userId: user.id } 
+    where: { 
+      id: params.id,
+      OR: [
+        { userId: user.id },
+        { userId: null } // Support rows without userId
+      ]
+    } 
   });
   
   // If no google_tokens deleted, try legacy Account table
