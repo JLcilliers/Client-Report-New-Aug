@@ -10,8 +10,12 @@ async function getBearer(tokenRowId: string, userId: string) {
   });
   if (!row) throw new Error('connector_not_found');
 
-  const now = Math.floor(Date.now() / 1000);
-  if (row.access_token && row.expires_at && row.expires_at > now + 60) return row.access_token;
+  const nowSec = Math.floor(Date.now() / 1000);
+  const expSec = row.expires_at != null ? Number(row.expires_at) : 0;
+  
+  if (row.access_token && expSec > nowSec + 60) {
+    return row.access_token; // still valid
+  }
 
   if (!row.refresh_token) throw new Error('no_refresh_token');
 

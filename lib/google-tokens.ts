@@ -7,8 +7,12 @@ export async function getAccessTokenForAccount(accountId: string, userId: string
   });
   if (!acct) throw new Error('account_not_found');
 
-  const now = Math.floor(Date.now() / 1000);
-  if (acct.access_token && acct.expires_at && acct.expires_at > now + 60) return acct.access_token;
+  const nowSec = Math.floor(Date.now() / 1000);
+  const expSec = acct.expires_at != null ? Number(acct.expires_at) : 0;
+  
+  if (acct.access_token && expSec > nowSec + 60) {
+    return acct.access_token; // still valid
+  }
   if (!acct.refresh_token) throw new Error('no_refresh_token');
 
   const body = new URLSearchParams({
