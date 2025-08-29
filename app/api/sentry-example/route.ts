@@ -2,10 +2,10 @@
 import * as Sentry from '@sentry/nextjs';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs'; // optional, but explicit
 
 export function GET() {
-  // Deliberately throw to verify Sentry server capture
   const err = new Error('Sentry Example API Route Error');
-  Sentry.captureException(err); // extra safety; Sentry also catches uncaught errors
-  throw err;
+  Sentry.captureException(err);
+  throw err; // forces a 500 and a Sentry Issue
 }
