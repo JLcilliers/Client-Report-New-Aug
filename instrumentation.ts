@@ -6,8 +6,8 @@ export function register() {
 
   const common = { 
     dsn, 
+    environment: process.env.SENTRY_ENVIRONMENT || process.env.VERCEL_ENV || 'production',
     tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.2 : 1.0,
-    environment: process.env.NODE_ENV,
   };
 
   if (process.env.NEXT_RUNTIME === 'nodejs') {
