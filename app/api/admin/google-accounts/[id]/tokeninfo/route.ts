@@ -16,8 +16,8 @@ export async function GET(
     });
 
     // Fetch the Google token record
-    const token = await prisma.googleTokens.findUnique({
-      where: { id },
+    const row = await prisma.googleTokens.findUnique({
+      where: { id: params.id },
       select: {
         id: true,
         google_sub: true,
@@ -25,30 +25,30 @@ export async function GET(
         scope: true,
         expires_at: true,
         userId: true,
-        createdAt: true,
-        updatedAt: true,
-        // Explicitly exclude tokens for security
-        access_token: false,
-        refresh_token: false,
+        created_at: true,  // <-- snake_case
+        updated_at: true,  // <-- snake_case
+        // (no access_token / refresh_token selected)
       },
     });
 
-    if (!token) {
+    if (!row) {
       return NextResponse.json(
         { error: 'Token not found' },
         { status: 404 }
       );
     }
 
-    // Convert BigInt to string for JSON serialization
+    // Convert BigInt to number for calculations
+    const expSec = row?.expires_at != null ? Number(row.expires_at) : null;
+    
     const serialized = {
-      ...token,
-      expires_at: token.expires_at ? token.expires_at.toString() : null,
-      expires_at_date: token.expires_at 
-        ? new Date(Number(token.expires_at) * 1000).toISOString()
+      ...row,
+      expires_at: row.expires_at ? row.expires_at.toString() : null,
+      expires_at_date: expSec 
+        ? new Date(expSec * 1000).toISOString()
         : null,
-      is_expired: token.expires_at 
-        ? Number(token.expires_at) * 1000 < Date.now()
+      is_expired: expSec 
+        ? expSec * 1000 < Date.now()
         : null,
     };
 
