@@ -5,7 +5,7 @@ import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import prisma from '@/lib/prisma';
 import * as Sentry from '@sentry/nextjs';
 
-// Redact tokens/secret-ish keys anywhere in nested objects/arrays
+// redact secrets recursively in any metadata payload
 const REDACT = /(token|id_token|access_token|refresh_token|client_secret|code)$/i;
 function sanitizeMeta(...meta: unknown[]): Record<string, unknown> {
   try {
@@ -44,22 +44,18 @@ export const authOptions: NextAuthOptions = {
   debug: process.env.NODE_ENV === 'development' || process.env.NEXT_PUBLIC_DEBUG_AUTH === 'true',
   logger: {
     error(code, ...metadata) {
-      console.error('Auth error:', code, ...metadata);
       Sentry.captureMessage(`nextauth:error:${code}`, {
         level: 'error',
         extra: sanitizeMeta(...metadata),
       });
     },
     warn(code, ...metadata) {
-      console.warn('Auth warning:', code, ...metadata);
       Sentry.captureMessage(`nextauth:warn:${code}`, {
         level: 'warning',
         extra: sanitizeMeta(...metadata),
       });
     },
     debug(code, ...metadata) {
-      console.debug('Auth debug:', code, ...metadata);
-      // Keep this noisy in staging only, or gate by env flag
       if (process.env.NEXT_PUBLIC_DEBUG_AUTH === 'true') {
         Sentry.captureMessage(`nextauth:debug:${code}`, {
           level: 'info',
@@ -101,11 +97,9 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       (session as any).google = token.google ?? null;
-      console.log('Session callback:', { session: session.user?.email });
       return session;
     },
     async signIn({ user, account, profile }) {
-      console.log('SignIn callback:', { user, account: account?.provider });
       return true;
     },
   },
