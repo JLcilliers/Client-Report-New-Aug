@@ -3,6 +3,7 @@ import type { NextAuthOptions } from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import prisma from '@/lib/prisma';
+import * as Sentry from '@sentry/nextjs';
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),              // pass the PrismaClient instance
@@ -26,16 +27,39 @@ export const authOptions: NextAuthOptions = {
       }
     }),
   ],
-  debug: true,
+  debug: process.env.NODE_ENV === 'development',
   logger: {
     error(code, metadata) {
       console.error('Auth error:', code, metadata);
+      // Send to Sentry without tokens
+      const sanitized = { ...metadata };
+      delete sanitized?.token;
+      delete sanitized?.access_token;
+      delete sanitized?.refresh_token;
+      Sentry.captureMessage(`nextauth:error:${code}`, { 
+        level: 'error', 
+        extra: sanitized 
+      });
     },
     warn(code) {
       console.warn('Auth warning:', code);
+      Sentry.captureMessage(`nextauth:warn:${code}`, { level: 'warning' });
     },
     debug(code, metadata) {
       console.debug('Auth debug:', code, metadata);
+      if (process.env.NODE_ENV === 'production') {
+        // Only log important debug messages in production
+        if (code.includes('callback') || code.includes('session')) {
+          const sanitized = { ...metadata };
+          delete sanitized?.token;
+          delete sanitized?.access_token;
+          delete sanitized?.refresh_token;
+          Sentry.captureMessage(`nextauth:debug:${code}`, { 
+            level: 'info', 
+            extra: sanitized 
+          });
+        }
+      }
     },
   },
   callbacks: {

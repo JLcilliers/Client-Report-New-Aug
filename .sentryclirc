@@ -1,0 +1,8 @@
+[defaults]
+url=https://sentry.io/
+org=search-signal
+project=search-insights-hub
+
+[auth]
+# Add your auth token as SENTRY_AUTH_TOKEN in environment variables
+# Get it from: https://sentry.io/settings/account/api/auth-tokens/
