@@ -2,6 +2,9 @@ const { withSentryConfig } = require('@sentry/nextjs');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  experimental: { 
+    instrumentationHook: true 
+  },
   images: {
     domains: ['localhost', 'online-client-reporting.vercel.app'],
   },
@@ -29,34 +32,26 @@ module.exports = withSentryConfig(
 
     // Suppresses source map uploading logs during build
     silent: true,
-    org: "search-signal", // Replace with your org
-    project: "search-insights-hub", // Replace with your project
     
-    // Use tunnel to avoid ad blockers
-    tunnelRoute: "/monitoring",
+    // Source maps upload configuration
+    authToken: process.env.SENTRY_AUTH_TOKEN,
+    org: process.env.SENTRY_ORG || "search-signal",
+    project: process.env.SENTRY_PROJECT || "search-insights-hub",
     
-    // Automatically instrument Next.js data fetching
-    autoInstrumentServerFunctions: true,
-    autoInstrumentAppDirectory: true,
-  },
-  {
-    // For all available options, see:
-    // https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
-
-    // Upload a larger set of source maps for prettier stack traces (increases build time)
-    widenClientFileUpload: true,
-
-    // Transpiles SDK to be compatible with IE11 (increases bundle size)
-    transpileClientSDK: false,
-
     // Routes browser requests to Sentry through a Next.js rewrite to circumvent ad-blockers
-    // This can increase your server load as well as your hosting bill.
-    tunnelRoute: "/monitoring",
-
+    tunnelRoute: "/error-monitoring",
+    
     // Hides source maps from generated client bundles
     hideSourceMaps: true,
-
+    
     // Automatically tree-shake Sentry logger statements to reduce bundle size
     disableLogger: true,
+    
+    // Upload a larger set of source maps for prettier stack traces
+    widenClientFileUpload: true,
+    
+    // Automatically instrument your app
+    autoInstrumentServerFunctions: true,
+    autoInstrumentAppDirectory: true,
   }
 );

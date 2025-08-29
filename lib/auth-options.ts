@@ -5,6 +5,20 @@ import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import prisma from '@/lib/prisma';
 import * as Sentry from '@sentry/nextjs';
 
+// Redact tokens/secret-ish keys anywhere in nested objects/arrays
+const REDACT = /(token|id_token|access_token|refresh_token|client_secret|code)$/i;
+function sanitizeMeta(...meta: unknown[]): Record<string, unknown> {
+  try {
+    const merged = meta.length === 1 ? meta[0] : meta;
+    const safe = JSON.parse(JSON.stringify(merged, (k, v) => (
+      typeof k === 'string' && REDACT.test(k) ? '[redacted]' : v
+    )));
+    return { meta: safe };
+  } catch {
+    return { meta: '[unserializable]' };
+  }
+}
+
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),              // pass the PrismaClient instance
   session: { strategy: 'jwt' },
@@ -27,38 +41,30 @@ export const authOptions: NextAuthOptions = {
       }
     }),
   ],
-  debug: process.env.NODE_ENV === 'development',
+  debug: process.env.NODE_ENV === 'development' || process.env.NEXT_PUBLIC_DEBUG_AUTH === 'true',
   logger: {
-    error(code, metadata) {
-      console.error('Auth error:', code, metadata);
-      // Send to Sentry without tokens
-      const sanitized = { ...metadata };
-      delete sanitized?.token;
-      delete sanitized?.access_token;
-      delete sanitized?.refresh_token;
-      Sentry.captureMessage(`nextauth:error:${code}`, { 
-        level: 'error', 
-        extra: sanitized 
+    error(code, ...metadata) {
+      console.error('Auth error:', code, ...metadata);
+      Sentry.captureMessage(`nextauth:error:${code}`, {
+        level: 'error',
+        extra: sanitizeMeta(...metadata),
       });
     },
-    warn(code) {
-      console.warn('Auth warning:', code);
-      Sentry.captureMessage(`nextauth:warn:${code}`, { level: 'warning' });
+    warn(code, ...metadata) {
+      console.warn('Auth warning:', code, ...metadata);
+      Sentry.captureMessage(`nextauth:warn:${code}`, {
+        level: 'warning',
+        extra: sanitizeMeta(...metadata),
+      });
     },
-    debug(code, metadata) {
-      console.debug('Auth debug:', code, metadata);
-      if (process.env.NODE_ENV === 'production') {
-        // Only log important debug messages in production
-        if (code.includes('callback') || code.includes('session')) {
-          const sanitized = { ...metadata };
-          delete sanitized?.token;
-          delete sanitized?.access_token;
-          delete sanitized?.refresh_token;
-          Sentry.captureMessage(`nextauth:debug:${code}`, { 
-            level: 'info', 
-            extra: sanitized 
-          });
-        }
+    debug(code, ...metadata) {
+      console.debug('Auth debug:', code, ...metadata);
+      // Keep this noisy in staging only, or gate by env flag
+      if (process.env.NEXT_PUBLIC_DEBUG_AUTH === 'true') {
+        Sentry.captureMessage(`nextauth:debug:${code}`, {
+          level: 'info',
+          extra: sanitizeMeta(...metadata),
+        });
       }
     },
   },
