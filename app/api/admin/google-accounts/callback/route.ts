@@ -54,11 +54,8 @@ export async function GET(req: Request) {
 
     // Upsert by (userId, google_sub) so the same Google account cannot duplicate
     await prisma.googleTokens.upsert({
-      where: { 
-        google_tokens_userid_google_sub_key: { 
-          userId: user.id, 
-          google_sub: ui.sub 
-        } 
+      where: {
+        userId_google_sub: { userId: user.id, google_sub: ui.sub } // ✅ the Prisma compound unique key
       },
       update: {
         access_token: tok.access_token,

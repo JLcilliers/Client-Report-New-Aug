@@ -130,22 +130,21 @@ model Log {
 }
 
 model GoogleTokens {
-  id           String   @id @default(cuid())
-  google_sub   String
-  email        String?
-  access_token String?  @db.Text
-  refresh_token String? @db.Text
-  scope        String?
-  expires_at   BigInt?  // BIGINT (epoch seconds)
-
-  created_at   DateTime  @default(now()) @map("created_at")
-  updated_at   DateTime  @default(now()) @updatedAt @map("updated_at")
-
-  userId       String?   // Optional for flexibility
-  user         User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id            String   @id @default(cuid())
+  google_sub    String
+  email         String?
+  access_token  String?  @db.Text
+  refresh_token String?  @db.Text
+  scope         String?
+  expires_at    BigInt?  // BIGINT (epoch seconds)
+  created_at    DateTime @default(now()) @map("created_at")
+  updated_at    DateTime @default(now()) @updatedAt @map("updated_at")
+  userId        String?  // we added this
   
+  user          User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@map("google_tokens")
   @@index([userId])
-  @@index([google_sub])
-  @@unique([userId, google_sub], map: "google_tokens_userid_google_sub_key")
+  @@unique([userId, google_sub])
+  //            ^^^^^^^^^^^^^^^  Prisma will generate where: { userId_google_sub: { ... } }
 }
