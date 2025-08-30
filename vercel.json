@@ -1,4 +1,7 @@
 {
+  "buildCommand": "cp prisma/schema.production.prisma prisma/schema.prisma && npx prisma generate && npm run build",
+  "installCommand": "npm install",
+  "framework": "nextjs",
   "functions": {
     "app/api/cron/daily-update/route.ts": {
       "maxDuration": 60
