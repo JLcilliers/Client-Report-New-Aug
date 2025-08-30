@@ -6,9 +6,8 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")  // pooler - used by the app at runtime
-  directUrl = env("DIRECT_URL")    // direct - used by migrations
+  provider  = "sqlite"
+  url       = env("DATABASE_URL")
 }
 
 model Account {
@@ -17,12 +16,12 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @map("refresh_token") @db.Text
-  access_token      String? @map("access_token") @db.Text
+  refresh_token     String? @map("refresh_token")
+  access_token      String? @map("access_token")
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?
   session_state     String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -67,8 +66,8 @@ model Report {
   propertyId      String?
   siteUrl         String?
   dateRange       String
-  metrics         String   @db.Text
-  data            String?  @db.Text
+  metrics         String
+  data            String?
   shareToken      String?  @unique
   isPublic        Boolean  @default(false)
   refreshInterval Int?
@@ -103,7 +102,7 @@ model ReportAccessLog {
   reportId     String
   report       ClientReport @relation(fields: [reportId], references: [id])
   ipAddress    String?
-  userAgent    String?  @db.Text
+  userAgent    String?
   accessedAt   DateTime     @default(now())
 }
 
@@ -112,7 +111,7 @@ model ReportCache {
   reportId    String
   report      ClientReport @relation(fields: [reportId], references: [id])
   dataType    String       // 'ga4', 'searchConsole', 'webVitals'
-  data        String       @db.Text // JSON string
+  data        String       // JSON string
   cachedAt    DateTime     @default(now())
   expiresAt   DateTime
 }
@@ -126,7 +125,7 @@ model Log {
   userId    String?
   accountId String?
   message   String
-  meta      Json?
+  meta      String? // JSON string
   @@index([createdAt, source])
 }
 
@@ -134,8 +133,8 @@ model GoogleTokens {
   id            String   @id @default(cuid())
   google_sub    String
   email         String?
-  access_token  String?  @db.Text
-  refresh_token String?  @db.Text
+  access_token  String?
+  refresh_token String?
   scope         String?
   expires_at    BigInt?  // BIGINT (epoch seconds)
   created_at    DateTime @default(now()) @map("created_at")
@@ -154,8 +153,8 @@ model GoogleAccount {
   id           String   @id @default(cuid())
   userId       String
   email        String   @unique
-  accessToken  String   @db.Text
-  refreshToken String?  @db.Text
+  accessToken  String
+  refreshToken String?
   expiresAt    Int?
   scope        String?
   createdAt    DateTime @default(now())

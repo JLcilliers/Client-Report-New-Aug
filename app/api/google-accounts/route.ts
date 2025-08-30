@@ -8,7 +8,10 @@ export async function GET() {
     const session = await getServerSession(authOptions);
     
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ 
+        error: 'Unauthorized',
+        accounts: [] 
+      }, { status: 401 });
     }
 
     const accounts = await prisma.googleAccount.findMany({
@@ -19,14 +22,21 @@ export async function GET() {
         id: true,
         email: true,
         createdAt: true,
-        scope: true
+        scope: true,
+        expiresAt: true
       }
     });
 
-    return NextResponse.json({ accounts });
+    return NextResponse.json({ 
+      accounts,
+      count: accounts.length 
+    });
   } catch (error) {
     console.error('Error fetching Google accounts:', error);
-    return NextResponse.json({ error: 'Failed to fetch accounts' }, { status: 500 });
+    return NextResponse.json({ 
+      error: 'Failed to fetch accounts',
+      accounts: [] 
+    }, { status: 500 });
   }
 }
 
@@ -54,5 +64,33 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('Error saving Google account:', error);
     return NextResponse.json({ error: 'Failed to save account' }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const accountId = searchParams.get('id');
+
+    if (!accountId) {
+      return NextResponse.json({ error: 'Account ID required' }, { status: 400 });
+    }
+
+    await prisma.googleAccount.delete({
+      where: {
+        id: accountId,
+        userId: session.user.id
+      }
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting Google account:', error);
+    return NextResponse.json({ error: 'Failed to delete account' }, { status: 500 });
   }
 }
