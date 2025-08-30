@@ -20,7 +20,8 @@
     "prisma:studio": "prisma studio",
     "prisma:reset": "prisma migrate reset",
     "production:scan": "node automation/production-scanner.js",
-    "production:prepare": "npm run production:scan && npm run build"
+    "production:prepare": "npm run production:scan && npm run build",
+    "build:production": "cp prisma/schema.production.prisma prisma/schema.prisma && prisma generate && next build"
   },
   "dependencies": {
     "@next-auth/prisma-adapter": "^1.0.7",
