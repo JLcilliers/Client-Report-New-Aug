@@ -65,13 +65,14 @@ export const authOptions: NextAuthOptions = {
     },
   },
   callbacks: {
-    async jwt({ token, account }) {
+    async jwt({ token, account, user }) {
       if (account?.provider === 'google') {
         token.google = {
           access_token: account.access_token,
           refresh_token: account.refresh_token,
           expires_at: (account.expires_at ?? 0) * 1000
         };
+        token.userId = user?.id;
       }
       const g = token.google as any;
       if (g?.expires_at && Date.now() > g.expires_at && g.refresh_token) {
@@ -97,9 +98,39 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       (session as any).google = token.google ?? null;
+      if (session?.user && token.userId) {
+        session.user.id = token.userId as string;
+      }
       return session;
     },
     async signIn({ user, account, profile }) {
+      if (account?.provider === 'google') {
+        try {
+          // Save or update Google account details
+          await prisma.googleAccount.upsert({
+            where: {
+              email: user.email!
+            },
+            update: {
+              accessToken: account.access_token!,
+              refreshToken: account.refresh_token,
+              expiresAt: account.expires_at,
+            },
+            create: {
+              userId: user.id,
+              email: user.email!,
+              accessToken: account.access_token!,
+              refreshToken: account.refresh_token,
+              expiresAt: account.expires_at,
+              scope: account.scope || ''
+            }
+          });
+        } catch (error) {
+          console.error('Error saving Google account:', error);
+          Sentry.captureException(error);
+          return false; // Prevent sign in on error
+        }
+      }
       return true;
     },
   },
