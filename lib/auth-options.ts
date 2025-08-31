@@ -4,6 +4,13 @@ import GoogleProvider from 'next-auth/providers/google';
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import prisma from '@/lib/prisma';
 import * as Sentry from '@sentry/nextjs';
+import { createClient } from '@supabase/supabase-js';
+
+// Initialize Supabase client
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
 // redact secrets recursively in any metadata payload
 const REDACT = /(token|id_token|access_token|refresh_token|client_secret|code)$/i;
@@ -104,33 +111,40 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
     async signIn({ user, account, profile }) {
+      console.log('=== SIGN IN ATTEMPT ===');
+      console.log('User:', user);
+      console.log('Account:', account);
+      console.log('Profile:', profile);
+      
       if (account?.provider === 'google') {
         try {
-          // Save or update Google account details
-          await prisma.googleAccount.upsert({
-            where: {
-              email: user.email!
-            },
-            update: {
-              accessToken: account.access_token!,
-              refreshToken: account.refresh_token,
-              expiresAt: account.expires_at,
-            },
-            create: {
-              userId: user.id,
-              email: user.email!,
-              accessToken: account.access_token!,
-              refreshToken: account.refresh_token,
-              expiresAt: account.expires_at,
-              scope: account.scope || ''
-            }
-          });
+          const { error: upsertError } = await supabase
+            .from('google_accounts')
+            .upsert({
+              email: user.email,
+              google_id: account.providerAccountId,
+              name: user.name,
+              image: user.image,
+              access_token: account.access_token,
+              refresh_token: account.refresh_token,
+              expires_at: account.expires_at,
+            }, {
+              onConflict: 'email'
+            });
+
+          if (upsertError) {
+            console.error('=== UPSERT ERROR ===', upsertError);
+            return false;  // This causes AccessDenied
+          }
+          
+          console.log('=== SIGN IN SUCCESS ===');
+          return true;
         } catch (error) {
-          console.error('Error saving Google account:', error);
-          Sentry.captureException(error);
-          return false; // Prevent sign in on error
+          console.error('=== CATCH ERROR ===', error);
+          return false;  // This causes AccessDenied
         }
       }
+      
       return true;
     },
   },
