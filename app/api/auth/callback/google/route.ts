@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
+export const dynamic = 'force-dynamic'
+
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -14,14 +16,16 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error('OAuth error:', error);
+      const baseUrl = request.nextUrl.origin || process.env.NEXT_PUBLIC_URL || 'https://searchsignal.online'
       return NextResponse.redirect(
-        `${process.env.NEXTAUTH_URL}/admin/google-accounts?error=${error}`
+        `${baseUrl}/admin/google-accounts?error=${error}`
       );
     }
 
     if (!code) {
+      const baseUrl = request.nextUrl.origin || process.env.NEXT_PUBLIC_URL || 'https://searchsignal.online'
       return NextResponse.redirect(
-        `${process.env.NEXTAUTH_URL}/admin/google-accounts?error=no_code`
+        `${baseUrl}/admin/google-accounts?error=no_code`
       );
     }
 
@@ -34,7 +38,7 @@ export async function GET(request: NextRequest) {
         code,
         client_id: process.env.GOOGLE_CLIENT_ID!,
         client_secret: process.env.GOOGLE_CLIENT_SECRET!,
-        redirect_uri: `${process.env.NEXTAUTH_URL}/api/auth/callback/google`,
+        redirect_uri: `${request.nextUrl.origin || process.env.NEXT_PUBLIC_URL || 'https://searchsignal.online'}/api/auth/callback/google`,
         grant_type: 'authorization_code',
       }),
     });
@@ -100,14 +104,16 @@ export async function GET(request: NextRequest) {
 
     console.log('Successfully saved Google account:', result.data.email);
 
+    const baseUrl = request.nextUrl.origin || process.env.NEXT_PUBLIC_URL || 'https://searchsignal.online'
     return NextResponse.redirect(
-      `${process.env.NEXTAUTH_URL}/admin/google-accounts?success=true`
+      `${baseUrl}/admin/google-accounts?success=true`
     );
 
   } catch (error) {
     console.error('OAuth callback error:', error);
+    const baseUrl = request.nextUrl.origin || process.env.NEXT_PUBLIC_URL || 'https://searchsignal.online'
     return NextResponse.redirect(
-      `${process.env.NEXTAUTH_URL}/admin/google-accounts?error=callback_failed`
+      `${baseUrl}/admin/google-accounts?error=callback_failed`
     );
   }
 }

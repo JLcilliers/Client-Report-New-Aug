@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getOAuthRedirectUri } from "@/lib/utils/oauth-config"
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   try {
     const redirectUri = getOAuthRedirectUri(request)
@@ -32,6 +34,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(authUrl)
   } catch (error: any) {
     console.error('[OAuth] Initialization error:', error)
-    return NextResponse.redirect('/admin/google-accounts?error=oauth_init_failed')
+    const baseUrl = request.nextUrl.origin || process.env.NEXT_PUBLIC_URL || 'https://searchsignal.online'
+    return NextResponse.redirect(`${baseUrl}/admin/google-accounts?error=oauth_init_failed`)
   }
 }

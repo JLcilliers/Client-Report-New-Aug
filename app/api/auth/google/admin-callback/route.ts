@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma"
 import { cookies } from "next/headers"
 import { getOAuthRedirectUri } from "@/lib/utils/oauth-config"
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams
@@ -15,12 +17,14 @@ export async function GET(request: NextRequest) {
     
     if (error) {
       console.error('[OAuth Callback] Error from Google:', error)
-      return NextResponse.redirect(`/admin/google-accounts?error=${error}`)
+      const baseUrl = request.nextUrl.origin || process.env.NEXT_PUBLIC_URL || 'https://searchsignal.online'
+      return NextResponse.redirect(`${baseUrl}/admin/google-accounts?error=${error}`)
     }
     
     if (!code) {
       console.error('[OAuth Callback] No authorization code received')
-      return NextResponse.redirect('/admin/google-accounts?error=no_code')
+      const baseUrl = request.nextUrl.origin || process.env.NEXT_PUBLIC_URL || 'https://searchsignal.online'
+      return NextResponse.redirect(`${baseUrl}/admin/google-accounts?error=no_code`)
     }
 
     // Use consistent base URL detection
@@ -123,10 +127,12 @@ export async function GET(request: NextRequest) {
     }
 
     console.log('[OAuth Callback] Success! Redirecting to admin panel...')
-    return NextResponse.redirect('/admin/google-accounts?success=true')
+    const baseUrl = request.nextUrl.origin || process.env.NEXT_PUBLIC_URL || 'https://searchsignal.online'
+    return NextResponse.redirect(`${baseUrl}/admin/google-accounts?success=true`)
   } catch (error: any) {
     console.error('[OAuth Callback] Error:', error)
     const errorMessage = error.message || 'callback_failed'
-    return NextResponse.redirect(`/admin/google-accounts?error=${encodeURIComponent(errorMessage)}`)
+    const baseUrl = request.nextUrl.origin || process.env.NEXT_PUBLIC_URL || 'https://searchsignal.online'
+    return NextResponse.redirect(`${baseUrl}/admin/google-accounts?error=${encodeURIComponent(errorMessage)}`)
   }
 }
