@@ -67,24 +67,38 @@ export async function GET(request: NextRequest) {
     const userInfo = await userInfoResponse.json()
     console.log('[OAuth Callback] User info:', userInfo.email)
 
-    // Save to database
+    // First, we need a userId - for now, use a default admin user or create one
+    // In production, this should be tied to the authenticated user
+    let user = await prisma.user.findFirst({
+      where: { email: userInfo.email }
+    })
+    
+    if (!user) {
+      user = await prisma.user.create({
+        data: {
+          email: userInfo.email,
+          name: userInfo.name || userInfo.email
+        }
+      })
+    }
+    
+    // Save to database with correct field names
     const googleAccount = await prisma.googleAccount.upsert({
-      where: { account_email: userInfo.email },
+      where: { email: userInfo.email },
       update: {
-        access_token: tokens.access_token!,
-        refresh_token: tokens.refresh_token || undefined,
-        token_expiry: new Date(tokens.expiry_date || Date.now() + 3600000),
-        account_name: userInfo.name || userInfo.email,
-        updated_at: new Date()
+        accessToken: tokens.access_token!,
+        refreshToken: tokens.refresh_token || undefined,
+        expiresAt: tokens.expiry_date ? Math.floor(tokens.expiry_date / 1000) : undefined,
+        scope: "analytics.readonly webmasters.readonly",
+        updatedAt: new Date()
       },
       create: {
-        account_email: userInfo.email,
-        account_name: userInfo.name || userInfo.email,
-        access_token: tokens.access_token!,
-        refresh_token: tokens.refresh_token || '',
-        token_expiry: new Date(tokens.expiry_date || Date.now() + 3600000),
-        scopes: ["analytics.readonly", "webmasters.readonly"],
-        is_active: true
+        userId: user.id,
+        email: userInfo.email,
+        accessToken: tokens.access_token!,
+        refreshToken: tokens.refresh_token || undefined,
+        expiresAt: tokens.expiry_date ? Math.floor(tokens.expiry_date / 1000) : undefined,
+        scope: "analytics.readonly webmasters.readonly"
       }
     })
     
