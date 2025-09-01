@@ -40,6 +40,30 @@ export default function GoogleAccountsPage() {
   const router = useRouter()
 
   useEffect(() => {
+    // Check for OAuth callback parameters
+    const params = new URLSearchParams(window.location.search)
+    const error = params.get('error')
+    const success = params.get('success')
+    
+    if (error) {
+      toast({
+        title: "Authentication Error",
+        description: error === 'callback_failed' 
+          ? "Failed to complete authentication. Please try again." 
+          : `Error: ${error}`,
+        variant: "destructive"
+      })
+      // Clean up URL
+      window.history.replaceState({}, '', '/admin/google-accounts')
+    } else if (success) {
+      toast({
+        title: "Success",
+        description: "Google account connected successfully!",
+      })
+      // Clean up URL
+      window.history.replaceState({}, '', '/admin/google-accounts')
+    }
+    
     fetchAccounts()
   }, [])
 
@@ -65,8 +89,8 @@ export default function GoogleAccountsPage() {
   }
 
   const addNewAccount = () => {
-    // Start OAuth flow for new account using NextAuth
-    signIn('google')
+    // Redirect to OAuth flow
+    window.location.href = '/api/auth/google/add-account'
   }
 
   const refreshAccount = async (accountId: string) => {

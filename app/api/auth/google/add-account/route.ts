@@ -1,31 +1,37 @@
-import { NextResponse } from "next/server"
-import { OAuth2Client } from "google-auth-library"
+import { NextRequest, NextResponse } from "next/server"
+import { getOAuthRedirectUri } from "@/lib/utils/oauth-config"
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const oauth2Client = new OAuth2Client(
-      process.env.GOOGLE_CLIENT_ID,
-      process.env.GOOGLE_CLIENT_SECRET,
-      `${process.env.NEXT_PUBLIC_URL || 'https://online-client-reporting.vercel.app'}/api/auth/google/callback`
-    )
-
-    const scopes = [
-      'https://www.googleapis.com/auth/webmasters.readonly',
-      'https://www.googleapis.com/auth/analytics.readonly',
-      'https://www.googleapis.com/auth/userinfo.email',
-      'https://www.googleapis.com/auth/userinfo.profile'
-    ]
-
-    const authUrl = oauth2Client.generateAuthUrl({
-      access_type: 'offline',
-      scope: scopes,
-      prompt: 'consent', // Force consent screen to get refresh token
-      include_granted_scopes: true
+    const redirectUri = getOAuthRedirectUri(request)
+    
+    console.log('[OAuth] Initializing with redirect URI:', redirectUri)
+    
+    // Construct OAuth URL manually for better control
+    const params = new URLSearchParams({
+      client_id: process.env.GOOGLE_CLIENT_ID!,
+      redirect_uri: redirectUri,
+      response_type: "code",
+      scope: [
+        "https://www.googleapis.com/auth/webmasters.readonly",
+        "https://www.googleapis.com/auth/analytics.readonly",
+        "https://www.googleapis.com/auth/userinfo.email",
+        "https://www.googleapis.com/auth/userinfo.profile"
+      ].join(" "),
+      access_type: "offline",
+      prompt: "consent",
+      include_granted_scopes: "true",
+      state: "admin_connection"
     })
-
+    
+    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?${params}`
+    
+    console.log('[OAuth] Redirecting to Google Auth')
+    console.log('[OAuth] Redirect URI:', redirectUri)
+    
     return NextResponse.redirect(authUrl)
   } catch (error: any) {
-    
+    console.error('[OAuth] Initialization error:', error)
     return NextResponse.redirect('/admin/google-accounts?error=oauth_init_failed')
   }
 }
