@@ -9,9 +9,7 @@ export async function GET(request: NextRequest) {
   
   // These are the callback URLs your app will use
   const callbacks = [
-    `${actualBaseUrl}/api/auth/google/callback`,
-    `${actualBaseUrl}/api/auth/google/admin-callback`,
-    `${actualBaseUrl}/api/auth/admin-google/callback`
+    `${actualBaseUrl}/api/auth/google/admin-callback`
   ]
   
   return NextResponse.json({

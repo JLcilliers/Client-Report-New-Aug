@@ -7,7 +7,12 @@ export async function GET(request: NextRequest) {
   try {
     const redirectUri = getOAuthRedirectUri(request)
     
-    console.log('[OAuth] Initializing with redirect URI:', redirectUri)
+    console.log('[OAuth] ===== OAuth Initialization Debug =====')
+    console.log('[OAuth] Request URL:', request.url)
+    console.log('[OAuth] Request origin:', request.nextUrl.origin)
+    console.log('[OAuth] Redirect URI being used:', redirectUri)
+    console.log('[OAuth] NEXT_PUBLIC_URL env:', process.env.NEXT_PUBLIC_URL)
+    console.log('[OAuth] NODE_ENV:', process.env.NODE_ENV)
     
     // Construct OAuth URL manually for better control
     const params = new URLSearchParams({
@@ -28,8 +33,10 @@ export async function GET(request: NextRequest) {
     
     const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?${params}`
     
-    console.log('[OAuth] Redirecting to Google Auth')
-    console.log('[OAuth] Redirect URI:', redirectUri)
+    console.log('[OAuth] Full OAuth URL:', authUrl)
+    console.log('[OAuth] URL params:', Object.fromEntries(params.entries()))
+    console.log('[OAuth] ===== End Debug =====')
+    console.log('[OAuth] Redirecting to Google Auth...')
     
     return NextResponse.redirect(authUrl)
   } catch (error: any) {

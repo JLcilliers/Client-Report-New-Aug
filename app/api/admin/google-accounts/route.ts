@@ -1,76 +1,65 @@
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
-import prisma from '@/lib/prisma';
+import { prisma } from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
 
-type Row = {
-  id: string;
-  google_sub: string;
-  email: string | null;
-  scope: string | null;
-  expires_at: bigint | number | null; // BIGINT in DB → BigInt in JS
-};
-
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: 'unauthenticated' }, { status: 401 });
-    }
-
-    // Resolve current app user
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-      select: { id: true },
-    });
-    if (!user) return NextResponse.json({ error: 'user_not_found' }, { status: 404 });
-
-    // Get all Google providerAccountIds for THIS app user from NextAuth Account table
+    // Fetch all Google accounts from the Account table where provider is 'google'
     const accounts = await prisma.account.findMany({
-      where: { provider: 'google', userId: user.id },
-      select: { providerAccountId: true },
+      where: {
+        provider: 'google'
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            name: true
+          }
+        }
+      },
+      orderBy: {
+        expires_at: 'desc'
+      }
     });
-    const subs = accounts.map(a => a.providerAccountId);
 
-    // If no Google accounts linked via NextAuth yet, short-circuit
-    if (subs.length === 0) {
-      return NextResponse.json({ ok: true, items: [] }, { headers: { 'Cache-Control': 'no-store' } });
-    }
-
-    // Fetch rows directly from google_tokens via a raw query
-    // (works even if you haven't declared a Prisma model for google_tokens yet)
-    const items: Row[] = await prisma.$queryRawUnsafe(
-      `SELECT id, google_sub, email, scope, expires_at
-         FROM google_tokens
-        WHERE google_sub = ANY($1::text[])
-        ORDER BY email NULLS LAST, google_sub`,
-      subs
-    );
-
-    // Normalise expires for the client (number in seconds + readable)
-    const now = Math.floor(Date.now() / 1000);
-    const serialised = items.map(r => {
-      const expSec = r.expires_at == null ? null : Number(r.expires_at);
-      return {
-        id: r.id,
-        googleSub: r.google_sub,
-        email: r.email,
-        scope: r.scope,
-        expiresAt: expSec,                    // epoch seconds (or null)
-        expiresInSec: expSec ? Math.max(0, expSec - now) : null,
-      };
-    });
+    // Transform the data to match the expected format for the frontend
+    const transformedAccounts = accounts.map(account => ({
+      id: account.id,
+      account_email: account.providerAccountId, // This is the actual Google email
+      account_name: account.user?.name || account.providerAccountId,
+      is_active: account.expires_at ? account.expires_at > Math.floor(Date.now() / 1000) : true,
+      created_at: new Date().toISOString(), // Account table doesn't have createdAt
+      updated_at: new Date().toISOString(), // Account table doesn't have updatedAt
+      token_expiry: account.expires_at ? new Date(account.expires_at * 1000).toISOString() : null,
+      refresh_token: account.refresh_token,
+      access_token: account.access_token,
+      // Add placeholder data for properties (these can be fetched separately)
+      search_console_properties: [],
+      analytics_properties: []
+    }));
 
     return NextResponse.json(
-      { ok: true, items: serialised },
+      { 
+        success: true,
+        accounts: transformedAccounts 
+      },
       { headers: { 'Cache-Control': 'no-store' } }
     );
-  } catch (e: any) {
-    // Surface the precise reason to the frontend so we can see what's wrong
-    const message = e?.message ?? String(e);
-    const code = e?.code ?? null;
-    return NextResponse.json({ error: 'internal', code, message }, { status: 500 });
+  } catch (error: any) {
+    console.error('[Google Accounts API] Error:', error);
+    return NextResponse.json(
+      { 
+        error: 'Failed to fetch Google accounts',
+        details: error.message 
+      }, 
+      { status: 500 }
+    );
   }
+}
+
+export async function POST() {
+  // This endpoint can be used to manually add a Google account
+  return NextResponse.json({ error: 'Not implemented' }, { status: 501 });
 }

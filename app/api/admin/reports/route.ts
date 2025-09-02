@@ -1,11 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/prisma';
 
 export async function GET(request: NextRequest) {
   try {
-
     // Fetch all reports from Prisma database (using ClientReport model)
     const reports = await prisma.clientReport.findMany({
       orderBy: {
@@ -33,8 +30,8 @@ export async function GET(request: NextRequest) {
       updated_at: report.updatedAt.toISOString(),
       is_public: report.isActive,
       google_account_id: report.googleAccountId,
-      search_console_properties: [report.searchConsolePropertyId],
-      analytics_properties: [report.ga4PropertyId],
+      search_console_properties: report.searchConsolePropertyId ? [report.searchConsolePropertyId] : [],
+      analytics_properties: report.ga4PropertyId ? [report.ga4PropertyId] : [],
       audit_summary: null,
       last_data_fetch: null,
       shareableLink: report.shareableLink,
@@ -42,8 +39,8 @@ export async function GET(request: NextRequest) {
     }));
 
     return NextResponse.json(transformedReports);
-  } catch (error) {
-    
+  } catch (error: any) {
+    console.error('[Reports API] Error:', error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

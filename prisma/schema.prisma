@@ -1,14 +1,10 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider  = "sqlite"  // Change to "postgresql" for production
-  url       = env("DATABASE_URL")
-  // directUrl = env("DIRECT_URL")  // Uncomment for PostgreSQL
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
 }
 
 model Account {
@@ -17,15 +13,14 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @map("refresh_token") // @db.Text for PostgreSQL
-  access_token      String? @map("access_token") // @db.Text for PostgreSQL
+  refresh_token     String? @map("refresh_token")
+  access_token      String? @map("access_token")
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? // @db.Text for PostgreSQL
+  id_token          String?
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -39,17 +34,17 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  email         String?   @unique
-  emailVerified DateTime?
-  name          String?
-  image         String?
-  accounts      Account[]
-  sessions      Session[]
-  reports       Report[]
-  clientReports ClientReport[]
-  googleTokens  GoogleTokens[]
+  id             String          @id @default(cuid())
+  email          String?         @unique
+  emailVerified  DateTime?
+  name           String?
+  image          String?
+  accounts       Account[]
+  clientReports  ClientReport[]
   googleAccounts GoogleAccount[]
+  reports        Report[]
+  sessions       Session[]
+  googleTokens   GoogleTokens[]
 }
 
 model VerificationToken {
@@ -61,72 +56,72 @@ model VerificationToken {
 }
 
 model Report {
-  id              String   @id @default(cuid())
+  id              String    @id @default(cuid())
   name            String
   userId          String
   propertyId      String?
   siteUrl         String?
   dateRange       String
-  metrics         String   // @db.Text for PostgreSQL
-  data            String?  // @db.Text for PostgreSQL
-  shareToken      String?  @unique
-  isPublic        Boolean  @default(false)
+  metrics         String
+  data            String?
+  shareToken      String?   @unique
+  isPublic        Boolean   @default(false)
   refreshInterval Int?
   lastRefreshed   DateTime?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model ClientReport {
-  id                      String   @id @default(cuid())
+  id                      String            @id @default(cuid())
   clientName              String
   reportName              String
   googleAccountId         String
   ga4PropertyId           String
   searchConsolePropertyId String
-  shareableLink           String   @unique
-  shareableId             String   @unique
-  isActive                Boolean  @default(true)
-  refreshInterval         String   @default("daily")
-  createdAt               DateTime @default(now())
-  updatedAt               DateTime @updatedAt
+  shareableLink           String            @unique
+  shareableId             String            @unique
+  isActive                Boolean           @default(true)
+  refreshInterval         String            @default("daily")
+  createdAt               DateTime          @default(now())
+  updatedAt               DateTime          @updatedAt
   userId                  String
-  user                    User     @relation(fields: [userId], references: [id])
+  user                    User              @relation(fields: [userId], references: [id])
   accessLogs              ReportAccessLog[]
   cache                   ReportCache[]
 }
 
 model ReportAccessLog {
-  id           String       @id @default(cuid())
-  reportId     String
-  report       ClientReport @relation(fields: [reportId], references: [id])
-  ipAddress    String?
-  userAgent    String?  // @db.Text for PostgreSQL
-  accessedAt   DateTime     @default(now())
+  id         String       @id @default(cuid())
+  reportId   String
+  ipAddress  String?
+  userAgent  String?
+  accessedAt DateTime     @default(now())
+  report     ClientReport @relation(fields: [reportId], references: [id])
 }
 
 model ReportCache {
-  id          String       @id @default(cuid())
-  reportId    String
-  report      ClientReport @relation(fields: [reportId], references: [id])
-  dataType    String       // 'ga4', 'searchConsole', 'webVitals'
-  data        String       // @db.Text for PostgreSQL // JSON string
-  cachedAt    DateTime     @default(now())
-  expiresAt   DateTime
+  id        String       @id @default(cuid())
+  reportId  String
+  dataType  String
+  data      String
+  cachedAt  DateTime     @default(now())
+  expiresAt DateTime
+  report    ClientReport @relation(fields: [reportId], references: [id])
 }
 
 model Log {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
-  level     String   // 'debug' | 'info' | 'warn' | 'error'
-  source    String   // e.g. 'api/google/properties'
+  level     String
+  source    String
   requestId String?
   userId    String?
   accountId String?
   message   String
-  meta      String? // Use Json? for PostgreSQL
+  meta      String?
+
   @@index([createdAt, source])
 }
 
@@ -134,34 +129,31 @@ model GoogleTokens {
   id            String   @id @default(cuid())
   google_sub    String
   email         String?
-  access_token  String?  // @db.Text for PostgreSQL
-  refresh_token String?  // @db.Text for PostgreSQL
+  access_token  String?
+  refresh_token String?
   scope         String?
-  expires_at    BigInt?  // BIGINT (epoch seconds)
+  expires_at    BigInt?
   created_at    DateTime @default(now()) @map("created_at")
   updated_at    DateTime @default(now()) @updatedAt @map("updated_at")
-  userId        String?  // we added this
-  
+  userId        String?
   user          User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@map("google_tokens")
-  @@index([userId])
   @@unique([userId, google_sub])
-  //            ^^^^^^^^^^^^^^^  Prisma will generate where: { userId_google_sub: { ... } }
+  @@index([userId])
+  @@map("google_tokens")
 }
 
 model GoogleAccount {
   id           String   @id @default(cuid())
   userId       String
   email        String   @unique
-  accessToken  String   // @db.Text for PostgreSQL
-  refreshToken String?  // @db.Text for PostgreSQL
+  accessToken  String
+  refreshToken String?
   expiresAt    Int?
-  scope        String?  // @db.Text for PostgreSQL
+  scope        String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-  
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
   @@index([userId])
 }

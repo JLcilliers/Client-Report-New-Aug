@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     const oauth2Client = new OAuth2Client(
       process.env.GOOGLE_CLIENT_ID,
       process.env.GOOGLE_CLIENT_SECRET,
-      `${process.env.NEXT_PUBLIC_URL}/api/auth/callback/google`
+      `${process.env.NEXT_PUBLIC_URL}/api/auth/google/admin-callback`
     )
     
     oauth2Client.setCredentials({

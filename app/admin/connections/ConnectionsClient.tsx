@@ -80,8 +80,8 @@ export default function ConnectionsClient({ initialConnection }: ConnectionsClie
     
     // Build OAuth URL for admin connection
     const params = new URLSearchParams({
-      client_id: "998982098952-et4jamotfaitvlp5d1mim3ve144dbm2s.apps.googleusercontent.com",
-      redirect_uri: `${window.location.origin}/api/auth/callback/google`,
+      client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "281498391609-8dgdr9pb3ppv2vlll0e7q18ahfoeuqru.apps.googleusercontent.com",
+      redirect_uri: `${window.location.origin}/api/auth/google/admin-callback`,
       response_type: "code",
       scope: [
         "https://www.googleapis.com/auth/webmasters",

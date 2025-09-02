@@ -13,6 +13,6 @@ export async function GET() {
     clientIdPreview: process.env.GOOGLE_CLIENT_ID ? 
       process.env.GOOGLE_CLIENT_ID.substring(0, 10) + "..." : 
       "Not configured",
-    redirectUri: `${process.env.NEXT_PUBLIC_URL}/api/auth/callback/google`,
+    redirectUri: `${process.env.NEXT_PUBLIC_URL}/api/auth/google/admin-callback`,
   })
 }

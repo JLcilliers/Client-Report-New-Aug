@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
         code,
         client_id: process.env.GOOGLE_CLIENT_ID!,
         client_secret: process.env.GOOGLE_CLIENT_SECRET!,
-        redirect_uri: `${request.nextUrl.origin || process.env.NEXT_PUBLIC_URL || 'https://searchsignal.online'}/api/auth/callback/google`,
+        redirect_uri: `${request.nextUrl.origin || process.env.NEXT_PUBLIC_URL || 'https://searchsignal.online'}/api/auth/google/admin-callback`,
         grant_type: 'authorization_code',
       }),
     });

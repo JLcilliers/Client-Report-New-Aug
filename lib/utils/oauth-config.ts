@@ -14,17 +14,9 @@ export function getOAuthBaseUrl(request: NextRequest): string {
     return `http://${host}`
   }
   
-  // For production, always use HTTPS
-  // Prefer NEXT_PUBLIC_URL if set, otherwise construct from host
-  if (process.env.NEXT_PUBLIC_URL) {
-    return process.env.NEXT_PUBLIC_URL
-  }
-  
-  // Force HTTPS in production
-  const protocol = process.env.NODE_ENV === 'production' ? 'https' : 
-    (request.headers.get('x-forwarded-proto') || 'https')
-  
-  return `${protocol}://${host}` || 'https://searchsignal.online'
+  // For production, ALWAYS use the production URL
+  // This ensures consistency regardless of how the app is accessed
+  return 'https://searchsignal.online'
 }
 
 /**
