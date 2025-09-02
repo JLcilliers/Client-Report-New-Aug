@@ -28,14 +28,17 @@ interface GoogleAccount {
   created_at: string
   updated_at: string
   token_expiry?: string
-  search_console_properties?: string[]
-  analytics_properties?: string[]
+  search_console_properties?: any[]
+  analytics_properties?: any[]
+  propertiesLoading?: boolean
+  propertiesError?: string
 }
 
 export default function GoogleAccountsPage() {
   const [accounts, setAccounts] = useState<GoogleAccount[]>([])
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState<string | null>(null)
+  const [fetchingProperties, setFetchingProperties] = useState<string | null>(null)
   const { toast } = useToast()
   const router = useRouter()
 
@@ -79,7 +82,13 @@ export default function GoogleAccountsPage() {
         const data = await response.json()
         console.log('[Frontend] Accounts data received:', data);
         console.log('[Frontend] Number of accounts:', data.accounts?.length || 0);
-        setAccounts(data.accounts || [])
+        const accountsData = data.accounts || [];
+        setAccounts(accountsData)
+        
+        // Fetch properties for each account
+        if (accountsData.length > 0) {
+          fetchAllProperties(accountsData);
+        }
       } else {
         const errorText = await response.text();
         console.error('[Frontend] Failed to fetch accounts!');
@@ -109,6 +118,80 @@ export default function GoogleAccountsPage() {
     window.location.href = '/api/auth/google/add-account'
   }
 
+  const fetchAllProperties = async (accountsList: GoogleAccount[]) => {
+    console.log('[Frontend] Fetching properties for all accounts...');
+    try {
+      const response = await fetch('/api/google/fetch-properties');
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('[Frontend] Properties data:', data);
+        
+        // Update accounts with properties
+        const updatedAccounts = accountsList.map(account => {
+          const propertyData = data.accounts?.find((p: any) => p.accountId === account.id);
+          if (propertyData) {
+            return {
+              ...account,
+              search_console_properties: propertyData.searchConsole || [],
+              analytics_properties: propertyData.analytics || [],
+              propertiesError: propertyData.error
+            };
+          }
+          return account;
+        });
+        
+        setAccounts(updatedAccounts);
+      }
+    } catch (error) {
+      console.error('[Frontend] Error fetching properties:', error);
+    }
+  }
+
+  const fetchPropertiesForAccount = async (accountId: string) => {
+    setFetchingProperties(accountId);
+    console.log('[Frontend] Fetching properties for account:', accountId);
+    
+    try {
+      const response = await fetch(`/api/google/fetch-properties?accountId=${accountId}`);
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('[Frontend] Properties for account:', data);
+        
+        // Update the specific account with properties
+        setAccounts(prevAccounts => 
+          prevAccounts.map(account => {
+            if (account.id === accountId) {
+              return {
+                ...account,
+                search_console_properties: data.properties?.searchConsole || [],
+                analytics_properties: data.properties?.analytics || []
+              };
+            }
+            return account;
+          })
+        );
+        
+        toast({
+          title: "Success",
+          description: "Properties fetched successfully"
+        });
+      } else {
+        throw new Error('Failed to fetch properties');
+      }
+    } catch (error) {
+      console.error('[Frontend] Error fetching properties:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch properties",
+        variant: "destructive"
+      });
+    } finally {
+      setFetchingProperties(null);
+    }
+  }
+
   const refreshAccount = async (accountId: string) => {
     setRefreshing(accountId)
     try {
@@ -121,6 +204,8 @@ export default function GoogleAccountsPage() {
           title: "Success",
           description: "Account refreshed successfully"
         })
+        // After refresh, fetch properties again
+        await fetchPropertiesForAccount(accountId);
         fetchAccounts()
       } else {
         throw new Error('Failed to refresh account')
@@ -259,8 +344,22 @@ export default function GoogleAccountsPage() {
                       <Button
                         variant="outline"
                         size="sm"
+                        onClick={() => fetchPropertiesForAccount(account.id)}
+                        disabled={fetchingProperties === account.id}
+                        title="Fetch properties"
+                      >
+                        {fetchingProperties === account.id ? (
+                          <RefreshCw className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Globe className="h-4 w-4" />
+                        )}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
                         onClick={() => refreshAccount(account.id)}
                         disabled={refreshing === account.id}
+                        title="Refresh token"
                       >
                         {refreshing === account.id ? (
                           <RefreshCw className="h-4 w-4 animate-spin" />
@@ -307,7 +406,22 @@ export default function GoogleAccountsPage() {
                       <div className="flex items-center gap-2">
                         <Globe className="h-4 w-4 text-blue-600" />
                         <span>{account.search_console_properties?.length || 0} properties</span>
+                        {fetchingProperties === account.id && (
+                          <RefreshCw className="h-3 w-3 animate-spin" />
+                        )}
                       </div>
+                      {account.search_console_properties && account.search_console_properties.length > 0 && (
+                        <div className="mt-1 text-xs text-gray-400">
+                          {account.search_console_properties.slice(0, 2).map((prop: any, idx: number) => (
+                            <div key={idx} className="truncate">
+                              {prop.siteUrl || prop}
+                            </div>
+                          ))}
+                          {account.search_console_properties.length > 2 && (
+                            <div>+{account.search_console_properties.length - 2} more</div>
+                          )}
+                        </div>
+                      )}
                     </div>
                     
                     <div>
@@ -315,7 +429,22 @@ export default function GoogleAccountsPage() {
                       <div className="flex items-center gap-2">
                         <BarChart3 className="h-4 w-4 text-purple-600" />
                         <span>{account.analytics_properties?.length || 0} properties</span>
+                        {fetchingProperties === account.id && (
+                          <RefreshCw className="h-3 w-3 animate-spin" />
+                        )}
                       </div>
+                      {account.analytics_properties && account.analytics_properties.length > 0 && (
+                        <div className="mt-1 text-xs text-gray-400">
+                          {account.analytics_properties.slice(0, 2).map((prop: any, idx: number) => (
+                            <div key={idx} className="truncate">
+                              {prop.displayName || prop.propertyId || prop}
+                            </div>
+                          ))}
+                          {account.analytics_properties.length > 2 && (
+                            <div>+{account.analytics_properties.length - 2} more</div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
 
