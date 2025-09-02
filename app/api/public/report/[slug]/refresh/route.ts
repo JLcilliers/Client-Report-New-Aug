@@ -3,6 +3,8 @@ import { cookies } from "next/headers"
 import { getPrisma } from "@/lib/db/prisma"
 import { google } from "googleapis"
 import { OAuth2Client } from "google-auth-library"
+import { withRetry, fetchWithTimeout } from "@/lib/utils/retry"
+import { tokenManager } from "@/lib/google/token-manager"
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -63,7 +65,7 @@ export async function POST(
     const oauth2Client = new OAuth2Client(
       process.env.GOOGLE_CLIENT_ID,
       process.env.GOOGLE_CLIENT_SECRET,
-      `${process.env.NEXT_PUBLIC_URL}/api/auth/google/admin-callback`
+      `${process.env.NEXT_PUBLIC_URL || 'https://searchsignal.online'}/api/auth/simple-admin`
     )
 
     oauth2Client.setCredentials({
@@ -85,12 +87,23 @@ export async function POST(
       byDate: [],
       topQueries: [],
       topPages: [],
+      byCountry: [],
+      byDevice: [],
     }
 
     const analyticsResult: any = {
       summary: {},
       trafficSources: [],
       topPages: [],
+      deviceCategories: [],
+      geoLocations: [],
+      userFlow: [],
+    }
+
+    const pageSpeedData: any = {
+      mobile: null,
+      desktop: null,
+      fetchTime: null,
     }
 
     // Date range for data fetching
@@ -209,19 +222,22 @@ export async function POST(
         try {
           
           
-          // Overall metrics
-          const overallResponse = await searchconsole.searchanalytics.query({
-            auth: oauth2Client,
-            siteUrl: property,
-            requestBody: {
-              startDate: formatDate(startDate),
-              endDate: formatDate(endDate),
-              dimensions: [],
-              rowLimit: 1,
-            },
-          })
+          // Overall metrics with retry
+          const overallResponse = await withRetry(
+            () => searchconsole.searchanalytics.query({
+              auth: oauth2Client,
+              siteUrl: property,
+              requestBody: {
+                startDate: formatDate(startDate),
+                endDate: formatDate(endDate),
+                dimensions: [],
+                rowLimit: 1,
+              },
+            }),
+            { maxAttempts: 3, onRetry: (attempt) => console.log(`Retrying Search Console API (attempt ${attempt})`) }
+          )
 
-          if (overallResponse.data.rows && overallResponse.data.rows[0]) {
+          if (overallResponse && overallResponse.data.rows && overallResponse.data.rows[0]) {
             const row = overallResponse.data.rows[0]
             aggregatedMetrics.clicks += row.clicks || 0
             aggregatedMetrics.impressions += row.impressions || 0
@@ -274,6 +290,50 @@ export async function POST(
           if (dateResponse.data.rows) {
             searchConsoleData.byDate.push(...dateResponse.data.rows)
           }
+          
+          // Get data by country
+          const countryResponse = await searchconsole.searchanalytics.query({
+            auth: oauth2Client,
+            siteUrl: property,
+            requestBody: {
+              startDate: formatDate(startDate),
+              endDate: formatDate(endDate),
+              dimensions: ['country'],
+              rowLimit: 20,
+            },
+          })
+
+          if (countryResponse.data.rows) {
+            searchConsoleData.byCountry = countryResponse.data.rows.map((row: any) => ({
+              country: row.keys?.[0] || '',
+              clicks: row.clicks || 0,
+              impressions: row.impressions || 0,
+              ctr: row.ctr || 0,
+              position: row.position || 0
+            }))
+          }
+          
+          // Get data by device
+          const deviceResponse = await searchconsole.searchanalytics.query({
+            auth: oauth2Client,
+            siteUrl: property,
+            requestBody: {
+              startDate: formatDate(startDate),
+              endDate: formatDate(endDate),
+              dimensions: ['device'],
+              rowLimit: 3,
+            },
+          })
+
+          if (deviceResponse.data.rows) {
+            searchConsoleData.byDevice = deviceResponse.data.rows.map((row: any) => ({
+              device: row.keys?.[0] || '',
+              clicks: row.clicks || 0,
+              impressions: row.impressions || 0,
+              ctr: row.ctr || 0,
+              position: row.position || 0
+            }))
+          }
 
         } catch (error: any) {
           
@@ -324,7 +384,7 @@ export async function POST(
           console.log('[Report Refresh] Access token length:', accessToken.value?.length || 0)
           console.log('[Report Refresh] Date range:', formatDate(startDate), 'to', formatDate(endDate))
           
-          // Overall metrics
+          // Overall metrics with channel grouping
           console.log('[Report Refresh] Making Analytics API request...')
           const response = await analyticsData.properties.runReport({
             property: formattedPropertyId,
@@ -345,6 +405,52 @@ export async function POST(
                 { name: "screenPageViews" },
                 { name: "eventCount" }
               ]
+            },
+            auth: oauth2Client
+          })
+          
+          // Fetch device category data
+          const deviceResponse = await analyticsData.properties.runReport({
+            property: formattedPropertyId,
+            requestBody: {
+              dateRanges: [{
+                startDate: formatDate(startDate),
+                endDate: formatDate(endDate)
+              }],
+              dimensions: [
+                { name: "deviceCategory" }
+              ],
+              metrics: [
+                { name: "sessions" },
+                { name: "activeUsers" },
+                { name: "bounceRate" },
+                { name: "averageSessionDuration" }
+              ]
+            },
+            auth: oauth2Client
+          })
+          
+          // Fetch geographic data
+          const geoResponse = await analyticsData.properties.runReport({
+            property: formattedPropertyId,
+            requestBody: {
+              dateRanges: [{
+                startDate: formatDate(startDate),
+                endDate: formatDate(endDate)
+              }],
+              dimensions: [
+                { name: "country" },
+                { name: "city" }
+              ],
+              metrics: [
+                { name: "sessions" },
+                { name: "activeUsers" }
+              ],
+              orderBys: [{
+                metric: { metricName: "sessions" },
+                desc: true
+              }],
+              limit: "20"
             },
             auth: oauth2Client
           })
@@ -393,9 +499,30 @@ export async function POST(
             })
           }
 
+          // Process device category data
+          if (deviceResponse.data.rows) {
+            analyticsResult.deviceCategories = deviceResponse.data.rows.map(row => ({
+              device: row.dimensionValues?.[0]?.value || "",
+              sessions: parseInt(row.metricValues?.[0]?.value || "0"),
+              users: parseInt(row.metricValues?.[1]?.value || "0"),
+              bounceRate: parseFloat(row.metricValues?.[2]?.value || "0"),
+              avgSessionDuration: parseFloat(row.metricValues?.[3]?.value || "0")
+            }))
+          }
+          
+          // Process geographic data
+          if (geoResponse.data.rows) {
+            analyticsResult.geoLocations = geoResponse.data.rows.slice(0, 10).map(row => ({
+              country: row.dimensionValues?.[0]?.value || "",
+              city: row.dimensionValues?.[1]?.value || "",
+              sessions: parseInt(row.metricValues?.[0]?.value || "0"),
+              users: parseInt(row.metricValues?.[1]?.value || "0")
+            }))
+          }
+
           // Get top pages
           const pagesResponse = await analyticsData.properties.runReport({
-            property: `properties/${propertyId}`,
+            property: formattedPropertyId,
             requestBody: {
               dateRanges: [{
                 startDate: formatDate(startDate),
@@ -447,10 +574,69 @@ export async function POST(
       }
     }
 
+    // Fetch PageSpeed data if we have a domain to test
+    let domainUrl: string | null = null
+    
+    // Try to extract domain from Search Console property
+    if (report.searchConsolePropertyId) {
+      const property = report.searchConsolePropertyId
+      if (property.startsWith('https://') || property.startsWith('http://')) {
+        domainUrl = property
+      } else if (property.startsWith('domain:')) {
+        domainUrl = `https://${property.replace('domain:', '')}`
+      } else if (property.startsWith('sc-domain:')) {
+        domainUrl = `https://${property.replace('sc-domain:', '')}`
+      }
+    }
+    
+    if (domainUrl) {
+      console.log('Fetching PageSpeed data for:', domainUrl)
+      
+      try {
+        // Fetch mobile PageSpeed data
+        const mobileResponse = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/data/pagespeed`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            url: domainUrl,
+            strategy: 'mobile'
+          })
+        })
+        
+        if (mobileResponse.ok) {
+          pageSpeedData.mobile = await mobileResponse.json()
+        }
+        
+        // Fetch desktop PageSpeed data
+        const desktopResponse = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/data/pagespeed`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            url: domainUrl,
+            strategy: 'desktop'
+          })
+        })
+        
+        if (desktopResponse.ok) {
+          pageSpeedData.desktop = await desktopResponse.json()
+        }
+        
+        pageSpeedData.fetchTime = new Date().toISOString()
+        
+      } catch (pageSpeedError: any) {
+        console.error('PageSpeed fetch error:', pageSpeedError)
+      }
+    }
+
     // Combine all data
     const combinedData = {
       search_console: searchConsoleData,
       analytics: analyticsResult,
+      pagespeed: pageSpeedData,
       fetched_at: new Date().toISOString(),
       date_range: {
         type: dateRange,
@@ -467,31 +653,48 @@ export async function POST(
 
     
 
-    // Store combined data using ReportCache model
-    try {
-      const expiresAt = new Date()
-      expiresAt.setHours(expiresAt.getHours() + 1) // Cache for 1 hour
-      
-      // Delete existing cache entries for this report and dataType
-      await prisma.reportCache.deleteMany({
-        where: { 
-          reportId: report.id,
-          dataType: 'combined'
-        }
-      })
-      
-      // Create new cache entry
-      await prisma.reportCache.create({
-        data: {
-          reportId: report.id,
-          dataType: 'combined',
-          data: JSON.stringify(combinedData),
-          cachedAt: new Date(),
-          expiresAt: expiresAt,
-        }
-      })
-    } catch (dbError) {
-      console.log('Database caching failed:', dbError)
+    // Store combined data using ReportCache model with partial save support
+    const hasData = (
+      (searchConsoleData.summary && Object.keys(searchConsoleData.summary).length > 0) ||
+      (analyticsResult.summary && Object.keys(analyticsResult.summary).length > 0) ||
+      (pageSpeedData.mobile || pageSpeedData.desktop)
+    )
+    
+    if (hasData) {
+      try {
+        const expiresAt = new Date()
+        expiresAt.setHours(expiresAt.getHours() + 24) // Cache for 24 hours
+        
+        // Delete existing cache entries for this report and dataType
+        await prisma.reportCache.deleteMany({
+          where: { 
+            reportId: report.id,
+            dataType: 'combined'
+          }
+        })
+        
+        // Create new cache entry with whatever data we managed to collect
+        await prisma.reportCache.create({
+          data: {
+            reportId: report.id,
+            dataType: 'combined',
+            data: JSON.stringify(combinedData),
+            cachedAt: new Date(),
+            expiresAt: expiresAt,
+          }
+        })
+        
+        console.log('Successfully cached report data:')
+        console.log('- Search Console data:', !!searchConsoleData.summary?.clicks)
+        console.log('- Analytics data:', !!analyticsResult.summary?.users)
+        console.log('- PageSpeed data:', !!(pageSpeedData.mobile || pageSpeedData.desktop))
+        
+      } catch (dbError) {
+        console.error('Database caching failed:', dbError)
+        // Still return the data even if caching failed
+      }
+    } else {
+      console.warn('No data collected from any source')
     }
 
     

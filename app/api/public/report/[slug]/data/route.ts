@@ -39,6 +39,9 @@ export async function GET(
     const result: any = {
       search_console: null,
       analytics: null,
+      pagespeed: null,
+      comparisons: null,
+      date_range: null,
       last_updated: null,
     }
     
@@ -46,11 +49,39 @@ export async function GET(
       for (const item of reportCache) {
         const parsedData = JSON.parse(item.data)
         
-        // Handle combined data format
+        // Handle combined data format (new comprehensive format)
         if (item.dataType === 'combined' && parsedData) {
           result.search_console = parsedData.search_console || null
           result.analytics = parsedData.analytics || null
+          result.pagespeed = parsedData.pagespeed || null
+          result.date_range = parsedData.date_range || null
           result.last_updated = parsedData.fetched_at || item.cachedAt.toISOString()
+          
+          // Calculate comparisons if we have date range info
+          if (parsedData.date_range && parsedData.search_console && parsedData.analytics) {
+            result.comparisons = {
+              search_console: {
+                clicks: {
+                  current: parsedData.search_console.summary?.clicks || 0,
+                  trend: 'neutral'
+                },
+                impressions: {
+                  current: parsedData.search_console.summary?.impressions || 0,
+                  trend: 'neutral'
+                }
+              },
+              analytics: {
+                users: {
+                  current: parsedData.analytics.summary?.users || 0,
+                  trend: 'neutral'
+                },
+                sessions: {
+                  current: parsedData.analytics.summary?.sessions || 0,
+                  trend: 'neutral'
+                }
+              }
+            }
+          }
         } 
         // Handle legacy separate format
         else if (item.dataType === 'search_console') {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createClient } from "@supabase/supabase-js"
+import { getPrisma } from "@/lib/db/prisma"
 
 export async function GET(
   request: NextRequest,
@@ -7,43 +7,25 @@ export async function GET(
 ) {
   try {
     const { reportId } = await params
+    const prisma = getPrisma()
     
-    
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-    
-    if (!supabaseUrl || !supabaseServiceRoleKey) {
-      return NextResponse.json(
-        { error: "Server configuration error" },
-        { status: 500 }
-      )
-    }
-    
-    const supabase = createClient(supabaseUrl, supabaseServiceRoleKey)
-    
-    // Get report with client info
-    const { data: report, error } = await supabase
-      .from("reports")
-      .select(`
-        *,
-        client:clients (
-          id,
-          name,
-          domain
-        )
-      `)
-      .eq("id", reportId)
-      .single()
-    
-    
-    
-    if (error) {
-      
-      return NextResponse.json(
-        { error: "Database error", details: error.message },
-        { status: 500 }
-      )
-    }
+    // Get report with all related data
+    const report = await prisma.clientReport.findUnique({
+      where: { id: reportId },
+      include: {
+        cache: {
+          where: {
+            expiresAt: {
+              gt: new Date()
+            }
+          },
+          orderBy: {
+            cachedAt: 'desc'
+          },
+          take: 1
+        }
+      }
+    })
     
     if (!report) {
       return NextResponse.json(
@@ -52,7 +34,27 @@ export async function GET(
       )
     }
     
-    return NextResponse.json(report)
+    // Transform report data to include client info and properties
+    const transformedReport = {
+      id: report.id,
+      name: report.reportName,
+      slug: report.shareableId,
+      client: {
+        id: report.id,
+        name: report.clientName,
+        domain: null // Add domain if stored
+      },
+      search_console_properties: report.searchConsolePropertyId ? [report.searchConsolePropertyId] : [],
+      analytics_properties: report.ga4PropertyId ? [report.ga4PropertyId] : [],
+      google_account_id: report.googleAccountId,
+      is_active: report.isActive,
+      refresh_interval: report.refreshInterval,
+      created_at: report.createdAt,
+      updated_at: report.updatedAt,
+      last_data_fetch: report.cache?.[0]?.cachedAt || null
+    }
+    
+    return NextResponse.json(transformedReport)
     
   } catch (error: any) {
     

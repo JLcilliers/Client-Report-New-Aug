@@ -1,6 +1,34 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 
+export async function POST(request: NextRequest) {
+  try {
+    // Simple demo authentication - no real validation
+    const body = await request.json()
+    
+    // Set a simple session cookie for demo purposes
+    const response = NextResponse.json({ 
+      success: true, 
+      message: "Demo authentication successful" 
+    })
+    
+    // Set a simple auth cookie (in production, use proper session management)
+    response.cookies.set('demo_auth', 'true', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 // 24 hours
+    })
+    
+    return response
+  } catch (error) {
+    return NextResponse.json({ 
+      success: false, 
+      error: "Authentication failed" 
+    }, { status: 401 })
+  }
+}
+
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
   const code = searchParams.get("code")
@@ -114,8 +142,8 @@ export async function GET(request: NextRequest) {
           })
       }
       
-      // Return success page
-      return new NextResponse(`
+      // Create response with success page
+      const response = new NextResponse(`
         <!DOCTYPE html>
         <html>
           <head>
@@ -176,6 +204,27 @@ export async function GET(request: NextRequest) {
       `, {
         headers: { "Content-Type": "text/html" },
       })
+      
+      // Set cookies for the tokens so the refresh route can use them
+      response.cookies.set('google_access_token', access_token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 * 7, // 7 days
+        path: '/'
+      })
+      
+      if (refresh_token) {
+        response.cookies.set('google_refresh_token', refresh_token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          maxAge: 60 * 60 * 24 * 30, // 30 days
+          path: '/'
+        })
+      }
+      
+      return response
       
     } catch (error: any) {
       
