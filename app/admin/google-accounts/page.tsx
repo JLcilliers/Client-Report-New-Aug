@@ -46,6 +46,7 @@ export default function GoogleAccountsPage() {
     const success = params.get('success')
     
     if (error) {
+      console.error('[Frontend] OAuth callback error detected:', error);
       toast({
         title: "Authentication Error",
         description: error === 'callback_failed' 
@@ -56,6 +57,7 @@ export default function GoogleAccountsPage() {
       // Clean up URL
       window.history.replaceState({}, '', '/admin/google-accounts')
     } else if (success) {
+      console.log('[Frontend] OAuth callback success detected');
       toast({
         title: "Success",
         description: "Google account connected successfully!",
@@ -68,15 +70,27 @@ export default function GoogleAccountsPage() {
   }, [])
 
   const fetchAccounts = async () => {
+    console.log('[Frontend] Fetching Google accounts...');
     try {
       const response = await fetch('/api/admin/google-accounts')
+      console.log('[Frontend] Fetch response status:', response.status);
+      
       if (response.ok) {
         const data = await response.json()
+        console.log('[Frontend] Accounts data received:', data);
+        console.log('[Frontend] Number of accounts:', data.accounts?.length || 0);
         setAccounts(data.accounts || [])
       } else {
+        const errorText = await response.text();
+        console.error('[Frontend] Failed to fetch accounts!');
+        console.error('  - Status:', response.status);
+        console.error('  - Response:', errorText);
         throw new Error('Failed to fetch accounts')
       }
-    } catch (error) {
+    } catch (error: any) {
+      console.error('[Frontend] Error fetching accounts:', error);
+      console.error('  - Message:', error.message);
+      console.error('  - Stack:', error.stack);
       
       toast({
         title: "Error",
@@ -89,6 +103,8 @@ export default function GoogleAccountsPage() {
   }
 
   const addNewAccount = () => {
+    console.log('[Frontend] Adding new account...');
+    console.log('[Frontend] Redirecting to OAuth flow: /api/auth/google/add-account');
     // Redirect to OAuth flow
     window.location.href = '/api/auth/google/add-account'
   }
@@ -122,25 +138,41 @@ export default function GoogleAccountsPage() {
   }
 
   const deleteAccount = async (accountId: string) => {
+    console.log('[Frontend] Delete account requested for ID:', accountId);
+    
     if (!confirm('Are you sure you want to remove this Google account?')) {
+      console.log('[Frontend] Delete cancelled by user');
       return
     }
 
+    console.log('[Frontend] Sending DELETE request...');
     try {
       const response = await fetch(`/api/admin/google-accounts/${accountId}`, {
         method: 'DELETE'
       })
       
+      console.log('[Frontend] Delete response status:', response.status);
+      
       if (response.ok) {
+        const data = await response.json();
+        console.log('[Frontend] Delete response data:', data);
+        
         toast({
           title: "Success",
           description: "Account removed successfully"
         })
         fetchAccounts()
       } else {
+        const errorText = await response.text();
+        console.error('[Frontend] Delete failed!');
+        console.error('  - Status:', response.status);
+        console.error('  - Response:', errorText);
         throw new Error('Failed to delete account')
       }
-    } catch (error) {
+    } catch (error: any) {
+      console.error('[Frontend] Error deleting account:', error);
+      console.error('  - Message:', error.message);
+      console.error('  - Stack:', error.stack);
       
       toast({
         title: "Error",

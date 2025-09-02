@@ -10,8 +10,23 @@ export async function DELETE(
   try {
     const { id } = params;
 
-    // Delete the Google account
-    await prisma.googleAccount.delete({
+    // Check if the account exists and is a Google account
+    const account = await prisma.account.findFirst({
+      where: { 
+        id,
+        provider: 'google'
+      }
+    });
+
+    if (!account) {
+      return NextResponse.json(
+        { error: 'Google account not found' },
+        { status: 404 }
+      );
+    }
+
+    // Delete the Google account from Account table
+    await prisma.account.delete({
       where: { id }
     });
 
