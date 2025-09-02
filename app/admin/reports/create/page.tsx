@@ -101,62 +101,86 @@ export default function CreateReportPage() {
 
   const fetchProperties = async (accountId: string) => {
     setLoadingProperties(true)
+    console.log('[Create Report] Fetching properties for account:', accountId)
+    
     try {
-      // Fetch properties using the new endpoint
-      const response = await fetch('/api/google/fetch-properties')
+      // Fetch properties for the specific account
+      const response = await fetch(`/api/google/fetch-properties?accountId=${accountId}`)
       
       if (response.ok) {
         const data = await response.json()
+        console.log('[Create Report] Properties response:', data)
         
-        // Set Search Console properties
-        if (data.properties?.searchConsole) {
-          const properties = data.properties.searchConsole.map((site: any) => ({
-            siteUrl: site.siteUrl,
-            verified: true
-          }))
-          setSearchConsoleProperties(properties)
-        } else {
+        // Handle the response structure correctly
+        if (data.success && data.properties) {
+          // Set Search Console properties
+          if (data.properties.searchConsole) {
+            const properties = data.properties.searchConsole.map((site: any) => ({
+              siteUrl: site.siteUrl,
+              verified: true,
+              permissionLevel: site.permissionLevel
+            }))
+            setSearchConsoleProperties(properties)
+            console.log('[Create Report] Search Console properties:', properties.length)
+          } else {
+            setSearchConsoleProperties([])
+          }
+          
+          // Set Analytics properties
+          if (data.properties.analytics) {
+            // Transform analytics properties to match expected format
+            const analyticsProps = data.properties.analytics.map((prop: any) => ({
+              account: prop.account,
+              property: prop.propertyId,
+              propertyId: prop.propertyId,
+              displayName: prop.displayName || prop.propertyId
+            }))
+            setAnalyticsProperties(analyticsProps)
+            console.log('[Create Report] Analytics properties:', analyticsProps.length)
+          } else {
+            setAnalyticsProperties([])
+          }
+          
+          if ((!data.properties.searchConsole || data.properties.searchConsole.length === 0) && 
+              (!data.properties.analytics || data.properties.analytics.length === 0)) {
+            toast({
+              title: "No properties found",
+              description: "This account may not have access to any properties or the token may be expired",
+              variant: "default"
+            })
+          }
+        } else if (data.error) {
+          console.error('[Create Report] Error from API:', data.error)
+          toast({
+            title: "Error loading properties",
+            description: data.error === 'No valid access token available' 
+              ? "Token expired. Please refresh the Google account connection."
+              : "Failed to load properties for this account",
+            variant: "destructive"
+          })
           setSearchConsoleProperties([])
-        }
-        
-        // Set Analytics properties
-        if (data.properties?.analytics) {
-          // Transform analytics properties to match expected format
-          const analyticsProps = data.properties.analytics.map((prop: any) => ({
-            account: prop.account,
-            property: prop.name,
-            propertyId: prop.propertyId,
-            displayName: prop.name
-          }))
-          setAnalyticsProperties(analyticsProps)
-        } else {
           setAnalyticsProperties([])
         }
-        
-        if (data.properties?.searchConsole?.length === 0 && data.properties?.analytics?.length === 0) {
-          toast({
-            title: "No properties found",
-            description: "Make sure you have access to Google Analytics or Search Console properties",
-            variant: "default"
-          })
-        }
-        
       } else {
         const errorText = await response.text()
-        
+        console.error('[Create Report] Error response:', errorText)
         toast({
           title: "Error loading properties",
           description: "Failed to load properties for this account",
           variant: "destructive"
         })
+        setSearchConsoleProperties([])
+        setAnalyticsProperties([])
       }
     } catch (error) {
-      
+      console.error('[Create Report] Network error:', error)
       toast({
         title: "Network Error",
         description: "Could not connect to fetch properties",
         variant: "destructive"
       })
+      setSearchConsoleProperties([])
+      setAnalyticsProperties([])
     } finally {
       setLoadingProperties(false)
     }
@@ -293,7 +317,24 @@ export default function CreateReportPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="googleAccount">Google Account</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="googleAccount">Google Account</Label>
+              {selectedGoogleAccount && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => fetchProperties(selectedGoogleAccount)}
+                  disabled={loadingProperties}
+                >
+                  {loadingProperties ? (
+                    <RefreshCw className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <RefreshCw className="h-4 w-4" />
+                  )}
+                  <span className="ml-2">Refresh Properties</span>
+                </Button>
+              )}
+            </div>
             <Select value={selectedGoogleAccount} onValueChange={setSelectedGoogleAccount}>
               <SelectTrigger id="googleAccount">
                 <SelectValue placeholder="Select a Google account" />
@@ -301,8 +342,12 @@ export default function CreateReportPage() {
               <SelectContent>
                 {googleAccounts.map((account) => (
                   <SelectItem key={account.id} value={account.id}>
-                    {account.account_email}
-                    {account.account_name && ` (${account.account_name})`}
+                    <div className="flex items-center justify-between w-full">
+                      <span>{account.account_email}</span>
+                      {!account.is_active && (
+                        <span className="text-xs text-red-500 ml-2">(Token Expired)</span>
+                      )}
+                    </div>
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -398,6 +443,30 @@ export default function CreateReportPage() {
                 <Globe className="h-5 w-5 text-blue-600" />
                 <Label className="text-base font-medium">Search Console Properties</Label>
                 <span className="text-sm text-gray-500">({searchConsoleProperties.length} available)</span>
+                {searchConsoleProperties.length > 0 && (
+                  <button
+                    type="button"
+                    className="text-xs text-blue-600 hover:underline ml-auto"
+                    onClick={() => {
+                      const allSelected = searchConsoleProperties.every(p => 
+                        formData.selectedSearchConsoleProps.includes(p.siteUrl)
+                      )
+                      if (allSelected) {
+                        setFormData(prev => ({ ...prev, selectedSearchConsoleProps: [] }))
+                      } else {
+                        setFormData(prev => ({ 
+                          ...prev, 
+                          selectedSearchConsoleProps: searchConsoleProperties.map(p => p.siteUrl) 
+                        }))
+                      }
+                    }}
+                  >
+                    {searchConsoleProperties.every(p => formData.selectedSearchConsoleProps.includes(p.siteUrl)) 
+                      ? 'Deselect All' 
+                      : 'Select All'
+                    }
+                  </button>
+                )}
               </div>
               
               {searchConsoleProperties.length > 0 ? (
@@ -442,6 +511,30 @@ export default function CreateReportPage() {
                 <BarChart3 className="h-5 w-5 text-purple-600" />
                 <Label className="text-base font-medium">Analytics Properties</Label>
                 <span className="text-sm text-gray-500">({analyticsProperties.length} available)</span>
+                {analyticsProperties.length > 0 && (
+                  <button
+                    type="button"
+                    className="text-xs text-purple-600 hover:underline ml-auto"
+                    onClick={() => {
+                      const allSelected = analyticsProperties.every(p => 
+                        formData.selectedAnalyticsProps.includes(p.propertyId)
+                      )
+                      if (allSelected) {
+                        setFormData(prev => ({ ...prev, selectedAnalyticsProps: [] }))
+                      } else {
+                        setFormData(prev => ({ 
+                          ...prev, 
+                          selectedAnalyticsProps: analyticsProperties.map(p => p.propertyId) 
+                        }))
+                      }
+                    }}
+                  >
+                    {analyticsProperties.every(p => formData.selectedAnalyticsProps.includes(p.propertyId)) 
+                      ? 'Deselect All' 
+                      : 'Select All'
+                    }
+                  </button>
+                )}
               </div>
               
               {analyticsProperties.length > 0 ? (
