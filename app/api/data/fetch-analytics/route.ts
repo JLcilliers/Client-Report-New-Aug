@@ -2,30 +2,54 @@ import { NextRequest, NextResponse } from "next/server"
 import { google } from "googleapis"
 import { OAuth2Client } from "google-auth-library"
 import { cookies } from "next/headers"
+import { prisma } from '@/lib/prisma'
+import { getValidGoogleToken } from '@/lib/google/refresh-token'
 
 export const dynamic = 'force-dynamic'
 
 const analyticsData = google.analyticsdata("v1beta")
 
 export async function POST(request: NextRequest) {
+  console.log('\n========== Analytics Data Fetch START ==========')
+  
   try {
-    const { propertyId, startDate, endDate } = await request.json()
+    const { propertyId, startDate, endDate, accountId } = await request.json()
+    
+    console.log('[Analytics] Request params:')
+    console.log('  - Property ID:', propertyId)
+    console.log('  - Start Date:', startDate)
+    console.log('  - End Date:', endDate)
+    console.log('  - Account ID:', accountId)
     
     if (!propertyId) {
+      console.error('[Analytics] No property ID provided')
       return NextResponse.json({ error: "Property ID is required" }, { status: 400 })
     }
     
-    // Get tokens from cookies
-    const cookieStore = cookies()
-    const accessToken = cookieStore.get('google_access_token')
-    const refreshToken = cookieStore.get('google_refresh_token')
+    // Get access token from account or cookies
+    let accessToken: string | null = null;
     
-    if (!accessToken || !refreshToken) {
+    if (accountId) {
+      console.log('[Analytics] Using account ID to get token:', accountId)
+      accessToken = await getValidGoogleToken(accountId)
+    } else {
+      console.log('[Analytics] No account ID, trying cookies')
+      const cookieStore = cookies()
+      const tokenCookie = cookieStore.get('google_access_token')
+      if (tokenCookie) {
+        accessToken = tokenCookie.value
+      }
+    }
+    
+    if (!accessToken) {
+      console.error('[Analytics] No valid access token found')
       return NextResponse.json({ 
         error: "Google authentication required",
         details: "No valid Google tokens found"
       }, { status: 401 })
     }
+    
+    console.log('[Analytics] Got access token, length:', accessToken.length)
     
     // Create OAuth2 client
     const oauth2Client = new OAuth2Client(
@@ -35,17 +59,8 @@ export async function POST(request: NextRequest) {
     )
     
     oauth2Client.setCredentials({
-      access_token: accessToken.value,
-      refresh_token: refreshToken.value,
+      access_token: accessToken
     })
-    
-    // Refresh the access token if needed
-    try {
-      const { credentials } = await oauth2Client.refreshAccessToken()
-      oauth2Client.setCredentials(credentials)
-    } catch (refreshError) {
-      console.log('Token refresh failed, using existing token:', refreshError)
-    }
     
     // Format dates
     const endDateObj = endDate ? new Date(endDate) : new Date()
@@ -57,9 +72,19 @@ export async function POST(request: NextRequest) {
     
     const formatDate = (date: Date) => date.toISOString().split('T')[0]
     
+    // Format property ID - ensure it has the correct format
+    let formattedPropertyId = propertyId;
+    if (!propertyId.startsWith('properties/')) {
+      formattedPropertyId = `properties/${propertyId}`;
+    }
+    
+    console.log('[Analytics] Formatted property ID:', formattedPropertyId)
+    console.log('[Analytics] Date range:', formatDate(startDateObj), 'to', formatDate(endDateObj))
+    console.log('[Analytics] Making Analytics API call...')
+    
     // Fetch Analytics data
     const response = await analyticsData.properties.runReport({
-      property: `properties/${propertyId}`,
+      property: formattedPropertyId,
       requestBody: {
         dateRanges: [{
           startDate: formatDate(startDateObj),
@@ -81,9 +106,12 @@ export async function POST(request: NextRequest) {
       auth: oauth2Client
     })
     
+    console.log('[Analytics] First API call successful, rows:', response.data.rows?.length || 0)
+    
     // Get top pages data
+    console.log('[Analytics] Fetching top pages...')
     const pagesResponse = await analyticsData.properties.runReport({
-      property: `properties/${propertyId}`,
+      property: formattedPropertyId,
       requestBody: {
         dateRanges: [{
           startDate: formatDate(startDateObj),
@@ -183,10 +211,18 @@ export async function POST(request: NextRequest) {
       }))
     }
     
+    console.log('[Analytics] Data processing complete:')
+    console.log('  - Total users:', analyticsResult.summary.users)
+    console.log('  - Total sessions:', analyticsResult.summary.sessions)
+    console.log('  - Total pageviews:', analyticsResult.summary.pageviews)
+    console.log('  - Traffic sources:', analyticsResult.trafficSources.length)
+    console.log('  - Top pages:', analyticsResult.topPages.length)
+    console.log('========== Analytics Data Fetch END ==========\n')
+    
     return NextResponse.json({
       success: true,
       analytics: analyticsResult,
-      propertyId,
+      propertyId: formattedPropertyId,
       dateRange: {
         startDate: formatDate(startDateObj),
         endDate: formatDate(endDateObj)
@@ -194,11 +230,19 @@ export async function POST(request: NextRequest) {
     })
     
   } catch (error: any) {
+    console.error('[Analytics] ERROR:', error)
+    console.error('[Analytics] Error details:')
+    console.error('  - Message:', error.message)
+    console.error('  - Code:', error.code)
+    console.error('  - Status:', error.status)
+    console.error('  - Stack:', error.stack)
+    console.error('========== Analytics Data Fetch END (ERROR) ==========\n')
     
     return NextResponse.json({
       error: "Failed to fetch Analytics data",
       details: error.message,
-      code: error.code
+      code: error.code,
+      status: error.status
     }, { status: 500 })
   }
 }

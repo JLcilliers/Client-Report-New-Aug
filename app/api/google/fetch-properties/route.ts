@@ -148,7 +148,7 @@ async function fetchPropertiesForToken(accessToken: string) {
       const gaJson = await gaResp.json() as { accountSummaries?: Ga4AccountSummary[] };
       analyticsProperties = gaJson.accountSummaries?.flatMap(as =>
         (as.propertySummaries ?? []).map(ps => ({
-          propertyId: ps.property || '',
+          propertyId: ps.property?.replace('properties/', '') || '',
           displayName: ps.displayName ?? '',
           account: as.account
         }))
