@@ -8,6 +8,14 @@ const nextConfig = {
   images: {
     domains: ['localhost', 'online-client-reporting.vercel.app'],
   },
+  webpack: (config, { isServer }) => {
+    // Fix for module resolution in Vercel
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': require('path').resolve(__dirname),
+    };
+    return config;
+  },
   async redirects() {
     return [
       {
