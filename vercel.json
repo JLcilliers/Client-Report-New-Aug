@@ -1,6 +1,6 @@
 {
-  "buildCommand": "cp prisma/schema.production.prisma prisma/schema.prisma && npx prisma generate && npm run build",
-  "installCommand": "npm install",
+  "buildCommand": "cp prisma/schema.production.prisma prisma/schema.prisma && npx prisma generate && npx next build",
+  "installCommand": "npm ci",
   "framework": "nextjs",
   "env": {
     "FORCE_REBUILD": "true"
