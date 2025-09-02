@@ -10,7 +10,7 @@ export async function GET() {
     queryAll: { success: false, message: '', data: null as any },
     create: { success: false, message: '', data: null as any },
     delete: { success: false, message: '' },
-    prismaStatus: { connected: false, message: '' }
+    prismaStatus: { success: false, message: '' }
   };
 
   try {
@@ -18,7 +18,7 @@ export async function GET() {
     console.log('[DB Check] Testing Prisma connection...');
     try {
       await prisma.$connect();
-      results.prismaStatus.connected = true;
+      results.prismaStatus.success = true;
       results.prismaStatus.message = 'Prisma connected successfully';
       console.log('[DB Check] ✓ Prisma connected');
     } catch (error: any) {
