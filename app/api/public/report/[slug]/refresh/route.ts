@@ -306,16 +306,28 @@ export async function POST(
 
     // Fetch Analytics data
     if (report.ga4PropertyId) {
-      
+      console.log('\n========== Analytics Data Fetch in Report Refresh ==========')
+      console.log('[Report Refresh] GA4 Property ID from report:', report.ga4PropertyId)
       
       const propertyIds = [report.ga4PropertyId]
       for (const propertyId of propertyIds) {
         try {
+          console.log('[Report Refresh] Processing property:', propertyId)
           
+          // Format property ID - ensure it has the correct format
+          let formattedPropertyId = propertyId;
+          if (!propertyId.startsWith('properties/')) {
+            formattedPropertyId = `properties/${propertyId}`;
+          }
+          
+          console.log('[Report Refresh] Formatted property ID:', formattedPropertyId)
+          console.log('[Report Refresh] Access token length:', accessToken.value?.length || 0)
+          console.log('[Report Refresh] Date range:', formatDate(startDate), 'to', formatDate(endDate))
           
           // Overall metrics
+          console.log('[Report Refresh] Making Analytics API request...')
           const response = await analyticsData.properties.runReport({
-            property: `properties/${propertyId}`,
+            property: formattedPropertyId,
             requestBody: {
               dateRanges: [{
                 startDate: formatDate(startDate),
@@ -336,6 +348,20 @@ export async function POST(
             },
             auth: oauth2Client
           })
+
+          console.log('[Report Refresh] Analytics API response received')
+          console.log('[Report Refresh] Response status:', response.status)
+          console.log('[Report Refresh] Response has data:', !!response.data)
+          console.log('[Report Refresh] Row count:', response.data.rows?.length || 0)
+          console.log('[Report Refresh] Dimension headers:', JSON.stringify(response.data.dimensionHeaders))
+          console.log('[Report Refresh] Metric headers:', JSON.stringify(response.data.metricHeaders))
+          
+          if (response.data.rows && response.data.rows.length > 0) {
+            console.log('[Report Refresh] First row data:', JSON.stringify(response.data.rows[0]))
+          } else {
+            console.log('[Report Refresh] WARNING: No rows returned from Analytics API')
+            console.log('[Report Refresh] Full response:', JSON.stringify(response.data))
+          }
 
           // Process Analytics data
           if (response.data.rows) {
@@ -404,7 +430,11 @@ export async function POST(
           }
 
         } catch (error: any) {
-          
+          console.error('[Report Refresh] Analytics API error:', error.message)
+          console.error('[Report Refresh] Error code:', error.code)
+          console.error('[Report Refresh] Error status:', error.status)
+          console.error('[Report Refresh] Error details:', JSON.stringify(error.errors))
+          console.error('[Report Refresh] Full error:', error)
         }
       }
 
