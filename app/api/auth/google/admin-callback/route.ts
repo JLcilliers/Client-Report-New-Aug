@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { OAuth2Client } from "google-auth-library"
-import { prisma } from "@/lib/prisma"
+import { prisma } from "@/lib/db/prisma"
 import { cookies } from "next/headers"
 import { getOAuthRedirectUri } from "@/lib/utils/oauth-config"
 

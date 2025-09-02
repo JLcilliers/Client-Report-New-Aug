@@ -1,6 +1,6 @@
 // app/api/admin/google-accounts/[id]/tokeninfo/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
+import { prisma } from '@/lib/db/prisma';
 import * as Sentry from '@sentry/nextjs';
 
 export async function GET(

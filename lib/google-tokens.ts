@@ -1,4 +1,4 @@
-import prisma from '@/lib/prisma';
+import { prisma } from '@/lib/db/prisma';
 
 export async function getAccessTokenForAccount(accountId: string, userId: string) {
   const acct = await prisma.account.findFirst({

@@ -1,4 +1,4 @@
-import prisma from '@/lib/prisma';
+import { prisma } from '@/lib/db/prisma';
 
 const enabled = process.env.DEBUG_DB_LOGS === 'true';
 

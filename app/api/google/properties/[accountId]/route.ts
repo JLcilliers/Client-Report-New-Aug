@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import prisma from '@/lib/prisma';
+import { prisma } from '@/lib/db/prisma';
 import { getAccessTokenForAccount } from '@/lib/google-tokens';
 import { log } from '@/lib/logger';
 

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { google } from "googleapis"
 import { OAuth2Client } from "google-auth-library"
-import { prisma } from '@/lib/prisma'
+import { prisma } from '@/lib/db/prisma'
 import { getValidGoogleToken } from '@/lib/google/refresh-token'
 
 export const dynamic = 'force-dynamic'

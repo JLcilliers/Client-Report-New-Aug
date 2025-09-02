@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { prisma } from '@/lib/db/prisma';
 import { getValidGoogleToken } from '@/lib/google/refresh-token';
 
 export const dynamic = 'force-dynamic';

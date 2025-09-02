@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-import prisma from '@/lib/prisma';
+import { prisma } from '@/lib/db/prisma';
 
 export default async function LogsPage() {
   // Optional: short-circuit if logging disabled
