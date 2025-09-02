@@ -7,8 +7,8 @@ export async function GET() {
   console.log('\n========== Database Check START ==========');
   
   const results = {
-    queryAll: { success: false, message: '', data: null },
-    create: { success: false, message: '', data: null },
+    queryAll: { success: false, message: '', data: null as any },
+    create: { success: false, message: '', data: null as any },
     delete: { success: false, message: '' },
     prismaStatus: { connected: false, message: '' }
   };
