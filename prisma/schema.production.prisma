@@ -39,16 +39,16 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  email         String?   @unique
-  emailVerified DateTime?
-  name          String?
-  image         String?
-  accounts      Account[]
-  sessions      Session[]
-  reports       Report[]
-  clientReports ClientReport[]
-  googleTokens  GoogleTokens[]
+  id             String          @id @default(cuid())
+  email          String?         @unique
+  emailVerified  DateTime?
+  name           String?
+  image          String?
+  accounts       Account[]
+  sessions       Session[]
+  reports        Report[]
+  clientReports  ClientReport[]
+  googleTokens   GoogleTokens[]
   googleAccounts GoogleAccount[]
 }
 
@@ -61,72 +61,77 @@ model VerificationToken {
 }
 
 model Report {
-  id              String   @id @default(cuid())
+  id              String    @id @default(cuid())
   name            String
   userId          String
   propertyId      String?
   siteUrl         String?
   dateRange       String
-  metrics         String   @db.Text
-  data            String?  @db.Text
-  shareToken      String?  @unique
-  isPublic        Boolean  @default(false)
+  metrics         String    @db.Text
+  data            String?   @db.Text
+  shareToken      String?   @unique
+  isPublic        Boolean   @default(false)
   refreshInterval Int?
   lastRefreshed   DateTime?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user            User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  seoAudits       SEOAudit[]
+  coreWebVitals   CoreWebVitalsMetric[]
+  pageSpeedAudits PageSpeedAudit[]
 }
 
 model ClientReport {
-  id                      String   @id @default(cuid())
+  id                      String            @id @default(cuid())
   clientName              String
   reportName              String
   googleAccountId         String
   ga4PropertyId           String
   searchConsolePropertyId String
-  shareableLink           String   @unique
-  shareableId             String   @unique
-  isActive                Boolean  @default(true)
-  refreshInterval         String   @default("daily")
-  createdAt               DateTime @default(now())
-  updatedAt               DateTime @updatedAt
+  shareableLink           String            @unique
+  shareableId             String            @unique
+  isActive                Boolean           @default(true)
+  refreshInterval         String            @default("daily")
+  createdAt               DateTime          @default(now())
+  updatedAt               DateTime          @updatedAt
   userId                  String
-  user                    User     @relation(fields: [userId], references: [id])
+  user                    User              @relation(fields: [userId], references: [id])
   accessLogs              ReportAccessLog[]
   cache                   ReportCache[]
+  seoAudits               SEOAudit[]
 }
 
 model ReportAccessLog {
-  id           String       @id @default(cuid())
-  reportId     String
-  report       ClientReport @relation(fields: [reportId], references: [id])
-  ipAddress    String?
-  userAgent    String?  @db.Text
-  accessedAt   DateTime     @default(now())
+  id         String       @id @default(cuid())
+  reportId   String
+  report     ClientReport @relation(fields: [reportId], references: [id])
+  ipAddress  String?
+  userAgent  String?      @db.Text
+  accessedAt DateTime     @default(now())
 }
 
 model ReportCache {
-  id          String       @id @default(cuid())
-  reportId    String
-  report      ClientReport @relation(fields: [reportId], references: [id])
-  dataType    String       // 'ga4', 'searchConsole', 'webVitals'
-  data        String       @db.Text // JSON string
-  cachedAt    DateTime     @default(now())
-  expiresAt   DateTime
+  id        String       @id @default(cuid())
+  reportId  String
+  report    ClientReport @relation(fields: [reportId], references: [id])
+  dataType  String // 'ga4', 'searchConsole', 'webVitals'
+  data      String       @db.Text // JSON string
+  cachedAt  DateTime     @default(now())
+  expiresAt DateTime
 }
 
 model Log {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
-  level     String   // 'debug' | 'info' | 'warn' | 'error'
-  source    String   // e.g. 'api/google/properties'
+  level     String // 'debug' | 'info' | 'warn' | 'error'
+  source    String // e.g. 'api/google/properties'
   requestId String?
   userId    String?
   accountId String?
   message   String
   meta      Json?
+
   @@index([createdAt, source])
 }
 
@@ -137,16 +142,16 @@ model GoogleTokens {
   access_token  String?  @db.Text
   refresh_token String?  @db.Text
   scope         String?
-  expires_at    BigInt?  // BIGINT (epoch seconds)
+  expires_at    BigInt? // BIGINT (epoch seconds)
   created_at    DateTime @default(now()) @map("created_at")
   updated_at    DateTime @default(now()) @updatedAt @map("updated_at")
-  userId        String?  // we added this
-  
-  user          User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        String? // we added this
 
-  @@map("google_tokens")
-  @@index([userId])
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@unique([userId, google_sub])
+  @@index([userId])
+  @@map("google_tokens")
 }
 
 model GoogleAccount {
@@ -159,8 +164,116 @@ model GoogleAccount {
   scope        String?  @db.Text
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-  
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([userId])
+}
+
+model SEOAudit {
+  id                   String                @id @default(cuid())
+  reportId             String?
+  clientReportId       String?
+  domain               String
+  url                  String
+  overallScore         Int                   @default(0)
+  performanceScore     Int                   @default(0)
+  seoScore             Int                   @default(0)
+  accessibilityScore   Int                   @default(0)
+  securityScore        Int                   @default(0)
+  mobileScore          Int                   @default(0)
+  coreWebVitals        String?               @db.Text // LCP, FID, CLS, TTFB, FCP, INP
+  pageSpeedMetrics     String?               @db.Text // Desktop/Mobile PageSpeed data
+  mobileUsability      String?               @db.Text // Mobile-friendly test results
+  crawlabilityData     String?               @db.Text // Robots.txt, sitemap analysis
+  metaTagsAnalysis     String?               @db.Text // Title, description, canonical, hreflang
+  structuredData       String?               @db.Text // Schema markup validation
+  securityChecks       String?               @db.Text // HTTPS, mixed content, headers
+  imageOptimization    String?               @db.Text // Image analysis data
+  resourceOptimization String?               @db.Text // CSS/JS optimization data
+  linkAnalysis         String?               @db.Text // Internal/external links
+  redirectChains       String?               @db.Text // Redirect analysis
+  errorPages           String?               @db.Text // 404 and other errors
+  duplicateContent     String?               @db.Text // Content duplication issues
+  technicalIssues      String?               @db.Text // Technical SEO problems
+  recommendations      String?               @db.Text // Prioritized action items
+  auditedAt            DateTime              @default(now())
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  report               Report?               @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  clientReport         ClientReport?         @relation(fields: [clientReportId], references: [id], onDelete: Cascade)
+  auditHistory         SEOAuditHistory[]
+  coreWebVitalsMetrics CoreWebVitalsMetric[]
+  pageSpeedAudits      PageSpeedAudit[]
+
+  @@index([reportId])
+  @@index([clientReportId])
+  @@index([domain])
+  @@index([auditedAt])
+}
+
+model SEOAuditHistory {
+  id            String   @id @default(cuid())
+  auditId       String
+  changeType    String // 'score_improvement', 'new_issue', 'issue_resolved'
+  category      String // 'performance', 'seo', 'accessibility', 'security', 'mobile'
+  previousValue String?
+  currentValue  String?
+  description   String
+  impact        String? // 'high', 'medium', 'low'
+  detectedAt    DateTime @default(now())
+  audit         SEOAudit @relation(fields: [auditId], references: [id], onDelete: Cascade)
+
+  @@index([auditId])
+  @@index([detectedAt])
+}
+
+model CoreWebVitalsMetric {
+  id         String    @id @default(cuid())
+  auditId    String?
+  reportId   String?
+  url        String
+  device     String // 'mobile' | 'desktop'
+  lcp        Float? // Largest Contentful Paint
+  fid        Float? // First Input Delay
+  cls        Float? // Cumulative Layout Shift
+  ttfb       Float? // Time to First Byte
+  fcp        Float? // First Contentful Paint
+  inp        Float? // Interaction to Next Paint
+  lcpGrade   String? // 'good', 'needs-improvement', 'poor'
+  fidGrade   String?
+  clsGrade   String?
+  ttfbGrade  String?
+  fcpGrade   String?
+  inpGrade   String?
+  measuredAt DateTime  @default(now())
+  audit      SEOAudit? @relation(fields: [auditId], references: [id], onDelete: Cascade)
+  report     Report?   @relation(fields: [reportId], references: [id], onDelete: Cascade)
+
+  @@index([auditId])
+  @@index([reportId])
+  @@index([url])
+  @@index([measuredAt])
+}
+
+model PageSpeedAudit {
+  id               String    @id @default(cuid())
+  auditId          String?
+  reportId         String?
+  url              String
+  device           String // 'mobile' | 'desktop'
+  performanceScore Int?
+  opportunities    String?   @db.Text // Performance optimization opportunities
+  diagnostics      String?   @db.Text // Performance diagnostics
+  labData          String?   @db.Text // Lab data metrics
+  fieldData        String?   @db.Text // Real user experience data
+  auditDetails     String?   @db.Text // Detailed audit results
+  screenshots      String?   @db.Text // Performance screenshots
+  auditedAt        DateTime  @default(now())
+  audit            SEOAudit? @relation(fields: [auditId], references: [id], onDelete: Cascade)
+  report           Report?   @relation(fields: [reportId], references: [id], onDelete: Cascade)
+
+  @@index([auditId])
+  @@index([reportId])
+  @@index([url])
 }

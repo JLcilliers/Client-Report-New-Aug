@@ -56,24 +56,24 @@ model VerificationToken {
 }
 
 model Report {
-  id                  String                @id @default(cuid())
-  name                String
-  userId              String
-  propertyId          String?
-  siteUrl             String?
-  dateRange           String
-  metrics             String
-  data                String?
-  shareToken          String?               @unique
-  isPublic            Boolean               @default(false)
-  refreshInterval     Int?
-  lastRefreshed       DateTime?
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
-  user                User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  seoAudits           SEOAudit[]
-  coreWebVitals       CoreWebVitalsMetric[]
-  pageSpeedAudits     PageSpeedAudit[]
+  id              String                @id @default(cuid())
+  name            String
+  userId          String
+  propertyId      String?
+  siteUrl         String?
+  dateRange       String
+  metrics         String
+  data            String?
+  shareToken      String?               @unique
+  isPublic        Boolean               @default(false)
+  refreshInterval Int?
+  lastRefreshed   DateTime?
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+  user            User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  seoAudits       SEOAudit[]
+  coreWebVitals   CoreWebVitalsMetric[]
+  pageSpeedAudits PageSpeedAudit[]
 }
 
 model ClientReport {
@@ -163,40 +163,40 @@ model GoogleAccount {
 }
 
 model SEOAudit {
-  id                    String              @id @default(cuid())
-  reportId              String?
-  clientReportId        String?
-  domain                String
-  url                   String
-  overallScore          Int                 @default(0)
-  performanceScore      Int                 @default(0)
-  seoScore              Int                 @default(0)
-  accessibilityScore    Int                 @default(0)
-  securityScore         Int                 @default(0)
-  mobileScore           Int                 @default(0)
-  coreWebVitals         String?             // LCP, FID, CLS, TTFB, FCP, INP
-  pageSpeedMetrics      String?             // Desktop/Mobile PageSpeed data
-  mobileUsability       String?             // Mobile-friendly test results
-  crawlabilityData      String?             // Robots.txt, sitemap analysis
-  metaTagsAnalysis      String?             // Title, description, canonical, hreflang
-  structuredData        String?             // Schema markup validation
-  securityChecks        String?             // HTTPS, mixed content, headers
-  imageOptimization     String?             // Image analysis data
-  resourceOptimization  String?             // CSS/JS optimization data
-  linkAnalysis          String?             // Internal/external links
-  redirectChains        String?             // Redirect analysis
-  errorPages            String?             // 404 and other errors
-  duplicateContent      String?             // Content duplication issues
-  technicalIssues       String?             // Technical SEO problems
-  recommendations       String?             // Prioritized action items
-  auditedAt             DateTime            @default(now())
-  createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
-  report                Report?             @relation(fields: [reportId], references: [id], onDelete: Cascade)
-  clientReport          ClientReport?       @relation(fields: [clientReportId], references: [id], onDelete: Cascade)
-  auditHistory          SEOAuditHistory[]
-  coreWebVitalsMetrics  CoreWebVitalsMetric[]
-  pageSpeedAudits       PageSpeedAudit[]
+  id                   String                @id @default(cuid())
+  reportId             String?
+  clientReportId       String?
+  domain               String
+  url                  String
+  overallScore         Int                   @default(0)
+  performanceScore     Int                   @default(0)
+  seoScore             Int                   @default(0)
+  accessibilityScore   Int                   @default(0)
+  securityScore        Int                   @default(0)
+  mobileScore          Int                   @default(0)
+  coreWebVitals        String? // LCP, FID, CLS, TTFB, FCP, INP
+  pageSpeedMetrics     String? // Desktop/Mobile PageSpeed data
+  mobileUsability      String? // Mobile-friendly test results
+  crawlabilityData     String? // Robots.txt, sitemap analysis
+  metaTagsAnalysis     String? // Title, description, canonical, hreflang
+  structuredData       String? // Schema markup validation
+  securityChecks       String? // HTTPS, mixed content, headers
+  imageOptimization    String? // Image analysis data
+  resourceOptimization String? // CSS/JS optimization data
+  linkAnalysis         String? // Internal/external links
+  redirectChains       String? // Redirect analysis
+  errorPages           String? // 404 and other errors
+  duplicateContent     String? // Content duplication issues
+  technicalIssues      String? // Technical SEO problems
+  recommendations      String? // Prioritized action items
+  auditedAt            DateTime              @default(now())
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  report               Report?               @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  clientReport         ClientReport?         @relation(fields: [clientReportId], references: [id], onDelete: Cascade)
+  auditHistory         SEOAuditHistory[]
+  coreWebVitalsMetrics CoreWebVitalsMetric[]
+  pageSpeedAudits      PageSpeedAudit[]
 
   @@index([reportId])
   @@index([clientReportId])
@@ -205,42 +205,42 @@ model SEOAudit {
 }
 
 model SEOAuditHistory {
-  id            String    @id @default(cuid())
+  id            String   @id @default(cuid())
   auditId       String
-  changeType    String    // 'score_improvement', 'new_issue', 'issue_resolved'
-  category      String    // 'performance', 'seo', 'accessibility', 'security', 'mobile'
+  changeType    String // 'score_improvement', 'new_issue', 'issue_resolved'
+  category      String // 'performance', 'seo', 'accessibility', 'security', 'mobile'
   previousValue String?
   currentValue  String?
   description   String
-  impact        String?   // 'high', 'medium', 'low'
-  detectedAt    DateTime  @default(now())
-  audit         SEOAudit  @relation(fields: [auditId], references: [id], onDelete: Cascade)
+  impact        String? // 'high', 'medium', 'low'
+  detectedAt    DateTime @default(now())
+  audit         SEOAudit @relation(fields: [auditId], references: [id], onDelete: Cascade)
 
   @@index([auditId])
   @@index([detectedAt])
 }
 
 model CoreWebVitalsMetric {
-  id          String   @id @default(cuid())
-  auditId     String?
-  reportId    String?
-  url         String
-  device      String   // 'mobile' | 'desktop'
-  lcp         Float?   // Largest Contentful Paint
-  fid         Float?   // First Input Delay
-  cls         Float?   // Cumulative Layout Shift
-  ttfb        Float?   // Time to First Byte
-  fcp         Float?   // First Contentful Paint
-  inp         Float?   // Interaction to Next Paint
-  lcpGrade    String?  // 'good', 'needs-improvement', 'poor'
-  fidGrade    String?
-  clsGrade    String?
-  ttfbGrade   String?
-  fcpGrade    String?
-  inpGrade    String?
-  measuredAt  DateTime @default(now())
-  audit       SEOAudit? @relation(fields: [auditId], references: [id], onDelete: Cascade)
-  report      Report?  @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  id         String    @id @default(cuid())
+  auditId    String?
+  reportId   String?
+  url        String
+  device     String // 'mobile' | 'desktop'
+  lcp        Float? // Largest Contentful Paint
+  fid        Float? // First Input Delay
+  cls        Float? // Cumulative Layout Shift
+  ttfb       Float? // Time to First Byte
+  fcp        Float? // First Contentful Paint
+  inp        Float? // Interaction to Next Paint
+  lcpGrade   String? // 'good', 'needs-improvement', 'poor'
+  fidGrade   String?
+  clsGrade   String?
+  ttfbGrade  String?
+  fcpGrade   String?
+  inpGrade   String?
+  measuredAt DateTime  @default(now())
+  audit      SEOAudit? @relation(fields: [auditId], references: [id], onDelete: Cascade)
+  report     Report?   @relation(fields: [reportId], references: [id], onDelete: Cascade)
 
   @@index([auditId])
   @@index([reportId])
@@ -253,14 +253,14 @@ model PageSpeedAudit {
   auditId          String?
   reportId         String?
   url              String
-  device           String    // 'mobile' | 'desktop'
+  device           String // 'mobile' | 'desktop'
   performanceScore Int?
-  opportunities    String?   // Performance optimization opportunities
-  diagnostics      String?   // Performance diagnostics
-  labData          String?   // Lab data metrics
-  fieldData        String?   // Real user experience data
-  auditDetails     String?   // Detailed audit results
-  screenshots      String?   // Performance screenshots
+  opportunities    String? // Performance optimization opportunities
+  diagnostics      String? // Performance diagnostics
+  labData          String? // Lab data metrics
+  fieldData        String? // Real user experience data
+  auditDetails     String? // Detailed audit results
+  screenshots      String? // Performance screenshots
   auditedAt        DateTime  @default(now())
   audit            SEOAudit? @relation(fields: [auditId], references: [id], onDelete: Cascade)
   report           Report?   @relation(fields: [reportId], references: [id], onDelete: Cascade)
