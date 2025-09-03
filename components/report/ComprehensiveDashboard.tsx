@@ -355,12 +355,22 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
       const reportData = await reportResponse.json();
       const domain = reportData.client?.domain || reportData.client_name || 'shopdualthreads.com';
       
-      console.log('🔍 Running SEO audit for domain:', domain);
+      console.log('🔍 Running comprehensive SEO audit for domain:', domain);
       
       const response = await fetch('/api/seo/technical-audit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ domain, includePageSpeed: true })
+        body: JSON.stringify({ 
+          domain, 
+          includePageSpeed: true,
+          includeCoreWebVitals: true,
+          includeMobileUsability: true,
+          includeCrawlability: true,
+          includeSecurityChecks: true,
+          includeStructuredData: true,
+          reportId: reportId,
+          clientReportId: reportSlug
+        })
       });
 
       if (!response.ok) {
@@ -996,9 +1006,16 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
                   {/* Category Scores */}
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {Object.entries(seoAuditData.categories || {}).map(([category, data]: [string, any]) => (
-                      <div key={category} className="p-4 border rounded-lg">
+                      <div key={category} className="p-4 border rounded-lg hover:shadow-md transition-shadow">
                         <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm font-medium capitalize">{category}</span>
+                          <span className="text-sm font-medium capitalize flex items-center gap-2">
+                            {category === 'performance' && <Zap className="w-4 h-4 text-blue-500" />}
+                            {category === 'seo' && <Search className="w-4 h-4 text-green-500" />}
+                            {category === 'security' && <Globe className="w-4 h-4 text-purple-500" />}
+                            {category === 'accessibility' && <Eye className="w-4 h-4 text-orange-500" />}
+                            {category === 'mobile' && <Activity className="w-4 h-4 text-pink-500" />}
+                            {category}
+                          </span>
                           <span className={`text-lg font-bold ${getScoreColor(data.score)}`}>
                             {data.score}%
                           </span>
@@ -1014,9 +1031,12 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
                               ) : (
                                 <XCircle className="w-3 h-3 text-red-500" />
                               )}
-                              <span className="truncate">{check.name}</span>
+                              <span className="truncate" title={check.name}>{check.name}</span>
                             </div>
                           ))}
+                          {data.checks?.length > 3 && (
+                            <p className="text-xs text-gray-400 mt-1">+{data.checks.length - 3} more checks</p>
+                          )}
                         </div>
                       </div>
                     ))}
@@ -1025,12 +1045,19 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
                   {/* Top Recommendations */}
                   <Card>
                     <CardHeader>
-                      <CardTitle className="text-base">Priority Recommendations</CardTitle>
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <Lightbulb className="w-4 h-4 text-yellow-500" />
+                        Priority Recommendations
+                      </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-3">
                         {seoAuditData.recommendations?.slice(0, 5).map((rec: any, idx: number) => (
-                          <div key={idx} className="border-l-4 border-red-500 pl-3 py-2">
+                          <div key={idx} className={`border-l-4 pl-3 py-2 ${
+                            rec.priority === 'high' ? 'border-red-500 bg-red-50' : 
+                            rec.priority === 'medium' ? 'border-yellow-500 bg-yellow-50' : 
+                            'border-blue-500 bg-blue-50'
+                          }`}>
                             <div className="flex items-center justify-between">
                               <p className="text-sm font-medium">{rec.issue}</p>
                               <Badge variant={rec.priority === 'high' ? 'destructive' : rec.priority === 'medium' ? 'default' : 'secondary'}>
@@ -1038,12 +1065,68 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
                               </Badge>
                             </div>
                             <p className="text-xs text-gray-600 mt-1">{rec.recommendation}</p>
-                            <p className="text-xs text-gray-500 mt-1">Impact: {rec.impact}</p>
+                            <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                              <Target className="w-3 h-3" />
+                              Impact: {rec.impact}
+                            </p>
                           </div>
                         ))}
                       </div>
                     </CardContent>
                   </Card>
+
+                  {/* Core Web Vitals */}
+                  {seoAuditData.coreWebVitals && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Activity className="w-4 h-4 text-blue-500" />
+                          Core Web Vitals
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                          {Object.entries(seoAuditData.coreWebVitals).map(([metric, value]: [string, any]) => (
+                            <div key={metric} className="text-center p-3 border rounded">
+                              <p className="text-xs text-gray-500 uppercase">{metric}</p>
+                              <p className="text-lg font-bold mt-1">{value}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {/* Detailed Checks */}
+                  {seoAuditData.checks && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <CheckSquare className="w-4 h-4 text-green-500" />
+                          Detailed Analysis Results
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2 max-h-96 overflow-y-auto">
+                          {seoAuditData.checks.map((check: any, idx: number) => (
+                            <div key={idx} className="flex items-start gap-2 p-2 hover:bg-gray-50 rounded">
+                              {check.status === 'pass' ? (
+                                <CheckCircle className="w-4 h-4 text-green-500 mt-0.5" />
+                              ) : check.status === 'warning' ? (
+                                <AlertCircle className="w-4 h-4 text-yellow-500 mt-0.5" />
+                              ) : (
+                                <XCircle className="w-4 h-4 text-red-500 mt-0.5" />
+                              )}
+                              <div className="flex-1">
+                                <p className="text-sm font-medium">{check.name}</p>
+                                <p className="text-xs text-gray-600">{check.message}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
                 </div>
               ) : (
                 <div className="text-center py-12">
