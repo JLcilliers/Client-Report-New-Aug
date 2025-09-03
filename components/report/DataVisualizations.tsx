@@ -123,7 +123,7 @@ export default function DataVisualizations({ searchData, analyticsData, competit
   if (chartType === 'search') {
     return (
       <ResponsiveContainer width="100%" height={350}>
-        <AreaChart data={searchTrendData}>
+        <LineChart data={searchTrendData}>
           <defs>
             <linearGradient id="colorClicks" x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor={COLORS.primary} stopOpacity={0.8}/>
@@ -140,23 +140,25 @@ export default function DataVisualizations({ searchData, analyticsData, competit
           <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 12 }} />
           <Tooltip content={<CustomTooltip />} />
           <Legend />
-          <Area
+          <Line
             yAxisId="left"
             type="monotone"
             dataKey="clicks"
             stroke={COLORS.primary}
-            fillOpacity={1}
-            fill="url(#colorClicks)"
             strokeWidth={2}
+            dot={{ fill: COLORS.primary, r: 4 }}
+            activeDot={{ r: 6 }}
+            name="Clicks"
           />
-          <Area
+          <Line
             yAxisId="left"
             type="monotone"
             dataKey="impressions"
             stroke={COLORS.secondary}
-            fillOpacity={1}
-            fill="url(#colorImpressions)"
             strokeWidth={2}
+            dot={{ fill: COLORS.secondary, r: 3 }}
+            activeDot={{ r: 5 }}
+            name="Impressions"
           />
           <Line
             yAxisId="right"
@@ -165,8 +167,10 @@ export default function DataVisualizations({ searchData, analyticsData, competit
             stroke={COLORS.tertiary}
             strokeWidth={2}
             dot={{ fill: COLORS.tertiary, r: 3 }}
+            activeDot={{ r: 5 }}
+            name="Avg Position"
           />
-        </AreaChart>
+        </LineChart>
       </ResponsiveContainer>
     );
   }
@@ -174,10 +178,17 @@ export default function DataVisualizations({ searchData, analyticsData, competit
   // Render traffic bar chart
   if (chartType === 'traffic-bar') {
     return (
-      <ResponsiveContainer width="100%" height={300}>
-        <BarChart data={trafficSourceData} layout="horizontal">
+      <ResponsiveContainer width="100%" height={350}>
+        <BarChart data={trafficSourceData} margin={{ top: 20, right: 30, left: 20, bottom: 80 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-          <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+          <XAxis 
+            dataKey="name" 
+            tick={{ fontSize: 11 }}
+            angle={-45}
+            textAnchor="end"
+            height={100}
+            interval={0}
+          />
           <YAxis tick={{ fontSize: 12 }} />
           <Tooltip content={<CustomTooltip />} />
           <Bar dataKey="sessions" fill={COLORS.primary} radius={[4, 4, 0, 0]}>
@@ -193,25 +204,38 @@ export default function DataVisualizations({ searchData, analyticsData, competit
   // Render traffic pie chart
   if (chartType === 'traffic-pie') {
     return (
-      <ResponsiveContainer width="100%" height={300}>
-        <PieChart>
-          <Pie
-            data={trafficSourceData}
-            cx="50%"
-            cy="50%"
-            labelLine={false}
-            label={({ name, percentage }: any) => `${name}: ${percentage}%`}
-            outerRadius={80}
-            fill="#8884d8"
-            dataKey="sessions"
-          >
-            {trafficSourceData.map((entry: any, index: number) => (
-              <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
-            ))}
-          </Pie>
-          <Tooltip />
-        </PieChart>
-      </ResponsiveContainer>
+      <div>
+        <ResponsiveContainer width="100%" height={250}>
+          <PieChart>
+            <Pie
+              data={trafficSourceData}
+              cx="50%"
+              cy="50%"
+              labelLine={false}
+              outerRadius={100}
+              fill="#8884d8"
+              dataKey="sessions"
+            >
+              {trafficSourceData.map((entry: any, index: number) => (
+                <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+              ))}
+            </Pie>
+            <Tooltip />
+          </PieChart>
+        </ResponsiveContainer>
+        <div className="mt-4 grid grid-cols-2 gap-2">
+          {trafficSourceData.map((entry: any, index: number) => (
+            <div key={entry.name} className="flex items-center gap-2 text-sm">
+              <div 
+                className="w-3 h-3 rounded-full flex-shrink-0" 
+                style={{ backgroundColor: PIE_COLORS[index % PIE_COLORS.length] }}
+              />
+              <span className="truncate">{entry.name}</span>
+              <span className="text-gray-500 ml-auto">{entry.percentage}%</span>
+            </div>
+          ))}
+        </div>
+      </div>
     );
   }
 
@@ -229,40 +253,32 @@ export default function DataVisualizations({ searchData, analyticsData, competit
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={350}>
-            <AreaChart data={searchTrendData}>
-              <defs>
-                <linearGradient id="colorClicks" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={COLORS.primary} stopOpacity={0.8}/>
-                  <stop offset="95%" stopColor={COLORS.primary} stopOpacity={0.1}/>
-                </linearGradient>
-                <linearGradient id="colorImpressions" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={COLORS.secondary} stopOpacity={0.8}/>
-                  <stop offset="95%" stopColor={COLORS.secondary} stopOpacity={0.1}/>
-                </linearGradient>
-              </defs>
+            <LineChart data={searchTrendData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis dataKey="date" tick={{ fontSize: 12 }} />
               <YAxis yAxisId="left" tick={{ fontSize: 12 }} />
               <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 12 }} />
               <Tooltip content={<CustomTooltip />} />
               <Legend />
-              <Area
+              <Line
                 yAxisId="left"
                 type="monotone"
                 dataKey="clicks"
                 stroke={COLORS.primary}
-                fillOpacity={1}
-                fill="url(#colorClicks)"
                 strokeWidth={2}
+                dot={{ fill: COLORS.primary, r: 4 }}
+                activeDot={{ r: 6 }}
+                name="Clicks"
               />
-              <Area
+              <Line
                 yAxisId="left"
                 type="monotone"
                 dataKey="impressions"
                 stroke={COLORS.secondary}
-                fillOpacity={1}
-                fill="url(#colorImpressions)"
                 strokeWidth={2}
+                dot={{ fill: COLORS.secondary, r: 3 }}
+                activeDot={{ r: 5 }}
+                name="Impressions"
               />
               <Line
                 yAxisId="right"
@@ -271,8 +287,10 @@ export default function DataVisualizations({ searchData, analyticsData, competit
                 stroke={COLORS.tertiary}
                 strokeWidth={2}
                 dot={{ fill: COLORS.tertiary, r: 3 }}
+                activeDot={{ r: 5 }}
+                name="Avg Position"
               />
-            </AreaChart>
+            </LineChart>
           </ResponsiveContainer>
         </CardContent>
       </Card>
@@ -288,10 +306,17 @@ export default function DataVisualizations({ searchData, analyticsData, competit
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={trafficSourceData} layout="horizontal">
+            <ResponsiveContainer width="100%" height={350}>
+              <BarChart data={trafficSourceData} margin={{ top: 20, right: 30, left: 20, bottom: 80 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                <XAxis 
+                  dataKey="name" 
+                  tick={{ fontSize: 11 }}
+                  angle={-45}
+                  textAnchor="end"
+                  height={100}
+                  interval={0}
+                />
                 <YAxis tick={{ fontSize: 12 }} />
                 <Tooltip content={<CustomTooltip />} />
                 <Bar dataKey="sessions" fill={COLORS.primary} radius={[4, 4, 0, 0]}>
@@ -313,25 +338,38 @@ export default function DataVisualizations({ searchData, analyticsData, competit
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={trafficSourceData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={(entry) => `${entry.name}: ${entry.percentage}%`}
-                  outerRadius={100}
-                  fill="#8884d8"
-                  dataKey="sessions"
-                >
-                  {trafficSourceData.map((entry: any, index: number) => (
-                    <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
+            <div>
+              <ResponsiveContainer width="100%" height={250}>
+                <PieChart>
+                  <Pie
+                    data={trafficSourceData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    outerRadius={100}
+                    fill="#8884d8"
+                    dataKey="sessions"
+                  >
+                    {trafficSourceData.map((entry: any, index: number) => (
+                      <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="mt-4 grid grid-cols-2 gap-2">
+                {trafficSourceData.map((entry: any, index: number) => (
+                  <div key={entry.name} className="flex items-center gap-2 text-sm">
+                    <div 
+                      className="w-3 h-3 rounded-full flex-shrink-0" 
+                      style={{ backgroundColor: PIE_COLORS[index % PIE_COLORS.length] }}
+                    />
+                    <span className="truncate">{entry.name}</span>
+                    <span className="text-gray-500 ml-auto">{entry.percentage}%</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>

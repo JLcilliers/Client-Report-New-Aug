@@ -68,13 +68,19 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
     fetchAllData();
   }, [reportId]);
 
-  // Auto-refresh when comparison period changes
+  // Only refresh when comparison period changes AND we have existing data
+  // This prevents infinite loops and unnecessary API calls
   useEffect(() => {
     console.log('📅 Comparison period changed to:', comparisonPeriod);
-    // Skip initial mount
-    if (metrics) {
-      console.log('🔄 Auto-refreshing data for new period:', comparisonPeriod);
-      fetchMetrics(comparisonPeriod);
+    // Only refresh if we have metrics and we're not currently refreshing
+    // and this isn't the initial load
+    if (metrics && !refreshing && !loading) {
+      console.log('🔄 Refreshing data for new period:', comparisonPeriod);
+      // Add a small delay to prevent rapid-fire requests
+      const timer = setTimeout(() => {
+        fetchMetrics(comparisonPeriod);
+      }, 500);
+      return () => clearTimeout(timer);
     }
   }, [comparisonPeriod]);
 
@@ -146,6 +152,12 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
   };
 
   const fetchMetrics = async (period?: string) => {
+    // Prevent multiple simultaneous refresh calls
+    if (refreshing) {
+      console.log('🚫 Already refreshing, skipping duplicate request');
+      return;
+    }
+    
     setRefreshing(true);
     const dateRange = period || comparisonPeriod;
     console.log('🔄 Starting data refresh for slug:', reportSlug, 'with period:', dateRange);
@@ -165,35 +177,55 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
         const refreshResult = await refreshResponse.json();
         console.log('✅ Data refreshed successfully:', refreshResult);
         
-        // Now fetch the refreshed data
-        console.log('📥 Fetching updated data...');
-        const dataResponse = await fetch(`/api/public/report/${reportSlug}/data`);
-        console.log('📥 Data response status:', dataResponse.status);
-        
-        if (dataResponse.ok) {
-          const data = await dataResponse.json();
-          console.log('📊 Received data:', data);
-          
-          // Transform the data to match our expected format
-          const transformedMetrics = transformLegacyData(data);
+        // If the refresh endpoint returns data directly, use it
+        if (refreshResult.data) {
+          console.log('📊 Using data from refresh response');
+          const transformedMetrics = transformLegacyData(refreshResult.data);
           console.log('🔄 Transformed metrics:', transformedMetrics);
           setMetrics(transformedMetrics);
           setLastRefresh(new Date());
         } else {
-          const dataError = await dataResponse.text();
-          console.error('❌ Data fetch failed:', dataError);
+          // Otherwise fetch the refreshed data
+          console.log('📥 Fetching updated data...');
+          const dataResponse = await fetch(`/api/public/report/${reportSlug}/data`);
+          console.log('📥 Data response status:', dataResponse.status);
+          
+          if (dataResponse.ok) {
+            const data = await dataResponse.json();
+            console.log('📊 Received data:', data);
+            
+            // Transform the data to match our expected format
+            const transformedMetrics = transformLegacyData(data);
+            console.log('🔄 Transformed metrics:', transformedMetrics);
+            setMetrics(transformedMetrics);
+            setLastRefresh(new Date());
+          } else {
+            const dataError = await dataResponse.text();
+            console.error('❌ Data fetch failed:', dataError);
+            // Show user-friendly error
+            console.error('Unable to fetch updated data. Please try again.');
+          }
         }
       } else {
-        const error = await refreshResponse.text();
-        console.error('❌ Refresh failed:', error);
-        alert(`Refresh failed: ${error}`);
+        const errorText = await refreshResponse.text();
+        console.error('❌ Refresh failed:', errorText);
+        // Parse error for better display
+        try {
+          const errorJson = JSON.parse(errorText);
+          console.error(`Unable to refresh data: ${errorJson.error || 'Unknown error'}`);
+        } catch {
+          console.error('Unable to refresh data. Please check your connection and try again.');
+        }
       }
     } catch (error: any) {
       console.error('💥 Error during refresh:', error);
-      alert(`Error: ${error?.message || 'Unknown error'}`);
+      console.error('Network error occurred. Please check your connection and try again.');
     } finally {
-      setRefreshing(false);
-      console.log('🏁 Refresh process completed');
+      // Always clear the refreshing state
+      setTimeout(() => {
+        setRefreshing(false);
+        console.log('🏁 Refresh process completed');
+      }, 500); // Small delay to prevent UI flashing
     }
   };
 

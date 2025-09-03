@@ -53,10 +53,10 @@ export default function PublicReportPage() {
   useEffect(() => {
     if (report) {
       fetchReportData()
-      // Only refresh if data is stale (older than 1 hour)
-      // Don't auto-refresh on every page load
-      if (isDataStale()) {
-        console.log('Data is stale, refreshing...')
+      // Only refresh if data is stale (older than 1 hour) AND not currently fetching
+      // Don't auto-refresh on every page load or while already refreshing
+      if (isDataStale() && !fetchingData) {
+        console.log('Data is stale, refreshing once...')
         refreshData()
       }
     }
@@ -107,14 +107,20 @@ export default function PublicReportPage() {
   }
 
   const isDataStale = () => {
-    if (!reportData?.last_updated) return true
+    if (!reportData?.last_updated) {
+      // If there's no last_updated, only consider stale if we have no data at all
+      return !reportData || (!reportData.search_console && !reportData.analytics)
+    }
     const lastUpdate = new Date(reportData.last_updated)
     const hoursSinceUpdate = (Date.now() - lastUpdate.getTime()) / (1000 * 60 * 60)
     return hoursSinceUpdate > 1 // Consider stale if older than 1 hour
   }
   
   const refreshData = async () => {
-    if (!report) return
+    if (!report || fetchingData) {
+      console.log('Already refreshing or no report, skipping...')
+      return
+    }
     
     setFetchingData(true)
     try {
@@ -206,7 +212,7 @@ export default function PublicReportPage() {
             </p>
             <div className="flex items-center gap-4 mt-2">
               <p className="text-sm text-gray-500">
-                Auto-refreshing data{fetchingData && '...'}
+                {fetchingData ? 'Refreshing data...' : `Last updated: ${reportData?.last_updated ? new Date(reportData.last_updated).toLocaleString() : 'Never'}`}
               </p>
               <Button
                 onClick={refreshData}
