@@ -24,19 +24,34 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
 ) {
+  const startTime = Date.now();
+  
   try {
     const { slug } = await params
     const prisma = getPrisma()
     
-    // Get optional date range from request body
+    // Get optional date range from request body with timeout
     let body: any = {}
     try {
-      body = await request.json()
+      const requestTimeout = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Request body parsing timeout')), 5000)
+      );
+      
+      body = await Promise.race([
+        request.json(),
+        requestTimeout
+      ]);
     } catch (e) {
       // Body is optional, continue without it
+      console.log('Request body parsing failed or empty:', e);
     }
     
     const { dateRange } = body // 'week', 'month', 'year', or custom days number
+    
+    // Add request timeout check
+    if (Date.now() - startTime > 25000) {
+      throw new Error('Request processing timeout');
+    }
     
     // Get report by slug
     const report = await prisma.clientReport.findUnique({
@@ -47,15 +62,43 @@ export async function POST(
       return NextResponse.json({ error: "Report not found" }, { status: 404 })
     }
 
-    // Get tokens from cookies (this endpoint should work with authenticated users)
+    // For public reports, we should return cached data
+    // Only authenticated users (admins) can refresh
     const cookieStore = cookies()
     const accessToken = cookieStore.get('google_access_token')
     const refreshToken = cookieStore.get('google_refresh_token')
     
     if (!accessToken || !refreshToken) {
+      console.log('[Report Refresh] No Google tokens - returning cached data for public view');
+      
+      // Try to return cached data for public viewers
+      const cachedData = await prisma.reportCache.findFirst({
+        where: {
+          reportId: report.id,
+          dataType: 'combined',
+          expiresAt: {
+            gt: new Date()
+          }
+        },
+        orderBy: {
+          cachedAt: 'desc'
+        }
+      });
+      
+      if (cachedData && cachedData.data) {
+        const data = JSON.parse(cachedData.data as string);
+        return NextResponse.json({ 
+          success: true,
+          message: "Returning cached data (authentication required for refresh)",
+          data: data,
+          cached: true,
+          cachedAt: cachedData.cachedAt
+        });
+      }
+      
       return NextResponse.json({ 
-        error: "Google authentication required",
-        details: "No valid Google tokens found"
+        error: "No data available",
+        details: "Authentication required to refresh data"
       }, { status: 401 })
     }
 
@@ -222,19 +265,29 @@ export async function POST(
         try {
           
           
-          // Overall metrics with retry
+          // Check timeout before API calls
+          if (Date.now() - startTime > 20000) {
+            throw new Error('Request timeout before Search Console API calls');
+          }
+          
+          // Overall metrics with retry and timeout
           const overallResponse = await withRetry(
-            () => searchconsole.searchanalytics.query({
-              auth: oauth2Client,
-              siteUrl: property,
-              requestBody: {
-                startDate: formatDate(startDate),
-                endDate: formatDate(endDate),
-                dimensions: [],
-                rowLimit: 1,
-              },
-            }),
-            { maxAttempts: 3, onRetry: (attempt) => console.log(`Retrying Search Console API (attempt ${attempt})`) }
+            () => {
+              if (Date.now() - startTime > 20000) {
+                throw new Error('Request timeout during Search Console API call');
+              }
+              return searchconsole.searchanalytics.query({
+                auth: oauth2Client,
+                siteUrl: property,
+                requestBody: {
+                  startDate: formatDate(startDate),
+                  endDate: formatDate(endDate),
+                  dimensions: [],
+                  rowLimit: 1,
+                },
+              });
+            },
+            { maxAttempts: 2, onRetry: (attempt) => console.log(`Retrying Search Console API (attempt ${attempt})`) }
           )
 
           if (overallResponse && overallResponse.data.rows && overallResponse.data.rows[0]) {
@@ -243,7 +296,13 @@ export async function POST(
             aggregatedMetrics.impressions += row.impressions || 0
           }
 
-          // Get top queries
+          // Check timeout before continuing
+          if (Date.now() - startTime > 18000) {
+            console.warn('Skipping additional Search Console queries due to timeout risk');
+            continue;
+          }
+
+          // Get top queries with timeout check
           const queriesResponse = await searchconsole.searchanalytics.query({
             auth: oauth2Client,
             siteUrl: property,
@@ -257,6 +316,12 @@ export async function POST(
 
           if (queriesResponse.data.rows) {
             searchConsoleData.topQueries.push(...queriesResponse.data.rows)
+          }
+
+          // Check timeout again
+          if (Date.now() - startTime > 19000) {
+            console.warn('Stopping Search Console queries due to timeout risk');
+            break;
           }
 
           // Get top pages
@@ -275,20 +340,22 @@ export async function POST(
             searchConsoleData.topPages.push(...pagesResponse.data.rows)
           }
 
-          // Get data by date
-          const dateResponse = await searchconsole.searchanalytics.query({
-            auth: oauth2Client,
-            siteUrl: property,
-            requestBody: {
-              startDate: formatDate(startDate),
-              endDate: formatDate(endDate),
-              dimensions: ['date'],
-              rowLimit: 30,
-            },
-          })
+          // Get data by date (skip if running out of time)
+          if (Date.now() - startTime < 19500) {
+            const dateResponse = await searchconsole.searchanalytics.query({
+              auth: oauth2Client,
+              siteUrl: property,
+              requestBody: {
+                startDate: formatDate(startDate),
+                endDate: formatDate(endDate),
+                dimensions: ['date'],
+                rowLimit: 30,
+              },
+            })
 
-          if (dateResponse.data.rows) {
-            searchConsoleData.byDate.push(...dateResponse.data.rows)
+            if (dateResponse.data.rows) {
+              searchConsoleData.byDate.push(...dateResponse.data.rows)
+            }
           }
           
           // Get data by country
@@ -364,96 +431,117 @@ export async function POST(
         .slice(0, 10)
     }
 
-    // Fetch Analytics data
+    // Fetch Analytics data with timeout checks
     if (report.ga4PropertyId) {
       console.log('\n========== Analytics Data Fetch in Report Refresh ==========')
       console.log('[Report Refresh] GA4 Property ID from report:', report.ga4PropertyId)
       
-      const propertyIds = [report.ga4PropertyId]
-      for (const propertyId of propertyIds) {
-        try {
-          console.log('[Report Refresh] Processing property:', propertyId)
+      // Check if we have enough time for Analytics
+      if (Date.now() - startTime > 15000) {
+        console.warn('Skipping Analytics data fetch due to timeout risk');
+      } else {
+        const propertyIds = [report.ga4PropertyId]
+        for (const propertyId of propertyIds) {
+          try {
+            // Check timeout before processing each property
+            if (Date.now() - startTime > 18000) {
+              console.warn('Timeout risk - stopping Analytics processing');
+              break;
+            }
+            
+            console.log('[Report Refresh] Processing property:', propertyId)
+            
+            // Format property ID - ensure it has the correct format
+            let formattedPropertyId = propertyId;
+            if (!propertyId.startsWith('properties/')) {
+              formattedPropertyId = `properties/${propertyId}`;
+            }
+            
+            console.log('[Report Refresh] Formatted property ID:', formattedPropertyId)
+            console.log('[Report Refresh] Access token length:', accessToken.value?.length || 0)
+            console.log('[Report Refresh] Date range:', formatDate(startDate), 'to', formatDate(endDate))
+            
+            // Overall metrics with channel grouping
+            console.log('[Report Refresh] Making Analytics API request...')
+            const response = await analyticsData.properties.runReport({
+              property: formattedPropertyId,
+              requestBody: {
+                dateRanges: [{
+                  startDate: formatDate(startDate),
+                  endDate: formatDate(endDate)
+                }],
+                dimensions: [
+                  { name: "sessionDefaultChannelGroup" }
+                ],
+                metrics: [
+                  { name: "sessions" },
+                  { name: "activeUsers" },
+                  { name: "newUsers" },
+                  { name: "bounceRate" },
+                  { name: "averageSessionDuration" },
+                  { name: "screenPageViews" },
+                  { name: "eventCount" }
+                ]
+              },
+              auth: oauth2Client
+            })
           
-          // Format property ID - ensure it has the correct format
-          let formattedPropertyId = propertyId;
-          if (!propertyId.startsWith('properties/')) {
-            formattedPropertyId = `properties/${propertyId}`;
+          // Only fetch additional data if we have time
+          let deviceResponse, geoResponse, pagesResponse;
+          
+          if (Date.now() - startTime < 18000) {
+            // Fetch device category data
+            deviceResponse = await analyticsData.properties.runReport({
+              property: formattedPropertyId,
+              requestBody: {
+                dateRanges: [{
+                  startDate: formatDate(startDate),
+                  endDate: formatDate(endDate)
+                }],
+                dimensions: [
+                  { name: "deviceCategory" }
+                ],
+                metrics: [
+                  { name: "sessions" },
+                  { name: "activeUsers" },
+                  { name: "bounceRate" },
+                  { name: "averageSessionDuration" }
+                ]
+              },
+              auth: oauth2Client
+            })
+          } else {
+            console.warn('Skipping device data due to timeout risk');
           }
           
-          console.log('[Report Refresh] Formatted property ID:', formattedPropertyId)
-          console.log('[Report Refresh] Access token length:', accessToken.value?.length || 0)
-          console.log('[Report Refresh] Date range:', formatDate(startDate), 'to', formatDate(endDate))
-          
-          // Overall metrics with channel grouping
-          console.log('[Report Refresh] Making Analytics API request...')
-          const response = await analyticsData.properties.runReport({
-            property: formattedPropertyId,
-            requestBody: {
-              dateRanges: [{
-                startDate: formatDate(startDate),
-                endDate: formatDate(endDate)
-              }],
-              dimensions: [
-                { name: "sessionDefaultChannelGroup" }
-              ],
-              metrics: [
-                { name: "sessions" },
-                { name: "activeUsers" },
-                { name: "newUsers" },
-                { name: "bounceRate" },
-                { name: "averageSessionDuration" },
-                { name: "screenPageViews" },
-                { name: "eventCount" }
-              ]
-            },
-            auth: oauth2Client
-          })
-          
-          // Fetch device category data
-          const deviceResponse = await analyticsData.properties.runReport({
-            property: formattedPropertyId,
-            requestBody: {
-              dateRanges: [{
-                startDate: formatDate(startDate),
-                endDate: formatDate(endDate)
-              }],
-              dimensions: [
-                { name: "deviceCategory" }
-              ],
-              metrics: [
-                { name: "sessions" },
-                { name: "activeUsers" },
-                { name: "bounceRate" },
-                { name: "averageSessionDuration" }
-              ]
-            },
-            auth: oauth2Client
-          })
-          
-          // Fetch geographic data
-          const geoResponse = await analyticsData.properties.runReport({
-            property: formattedPropertyId,
-            requestBody: {
-              dateRanges: [{
-                startDate: formatDate(startDate),
-                endDate: formatDate(endDate)
-              }],
-              dimensions: [
-                { name: "country" },
-                { name: "city" }
-              ],
-              metrics: [
-                { name: "sessions" },
-                { name: "activeUsers" }
-              ],
-              orderBys: [{
-                metric: { metricName: "sessions" },
-                desc: true
-              }],
-              limit: "20"
-            },
-            auth: oauth2Client
-          })
+          if (Date.now() - startTime < 19000) {
+            // Fetch geographic data
+            geoResponse = await analyticsData.properties.runReport({
+              property: formattedPropertyId,
+              requestBody: {
+                dateRanges: [{
+                  startDate: formatDate(startDate),
+                  endDate: formatDate(endDate)
+                }],
+                dimensions: [
+                  { name: "country" },
+                  { name: "city" }
+                ],
+                metrics: [
+                  { name: "sessions" },
+                  { name: "activeUsers" }
+                ],
+                orderBys: [{
+                  metric: { metricName: "sessions" },
+                  desc: true
+                }],
+                limit: "20"
+              },
+              auth: oauth2Client
+            })
+          } else {
+            console.warn('Skipping geo data due to timeout risk');
+          }
 
           console.log('[Report Refresh] Analytics API response received')
           console.log('[Report Refresh] Response status:', response.status)
@@ -500,7 +588,7 @@ export async function POST(
           }
 
           // Process device category data
-          if (deviceResponse.data.rows) {
+          if (deviceResponse && deviceResponse.data && deviceResponse.data.rows) {
             analyticsResult.deviceCategories = deviceResponse.data.rows.map(row => ({
               device: row.dimensionValues?.[0]?.value || "",
               sessions: parseInt(row.metricValues?.[0]?.value || "0"),
@@ -511,7 +599,7 @@ export async function POST(
           }
           
           // Process geographic data
-          if (geoResponse.data.rows) {
+          if (geoResponse && geoResponse.data && geoResponse.data.rows) {
             analyticsResult.geoLocations = geoResponse.data.rows.slice(0, 10).map(row => ({
               country: row.dimensionValues?.[0]?.value || "",
               city: row.dimensionValues?.[1]?.value || "",
@@ -521,39 +609,43 @@ export async function POST(
           }
 
           // Get top pages
-          const pagesResponse = await analyticsData.properties.runReport({
-            property: formattedPropertyId,
-            requestBody: {
-              dateRanges: [{
-                startDate: formatDate(startDate),
-                endDate: formatDate(endDate)
-              }],
-              dimensions: [
-                { name: "pagePath" }
-              ],
-              metrics: [
-                { name: "sessions" },
-                { name: "activeUsers" },
-                { name: "bounceRate" },
-                { name: "averageSessionDuration" }
-              ],
-              orderBys: [{
-                metric: { metricName: "sessions" },
-                desc: true
-              }],
-              limit: "10"
-            },
-            auth: oauth2Client
-          })
-
-          if (pagesResponse.data.rows) {
-            analyticsResult.topPages = pagesResponse.data.rows.map(row => ({
-              page: row.dimensionValues?.[0]?.value || "",
-              sessions: parseInt(row.metricValues?.[0]?.value || "0"),
-              users: parseInt(row.metricValues?.[1]?.value || "0"),
-              bounceRate: parseFloat(row.metricValues?.[2]?.value || "0"),
-              avgSessionDuration: parseFloat(row.metricValues?.[3]?.value || "0")
-            }))
+          if (Date.now() - startTime < 19500) {
+            pagesResponse = await analyticsData.properties.runReport({
+              property: formattedPropertyId,
+              requestBody: {
+                dateRanges: [{
+                  startDate: formatDate(startDate),
+                  endDate: formatDate(endDate)
+                }],
+                dimensions: [
+                  { name: "pagePath" }
+                ],
+                metrics: [
+                  { name: "sessions" },
+                  { name: "activeUsers" },
+                  { name: "bounceRate" },
+                  { name: "averageSessionDuration" }
+                ],
+                orderBys: [{
+                  metric: { metricName: "sessions" },
+                  desc: true
+                }],
+                limit: "10"
+              },
+              auth: oauth2Client
+            })
+  
+            if (pagesResponse && pagesResponse.data.rows) {
+              analyticsResult.topPages = pagesResponse.data.rows.map(row => ({
+                page: row.dimensionValues?.[0]?.value || "",
+                sessions: parseInt(row.metricValues?.[0]?.value || "0"),
+                users: parseInt(row.metricValues?.[1]?.value || "0"),
+                bounceRate: parseFloat(row.metricValues?.[2]?.value || "0"),
+                avgSessionDuration: parseFloat(row.metricValues?.[3]?.value || "0")
+              }))
+            }
+          } else {
+            console.warn('Skipping pages data due to timeout risk');
           }
 
         } catch (error: any) {
@@ -562,6 +654,9 @@ export async function POST(
           console.error('[Report Refresh] Error status:', error.status)
           console.error('[Report Refresh] Error details:', JSON.stringify(error.errors))
           console.error('[Report Refresh] Full error:', error)
+          
+          // Don't throw here - continue with partial data
+          console.warn('Continuing with partial Analytics data due to error');
         }
       }
 
@@ -572,64 +667,76 @@ export async function POST(
           source.percentage = (source.sessions / totalSessions) * 100
         })
       }
+      }
     }
 
-    // Fetch PageSpeed data if we have a domain to test
-    let domainUrl: string | null = null
-    
-    // Try to extract domain from Search Console property
-    if (report.searchConsolePropertyId) {
-      const property = report.searchConsolePropertyId
-      if (property.startsWith('https://') || property.startsWith('http://')) {
-        domainUrl = property
-      } else if (property.startsWith('domain:')) {
-        domainUrl = `https://${property.replace('domain:', '')}`
-      } else if (property.startsWith('sc-domain:')) {
-        domainUrl = `https://${property.replace('sc-domain:', '')}`
-      }
-    }
-    
-    if (domainUrl) {
-      console.log('Fetching PageSpeed data for:', domainUrl)
+    // Fetch PageSpeed data if we have a domain to test and time remaining
+    if (Date.now() - startTime < 20000) {
+      let domainUrl: string | null = null
       
-      try {
-        // Fetch mobile PageSpeed data
-        const mobileResponse = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/data/pagespeed`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            url: domainUrl,
-            strategy: 'mobile'
-          })
-        })
-        
-        if (mobileResponse.ok) {
-          pageSpeedData.mobile = await mobileResponse.json()
+      // Try to extract domain from Search Console property
+      if (report.searchConsolePropertyId) {
+        const property = report.searchConsolePropertyId
+        if (property.startsWith('https://') || property.startsWith('http://')) {
+          domainUrl = property
+        } else if (property.startsWith('domain:')) {
+          domainUrl = `https://${property.replace('domain:', '')}`
+        } else if (property.startsWith('sc-domain:')) {
+          domainUrl = `https://${property.replace('sc-domain:', '')}`
         }
-        
-        // Fetch desktop PageSpeed data
-        const desktopResponse = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/data/pagespeed`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            url: domainUrl,
-            strategy: 'desktop'
-          })
-        })
-        
-        if (desktopResponse.ok) {
-          pageSpeedData.desktop = await desktopResponse.json()
-        }
-        
-        pageSpeedData.fetchTime = new Date().toISOString()
-        
-      } catch (pageSpeedError: any) {
-        console.error('PageSpeed fetch error:', pageSpeedError)
       }
+      
+      if (domainUrl && Date.now() - startTime < 21000) {
+        console.log('Fetching PageSpeed data for:', domainUrl)
+        
+        try {
+          // Only fetch mobile PageSpeed data to save time
+          const mobileResponse = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/data/pagespeed`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              url: domainUrl,
+              strategy: 'mobile'
+            })
+          })
+          
+          if (mobileResponse.ok) {
+            pageSpeedData.mobile = await mobileResponse.json()
+          }
+          
+          // Only fetch desktop if we still have time
+          if (Date.now() - startTime < 22000) {
+            const desktopResponse = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/data/pagespeed`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                url: domainUrl,
+                strategy: 'desktop'
+              })
+            })
+            
+            if (desktopResponse.ok) {
+              pageSpeedData.desktop = await desktopResponse.json()
+            }
+          } else {
+            console.warn('Skipping desktop PageSpeed due to timeout risk');
+          }
+          
+          pageSpeedData.fetchTime = new Date().toISOString()
+          
+        } catch (pageSpeedError: any) {
+          console.error('PageSpeed fetch error:', pageSpeedError)
+          // Continue with partial data
+        }
+      } else {
+        console.log('Skipping PageSpeed data due to timeout risk or missing domain');
+      }
+    } else {
+      console.log('Skipping PageSpeed data due to timeout risk');
     }
 
     // Combine all data
@@ -699,15 +806,30 @@ export async function POST(
 
     
 
+    // Final timeout check
+    if (Date.now() - startTime > 24000) {
+      console.warn('Request approaching timeout limit - returning partial data');
+    }
+    
+    const processingTime = Date.now() - startTime;
+    console.log(`Total processing time: ${processingTime}ms`);
+    
     return NextResponse.json({ 
       success: true, 
       message: "Data refreshed successfully",
-      data: combinedData
+      data: combinedData,
+      processingTime: `${processingTime}ms`
     })
   } catch (error: any) {
+    const processingTime = Date.now() - startTime;
+    console.error('Refresh error after', processingTime, 'ms:', error.message);
     
     return NextResponse.json(
-      { error: "Failed to refresh data", details: error.message },
+      { 
+        error: "Failed to refresh data", 
+        details: error.message,
+        processingTime: `${processingTime}ms`
+      },
       { status: 500 }
     )
   }

@@ -162,15 +162,27 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
     const dateRange = period || comparisonPeriod;
     console.log('🔄 Starting data refresh for slug:', reportSlug, 'with period:', dateRange);
     
+    // Set a failsafe timeout to always clear refreshing state
+    const failsafeTimeout = setTimeout(() => {
+      console.warn('⚠️ Failsafe timeout triggered - clearing refreshing state');
+      setRefreshing(false);
+    }, 30000); // 30 second failsafe
+    
     try {
-      // First try to refresh the data using the working refresh endpoint
+      // First try to refresh the data using the working refresh endpoint with timeout
       console.log('📡 Calling refresh endpoint with date range:', dateRange);
+      
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 25000); // 25 second timeout
+      
       const refreshResponse = await fetch(`/api/public/report/${reportSlug}/refresh`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ dateRange })
+        body: JSON.stringify({ dateRange }),
+        signal: controller.signal
       });
-
+      
+      clearTimeout(timeoutId);
       console.log('📡 Refresh response status:', refreshResponse.status);
 
       if (refreshResponse.ok) {
@@ -184,10 +196,18 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
           console.log('🔄 Transformed metrics:', transformedMetrics);
           setMetrics(transformedMetrics);
           setLastRefresh(new Date());
-        } else {
+        } else if (refreshResult.success) {
+          // API returned success but no data - fetch it separately
           // Otherwise fetch the refreshed data
           console.log('📥 Fetching updated data...');
-          const dataResponse = await fetch(`/api/public/report/${reportSlug}/data`);
+          const dataController = new AbortController();
+          const dataTimeoutId = setTimeout(() => dataController.abort(), 10000);
+          
+          const dataResponse = await fetch(`/api/public/report/${reportSlug}/data`, {
+            signal: dataController.signal
+          });
+          
+          clearTimeout(dataTimeoutId);
           console.log('📥 Data response status:', dataResponse.status);
           
           if (dataResponse.ok) {
@@ -202,30 +222,50 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
           } else {
             const dataError = await dataResponse.text();
             console.error('❌ Data fetch failed:', dataError);
-            // Show user-friendly error
-            console.error('Unable to fetch updated data. Please try again.');
+            throw new Error('Unable to fetch updated data. Please try again.');
           }
         }
       } else {
+        // Handle different error status codes
+        if (refreshResponse.status === 401) {
+          console.warn('🔐 Authentication required - using existing data');
+          // Try to load existing cached data instead
+          await loadExistingData();
+          return; // Exit early, data has been loaded from cache
+        }
+        
         const errorText = await refreshResponse.text();
         console.error('❌ Refresh failed:', errorText);
         // Parse error for better display
         try {
           const errorJson = JSON.parse(errorText);
-          console.error(`Unable to refresh data: ${errorJson.error || 'Unknown error'}`);
+          console.warn(`Refresh failed: ${errorJson.error || 'Unknown error'}. Using cached data.`);
+          // Try to load existing data as fallback
+          await loadExistingData();
         } catch {
-          console.error('Unable to refresh data. Please check your connection and try again.');
+          console.warn('Unable to refresh data. Using cached data.');
+          await loadExistingData();
         }
       }
     } catch (error: any) {
       console.error('💥 Error during refresh:', error);
-      console.error('Network error occurred. Please check your connection and try again.');
+      
+      if (error.name === 'AbortError') {
+        console.error('⏱️ Request timed out. The refresh is taking longer than expected.');
+      } else {
+        console.error('❌ Network error occurred. Please check your connection and try again.');
+      }
+      
+      // Optionally show user feedback here if you have a toast system
+      // toast.error(error.message || 'Failed to refresh data');
+      
     } finally {
-      // Always clear the refreshing state
-      setTimeout(() => {
-        setRefreshing(false);
-        console.log('🏁 Refresh process completed');
-      }, 500); // Small delay to prevent UI flashing
+      // Clear failsafe timeout
+      clearTimeout(failsafeTimeout);
+      
+      // Always clear the refreshing state immediately in finally
+      setRefreshing(false);
+      console.log('🏁 Refresh process completed');
     }
   };
 
@@ -579,7 +619,7 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
             className="flex items-center gap-2"
           >
             <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
-            Refresh Data
+            {refreshing ? 'Refreshing...' : 'Refresh Data'}
           </Button>
         </div>
       </div>
