@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -55,6 +55,8 @@ interface MetricCard {
 export default function ComprehensiveDashboard({ reportId, reportSlug, googleAccountId }: DashboardProps) {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const refreshingRef = useRef(false);
+  const [forceRender, setForceRender] = useState(0);
   const [metrics, setMetrics] = useState<any>(null);
   const [agencyUpdates, setAgencyUpdates] = useState<any[]>([]);
   const [comparisonPeriod, setComparisonPeriod] = useState<'week' | 'month' | 'year' | 'last30' | 'last90' | 'monthToDate' | 'yearOverYear'>('week');
@@ -151,22 +153,51 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
     }
   };
 
+  const clearRefreshingState = useCallback(() => {
+    console.log('🧹 Clearing refreshing state using multiple methods');
+    
+    // Method 1: Direct state update
+    setRefreshing(false);
+    
+    // Method 2: Use ref to track state
+    refreshingRef.current = false;
+    
+    // Method 3: Force re-render to ensure UI updates
+    setForceRender(prev => prev + 1);
+    
+    // Method 4: Delayed state clear as failsafe
+    setTimeout(() => {
+      console.log('🔄 Failsafe state clear');
+      setRefreshing(false);
+      refreshingRef.current = false;
+    }, 100);
+  }, []);
+
   const fetchMetrics = async (period?: string) => {
-    // Prevent multiple simultaneous refresh calls
-    if (refreshing) {
+    // Prevent multiple simultaneous refresh calls using both state and ref
+    if (refreshing || refreshingRef.current) {
       console.log('🚫 Already refreshing, skipping duplicate request');
       return;
     }
     
+    // Set both state and ref
     setRefreshing(true);
+    refreshingRef.current = true;
     const dateRange = period || comparisonPeriod;
     console.log('🔄 Starting data refresh for slug:', reportSlug, 'with period:', dateRange);
     
-    // Set a failsafe timeout to always clear refreshing state
-    const failsafeTimeout = setTimeout(() => {
-      console.warn('⚠️ Failsafe timeout triggered - clearing refreshing state');
-      setRefreshing(false);
+    // Set multiple failsafe timeouts to always clear refreshing state
+    const failsafeTimeout1 = setTimeout(() => {
+      console.warn('⚠️ Primary failsafe timeout triggered - clearing refreshing state');
+      clearRefreshingState();
     }, 30000); // 30 second failsafe
+    
+    const failsafeTimeout2 = setTimeout(() => {
+      console.warn('⚠️ Secondary failsafe timeout triggered - force clearing state');
+      setRefreshing(false);
+      refreshingRef.current = false;
+      setForceRender(prev => prev + 1);
+    }, 35000); // 35 second backup failsafe
     
     try {
       // First try to refresh the data using the working refresh endpoint with timeout
@@ -260,11 +291,12 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
       // toast.error(error.message || 'Failed to refresh data');
       
     } finally {
-      // Clear failsafe timeout
-      clearTimeout(failsafeTimeout);
+      // Clear failsafe timeouts
+      clearTimeout(failsafeTimeout1);
+      clearTimeout(failsafeTimeout2);
       
-      // Always clear the refreshing state immediately in finally
-      setRefreshing(false);
+      // Always clear the refreshing state using our comprehensive method
+      clearRefreshingState();
       console.log('🏁 Refresh process completed');
     }
   };
@@ -548,7 +580,7 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
           <h2 className="text-2xl font-bold">Performance Dashboard</h2>
           <p className="text-gray-600">
             Last updated: {lastRefresh ? lastRefresh.toLocaleString() : (metrics?.fetchedAt ? new Date(metrics.fetchedAt).toLocaleString() : 'Never')}
-            {refreshing && ' - Refreshing...'}
+            {(refreshing || refreshingRef.current) && ' - Refreshing...'}
           </p>
         </div>
         <div className="flex items-center gap-4">
@@ -615,11 +647,11 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
           </div>
           <Button
             onClick={() => fetchMetrics(comparisonPeriod)}
-            disabled={refreshing}
+            disabled={refreshing || refreshingRef.current}
             className="flex items-center gap-2"
           >
-            <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
-            {refreshing ? 'Refreshing...' : 'Refresh Data'}
+            <RefreshCw className={`w-4 h-4 ${(refreshing || refreshingRef.current) ? 'animate-spin' : ''}`} />
+            {(refreshing || refreshingRef.current) ? 'Refreshing...' : 'Refresh Data'}
           </Button>
         </div>
       </div>
