@@ -583,7 +583,7 @@ function analyzeContentQuality(pages: any[]) {
         page.wordCount < 100 ? 'Extremely thin content (under 100 words)' : 'Thin content',
         page.headings.h1 === 0 ? 'Missing H1 heading' : null,
         page.metaDescription === '' ? 'Missing meta description' : null
-      ].filter(Boolean)
+      ].filter((issue): issue is string => issue !== null)
     }));
 
   // Analyze duplicate images
@@ -602,7 +602,7 @@ function analyzeContentQuality(pages: any[]) {
     .filter(([_, data]) => data.urls.length > 1)
     .map(([hash, data]) => ({
       hash,
-      urls: [...new Set(data.urls)], // Remove duplicates
+      urls: Array.from(new Set(data.urls)), // Remove duplicates
       imageSrc: data.src,
       count: new Set(data.urls).size
     }));

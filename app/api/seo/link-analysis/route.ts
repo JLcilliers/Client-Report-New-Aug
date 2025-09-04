@@ -555,7 +555,13 @@ function identifyLinkIssues(internalLinks: any[], externalLinks: any[], redirect
 }
 
 function generateLinkRecommendations(issues: any[], linkEquity: any, anchorTextAnalysis: any) {
-  const recommendations = [];
+  const recommendations: Array<{
+    priority: 'high' | 'medium' | 'low';
+    category: string;
+    issue: string;
+    recommendation: string;
+    impact: string;
+  }> = [];
 
   // Add issue-based recommendations
   issues.forEach(issue => {
@@ -572,7 +578,7 @@ function generateLinkRecommendations(issues: any[], linkEquity: any, anchorTextA
   });
 
   // Add link equity recommendations
-  linkEquity.recommendations.forEach(rec => {
+  linkEquity.recommendations.forEach((rec: string) => {
     recommendations.push({
       priority: 'medium' as const,
       category: 'Link Equity',
@@ -583,7 +589,7 @@ function generateLinkRecommendations(issues: any[], linkEquity: any, anchorTextA
   });
 
   // Add anchor text recommendations
-  anchorTextAnalysis.recommendations.forEach(rec => {
+  anchorTextAnalysis.recommendations.forEach((rec: string) => {
     recommendations.push({
       priority: anchorTextAnalysis.overOptimized ? 'high' as const : 'medium' as const,
       category: 'Anchor Text',
