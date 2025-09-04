@@ -1615,6 +1615,7 @@ async function auditContentQualityEnhanced(url: string) {
     const html = await response.text();
     
     // Use our content quality analysis logic similar to the MCP server
+    // @ts-ignore - jsdom types may not be available in all environments
     const { JSDOM } = await import('jsdom');
     const dom = new JSDOM(html, { url });
     const doc = dom.window.document;
