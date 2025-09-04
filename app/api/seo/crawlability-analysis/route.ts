@@ -183,7 +183,14 @@ async function analyzeCrawlability(
     const internalLinking = analyzeInternalLinking($, domain);
 
     // Estimate crawl budget optimization
-    let crawlBudget = { estimatedCrawlBudget: 0, factorsAffecting: [], optimization: { score: 0, recommendations: [] } };
+    let crawlBudget: {
+      estimatedCrawlBudget: number;
+      factorsAffecting: string[];
+      optimization: {
+        score: number;
+        recommendations: string[];
+      };
+    } = { estimatedCrawlBudget: 0, factorsAffecting: [], optimization: { score: 0, recommendations: [] } };
     if (options.analyzeCrawlBudget) {
       crawlBudget = analyzeCrawlBudgetFactors(technicalFactors, robots, sitemap, indexability);
     }
@@ -331,7 +338,7 @@ async function analyzeRobotsTxt(robotsUrl: string) {
 
     // Check for common issues
     const hasWildcardDisallow = robots.userAgents.some(ua => 
-      ua.userAgent === '*' && ua.rules.some(rule => rule.directive === 'Disallow' && rule.path === '/')
+      ua.userAgent === '*' && ua.rules.some((rule: { directive: string; path: string }) => rule.directive === 'Disallow' && rule.path === '/')
     );
     
     if (hasWildcardDisallow) {
@@ -525,7 +532,7 @@ function analyzeTechnicalFactors($: cheerio.CheerioAPI, response: Response, load
     total: images.length,
     withAlt: images.filter((_, img) => !!$(img).attr('alt')).length,
     withoutAlt: images.filter((_, img) => !$(img).attr('alt')).length,
-    lazy: images.filter((_, img) => $(img).attr('loading') === 'lazy' || $(img).attr('data-src')).length
+    lazy: images.filter((_, img) => $(img).attr('loading') === 'lazy' || !!$(img).attr('data-src')).length
   };
 
   return {
@@ -562,10 +569,22 @@ function analyzeInternalLinking($: cheerio.CheerioAPI, domain: string) {
   };
 }
 
-function analyzeCrawlBudgetFactors(technicalFactors: any, robots: any, sitemap: any, indexability: any) {
+function analyzeCrawlBudgetFactors(
+  technicalFactors: any, 
+  robots: any, 
+  sitemap: any, 
+  indexability: any
+): {
+  estimatedCrawlBudget: number;
+  factorsAffecting: string[];
+  optimization: {
+    score: number;
+    recommendations: string[];
+  };
+} {
   let score = 100;
-  const factorsAffecting = [];
-  const recommendations = [];
+  const factorsAffecting: string[] = [];
+  const recommendations: string[] = [];
 
   // Page load time impact
   if (technicalFactors.loadTime > 3000) {
@@ -684,8 +703,20 @@ function identifyCrawlabilityIssues(robots: any, sitemap: any, indexability: any
   return issues;
 }
 
-function generateCrawlabilityRecommendations(issues: any[], crawlBudget: any) {
-  const recommendations = [];
+function generateCrawlabilityRecommendations(issues: any[], crawlBudget: any): {
+  priority: 'high' | 'medium' | 'low';
+  category: string;
+  issue: string;
+  recommendation: string;
+  impact: string;
+}[] {
+  const recommendations: {
+    priority: 'high' | 'medium' | 'low';
+    category: string;
+    issue: string;
+    recommendation: string;
+    impact: string;
+  }[] = [];
 
   // Add issue-based recommendations
   issues.forEach(issue => {
@@ -711,7 +742,7 @@ function generateCrawlabilityRecommendations(issues: any[], crawlBudget: any) {
   });
 
   return recommendations.sort((a, b) => {
-    const priorityOrder = { high: 0, medium: 1, low: 2 };
+    const priorityOrder: { [key in 'high' | 'medium' | 'low']: number } = { high: 0, medium: 1, low: 2 };
     return priorityOrder[a.priority] - priorityOrder[b.priority];
   });
 }
