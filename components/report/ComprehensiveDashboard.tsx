@@ -144,9 +144,30 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
         const transformedMetrics = transformLegacyData(data);
         console.log('📖 Transformed existing data:', transformedMetrics);
         setMetrics(transformedMetrics);
+        
+        // Auto-refresh if data is older than 1 hour
+        const dataAge = data?.fetched_at ? new Date().getTime() - new Date(data.fetched_at).getTime() : Infinity;
+        const oneHour = 60 * 60 * 1000; // 1 hour in milliseconds
+        
+        if (dataAge > oneHour) {
+          console.log('📅 Data is stale, auto-refreshing...');
+          // Small delay to let the UI render first
+          setTimeout(() => {
+            if (!refreshing && !refreshingRef.current) {
+              fetchMetrics(comparisonPeriod);
+            }
+          }, 1000);
+        }
       } else {
         const error = await dataResponse.text();
         console.error('❌ Failed to load existing data:', error);
+        // If no existing data, always try to refresh
+        console.log('🔄 No existing data, attempting refresh...');
+        setTimeout(() => {
+          if (!refreshing && !refreshingRef.current) {
+            fetchMetrics(comparisonPeriod);
+          }
+        }, 1000);
       }
     } catch (error) {
       console.error('💥 Error loading existing data:', error);
@@ -154,50 +175,40 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
   };
 
   const clearRefreshingState = useCallback(() => {
-    console.log('🧹 Clearing refreshing state using multiple methods');
-    
-    // Method 1: Direct state update
+    console.log('🧹 Clearing refreshing state');
     setRefreshing(false);
-    
-    // Method 2: Use ref to track state
     refreshingRef.current = false;
     
-    // Method 3: Force re-render to ensure UI updates
-    setForceRender(prev => prev + 1);
-    
-    // Method 4: Delayed state clear as failsafe
+    // Multiple failsafes to ensure state is cleared
     setTimeout(() => {
-      console.log('🔄 Failsafe state clear');
       setRefreshing(false);
       refreshingRef.current = false;
     }, 100);
+    
+    setTimeout(() => {
+      setRefreshing(false);
+      refreshingRef.current = false;
+    }, 1000);
   }, []);
 
   const fetchMetrics = async (period?: string) => {
-    // Prevent multiple simultaneous refresh calls using both state and ref
+    // Prevent multiple simultaneous refresh calls
     if (refreshing || refreshingRef.current) {
       console.log('🚫 Already refreshing, skipping duplicate request');
       return;
     }
     
-    // Set both state and ref
+    // Set refreshing state
     setRefreshing(true);
     refreshingRef.current = true;
     const dateRange = period || comparisonPeriod;
     console.log('🔄 Starting data refresh for slug:', reportSlug, 'with period:', dateRange);
     
-    // Set multiple failsafe timeouts to always clear refreshing state
-    const failsafeTimeout1 = setTimeout(() => {
-      console.warn('⚠️ Primary failsafe timeout triggered - clearing refreshing state');
+    // Set failsafe timeout to always clear refreshing state
+    const failsafeTimeout = setTimeout(() => {
+      console.warn('⚠️ Failsafe timeout triggered - clearing refreshing state');
       clearRefreshingState();
     }, 30000); // 30 second failsafe
-    
-    const failsafeTimeout2 = setTimeout(() => {
-      console.warn('⚠️ Secondary failsafe timeout triggered - force clearing state');
-      setRefreshing(false);
-      refreshingRef.current = false;
-      setForceRender(prev => prev + 1);
-    }, 35000); // 35 second backup failsafe
     
     try {
       // First try to refresh the data using the working refresh endpoint with timeout
@@ -291,9 +302,8 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
       // toast.error(error.message || 'Failed to refresh data');
       
     } finally {
-      // Clear failsafe timeouts
-      clearTimeout(failsafeTimeout1);
-      clearTimeout(failsafeTimeout2);
+      // Clear failsafe timeout
+      clearTimeout(failsafeTimeout);
       
       // Always clear the refreshing state using our comprehensive method
       clearRefreshingState();

@@ -13,7 +13,7 @@ export async function GET(
     console.log("Looking for report with slug:", slug)
     
     // Get report by shareableId (which is used as the slug)
-    const report = await prisma.clientReport.findUnique({
+    let report = await prisma.clientReport.findUnique({
       where: { shareableId: slug },
       include: {
         user: {
@@ -25,6 +25,23 @@ export async function GET(
         }
       }
     })
+    
+    // Fallback: try to find by id if shareableId lookup failed
+    if (!report) {
+      console.log("Report not found by shareableId, trying by id:", slug)
+      report = await prisma.clientReport.findUnique({
+        where: { id: slug },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true
+            }
+          }
+        }
+      })
+    }
     
     if (!report) {
       console.log("Report not found for slug:", slug)

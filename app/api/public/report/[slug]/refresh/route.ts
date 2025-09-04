@@ -54,9 +54,16 @@ export async function POST(
     }
     
     // Get report by slug
-    const report = await prisma.clientReport.findUnique({
+    let report = await prisma.clientReport.findUnique({
       where: { shareableId: slug }
     })
+
+    // Fallback: try to find by id if shareableId lookup failed
+    if (!report) {
+      report = await prisma.clientReport.findUnique({
+        where: { id: slug }
+      })
+    }
 
     if (!report) {
       return NextResponse.json({ error: "Report not found" }, { status: 404 })
