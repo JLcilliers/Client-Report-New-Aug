@@ -945,29 +945,174 @@ function analyzeContent(html: string, url: string) {
   };
 }
 
-// Placeholder functions for optional audits (not implemented in basic version)
+// Actual implementation of performance audits
 async function auditPageSpeedComprehensive(url: string, auditId: string) {
-  return { averageScore: 0, mobile: null, desktop: null };
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/api/seo/page-speed-comprehensive`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        url, 
+        auditId,
+        devices: ['mobile', 'desktop']
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`PageSpeed API failed: ${response.status}`);
+    }
+
+    const data = await response.json();
+    
+    // Calculate average score from mobile and desktop
+    const scores = data.results?.map((r: any) => r.scores?.performance || 0) || [0];
+    const averageScore = Math.round(scores.reduce((a: number, b: number) => a + b, 0) / scores.length);
+    
+    return {
+      averageScore,
+      mobile: data.results?.find((r: any) => r.device === 'mobile'),
+      desktop: data.results?.find((r: any) => r.device === 'desktop'),
+      results: data.results || []
+    };
+  } catch (error) {
+    console.warn('PageSpeed audit failed:', error);
+    return { averageScore: 0, mobile: null, desktop: null, results: [] };
+  }
 }
 
 async function auditCoreWebVitals(url: string, auditId: string) {
-  return { mobile: null, desktop: null, grade: 'poor' };
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/api/seo/core-web-vitals`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        url, 
+        auditId,
+        devices: ['mobile', 'desktop']
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Core Web Vitals API failed: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const results = data.results || [];
+    
+    // Determine overall grade from all results
+    const grades = results.map((r: any) => r.overallGrade);
+    let overallGrade = 'good';
+    if (grades.some((g: string) => g === 'poor')) overallGrade = 'poor';
+    else if (grades.some((g: string) => g === 'needs-improvement')) overallGrade = 'needs-improvement';
+    
+    return {
+      mobile: results.find((r: any) => r.device === 'mobile'),
+      desktop: results.find((r: any) => r.device === 'desktop'),
+      grade: overallGrade,
+      results
+    };
+  } catch (error) {
+    console.warn('Core Web Vitals audit failed:', error);
+    return { mobile: null, desktop: null, grade: 'poor', results: [] };
+  }
 }
 
 async function auditMobileUsability(url: string) {
-  return { score: 0, issues: [], passedChecks: 0, totalChecks: 0 };
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/api/seo/mobile-usability`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Mobile Usability API failed: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.mobileFriendly || { score: 0, issues: [], passedChecks: 0, totalChecks: 0 };
+  } catch (error) {
+    console.warn('Mobile Usability audit failed:', error);
+    return { score: 0, issues: [], passedChecks: 0, totalChecks: 0 };
+  }
 }
 
 async function auditCrawlability(url: string) {
-  return { score: 0, robotsTxt: null, sitemap: null, indexability: null };
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/api/seo/crawlability-analysis`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Crawlability API failed: ${response.status}`);
+    }
+
+    const data = await response.json();
+    
+    // Calculate a simple score based on crawlability factors
+    let score = 100;
+    if (!data.robots?.exists) score -= 20;
+    if (!data.sitemap?.xmlSitemap?.exists) score -= 20;
+    if (data.robots?.issues?.length > 0) score -= data.robots.issues.length * 5;
+    
+    return {
+      score: Math.max(0, score),
+      robotsTxt: data.robots,
+      sitemap: data.sitemap,
+      indexability: data.indexability,
+      analysis: data
+    };
+  } catch (error) {
+    console.warn('Crawlability audit failed:', error);
+    return { score: 0, robotsTxt: null, sitemap: null, indexability: null };
+  }
 }
 
 async function auditLinkAnalysis(url: string) {
-  return { internalLinks: null, externalLinks: null, issues: [] };
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/api/seo/link-analysis`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Link Analysis API failed: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.linkAnalysis || { internalLinks: null, externalLinks: null, issues: [] };
+  } catch (error) {
+    console.warn('Link Analysis audit failed:', error);
+    return { internalLinks: null, externalLinks: null, issues: [] };
+  }
 }
 
 async function auditContentAnalysis(url: string) {
-  return { duplicateContent: null, errorPages: null, contentQuality: null };
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/api/seo/duplicate-content-404`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Content Analysis API failed: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return {
+      duplicateContent: data.duplicateContent,
+      errorPages: data.errorPages,
+      contentAnalysis: data.contentAnalysis,
+      analysis: data
+    };
+  } catch (error) {
+    console.warn('Content Analysis audit failed:', error);
+    return { duplicateContent: null, errorPages: null, contentQuality: null };
+  }
 }
 
 async function compileComprehensiveAudit(
