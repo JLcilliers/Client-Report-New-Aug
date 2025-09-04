@@ -105,14 +105,21 @@ export async function POST(request: NextRequest) {
     console.log('🔍 Starting comprehensive technical SEO audit for:', url);
     
     // Create audit record in database
-    const auditRecord = await prisma.sEOAudit.create({
-      data: {
-        reportId: reportId || undefined,
-        clientReportId: clientReportId || undefined,
-        domain: new URL(url).hostname,
-        url
-      }
-    });
+    let auditRecord;
+    try {
+      auditRecord = await prisma.sEOAudit.create({
+        data: {
+          reportId: reportId || undefined,
+          clientReportId: clientReportId || undefined,
+          domain: new URL(url).hostname,
+          url
+        }
+      });
+    } catch (dbError) {
+      console.warn('Failed to create audit record in database:', dbError);
+      // Continue without database record for now
+      auditRecord = { id: 'temp-id-' + Date.now() };
+    }
 
     // Run core audits in parallel (fast ones first)
     console.log('🚀 Running core audits...');
@@ -209,29 +216,35 @@ export async function POST(request: NextRequest) {
     );
 
     // Update audit record with results
-    await prisma.sEOAudit.update({
-      where: { id: auditRecord.id },
-      data: {
-        overallScore: audit.overallScore,
-        performanceScore: audit.categories.performance.score,
-        seoScore: audit.categories.seo.score,
-        accessibilityScore: audit.categories.accessibility.score,
-        securityScore: audit.categories.security.score,
-        mobileScore: audit.categories.mobile.score,
-        coreWebVitals: coreWebVitalsAudit ? JSON.stringify(coreWebVitalsAudit) : null,
-        pageSpeedMetrics: pageSpeedAudit ? JSON.stringify(pageSpeedAudit) : null,
-        mobileUsability: mobileUsabilityAudit ? JSON.stringify(mobileUsabilityAudit) : null,
-        crawlabilityData: crawlabilityAudit ? JSON.stringify(crawlabilityAudit) : null,
-        metaTagsAnalysis: metaAudit ? JSON.stringify(metaAudit) : null,
-        structuredData: structuredDataAudit ? JSON.stringify(structuredDataAudit) : null,
-        securityChecks: sslAudit ? JSON.stringify(sslAudit) : null,
-        linkAnalysis: linkAnalysisAudit ? JSON.stringify(linkAnalysisAudit) : null,
-        duplicateContent: contentAnalysisAudit?.duplicateContent ? JSON.stringify(contentAnalysisAudit.duplicateContent) : null,
-        errorPages: contentAnalysisAudit?.errorPages ? JSON.stringify(contentAnalysisAudit.errorPages) : null,
-        technicalIssues: JSON.stringify(audit.categories),
-        recommendations: JSON.stringify(audit.recommendations)
+    if (auditRecord.id && !auditRecord.id.startsWith('temp-id-')) {
+      try {
+        await prisma.sEOAudit.update({
+          where: { id: auditRecord.id },
+          data: {
+            overallScore: audit.overallScore,
+            performanceScore: audit.categories.performance.score,
+            seoScore: audit.categories.seo.score,
+            accessibilityScore: audit.categories.accessibility.score,
+            securityScore: audit.categories.security.score,
+            mobileScore: audit.categories.mobile.score,
+            coreWebVitals: coreWebVitalsAudit ? JSON.stringify(coreWebVitalsAudit) : null,
+            pageSpeedMetrics: pageSpeedAudit ? JSON.stringify(pageSpeedAudit) : null,
+            mobileUsability: mobileUsabilityAudit ? JSON.stringify(mobileUsabilityAudit) : null,
+            crawlabilityData: crawlabilityAudit ? JSON.stringify(crawlabilityAudit) : null,
+            metaTagsAnalysis: metaAudit ? JSON.stringify(metaAudit) : null,
+            structuredData: structuredDataAudit ? JSON.stringify(structuredDataAudit) : null,
+            securityChecks: sslAudit ? JSON.stringify(sslAudit) : null,
+            linkAnalysis: linkAnalysisAudit ? JSON.stringify(linkAnalysisAudit) : null,
+            duplicateContent: contentAnalysisAudit?.duplicateContent ? JSON.stringify(contentAnalysisAudit.duplicateContent) : null,
+            errorPages: contentAnalysisAudit?.errorPages ? JSON.stringify(contentAnalysisAudit.errorPages) : null,
+            technicalIssues: JSON.stringify(audit.categories),
+            recommendations: JSON.stringify(audit.recommendations)
+          }
+        });
+      } catch (updateError) {
+        console.warn('Failed to update audit record:', updateError);
       }
-    });
+    }
 
     audit.auditId = auditRecord.id;
     console.log('✅ Comprehensive technical SEO audit completed');
@@ -239,8 +252,16 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(audit);
   } catch (error) {
     console.error('Technical audit error:', error);
+    console.error('Error details:', {
+      name: error instanceof Error ? error.name : 'Unknown',
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : 'No stack trace'
+    });
     return NextResponse.json(
-      { error: 'Failed to perform comprehensive technical audit' },
+      { 
+        error: 'Failed to perform comprehensive technical audit',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     );
   }
