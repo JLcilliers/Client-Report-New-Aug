@@ -1013,17 +1013,236 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
                     </div>
                   </div>
 
-                  {/* Category Scores */}
+                  {/* Performance-Mobile, Core Web Vitals, and Content Quality Sections */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {/* Performance-Mobile Section */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Activity className="w-4 h-4 text-pink-500" />
+                          Performance-Mobile
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          <div className="text-center">
+                            <div className={`text-4xl font-bold ${getScoreColor(seoAuditData.pageSpeed?.mobile?.performance || 0)}`}>
+                              {seoAuditData.pageSpeed?.mobile?.performance || 0}
+                            </div>
+                            <p className="text-sm text-gray-500">Performance Score</p>
+                          </div>
+                          
+                          {seoAuditData.pageSpeed?.mobile && (
+                            <div className="space-y-2">
+                              <div className="flex justify-between text-xs">
+                                <span>Accessibility</span>
+                                <span className={getScoreColor(seoAuditData.pageSpeed.mobile.accessibility || 0)}>
+                                  {seoAuditData.pageSpeed.mobile.accessibility || 0}/100
+                                </span>
+                              </div>
+                              <div className="flex justify-between text-xs">
+                                <span>Best Practices</span>
+                                <span className={getScoreColor(seoAuditData.pageSpeed.mobile.bestPractices || 0)}>
+                                  {seoAuditData.pageSpeed.mobile.bestPractices || 0}/100
+                                </span>
+                              </div>
+                              <div className="flex justify-between text-xs">
+                                <span>SEO</span>
+                                <span className={getScoreColor(seoAuditData.pageSpeed.mobile.seo || 0)}>
+                                  {seoAuditData.pageSpeed.mobile.seo || 0}/100
+                                </span>
+                              </div>
+                            </div>
+                          )}
+                          
+                          {seoAuditData.pageSpeed?.mobile?.audits && (
+                            <div className="space-y-1">
+                              <p className="text-xs font-medium text-gray-600">Key Issues:</p>
+                              {Object.entries(seoAuditData.pageSpeed.mobile.audits)
+                                .filter(([key, audit]: [string, any]) => audit.score < 1)
+                                .slice(0, 3)
+                                .map(([key, audit]: [string, any], idx: number) => (
+                                  <div key={idx} className="flex items-center gap-2 text-xs">
+                                    <XCircle className="w-3 h-3 text-red-500" />
+                                    <span className="truncate" title={audit.title}>{audit.title}</span>
+                                  </div>
+                                ))}
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Core Web Vitals Section */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Zap className="w-4 h-4 text-blue-500" />
+                          Core Web Vitals
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          <div className="text-center">
+                            <div className={`text-4xl font-bold ${getScoreColor(seoAuditData.coreWebVitals?.grade || 0)}`}>
+                              {seoAuditData.coreWebVitals?.grade || 'N/A'}
+                            </div>
+                            <p className="text-sm text-gray-500">Overall Grade</p>
+                          </div>
+                          
+                          {seoAuditData.coreWebVitals && (
+                            <div className="space-y-2">
+                              {seoAuditData.coreWebVitals.mobile && (
+                                <div>
+                                  <p className="text-xs font-medium text-gray-600 mb-1">Mobile (Phone):</p>
+                                  <div className="space-y-1">
+                                    <div className="flex justify-between text-xs">
+                                      <span>LCP</span>
+                                      <span className={
+                                        (seoAuditData.coreWebVitals.mobile.LCP || 0) <= 2500 ? 'text-green-600' :
+                                        (seoAuditData.coreWebVitals.mobile.LCP || 0) <= 4000 ? 'text-yellow-600' : 'text-red-600'
+                                      }>
+                                        {((seoAuditData.coreWebVitals.mobile.LCP || 0) / 1000).toFixed(1)}s
+                                      </span>
+                                    </div>
+                                    <div className="flex justify-between text-xs">
+                                      <span>INP</span>
+                                      <span className={
+                                        (seoAuditData.coreWebVitals.mobile.INP || 0) <= 200 ? 'text-green-600' :
+                                        (seoAuditData.coreWebVitals.mobile.INP || 0) <= 500 ? 'text-yellow-600' : 'text-red-600'
+                                      }>
+                                        {seoAuditData.coreWebVitals.mobile.INP || 0}ms
+                                      </span>
+                                    </div>
+                                    <div className="flex justify-between text-xs">
+                                      <span>CLS</span>
+                                      <span className={
+                                        (seoAuditData.coreWebVitals.mobile.CLS || 0) <= 0.1 ? 'text-green-600' :
+                                        (seoAuditData.coreWebVitals.mobile.CLS || 0) <= 0.25 ? 'text-yellow-600' : 'text-red-600'
+                                      }>
+                                        {(seoAuditData.coreWebVitals.mobile.CLS || 0).toFixed(3)}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                              
+                              {seoAuditData.coreWebVitals.desktop && (
+                                <div className="mt-2">
+                                  <p className="text-xs font-medium text-gray-600 mb-1">Desktop:</p>
+                                  <div className="space-y-1">
+                                    <div className="flex justify-between text-xs">
+                                      <span>LCP</span>
+                                      <span className={
+                                        (seoAuditData.coreWebVitals.desktop.LCP || 0) <= 2500 ? 'text-green-600' :
+                                        (seoAuditData.coreWebVitals.desktop.LCP || 0) <= 4000 ? 'text-yellow-600' : 'text-red-600'
+                                      }>
+                                        {((seoAuditData.coreWebVitals.desktop.LCP || 0) / 1000).toFixed(1)}s
+                                      </span>
+                                    </div>
+                                    <div className="flex justify-between text-xs">
+                                      <span>INP</span>
+                                      <span className={
+                                        (seoAuditData.coreWebVitals.desktop.INP || 0) <= 200 ? 'text-green-600' :
+                                        (seoAuditData.coreWebVitals.desktop.INP || 0) <= 500 ? 'text-yellow-600' : 'text-red-600'
+                                      }>
+                                        {seoAuditData.coreWebVitals.desktop.INP || 0}ms
+                                      </span>
+                                    </div>
+                                    <div className="flex justify-between text-xs">
+                                      <span>CLS</span>
+                                      <span className={
+                                        (seoAuditData.coreWebVitals.desktop.CLS || 0) <= 0.1 ? 'text-green-600' :
+                                        (seoAuditData.coreWebVitals.desktop.CLS || 0) <= 0.25 ? 'text-yellow-600' : 'text-red-600'
+                                      }>
+                                        {(seoAuditData.coreWebVitals.desktop.CLS || 0).toFixed(3)}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Content Quality Section */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <FileText className="w-4 h-4 text-green-500" />
+                          Content Quality
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          <div className="text-center">
+                            <div className={`text-4xl font-bold ${getScoreColor(seoAuditData.contentQuality?.score || 0)}`}>
+                              {seoAuditData.contentQuality?.score || 0}
+                            </div>
+                            <p className="text-sm text-gray-500">Content Score</p>
+                          </div>
+                          
+                          {seoAuditData.contentQuality && (
+                            <div className="space-y-2">
+                              <div className="flex justify-between text-xs">
+                                <span>H1 Present</span>
+                                <span className={seoAuditData.contentQuality.h1 ? 'text-green-600' : 'text-red-600'}>
+                                  {seoAuditData.contentQuality.h1 ? '✓' : '✗'}
+                                </span>
+                              </div>
+                              <div className="flex justify-between text-xs">
+                                <span>Meta Description</span>
+                                <span className={seoAuditData.contentQuality.metaDescLength > 0 ? 'text-green-600' : 'text-red-600'}>
+                                  {seoAuditData.contentQuality.metaDescLength}
+                                </span>
+                              </div>
+                              <div className="flex justify-between text-xs">
+                                <span>Image Alt Coverage</span>
+                                <span className="text-gray-600">
+                                  {seoAuditData.contentQuality.imageAltCoverage || '0/0'}
+                                </span>
+                              </div>
+                              <div className="flex justify-between text-xs">
+                                <span>Reading Grade</span>
+                                <span className={
+                                  (seoAuditData.contentQuality.readingGrade || 0) <= 14 ? 'text-green-600' : 'text-yellow-600'
+                                }>
+                                  {(seoAuditData.contentQuality.readingGrade || 0).toFixed(1)}
+                                </span>
+                              </div>
+                              
+                              {seoAuditData.contentQuality.issues && seoAuditData.contentQuality.issues.length > 0 && (
+                                <div className="space-y-1 mt-2">
+                                  <p className="text-xs font-medium text-gray-600">Issues:</p>
+                                  {seoAuditData.contentQuality.issues.slice(0, 3).map((issue: string, idx: number) => (
+                                    <div key={idx} className="flex items-center gap-2 text-xs">
+                                      <AlertCircle className="w-3 h-3 text-yellow-500" />
+                                      <span className="truncate" title={issue}>{issue}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Additional Category Scores (other categories) */}
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {Object.entries(seoAuditData.categories || {}).map(([category, data]: [string, any]) => (
+                    {Object.entries(seoAuditData.categories || {})
+                      .filter(([category]) => !['performance', 'mobile', 'content'].includes(category))
+                      .map(([category, data]: [string, any]) => (
                       <div key={category} className="p-4 border rounded-lg hover:shadow-md transition-shadow">
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-sm font-medium capitalize flex items-center gap-2">
-                            {category === 'performance' && <Zap className="w-4 h-4 text-blue-500" />}
                             {category === 'seo' && <Search className="w-4 h-4 text-green-500" />}
                             {category === 'security' && <Globe className="w-4 h-4 text-purple-500" />}
                             {category === 'accessibility' && <Eye className="w-4 h-4 text-orange-500" />}
-                            {category === 'mobile' && <Activity className="w-4 h-4 text-pink-500" />}
+                            {category === 'crawlability' && <Globe className="w-4 h-4 text-blue-500" />}
                             {category}
                           </span>
                           <span className={`text-lg font-bold ${getScoreColor(data.score)}`}>

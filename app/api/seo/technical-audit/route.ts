@@ -152,11 +152,11 @@ export async function POST(request: NextRequest) {
       const performancePromises = [];
       
       if (includePageSpeed) {
-        performancePromises.push(auditPageSpeedComprehensive(url, auditRecord.id));
+        performancePromises.push(auditPageSpeedEnhanced(url));
       }
       
       if (includeCoreWebVitals) {
-        performancePromises.push(auditCoreWebVitals(url, auditRecord.id));
+        performancePromises.push(auditCoreWebVitalsEnhanced(url));
       }
       
       const performanceResults = await Promise.all(performancePromises);
@@ -193,6 +193,10 @@ export async function POST(request: NextRequest) {
       contentAnalysisAudit = await auditContentAnalysis(url);
     }
 
+    // Run enhanced content quality audit
+    console.log('✨ Running enhanced content quality audit...');
+    const contentQualityAudit = await auditContentQualityEnhanced(url);
+
     console.log('🔧 Compiling comprehensive audit...');
 
     // Compile comprehensive audit
@@ -211,7 +215,8 @@ export async function POST(request: NextRequest) {
         mobileUsabilityAudit,
         crawlabilityAudit,
         linkAnalysisAudit,
-        contentAnalysisAudit
+        contentAnalysisAudit,
+        contentQualityAudit
       }
     );
 
@@ -1131,6 +1136,7 @@ async function compileComprehensiveAudit(
     crawlabilityAudit: any;
     linkAnalysisAudit: any;
     contentAnalysisAudit: any;
+    contentQualityAudit: any;
   }
 ): Promise<ComprehensiveTechnicalAudit> {
   const {
@@ -1145,7 +1151,8 @@ async function compileComprehensiveAudit(
     mobileUsabilityAudit,
     crawlabilityAudit,
     linkAnalysisAudit,
-    contentAnalysisAudit
+    contentAnalysisAudit,
+    contentQualityAudit
   } = auditResults;
 
   const categories = {
@@ -1498,4 +1505,256 @@ async function compileComprehensiveAudit(
       return priorityOrder[a.priority] - priorityOrder[b.priority];
     })
   };
+}
+
+// Enhanced PageSpeed audit function with direct PSI v5 API calls
+async function auditPageSpeedEnhanced(url: string) {
+  try {
+    console.log('🚀 Running enhanced PageSpeed audit for:', url);
+    
+    const apiKey = process.env.GOOGLE_PSI_API_KEY || process.env.PAGESPEED_API_KEY;
+    if (!apiKey) {
+      console.warn('⚠️ No PSI API key found, using mock data');
+      return { mobile: null, desktop: null, averageScore: 0, error: 'No API key' };
+    }
+
+    // Run PSI for both mobile and desktop strategies
+    const [mobileData, desktopData] = await Promise.allSettled([
+      runPageSpeedInsights(url, 'mobile', apiKey),
+      runPageSpeedInsights(url, 'desktop', apiKey)
+    ]);
+
+    const mobile = mobileData.status === 'fulfilled' ? mobileData.value : null;
+    const desktop = desktopData.status === 'fulfilled' ? desktopData.value : null;
+
+    // Calculate average score
+    const scores = [];
+    if (mobile?.categories?.performance?.score) scores.push(mobile.categories.performance.score * 100);
+    if (desktop?.categories?.performance?.score) scores.push(desktop.categories.performance.score * 100);
+    const averageScore = scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b) / scores.length) : 0;
+
+    return {
+      mobile: mobile ? {
+        performance: Math.round((mobile.categories?.performance?.score || 0) * 100),
+        accessibility: Math.round((mobile.categories?.accessibility?.score || 0) * 100),
+        seo: Math.round((mobile.categories?.seo?.score || 0) * 100),
+        audits: mobile.audits
+      } : null,
+      desktop: desktop ? {
+        performance: Math.round((desktop.categories?.performance?.score || 0) * 100),
+        accessibility: Math.round((desktop.categories?.accessibility?.score || 0) * 100),
+        seo: Math.round((desktop.categories?.seo?.score || 0) * 100),
+        audits: desktop.audits
+      } : null,
+      averageScore,
+      timestamp: new Date().toISOString()
+    };
+  } catch (error) {
+    console.error('❌ Enhanced PageSpeed audit failed:', error);
+    return { mobile: null, desktop: null, averageScore: 0, error: String(error) };
+  }
+}
+
+// Enhanced Core Web Vitals audit with CrUX API
+async function auditCoreWebVitalsEnhanced(url: string) {
+  try {
+    console.log('📊 Running enhanced Core Web Vitals audit for:', url);
+    
+    const apiKey = process.env.GOOGLE_CRUX_API_KEY || process.env.GOOGLE_PSI_API_KEY || process.env.PAGESPEED_API_KEY;
+    if (!apiKey) {
+      console.warn('⚠️ No CrUX API key found, using mock data');
+      return { mobile: null, desktop: null, grade: 'poor', error: 'No API key' };
+    }
+
+    // Try to get page-level data for both phone and desktop
+    const [phoneData, desktopData] = await Promise.allSettled([
+      queryCruxData(url, 'PHONE', apiKey),
+      queryCruxData(url, 'DESKTOP', apiKey)
+    ]);
+
+    // If page-level fails, try origin-level
+    const origin = new URL(url).origin;
+    const [phoneOriginData, desktopOriginData] = await Promise.allSettled([
+      phoneData.status === 'rejected' ? queryCruxData(null, 'PHONE', apiKey, origin) : Promise.resolve(null),
+      desktopData.status === 'rejected' ? queryCruxData(null, 'DESKTOP', apiKey, origin) : Promise.resolve(null)
+    ]);
+
+    const mobile = phoneData.status === 'fulfilled' ? phoneData.value : 
+                  (phoneOriginData.status === 'fulfilled' ? phoneOriginData.value : null);
+    const desktop = desktopData.status === 'fulfilled' ? desktopData.value : 
+                   (desktopOriginData.status === 'fulfilled' ? desktopOriginData.value : null);
+
+    // Calculate overall grade based on metrics
+    const grade = calculateCoreWebVitalsGrade(mobile, desktop);
+
+    return {
+      mobile: mobile ? extractCoreWebVitals(mobile) : null,
+      desktop: desktop ? extractCoreWebVitals(desktop) : null,
+      grade,
+      timestamp: new Date().toISOString()
+    };
+  } catch (error) {
+    console.error('❌ Enhanced Core Web Vitals audit failed:', error);
+    return { mobile: null, desktop: null, grade: 'poor', error: String(error) };
+  }
+}
+
+// Enhanced Content Quality audit
+async function auditContentQualityEnhanced(url: string) {
+  try {
+    console.log('📝 Running enhanced content quality audit for:', url);
+    
+    const response = await fetch(url, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; SEO-Reporter/1.0)' }
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const html = await response.text();
+    
+    // Use our content quality analysis logic similar to the MCP server
+    const { JSDOM } = await import('jsdom');
+    const dom = new JSDOM(html, { url });
+    const doc = dom.window.document;
+
+    // Simple checks
+    const h1 = doc.querySelector("h1")?.textContent?.trim() || "";
+    const title = doc.querySelector("title")?.textContent?.trim() || "";
+    const metaDesc = doc.querySelector("meta[name='description']")?.getAttribute("content") || "";
+    const images = [...doc.querySelectorAll("img")];
+    const withAlt = images.filter(i => i.getAttribute("alt")).length;
+    const jsonLd = [...doc.querySelectorAll("script[type='application/ld+json']")].map(s => s.textContent);
+
+    // Calculate score
+    let score = 100;
+    const issues = [];
+    
+    if (!h1) { score -= 10; issues.push("Missing H1"); }
+    if (!metaDesc) { score -= 10; issues.push("Missing meta description"); }
+    if (!title || title.length < 15) { score -= 5; issues.push("Title too short"); }
+    if (images.length && withAlt / images.length < 0.7) { 
+      score -= 10; 
+      issues.push("Low image alt coverage"); 
+    }
+    if (!jsonLd.length) { score -= 5; issues.push("No JSON-LD detected"); }
+
+    return {
+      score: Math.max(0, Math.round(score)),
+      issues: issues.slice(0, 3), // Top 3 issues
+      details: {
+        title: title,
+        h1: h1,
+        metaDescLength: metaDesc.length,
+        imageAltCoverage: `${withAlt}/${images.length}`,
+        jsonLdCount: jsonLd.length
+      },
+      timestamp: new Date().toISOString()
+    };
+  } catch (error) {
+    console.error('❌ Enhanced content quality audit failed:', error);
+    return {
+      score: 0,
+      issues: ['Failed to analyze content'],
+      details: {},
+      error: String(error),
+      timestamp: new Date().toISOString()
+    };
+  }
+}
+
+// Helper function to call PageSpeed Insights API v5
+async function runPageSpeedInsights(url: string, strategy: 'mobile' | 'desktop', apiKey: string) {
+  const endpoint = new URL("https://www.googleapis.com/pagespeedonline/v5/runPagespeed");
+  endpoint.searchParams.set("url", url);
+  endpoint.searchParams.set("strategy", strategy);
+  ["performance", "accessibility", "seo"].forEach(c => endpoint.searchParams.append("category", c));
+  endpoint.searchParams.set("key", apiKey);
+
+  const response = await fetch(endpoint.toString());
+  if (!response.ok) {
+    throw new Error(`PSI API error ${response.status}: ${await response.text()}`);
+  }
+  
+  const data = await response.json();
+  return data.lighthouseResult;
+}
+
+// Helper function to call CrUX API
+async function queryCruxData(url: string | null, formFactor: 'PHONE' | 'DESKTOP', apiKey: string, origin?: string) {
+  const queryData: any = { 
+    formFactor, 
+    metrics: ["largest_contentful_paint", "interaction_to_next_paint", "cumulative_layout_shift"] 
+  };
+  
+  if (url) queryData.url = url;
+  if (origin) queryData.origin = origin;
+
+  const endpoint = `https://chromeuxreport.googleapis.com/v1/records:queryRecord?key=${apiKey}`;
+  const response = await fetch(endpoint, { 
+    method: "POST", 
+    headers: { "Content-Type": "application/json" }, 
+    body: JSON.stringify(queryData) 
+  });
+
+  if (!response.ok) {
+    throw new Error(`CrUX API error ${response.status}: ${await response.text()}`);
+  }
+
+  const data = await response.json();
+  return data.record;
+}
+
+// Helper function to extract Core Web Vitals from CrUX data
+function extractCoreWebVitals(cruxData: any) {
+  if (!cruxData?.metrics) return null;
+
+  const lcp = cruxData.metrics.largest_contentful_paint?.percentiles?.p75 || 0;
+  const inp = cruxData.metrics.interaction_to_next_paint?.percentiles?.p75 || 0;
+  const cls = cruxData.metrics.cumulative_layout_shift?.percentiles?.p75 || 0;
+
+  return {
+    lcp: { value: lcp, grade: gradeMetric('lcp', lcp) },
+    inp: { value: inp, grade: gradeMetric('inp', inp) },
+    cls: { value: cls, grade: gradeMetric('cls', cls) }
+  };
+}
+
+// Helper function to grade Core Web Vitals metrics
+function gradeMetric(metric: string, value: number): string {
+  switch (metric) {
+    case 'lcp':
+      return value <= 2500 ? 'good' : value <= 4000 ? 'needs-improvement' : 'poor';
+    case 'inp':
+      return value <= 200 ? 'good' : value <= 500 ? 'needs-improvement' : 'poor';
+    case 'cls':
+      return value <= 0.1 ? 'good' : value <= 0.25 ? 'needs-improvement' : 'poor';
+    default:
+      return 'poor';
+  }
+}
+
+// Helper function to calculate overall Core Web Vitals grade
+function calculateCoreWebVitalsGrade(mobile: any, desktop: any): string {
+  const grades = [];
+  
+  if (mobile) {
+    const mobileGrades = Object.values(mobile).map((m: any) => m?.grade).filter(Boolean);
+    grades.push(...mobileGrades);
+  }
+  
+  if (desktop) {
+    const desktopGrades = Object.values(desktop).map((d: any) => d?.grade).filter(Boolean);
+    grades.push(...desktopGrades);
+  }
+  
+  if (grades.length === 0) return 'poor';
+  
+  const goodCount = grades.filter(g => g === 'good').length;
+  const needsImprovementCount = grades.filter(g => g === 'needs-improvement').length;
+  
+  if (goodCount >= grades.length * 0.67) return 'good';
+  if (needsImprovementCount + goodCount >= grades.length * 0.5) return 'needs-improvement';
+  return 'poor';
 }
