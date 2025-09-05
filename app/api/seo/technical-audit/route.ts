@@ -1624,9 +1624,10 @@ async function auditContentQualityEnhanced(url: string) {
     const h1 = doc.querySelector("h1")?.textContent?.trim() || "";
     const title = doc.querySelector("title")?.textContent?.trim() || "";
     const metaDesc = doc.querySelector("meta[name='description']")?.getAttribute("content") || "";
-    const images = Array.from(doc.querySelectorAll("img"));
+    const images = Array.from(doc.querySelectorAll("img")) as HTMLImageElement[];
     const withAlt = images.filter(i => i.getAttribute("alt")).length;
-    const jsonLd = Array.from(doc.querySelectorAll("script[type='application/ld+json']")).map(s => s.textContent);
+    const jsonLd = Array.from(doc.querySelectorAll("script[type='application/ld+json']")) as HTMLScriptElement[];
+    const jsonLdContent = jsonLd.map(s => s.textContent);
 
     // Calculate score
     let score = 100;
@@ -1639,7 +1640,7 @@ async function auditContentQualityEnhanced(url: string) {
       score -= 10; 
       issues.push("Low image alt coverage"); 
     }
-    if (!jsonLd.length) { score -= 5; issues.push("No JSON-LD detected"); }
+    if (!jsonLdContent.length) { score -= 5; issues.push("No JSON-LD detected"); }
 
     return {
       score: Math.max(0, Math.round(score)),
@@ -1649,7 +1650,7 @@ async function auditContentQualityEnhanced(url: string) {
         h1: h1,
         metaDescLength: metaDesc.length,
         imageAltCoverage: `${withAlt}/${images.length}`,
-        jsonLdCount: jsonLd.length
+        jsonLdCount: jsonLdContent.length
       },
       timestamp: new Date().toISOString()
     };
