@@ -56,5 +56,8 @@ prisma/migrations/
 # Credentials
 Credentials.txt
 VERCEL_ENV_SETUP.md
+VERCEL_SETUP.md
 set_api_keys.ps1
 zen-mcp-server/
+.env.production
+Environment Variables.txt
