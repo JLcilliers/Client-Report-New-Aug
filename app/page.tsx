@@ -14,7 +14,7 @@ export default function HomePage() {
   const handleGoogleLogin = () => {
     setLoading(true)
     // Use NextAuth signIn with Google provider
-    signIn('google', { callbackUrl: '/admin' })
+    signIn('google', { callbackUrl: '/admin/google-accounts' })
   }
 
   const handleSimpleAdminLogin = () => {
@@ -28,7 +28,7 @@ export default function HomePage() {
       .then(res => res.json())
       .then(data => {
         if (data.success) {
-          router.push("/admin")
+          router.push("/admin/google-accounts")
         }
       })
       .catch(err => console.error("Login error:", err))

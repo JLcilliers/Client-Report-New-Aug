@@ -80,11 +80,22 @@ export default function AdminDashboard() {
         const reports = await response.json()
         // Count unique clients from reports
         const uniqueClients = new Set(reports.map((r: any) => r.client_name)).size
+        
+        // Find the most recent update/refresh
+        const mostRecentUpdate = reports.reduce((latest: Date | null, report: any) => {
+          const reportDate = report.lastRefreshed ? new Date(report.lastRefreshed) : 
+                           report.updated_at ? new Date(report.updated_at) : null;
+          
+          if (!reportDate) return latest;
+          if (!latest) return reportDate;
+          return reportDate > latest ? reportDate : latest;
+        }, null);
+        
         setStats({
           totalClients: uniqueClients,
           activeClients: uniqueClients,
           totalReports: reports.length,
-          lastSync: reports[0]?.last_data_fetch ? new Date(reports[0].last_data_fetch) : null
+          lastSync: mostRecentUpdate
         })
       }
     } catch (error) {
@@ -212,15 +223,43 @@ export default function AdminDashboard() {
 
         <Card 
           className="cursor-pointer hover:shadow-md transition-shadow"
-          onClick={() => {
+          onClick={async () => {
             setLoading(true);
-            fetchConnectedClients();
-            fetchStats();
-            fetchRecentReports();
             toast({
-              title: "Refreshing data...",
-              description: "Fetching latest information",
+              title: "Refreshing all data...",
+              description: "This may take a moment",
             });
+            
+            try {
+              // Refresh all reports data
+              const refreshResponse = await fetch("/api/reports/refresh", {
+                method: "POST"
+              });
+              
+              if (refreshResponse.ok) {
+                const refreshData = await refreshResponse.json();
+                toast({
+                  title: "Data refreshed!",
+                  description: `Updated ${refreshData.updated || 0} reports`,
+                });
+              }
+              
+              // Fetch updated data
+              await Promise.all([
+                fetchConnectedClients(),
+                fetchStats(),
+                fetchRecentReports()
+              ]);
+            } catch (error) {
+              console.error("Error refreshing data:", error);
+              toast({
+                title: "Refresh failed",
+                description: "Some data may not have been updated",
+                variant: "destructive"
+              });
+            } finally {
+              setLoading(false);
+            }
           }}
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

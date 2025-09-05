@@ -83,6 +83,35 @@ export default function GoogleAccountsPage() {
         console.log('[Frontend] Accounts data received:', data);
         console.log('[Frontend] Number of accounts:', data.accounts?.length || 0);
         const accountsData = data.accounts || [];
+        
+        // Auto-refresh expired tokens
+        for (const account of accountsData) {
+          if (account.token_expiry) {
+            const expiryDate = new Date(account.token_expiry);
+            const now = new Date();
+            
+            // If token is expired or will expire in next 5 minutes
+            if (expiryDate <= new Date(now.getTime() + 5 * 60000)) {
+              console.log(`[Frontend] Token expired/expiring for account ${account.id}, auto-refreshing...`);
+              try {
+                const refreshResponse = await fetch(`/api/admin/google-accounts/${account.id}/refresh`, {
+                  method: 'POST'
+                });
+                
+                if (refreshResponse.ok) {
+                  const refreshData = await refreshResponse.json();
+                  console.log(`[Frontend] Token refreshed successfully for account ${account.id}`);
+                  // Update the account with new expiry
+                  account.token_expiry = new Date(refreshData.expires_at * 1000).toISOString();
+                  account.is_active = true;
+                }
+              } catch (refreshError) {
+                console.error(`[Frontend] Failed to auto-refresh token for account ${account.id}:`, refreshError);
+              }
+            }
+          }
+        }
+        
         setAccounts(accountsData)
         
         // Fetch properties for each account
