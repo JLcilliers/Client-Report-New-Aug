@@ -2,7 +2,8 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { JSDOM } from "jsdom";
 import Readability from "@mozilla/readability";
-import { fleschKincaidGrade } from "text-readability";
+import textReadability from "text-readability";
+const { fleschKincaidGrade } = textReadability;
 
 const server = new McpServer({ name: "content-quality", version: "1.0.0" });
 

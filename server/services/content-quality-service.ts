@@ -112,7 +112,6 @@ export class ContentQualityService {
     
     // Extract main content using Readability
     let mainContent = '';
-    let readabilityScore = 0;
     
     try {
       // @ts-ignore

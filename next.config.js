@@ -1,4 +1,4 @@
-const { withSentryConfig } = require('@sentry/nextjs');
+import { withSentryConfig } from '@sentry/nextjs';
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -16,7 +16,7 @@ const nextConfig = {
     // Fix for module resolution in Vercel
     config.resolve.alias = {
       ...config.resolve.alias,
-      '@': require('path').resolve(__dirname),
+      '@': new URL('.', import.meta.url).pathname.replace(/\/$/, ''),
     };
     return config;
   },
@@ -36,7 +36,7 @@ const nextConfig = {
   },
 }
 
-module.exports = withSentryConfig(
+export default withSentryConfig(
   nextConfig,
   {
     // For all available options, see:
