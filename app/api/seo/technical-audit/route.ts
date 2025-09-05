@@ -1624,9 +1624,9 @@ async function auditContentQualityEnhanced(url: string) {
     const h1 = doc.querySelector("h1")?.textContent?.trim() || "";
     const title = doc.querySelector("title")?.textContent?.trim() || "";
     const metaDesc = doc.querySelector("meta[name='description']")?.getAttribute("content") || "";
-    const images = [...doc.querySelectorAll("img")];
+    const images = Array.from(doc.querySelectorAll("img"));
     const withAlt = images.filter(i => i.getAttribute("alt")).length;
-    const jsonLd = [...doc.querySelectorAll("script[type='application/ld+json']")].map(s => s.textContent);
+    const jsonLd = Array.from(doc.querySelectorAll("script[type='application/ld+json']")).map(s => s.textContent);
 
     // Calculate score
     let score = 100;

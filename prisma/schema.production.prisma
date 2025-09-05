@@ -277,3 +277,58 @@ model PageSpeedAudit {
   @@index([reportId])
   @@index([url])
 }
+
+// PageSpeed Insights cache table
+model PageAudit {
+  id          String   @id @default(cuid())
+  url         String
+  strategy    String   // 'mobile' | 'desktop'
+  source      String   // 'PSI' | 'Lighthouse'
+  rawJson     String   @db.Text // JSON stored as text for PostgreSQL
+  collectedAt DateTime @default(now())
+  
+  @@unique([url, strategy, source])
+  @@index([url])
+  @@index([collectedAt])
+}
+
+// Core Web Vitals measurements from CrUX
+model CwvMeasurement {
+  id           String   @id @default(cuid())
+  url          String
+  origin       String
+  formFactor   String   // 'PHONE' | 'DESKTOP'
+  p75LcpMs     Float    // 75th percentile LCP in milliseconds
+  p75InpMs     Float    // 75th percentile INP in milliseconds
+  p75Cls       Float    // 75th percentile CLS (unitless)
+  p75FcpMs     Float?   // 75th percentile FCP in milliseconds
+  p75TtfbMs    Float?   // 75th percentile TTFB in milliseconds
+  grade        String?  // Overall grade A-F
+  windowStart  DateTime
+  windowEnd    DateTime
+  histJson     String?  @db.Text // Full histogram data as JSON text
+  collectedAt  DateTime @default(now())
+  
+  @@unique([url, formFactor])
+  @@index([url])
+  @@index([origin])
+  @@index([collectedAt])
+}
+
+// Content Quality analysis
+model ContentQuality {
+  id                String   @id @default(cuid())
+  url               String
+  score             Int      // 0-100 overall score
+  readabilityScore  Float    // 0-30
+  tagsScore         Float    // 0-40
+  mediaScore        Float    // 0-10
+  linkHealthScore   Float    // 0-20
+  details           String   @db.Text // Detailed metrics as JSON text
+  topIssues         String   @db.Text // Array of issue strings as JSON
+  collectedAt       DateTime @default(now())
+  
+  @@unique([url])
+  @@index([url])
+  @@index([collectedAt])
+}

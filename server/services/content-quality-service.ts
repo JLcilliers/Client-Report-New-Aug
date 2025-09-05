@@ -116,7 +116,7 @@ export class ContentQualityService {
     try {
       // @ts-ignore
       const { Readability } = await import('@mozilla/readability');
-      const reader = new Readability(doc.cloneNode(true));
+      const reader = new Readability(doc.cloneNode(true) as Document);
       const article = reader.parse();
       mainContent = article?.textContent || doc.body?.textContent || '';
     } catch (error) {

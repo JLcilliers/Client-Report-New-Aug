@@ -37,8 +37,8 @@ interface CWVData {
     LCP: number; // milliseconds
     INP: number; // milliseconds  
     CLS: number; // unitless
-    FCP?: number; // milliseconds
-    TTFB?: number; // milliseconds
+    FCP?: number | null; // milliseconds
+    TTFB?: number | null; // milliseconds
   };
   grade: string;
   collectionPeriod: {
