@@ -118,30 +118,39 @@ export const authOptions: NextAuthOptions = {
       
       if (account?.provider === 'google') {
         try {
-          const { error: upsertError } = await supabase
-            .from('google_accounts')
-            .upsert({
-              email: user.email,
-              google_id: account.providerAccountId,
-              name: user.name,
-              image: user.image,
-              access_token: account.access_token,
-              refresh_token: account.refresh_token,
-              expires_at: account.expires_at,
-            }, {
-              onConflict: 'email'
-            });
-
-          if (upsertError) {
-            console.error('=== UPSERT ERROR ===', upsertError);
-            return false;  // This causes AccessDenied
-          }
+          // Save to GoogleTokens table using Prisma instead of Supabase
+          await prisma.googleTokens.upsert({
+            where: {
+              userId_google_sub: {
+                userId: user.id,
+                google_sub: account.providerAccountId
+              }
+            },
+            update: {
+              email: user.email || undefined,
+              access_token: account.access_token || undefined,
+              refresh_token: account.refresh_token || undefined,
+              expires_at: account.expires_at ? BigInt(account.expires_at) : undefined,
+              scope: account.scope || undefined
+            },
+            create: {
+              userId: user.id,
+              google_sub: account.providerAccountId,
+              email: user.email || undefined,
+              access_token: account.access_token || undefined,
+              refresh_token: account.refresh_token || undefined,
+              expires_at: account.expires_at ? BigInt(account.expires_at) : undefined,
+              scope: account.scope || undefined
+            }
+          });
           
-          console.log('=== SIGN IN SUCCESS ===');
+          console.log('=== SIGN IN SUCCESS - Saved to GoogleTokens ===');
           return true;
         } catch (error) {
           console.error('=== CATCH ERROR ===', error);
-          return false;  // This causes AccessDenied
+          // Don't fail sign in if we can't save tokens - user can still sign in
+          // We'll save tokens on the callback route instead
+          return true;
         }
       }
       
