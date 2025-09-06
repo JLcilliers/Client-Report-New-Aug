@@ -28,6 +28,15 @@ export default function AdminLayout({
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    // In development, allow dev_auth cookie to bypass NextAuth
+    const devAuth = document.cookie.includes('dev_auth=true');
+    const isDevelopment = process.env.NEXT_PUBLIC_DEV_MODE === 'true' || window.location.hostname === 'localhost';
+    
+    if (isDevelopment && devAuth) {
+      setLoading(false);
+      return;
+    }
+    
     if (status === "loading") {
       setLoading(true)
     } else if (status === "unauthenticated") {
@@ -52,7 +61,11 @@ export default function AdminLayout({
     )
   }
 
-  if (!session) {
+  // In development with dev_auth, allow access without NextAuth session
+  const devAuth = typeof window !== 'undefined' && document.cookie.includes('dev_auth=true');
+  const isDevelopment = process.env.NEXT_PUBLIC_DEV_MODE === 'true' || (typeof window !== 'undefined' && window.location.hostname === 'localhost');
+  
+  if (!session && !(isDevelopment && devAuth)) {
     return null
   }
 
@@ -72,7 +85,7 @@ export default function AdminLayout({
           <div className="flex flex-col h-full">
             <div className="p-4 border-b">
               <h2 className="text-xl font-bold text-gray-800">SEO Platform</h2>
-              <p className="text-sm text-gray-600 mt-1">{session.user?.email || 'Admin'}</p>
+              <p className="text-sm text-gray-600 mt-1">{session?.user?.email || (isDevelopment && devAuth ? 'Dev Mode' : 'Admin')}</p>
             </div>
             
             <nav className="flex-1 p-4">

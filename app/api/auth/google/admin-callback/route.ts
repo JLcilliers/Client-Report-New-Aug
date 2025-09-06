@@ -25,13 +25,13 @@ export async function GET(request: NextRequest) {
     if (error) {
       console.error('[OAuth Callback] Error from Google:', error)
       const baseUrl = request.nextUrl.origin || process.env.NEXT_PUBLIC_URL || 'https://searchsignal.online'
-      return NextResponse.redirect(`${baseUrl}/admin?error=${error}`)
+      return NextResponse.redirect(`${baseUrl}/admin/google-accounts?error=${error}`)
     }
     
     if (!code) {
       console.error('[OAuth Callback] No authorization code received')
       const baseUrl = request.nextUrl.origin || process.env.NEXT_PUBLIC_URL || 'https://searchsignal.online'
-      return NextResponse.redirect(`${baseUrl}/admin?error=no_code`)
+      return NextResponse.redirect(`${baseUrl}/admin/google-accounts?error=no_code`)
     }
 
     // Use consistent base URL detection
@@ -207,7 +207,7 @@ export async function GET(request: NextRequest) {
     console.log('========== OAuth Callback END (SUCCESS) ==========\n');
     
     const baseUrl = request.nextUrl.origin || process.env.NEXT_PUBLIC_URL || 'https://searchsignal.online'
-    const redirectUrl = `${baseUrl}/admin?success=true`;
+    const redirectUrl = `${baseUrl}/admin/google-accounts?success=true`;
     console.log('[OAuth Callback] Redirecting to:', redirectUrl);
     return NextResponse.redirect(redirectUrl)
   } catch (error: any) {
