@@ -28,16 +28,18 @@ export default function AdminLayout({
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Check for our Google OAuth cookies or demo auth
+    // Check for our Google OAuth cookies or demo auth first
     const hasGoogleAuth = document.cookie.includes('google_access_token');
     const hasDemoAuth = document.cookie.includes('demo_auth=true');
     const isDevelopment = process.env.NEXT_PUBLIC_DEV_MODE === 'true' || window.location.hostname === 'localhost';
     
-    if (hasGoogleAuth || hasDemoAuth || (isDevelopment && hasDemoAuth)) {
+    // If we have valid cookie-based auth, allow access regardless of NextAuth status
+    if (hasGoogleAuth || hasDemoAuth) {
       setLoading(false);
       return;
     }
     
+    // Only check NextAuth if no cookie-based auth is present
     if (status === "loading") {
       setLoading(true)
     } else if (status === "unauthenticated") {
@@ -65,9 +67,8 @@ export default function AdminLayout({
   // Allow access if we have Google OAuth cookies, demo auth, or NextAuth session
   const hasGoogleAuth = typeof window !== 'undefined' && document.cookie.includes('google_access_token');
   const hasDemoAuth = typeof window !== 'undefined' && document.cookie.includes('demo_auth=true');
-  const isDevelopment = process.env.NEXT_PUBLIC_DEV_MODE === 'true' || (typeof window !== 'undefined' && window.location.hostname === 'localhost');
   
-  if (!session && !hasGoogleAuth && !hasDemoAuth && !(isDevelopment && hasDemoAuth)) {
+  if (!session && !hasGoogleAuth && !hasDemoAuth) {
     return null
   }
 
