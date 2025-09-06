@@ -132,53 +132,50 @@ export async function GET(request: NextRequest) {
       console.log('[OAuth Callback] Existing user found:', user.id);
     }
     
-    // Save to Account table (which stores OAuth credentials)
-    console.log('[OAuth Callback] Preparing to save/update Account record...');
+    // Save to GoogleTokens table (which is what the frontend reads from)
+    console.log('[OAuth Callback] Preparing to save/update GoogleTokens record...');
     
-    const accountData = {
-      update: {
-        access_token: tokens.access_token!,
-        refresh_token: tokens.refresh_token || undefined,
-        expires_at: tokens.expiry_date ? Math.floor(tokens.expiry_date / 1000) : undefined,
-        scope: tokens.scope || "https://www.googleapis.com/auth/analytics.readonly https://www.googleapis.com/auth/webmasters.readonly",
-      },
-      create: {
-        userId: user.id,
-        type: 'oauth',
-        provider: 'google',
-        providerAccountId: userInfo.email,
-        access_token: tokens.access_token!,
-        refresh_token: tokens.refresh_token || undefined,
-        expires_at: tokens.expiry_date ? Math.floor(tokens.expiry_date / 1000) : undefined,
-        scope: tokens.scope || "https://www.googleapis.com/auth/analytics.readonly https://www.googleapis.com/auth/webmasters.readonly",
-        token_type: tokens.token_type || 'Bearer'
-      }
+    const googleTokensData = {
+      google_sub: userInfo.id, // Google's unique user ID
+      email: userInfo.email,
+      access_token: tokens.access_token!,
+      refresh_token: tokens.refresh_token || undefined,
+      expires_at: tokens.expiry_date ? BigInt(tokens.expiry_date) : undefined,
+      scope: tokens.scope || "https://www.googleapis.com/auth/analytics.readonly https://www.googleapis.com/auth/webmasters.readonly",
+      userId: user.id
     };
     
-    console.log('[OAuth Callback] Account data to save:');
+    console.log('[OAuth Callback] GoogleTokens data to save:');
     console.log('  - UserId:', user.id);
-    console.log('  - Provider:', 'google');
-    console.log('  - ProviderAccountId:', userInfo.email);
+    console.log('  - Email:', userInfo.email);
+    console.log('  - Google Sub:', userInfo.id);
     console.log('  - Has refresh token:', !!tokens.refresh_token);
-    console.log('  - Expires at:', accountData.create.expires_at);
+    console.log('  - Expires at:', tokens.expiry_date);
     
     let googleAccount;
     try {
       console.log('[OAuth Callback] Executing Prisma upsert...');
-      googleAccount = await prisma.account.upsert({
+      googleAccount = await prisma.googleTokens.upsert({
         where: { 
-          provider_providerAccountId: {
-            provider: 'google',
-            providerAccountId: userInfo.email
+          userId_google_sub: {
+            userId: user.id,
+            google_sub: userInfo.id
           }
         },
-        ...accountData
+        update: {
+          access_token: tokens.access_token!,
+          refresh_token: tokens.refresh_token || undefined,
+          expires_at: tokens.expiry_date ? BigInt(tokens.expiry_date) : undefined,
+          scope: tokens.scope || "https://www.googleapis.com/auth/analytics.readonly https://www.googleapis.com/auth/webmasters.readonly",
+          email: userInfo.email
+        },
+        create: googleTokensData
       })
-      console.log('[OAuth Callback] Account saved successfully!');
-      console.log('  - Account ID:', googleAccount.id);
-      console.log('  - Account provider:', googleAccount.provider);
+      console.log('[OAuth Callback] GoogleTokens saved successfully!');
+      console.log('  - GoogleTokens ID:', googleAccount.id);
+      console.log('  - GoogleTokens email:', googleAccount.email);
     } catch (saveError: any) {
-      console.error('[OAuth Callback] Failed to save account!');
+      console.error('[OAuth Callback] Failed to save GoogleTokens!');
       console.error('  - Error:', saveError.message);
       console.error('  - Stack:', saveError.stack);
       console.error('  - Full error:', JSON.stringify(saveError, null, 2));
