@@ -116,44 +116,8 @@ export const authOptions: NextAuthOptions = {
       console.log('Account:', account);
       console.log('Profile:', profile);
       
-      if (account?.provider === 'google') {
-        try {
-          // Save to GoogleTokens table using Prisma instead of Supabase
-          await prisma.googleTokens.upsert({
-            where: {
-              userId_google_sub: {
-                userId: user.id,
-                google_sub: account.providerAccountId
-              }
-            },
-            update: {
-              email: user.email || undefined,
-              access_token: account.access_token || undefined,
-              refresh_token: account.refresh_token || undefined,
-              expires_at: account.expires_at ? BigInt(account.expires_at) : undefined,
-              scope: account.scope || undefined
-            },
-            create: {
-              userId: user.id,
-              google_sub: account.providerAccountId,
-              email: user.email || undefined,
-              access_token: account.access_token || undefined,
-              refresh_token: account.refresh_token || undefined,
-              expires_at: account.expires_at ? BigInt(account.expires_at) : undefined,
-              scope: account.scope || undefined
-            }
-          });
-          
-          console.log('=== SIGN IN SUCCESS - Saved to GoogleTokens ===');
-          return true;
-        } catch (error) {
-          console.error('=== CATCH ERROR ===', error);
-          // Don't fail sign in if we can't save tokens - user can still sign in
-          // We'll save tokens on the callback route instead
-          return true;
-        }
-      }
-      
+      // Just allow the sign in - the PrismaAdapter will handle saving the account
+      // We'll copy tokens to GoogleTokens table after user is created
       return true;
     },
   },
