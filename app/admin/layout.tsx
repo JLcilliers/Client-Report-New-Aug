@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react"
 import { useRouter, usePathname } from "next/navigation"
-import { useSession, signOut } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { 
@@ -24,33 +23,34 @@ export default function AdminLayout({
 }) {
   const router = useRouter()
   const pathname = usePathname()
-  const { data: session, status } = useSession()
   const [loading, setLoading] = useState(true)
+  const [userEmail, setUserEmail] = useState<string | null>(null)
 
   useEffect(() => {
-    // In development, allow dev_auth cookie to bypass NextAuth
-    const devAuth = document.cookie.includes('dev_auth=true');
-    const isDevelopment = process.env.NEXT_PUBLIC_DEV_MODE === 'true' || window.location.hostname === 'localhost';
+    // Check for our custom auth cookies
+    const hasGoogleAuth = document.cookie.includes('google_access_token');
+    const hasDemoAuth = document.cookie.includes('demo_auth=true');
+    const googleUserEmail = document.cookie.match(/google_user_email=([^;]+)/)?.[1];
     
-    if (isDevelopment && devAuth) {
+    if (hasGoogleAuth || hasDemoAuth) {
+      setUserEmail(googleUserEmail ? decodeURIComponent(googleUserEmail) : 'Admin');
       setLoading(false);
-      return;
-    }
-    
-    if (status === "loading") {
-      setLoading(true)
-    } else if (status === "unauthenticated") {
-      router.push("/api/auth/signin?callbackUrl=/admin")
     } else {
-      setLoading(false)
+      // No auth cookies, redirect to login
+      router.push("/?auth=required")
     }
-  }, [status, router])
+  }, [router])
 
   const handleSignOut = async () => {
-    await signOut({ callbackUrl: "/" })
+    // Clear cookies
+    document.cookie = 'google_access_token=; Max-Age=0; path=/';
+    document.cookie = 'google_refresh_token=; Max-Age=0; path=/';
+    document.cookie = 'google_user_email=; Max-Age=0; path=/';
+    document.cookie = 'demo_auth=; Max-Age=0; path=/';
+    router.push("/")
   }
 
-  if (loading || status === "loading") {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -59,14 +59,6 @@ export default function AdminLayout({
         </div>
       </div>
     )
-  }
-
-  // In development with dev_auth, allow access without NextAuth session
-  const devAuth = typeof window !== 'undefined' && document.cookie.includes('dev_auth=true');
-  const isDevelopment = process.env.NEXT_PUBLIC_DEV_MODE === 'true' || (typeof window !== 'undefined' && window.location.hostname === 'localhost');
-  
-  if (!session && !(isDevelopment && devAuth)) {
-    return null
   }
 
   const navigation = [
@@ -85,7 +77,7 @@ export default function AdminLayout({
           <div className="flex flex-col h-full">
             <div className="p-4 border-b">
               <h2 className="text-xl font-bold text-gray-800">SEO Platform</h2>
-              <p className="text-sm text-gray-600 mt-1">{session?.user?.email || (isDevelopment && devAuth ? 'Dev Mode' : 'Admin')}</p>
+              <p className="text-sm text-gray-600 mt-1">{userEmail}</p>
             </div>
             
             <nav className="flex-1 p-4">
