@@ -1,0 +1,10 @@
+b0da2dd Fix token refresh handling and change login redirect to /admin
+e24c35d Update .gitignore to exclude sensitive environment files
+1833ee5 Fix authentication, token refresh, and dashboard functionality
+b0b9222 Fix additional TypeScript error in technical-audit route
+44e4249 Fix Vercel deployment: Add missing Prisma models and resolve TypeScript errors
+9eb8ed8 Fix duplicate readabilityScore variable declaration in content-quality-service.ts
+f0a46ff Complete SEO dashboard enhancement with real-time data and caching
+82e98f5 Fix Vercel deployment: Add ts-ignore for jsdom import
+a24f3e4 Fix Vercel deployment: Add @types/jsdom for TypeScript compilation
+36b5e4a Enhance SEO dashboard with real PageSpeed, CrUX, and Content Quality data

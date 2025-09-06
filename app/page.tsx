@@ -13,8 +13,8 @@ export default function HomePage() {
 
   const handleGoogleLogin = () => {
     setLoading(true)
-    // Use NextAuth signIn with Google provider
-    signIn('google', { callbackUrl: '/admin' })
+    // Use direct OAuth flow with forced consent to get refresh token
+    window.location.href = '/api/auth/google/add-account'
   }
 
   const handleSimpleAdminLogin = () => {

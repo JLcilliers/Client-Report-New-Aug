@@ -68,6 +68,6 @@ export async function GET(request: NextRequest) {
     console.error('========== OAuth Add Account END (ERROR) ==========\n');
     
     const baseUrl = request.nextUrl.origin || process.env.NEXT_PUBLIC_URL || 'https://searchsignal.online'
-    return NextResponse.redirect(`${baseUrl}/admin/google-accounts?error=oauth_init_failed`)
+    return NextResponse.redirect(`${baseUrl}/admin?error=oauth_init_failed`)
   }
 }

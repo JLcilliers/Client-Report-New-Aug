@@ -9,10 +9,16 @@ Search Insights Hub - A comprehensive SEO reporting platform that integrates wit
 ## Essential Commands
 
 ```bash
-# Development
-npm run dev                 # Start development server on port 3000
-npm run build              # Build for production
-npm start                  # Start production server
+# PRODUCTION DEPLOYMENT (Primary Workflow)
+git add -A                 # Stage changes
+git commit -m "message"    # Commit changes
+git push origin main       # Deploy to Vercel automatically
+# Live at: https://searchsignal.online
+
+# Local Testing (Optional)
+npm run dev                # Start local dev server for testing
+npm run build              # Build for production locally
+npm start                  # Start production server locally
 
 # Database (Prisma with SQLite)
 npm run prisma:generate    # Generate Prisma client
@@ -94,10 +100,13 @@ taskkill //PID [PID] //F      # Kill process
 - Ensure user has permissions for the properties
 
 ### Production Deployment Notes
-- Run `npm run production:scan` before deployment to check for issues
+- **Platform**: Vercel (auto-deploys from GitHub)
+- **Live URL**: https://searchsignal.online
+- **Workflow**: Push to GitHub → Vercel auto-deploys
+- **Database**: PostgreSQL in production (not SQLite)
+- **Environment Variables**: Set in Vercel dashboard, not locally
+- Run `npm run production:scan` locally before pushing to check for issues
 - Update redirect URIs in Google Cloud Console for production domain
-- Set all environment variables in production environment
-- Database needs migration from SQLite to PostgreSQL for production
 
 ### Automation Tools
 - `automation/test-runner.js` - Automated testing with 50 retry iterations
