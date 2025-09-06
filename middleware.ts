@@ -9,7 +9,19 @@ export function middleware(req: NextRequest) {
     return NextResponse.next();
   }
   
-  // Use NextAuth middleware for admin routes
+  // Check for demo auth cookie first
+  const demoAuth = req.cookies.get('demo_auth');
+  if (demoAuth?.value === 'true') {
+    return NextResponse.next();
+  }
+  
+  // Check for Google OAuth cookies
+  const googleAccessToken = req.cookies.get('google_access_token');
+  if (googleAccessToken?.value) {
+    return NextResponse.next();
+  }
+  
+  // Use NextAuth middleware for admin routes as fallback
   return (withAuth({
     pages: { signIn: '/' }, // redirect to home page instead of /api/auth/signin
   }) as any)(req);
