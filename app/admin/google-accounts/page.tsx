@@ -104,9 +104,20 @@ export default function GoogleAccountsPage() {
                   // Update the account with new expiry
                   account.token_expiry = new Date(refreshData.expires_at * 1000).toISOString();
                   account.is_active = true;
+                } else {
+                  const errorData = await refreshResponse.json();
+                  console.error(`[Frontend] Failed to refresh token for account ${account.id}:`, errorData);
+                  
+                  // If re-authentication is required, mark the account appropriately
+                  if (errorData.requiresReauth) {
+                    account.is_active = false;
+                    account.needsReauth = true;
+                    account.errorMessage = errorData.message;
+                  }
                 }
               } catch (refreshError) {
                 console.error(`[Frontend] Failed to auto-refresh token for account ${account.id}:`, refreshError);
+                account.is_active = false;
               }
             }
           }

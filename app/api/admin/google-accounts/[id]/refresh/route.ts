@@ -11,12 +11,59 @@ export async function POST(
     const { id } = params;
     console.log('[Refresh Token] Refreshing token for account:', id);
 
+    // First, check if the account exists and has a refresh token
+    const { prisma } = await import('@/lib/db/prisma');
+    const account = await prisma.account.findUnique({
+      where: { id },
+      select: { 
+        id: true, 
+        refresh_token: true,
+        access_token: true,
+        expires_at: true
+      }
+    });
+
+    if (!account) {
+      console.error('[Refresh Token] Account not found:', id);
+      return NextResponse.json(
+        { error: 'Account not found' },
+        { status: 404 }
+      );
+    }
+
+    if (!account.refresh_token) {
+      console.error('[Refresh Token] No refresh token for account:', id);
+      console.log('[Refresh Token] Account needs re-authentication');
+      
+      // Mark account as needing re-authentication
+      await prisma.account.update({
+        where: { id },
+        data: { 
+          expires_at: Math.floor(Date.now() / 1000) - 1 // Mark as expired
+        }
+      });
+      
+      return NextResponse.json(
+        { 
+          error: 'No refresh token available',
+          requiresReauth: true,
+          message: 'This account needs to be re-authenticated. Please remove and re-add the account.'
+        },
+        { status: 400 }
+      );
+    }
+
     // Use the refresh token utility we created
     const result = await refreshGoogleToken(id);
 
     if (!result) {
+      console.error('[Refresh Token] Token refresh failed for account:', id);
       return NextResponse.json(
-        { error: 'Failed to refresh token - no valid refresh token or refresh failed' },
+        { 
+          error: 'Failed to refresh token',
+          requiresReauth: true,
+          message: 'Token refresh failed. The account may need to be re-authenticated.'
+        },
         { status: 400 }
       );
     }
