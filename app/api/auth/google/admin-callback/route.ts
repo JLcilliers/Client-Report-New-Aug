@@ -182,31 +182,45 @@ export async function GET(request: NextRequest) {
       throw saveError;
     }
 
-    // Set cookies for session
-    const cookieStore = cookies()
-    cookieStore.set('google_access_token', tokens.access_token!, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7 // 7 days
-    })
-    
-    if (tokens.refresh_token) {
-      cookieStore.set('google_refresh_token', tokens.refresh_token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 60 * 60 * 24 * 30 // 30 days
-      })
-    }
-
     console.log('[OAuth Callback] All operations successful!');
     console.log('========== OAuth Callback END (SUCCESS) ==========\n');
     
     const baseUrl = request.nextUrl.origin || process.env.NEXT_PUBLIC_URL || 'https://searchsignal.online'
     const redirectUrl = `${baseUrl}/admin/google-accounts?success=true`;
     console.log('[OAuth Callback] Redirecting to:', redirectUrl);
-    return NextResponse.redirect(redirectUrl)
+    
+    // Create response with redirect
+    const response = NextResponse.redirect(redirectUrl)
+    
+    // Set cookies on the response
+    response.cookies.set('google_access_token', tokens.access_token!, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+      path: '/'
+    })
+    
+    if (tokens.refresh_token) {
+      response.cookies.set('google_refresh_token', tokens.refresh_token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 * 30, // 30 days
+        path: '/'
+      })
+    }
+    
+    // Also set a user cookie for the middleware
+    response.cookies.set('google_user_email', userInfo.email, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+      path: '/'
+    })
+    
+    return response
   } catch (error: any) {
     console.error('\n========== OAuth Callback ERROR ==========');
     console.error('[OAuth Callback] Caught error!');
