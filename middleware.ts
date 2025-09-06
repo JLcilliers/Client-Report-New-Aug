@@ -1,6 +1,7 @@
 // middleware.ts
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { withAuth } from 'next-auth/middleware';
 
 export function middleware(req: NextRequest) {
   // In development, bypass auth completely
@@ -8,18 +9,10 @@ export function middleware(req: NextRequest) {
     return NextResponse.next();
   }
   
-  // Check if user has a valid Google access token cookie or demo auth
-  const hasGoogleToken = req.cookies.has('google_access_token');
-  const hasDemoAuth = req.cookies.has('demo_auth');
-  
-  // Allow access if they have a Google token (from our OAuth flow) or demo auth
-  if (hasGoogleToken || hasDemoAuth) {
-    return NextResponse.next();
-  }
-  
-  // Otherwise redirect to home page for login
-  const baseUrl = req.nextUrl.origin;
-  return NextResponse.redirect(`${baseUrl}/?auth=required`);
+  // Use NextAuth middleware for admin routes
+  return (withAuth({
+    pages: { signIn: '/' }, // redirect to home page instead of /api/auth/signin
+  }) as any)(req);
 }
 
 export const config = {

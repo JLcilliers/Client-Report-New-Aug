@@ -28,11 +28,12 @@ export default function AdminLayout({
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // In development, allow dev_auth cookie to bypass NextAuth
-    const devAuth = document.cookie.includes('dev_auth=true');
+    // Check for our Google OAuth cookies or demo auth
+    const hasGoogleAuth = document.cookie.includes('google_access_token');
+    const hasDemoAuth = document.cookie.includes('demo_auth=true');
     const isDevelopment = process.env.NEXT_PUBLIC_DEV_MODE === 'true' || window.location.hostname === 'localhost';
     
-    if (isDevelopment && devAuth) {
+    if (hasGoogleAuth || hasDemoAuth || (isDevelopment && hasDemoAuth)) {
       setLoading(false);
       return;
     }
@@ -40,7 +41,7 @@ export default function AdminLayout({
     if (status === "loading") {
       setLoading(true)
     } else if (status === "unauthenticated") {
-      router.push("/api/auth/signin?callbackUrl=/admin")
+      router.push("/?auth=required")
     } else {
       setLoading(false)
     }
@@ -61,11 +62,12 @@ export default function AdminLayout({
     )
   }
 
-  // In development with dev_auth, allow access without NextAuth session
-  const devAuth = typeof window !== 'undefined' && document.cookie.includes('dev_auth=true');
+  // Allow access if we have Google OAuth cookies, demo auth, or NextAuth session
+  const hasGoogleAuth = typeof window !== 'undefined' && document.cookie.includes('google_access_token');
+  const hasDemoAuth = typeof window !== 'undefined' && document.cookie.includes('demo_auth=true');
   const isDevelopment = process.env.NEXT_PUBLIC_DEV_MODE === 'true' || (typeof window !== 'undefined' && window.location.hostname === 'localhost');
   
-  if (!session && !(isDevelopment && devAuth)) {
+  if (!session && !hasGoogleAuth && !hasDemoAuth && !(isDevelopment && hasDemoAuth)) {
     return null
   }
 
@@ -85,7 +87,12 @@ export default function AdminLayout({
           <div className="flex flex-col h-full">
             <div className="p-4 border-b">
               <h2 className="text-xl font-bold text-gray-800">SEO Platform</h2>
-              <p className="text-sm text-gray-600 mt-1">{session?.user?.email || (isDevelopment && devAuth ? 'Dev Mode' : 'Admin')}</p>
+              <p className="text-sm text-gray-600 mt-1">
+                {session?.user?.email || 
+                 (typeof window !== 'undefined' && document.cookie.match(/google_user_email=([^;]+)/)?.[1] ? 
+                  decodeURIComponent(document.cookie.match(/google_user_email=([^;]+)/)?.[1] || '') : 
+                  (hasDemoAuth ? 'Demo Mode' : 'Admin'))}
+              </p>
             </div>
             
             <nav className="flex-1 p-4">
