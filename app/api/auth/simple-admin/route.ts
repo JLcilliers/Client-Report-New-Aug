@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
+import { prisma } from "@/lib/db/prisma"
 
 export async function POST(request: NextRequest) {
   try {
@@ -98,48 +99,89 @@ export async function GET(request: NextRequest) {
       // Calculate token expiry
       const tokenExpiry = new Date()
       tokenExpiry.setSeconds(tokenExpiry.getSeconds() + expires_in)
+      const expiresAt = Math.floor(tokenExpiry.getTime() / 1000)
       
-      // Store in Supabase
-      const supabase = createClient(supabaseUrl, supabaseServiceRoleKey)
+      // First, find or create a user
+      let user = await prisma.user.findUnique({
+        where: { email: userData.email }
+      })
       
-      // Try to create table if it doesn't exist (will fail silently if it does)
-      try {
-        await supabase.from("admin_google_connections").select("*").limit(1)
-      } catch (error) {
-        // Table might not exist, but we'll handle that below
-        
+      if (!user) {
+        user = await prisma.user.create({
+          data: {
+            email: userData.email,
+            name: userData.name || userData.email.split('@')[0],
+            image: userData.picture || null
+          }
+        })
       }
       
-      // Upsert the connection
-      const { error: upsertError } = await supabase
-        .from("admin_google_connections")
-        .upsert({
-          admin_email: userData.email,
-          email: userData.email,
-          access_token,
-          refresh_token: refresh_token || "",
-          token_expiry: tokenExpiry.toISOString(),
-        }, {
-          onConflict: "admin_email",
-        })
+      // Store the Google account in Prisma
+      // First check if this Google account already exists
+      const existingAccount = await prisma.account.findUnique({
+        where: {
+          provider_providerAccountId: {
+            provider: 'google',
+            providerAccountId: userData.email
+          }
+        }
+      })
       
-      if (upsertError) {
-        
-        // Try without upsert
-        await supabase
-          .from("admin_google_connections")
-          .delete()
-          .eq("admin_email", userData.email)
-        
-        await supabase
-          .from("admin_google_connections")
-          .insert({
-            admin_email: userData.email,
-            email: userData.email,
+      if (existingAccount) {
+        // Update existing account
+        await prisma.account.update({
+          where: { id: existingAccount.id },
+          data: {
             access_token,
-            refresh_token: refresh_token || "",
-            token_expiry: tokenExpiry.toISOString(),
-          })
+            refresh_token: refresh_token || existingAccount.refresh_token,
+            expires_at: expiresAt,
+            scope: tokenData.scope || existingAccount.scope
+          }
+        })
+      } else {
+        // Create new account
+        await prisma.account.create({
+          data: {
+            userId: user.id,
+            type: 'oauth',
+            provider: 'google',
+            providerAccountId: userData.email,
+            access_token,
+            refresh_token: refresh_token || null,
+            expires_at: expiresAt,
+            token_type: tokenData.token_type || 'Bearer',
+            scope: tokenData.scope || null,
+            id_token: tokenData.id_token || null
+          }
+        })
+      }
+      
+      // Also store in GoogleAccount table for backward compatibility
+      const existingGoogleAccount = await prisma.googleAccount.findUnique({
+        where: { email: userData.email }
+      })
+      
+      if (existingGoogleAccount) {
+        await prisma.googleAccount.update({
+          where: { id: existingGoogleAccount.id },
+          data: {
+            accessToken: access_token,
+            refreshToken: refresh_token || existingGoogleAccount.refreshToken,
+            expiresAt,
+            scope: tokenData.scope || existingGoogleAccount.scope
+          }
+        })
+      } else {
+        await prisma.googleAccount.create({
+          data: {
+            userId: user.id,
+            email: userData.email,
+            accessToken: access_token,
+            refreshToken: refresh_token || null,
+            expiresAt,
+            scope: tokenData.scope || null
+          }
+        })
       }
       
       // Create response with success page
