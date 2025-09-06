@@ -11,7 +11,9 @@ export function getOAuthBaseUrl(request: NextRequest): string {
   const isLocalhost = host?.includes('localhost')
   
   if (isLocalhost) {
-    return `http://${host}`
+    // Always use port 3000 for OAuth redirect URIs since that's what's registered
+    // Even if the app is running on port 3001
+    return `http://localhost:3000`
   }
   
   // For production, ALWAYS use the production URL

@@ -36,23 +36,22 @@ export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
   const code = searchParams.get("code")
   const action = searchParams.get("action")
+  const redirect = searchParams.get("redirect") || "/admin"
   
-  // If no code, initiate OAuth
-  if (!code && action === "start") {
-    const params = new URLSearchParams({
-      client_id: process.env.GOOGLE_CLIENT_ID!,
-      redirect_uri: `${request.nextUrl.origin}/api/auth/simple-admin`,
-      response_type: "code",
-      scope: [
-        "https://www.googleapis.com/auth/webmasters.readonly",
-        "https://www.googleapis.com/auth/analytics.readonly",
-        "https://www.googleapis.com/auth/userinfo.email",
-      ].join(" "),
-      access_type: "offline",
-      prompt: "consent",
+  // For demo auth, just set the cookie and redirect
+  if (action === "start" && !code) {
+    const response = NextResponse.redirect(`${request.nextUrl.origin}${redirect}`)
+    
+    // Set demo auth cookie
+    response.cookies.set('demo_auth', 'true', {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24, // 24 hours
+      path: '/'
     })
     
-    return NextResponse.redirect(`https://accounts.google.com/o/oauth2/v2/auth?${params}`)
+    return response
   }
   
   // If we have a code, exchange it for tokens
