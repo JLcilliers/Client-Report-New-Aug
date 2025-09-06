@@ -5,7 +5,11 @@ import GoogleProvider from 'next-auth/providers/google';
 export const authOptionsSimple: NextAuthOptions = {
   // No adapter - use JWT strategy
   session: { strategy: 'jwt' },
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: process.env.NEXTAUTH_SECRET || 'fallback-secret-for-testing',
+  pages: {
+    signIn: '/api/auth/signin',
+    error: '/api/auth/error',
+  },
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
