@@ -28,7 +28,7 @@ function sanitizeMeta(...meta: unknown[]): Record<string, unknown> {
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),              // pass the PrismaClient instance
-  session: { strategy: 'jwt' },
+  session: { strategy: 'database' },           // Use database strategy with adapter
   secret: process.env.NEXTAUTH_SECRET,
   providers: [
     GoogleProvider({
@@ -72,41 +72,27 @@ export const authOptions: NextAuthOptions = {
     },
   },
   callbacks: {
-    async jwt({ token, account, user }) {
-      if (account?.provider === 'google') {
-        token.google = {
-          access_token: account.access_token,
-          refresh_token: account.refresh_token,
-          expires_at: (account.expires_at ?? 0) * 1000
-        };
-        token.userId = user?.id;
-      }
-      const g = token.google as any;
-      if (g?.expires_at && Date.now() > g.expires_at && g.refresh_token) {
-        const body = new URLSearchParams({
-          client_id: process.env.GOOGLE_CLIENT_ID!,
-          client_secret: process.env.GOOGLE_CLIENT_SECRET!,
-          grant_type: 'refresh_token',
-          refresh_token: g.refresh_token,
-        }).toString();
-        const r = await fetch('https://oauth2.googleapis.com/token', {
-          method: 'POST',
-          headers: { 'content-type': 'application/x-www-form-urlencoded' },
-          body
+    async session({ session, user }) {
+      // With database strategy, we get the user from the database
+      if (session?.user) {
+        session.user.id = user.id;
+        
+        // Fetch Google tokens from the Account table
+        const googleAccount = await prisma.account.findFirst({
+          where: {
+            userId: user.id,
+            provider: 'google'
+          }
         });
-        const data = await r.json();
-        if (data.access_token) {
-          g.access_token = data.access_token;
-          g.expires_at = Date.now() + data.expires_in * 1000;
+        
+        if (googleAccount) {
+          // Add Google tokens to session
+          (session as any).google = {
+            access_token: googleAccount.access_token,
+            refresh_token: googleAccount.refresh_token,
+            expires_at: googleAccount.expires_at ? googleAccount.expires_at * 1000 : null
+          };
         }
-        token.google = g;
-      }
-      return token;
-    },
-    async session({ session, token }) {
-      (session as any).google = token.google ?? null;
-      if (session?.user && token.userId) {
-        session.user.id = token.userId as string;
       }
       return session;
     },
