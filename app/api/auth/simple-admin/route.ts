@@ -14,8 +14,9 @@ export async function POST(request: NextRequest) {
     })
     
     // Set a simple auth cookie (in production, use proper session management)
+    // Note: httpOnly=false so client-side can read it for auth checks
     response.cookies.set('demo_auth', 'true', {
-      httpOnly: true,
+      httpOnly: false,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 // 24 hours
