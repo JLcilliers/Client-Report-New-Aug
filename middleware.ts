@@ -8,11 +8,12 @@ export function middleware(req: NextRequest) {
     return NextResponse.next();
   }
   
-  // Check if user has a valid Google access token cookie
+  // Check if user has a valid Google access token cookie or demo auth
   const hasGoogleToken = req.cookies.has('google_access_token');
+  const hasDemoAuth = req.cookies.has('demo_auth');
   
-  // Allow access if they have a Google token (from our OAuth flow)
-  if (hasGoogleToken) {
+  // Allow access if they have a Google token (from our OAuth flow) or demo auth
+  if (hasGoogleToken || hasDemoAuth) {
     return NextResponse.next();
   }
   
