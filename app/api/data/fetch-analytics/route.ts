@@ -13,25 +13,40 @@ export async function POST(request: NextRequest) {
   console.log('\n========== Analytics Data Fetch START ==========')
   
   try {
-    const { propertyId, startDate, endDate, accountId } = await request.json()
+    const { propertyId, startDate, endDate, accountId, reportId } = await request.json()
     
     console.log('[Analytics] Request params:')
     console.log('  - Property ID:', propertyId)
     console.log('  - Start Date:', startDate)
     console.log('  - End Date:', endDate)
     console.log('  - Account ID:', accountId)
+    console.log('  - Report ID:', reportId)
     
     if (!propertyId) {
       console.error('[Analytics] No property ID provided')
       return NextResponse.json({ error: "Property ID is required" }, { status: 400 })
     }
     
-    // Get access token from account or cookies
+    // Get access token from account, report, or cookies
     let accessToken: string | null = null;
+    let effectiveAccountId = accountId;
     
-    if (accountId) {
-      console.log('[Analytics] Using account ID to get token:', accountId)
-      accessToken = await getValidGoogleToken(accountId)
+    // If no accountId but we have reportId, get accountId from report
+    if (!effectiveAccountId && reportId) {
+      console.log('[Analytics] Getting account ID from report:', reportId)
+      const report = await prisma.clientReport.findUnique({
+        where: { id: reportId },
+        select: { googleAccountId: true }
+      })
+      if (report?.googleAccountId) {
+        effectiveAccountId = report.googleAccountId
+        console.log('[Analytics] Found account ID from report:', effectiveAccountId)
+      }
+    }
+    
+    if (effectiveAccountId) {
+      console.log('[Analytics] Using account ID to get token:', effectiveAccountId)
+      accessToken = await getValidGoogleToken(effectiveAccountId)
     } else {
       console.log('[Analytics] No account ID, trying cookies')
       const cookieStore = cookies()

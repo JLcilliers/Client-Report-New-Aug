@@ -21,41 +21,60 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Report ID or properties required" }, { status: 400 })
     }
     
-    // Get tokens from cookies
-    const cookieStore = cookies()
-    const accessToken = cookieStore.get('google_access_token')
-    const refreshToken = cookieStore.get('google_refresh_token')
+    // Get access token from report's Google account
+    let currentAccessToken: string | null = null;
     
-    if (!accessToken || !refreshToken) {
-      return NextResponse.json({ 
-        error: "Google authentication required",
-        details: "No valid Google tokens found"
-      }, { status: 401 })
-    }
-    
-    let currentAccessToken = accessToken.value
-    
-    // Try to refresh token if needed
-    try {
-      const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: new URLSearchParams({
-          refresh_token: refreshToken.value,
-          client_id: process.env.GOOGLE_CLIENT_ID!,
-          client_secret: process.env.GOOGLE_CLIENT_SECRET!,
-          grant_type: "refresh_token",
-        }),
+    if (reportId) {
+      const prisma = getPrisma()
+      const report = await prisma.clientReport.findUnique({
+        where: { id: reportId },
+        select: { googleAccountId: true }
       })
       
-      if (tokenResponse.ok) {
-        const newTokens = await tokenResponse.json()
-        currentAccessToken = newTokens.access_token
+      if (report?.googleAccountId) {
+        // Import the refresh token helper
+        const { getValidGoogleToken } = await import('@/lib/google/refresh-token');
+        currentAccessToken = await getValidGoogleToken(report.googleAccountId);
       }
-    } catch (refreshError) {
-      console.log('Token refresh failed, using existing token:', refreshError)
+    }
+    
+    // Fallback to cookies if no token from database
+    if (!currentAccessToken) {
+      const cookieStore = cookies()
+      const accessToken = cookieStore.get('google_access_token')
+      const refreshToken = cookieStore.get('google_refresh_token')
+      
+      if (!accessToken || !refreshToken) {
+        return NextResponse.json({ 
+          error: "Google authentication required",
+          details: "No valid Google tokens found"
+        }, { status: 401 })
+      }
+      
+      currentAccessToken = accessToken.value
+      
+      // Try to refresh token if needed
+      try {
+        const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: new URLSearchParams({
+            refresh_token: refreshToken.value,
+            client_id: process.env.GOOGLE_CLIENT_ID!,
+            client_secret: process.env.GOOGLE_CLIENT_SECRET!,
+            grant_type: "refresh_token",
+          }),
+        })
+        
+        if (tokenResponse.ok) {
+          const newTokens = await tokenResponse.json()
+          currentAccessToken = newTokens.access_token
+        }
+      } catch (refreshError) {
+        console.log('Token refresh failed, using existing token:', refreshError)
+      }
     }
     
     // Get report details from database if reportId provided
