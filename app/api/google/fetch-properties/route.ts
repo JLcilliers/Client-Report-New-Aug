@@ -33,8 +33,8 @@ export async function GET(request: NextRequest) {
     
     if (!accountId) {
       // If no accountId provided, get all accounts and fetch properties for each
-      const accounts = await prisma.account.findMany({
-        where: { provider: 'google' },
+      // Using GoogleTokens table instead of Account table
+      const googleAccounts = await prisma.googleTokens.findMany({
         include: {
           user: {
             select: {
@@ -46,12 +46,12 @@ export async function GET(request: NextRequest) {
       });
 
       const allProperties = await Promise.all(
-        accounts.map(async (account) => {
+        googleAccounts.map(async (account) => {
           const accessToken = await getValidGoogleToken(account.id);
           if (!accessToken) {
             return {
               accountId: account.id,
-              accountEmail: account.providerAccountId,
+              accountEmail: account.email || 'Unknown',
               error: 'No valid token',
               searchConsole: [],
               analytics: []
@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
           const { searchConsole, analytics } = await fetchPropertiesForToken(accessToken);
           return {
             accountId: account.id,
-            accountEmail: account.providerAccountId,
+            accountEmail: account.email || 'Unknown',
             searchConsole,
             analytics
           };

@@ -12,14 +12,16 @@ export async function POST(
     console.log('[Refresh Token] Refreshing token for account:', id);
 
     // First, check if the account exists and has a refresh token
+    // Using GoogleTokens table instead of Account table
     const { prisma } = await import('@/lib/db/prisma');
-    const account = await prisma.account.findUnique({
+    const account = await prisma.googleTokens.findUnique({
       where: { id },
       select: { 
         id: true, 
         refresh_token: true,
         access_token: true,
-        expires_at: true
+        expires_at: true,
+        email: true
       }
     });
 
@@ -36,10 +38,10 @@ export async function POST(
       console.log('[Refresh Token] Account needs re-authentication');
       
       // Mark account as needing re-authentication
-      await prisma.account.update({
+      await prisma.googleTokens.update({
         where: { id },
         data: { 
-          expires_at: Math.floor(Date.now() / 1000) - 1 // Mark as expired
+          expires_at: BigInt(Math.floor(Date.now() / 1000) - 1) // Mark as expired
         }
       });
       
