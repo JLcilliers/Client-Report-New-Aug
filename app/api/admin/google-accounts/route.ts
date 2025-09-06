@@ -5,11 +5,8 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    // Fetch all Google accounts from the Account table where provider is 'google'
-    const accounts = await prisma.account.findMany({
-      where: {
-        provider: 'google'
-      },
+    // Fetch all Google accounts from the GoogleTokens table
+    const accounts = await prisma.googleTokens.findMany({
       include: {
         user: {
           select: {
@@ -20,19 +17,19 @@ export async function GET() {
         }
       },
       orderBy: {
-        expires_at: 'desc'
+        updated_at: 'desc'
       }
     });
 
     // Transform the data to match the expected format for the frontend
     const transformedAccounts = accounts.map(account => ({
       id: account.id,
-      account_email: account.providerAccountId, // This is the actual Google email
-      account_name: account.user?.name || account.providerAccountId,
-      is_active: account.expires_at ? account.expires_at > Math.floor(Date.now() / 1000) : true,
-      created_at: new Date().toISOString(), // Account table doesn't have createdAt
-      updated_at: new Date().toISOString(), // Account table doesn't have updatedAt
-      token_expiry: account.expires_at ? new Date(account.expires_at * 1000).toISOString() : null,
+      account_email: account.email || 'Unknown', // Use the email from GoogleTokens
+      account_name: account.user?.name || account.email || 'Unknown',
+      is_active: account.expires_at ? Number(account.expires_at) > Math.floor(Date.now() / 1000) : true,
+      created_at: account.created_at.toISOString(),
+      updated_at: account.updated_at.toISOString(),
+      token_expiry: account.expires_at ? new Date(Number(account.expires_at) * 1000).toISOString() : null,
       refresh_token: account.refresh_token,
       access_token: account.access_token,
       // Add placeholder data for properties (these can be fetched separately)

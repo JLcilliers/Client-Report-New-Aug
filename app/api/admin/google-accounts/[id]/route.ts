@@ -10,12 +10,9 @@ export async function DELETE(
   try {
     const { id } = params;
 
-    // Check if the account exists and is a Google account
-    const account = await prisma.account.findFirst({
-      where: { 
-        id,
-        provider: 'google'
-      }
+    // Check if the account exists in GoogleTokens table
+    const account = await prisma.googleTokens.findFirst({
+      where: { id }
     });
 
     if (!account) {
@@ -25,8 +22,8 @@ export async function DELETE(
       );
     }
 
-    // Delete the Google account from Account table
-    await prisma.account.delete({
+    // Delete the Google account from GoogleTokens table
+    await prisma.googleTokens.delete({
       where: { id }
     });
 

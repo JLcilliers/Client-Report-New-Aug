@@ -5,8 +5,8 @@ export async function refreshGoogleToken(accountId: string): Promise<{
   expires_at: number;
 } | null> {
   try {
-    // Get the account with refresh token
-    const account = await prisma.account.findUnique({
+    // Get the account with refresh token from GoogleTokens table
+    const account = await prisma.googleTokens.findUnique({
       where: { id: accountId }
     });
 
@@ -40,12 +40,12 @@ export async function refreshGoogleToken(accountId: string): Promise<{
     // Calculate expiration timestamp (current time + expires_in seconds)
     const expires_at = Math.floor(Date.now() / 1000) + (data.expires_in || 3600);
 
-    // Update the account with new access token and expiry
-    await prisma.account.update({
+    // Update the account with new access token and expiry in GoogleTokens table
+    await prisma.googleTokens.update({
       where: { id: accountId },
       data: {
         access_token: data.access_token,
-        expires_at: expires_at,
+        expires_at: BigInt(expires_at),
       },
     });
 
@@ -61,7 +61,7 @@ export async function refreshGoogleToken(accountId: string): Promise<{
 
 export async function getValidGoogleToken(accountId: string): Promise<string | null> {
   try {
-    const account = await prisma.account.findUnique({
+    const account = await prisma.googleTokens.findUnique({
       where: { id: accountId }
     });
 
@@ -71,7 +71,7 @@ export async function getValidGoogleToken(accountId: string): Promise<string | n
 
     // Check if token is expired (with 5 minute buffer)
     const now = Math.floor(Date.now() / 1000);
-    const isExpired = account.expires_at ? account.expires_at < (now + 300) : true;
+    const isExpired = account.expires_at ? Number(account.expires_at) < (now + 300) : true;
 
     if (isExpired) {
       console.log('Token expired for account:', accountId, 'Refreshing...');
