@@ -3,6 +3,11 @@ import { cookies } from "next/headers"
 import { getPrisma } from "@/lib/db/prisma"
 import { google } from "googleapis"
 import { OAuth2Client } from "google-auth-library"
+import { 
+  validateSearchConsoleData,
+  formatDateForGoogleAPI,
+  debugLogSearchConsoleResponse
+} from "@/lib/google/data-validator"
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -161,20 +166,24 @@ export async function POST(
       fetchTime: null,
     }
 
-    // Date range for data fetching
+    // Date range for data fetching - account for Search Console's 2-3 day delay
     let endDate = new Date()
     let startDate = new Date()
     let previousStartDate = new Date()
     let previousEndDate = new Date()
     
+    // Adjust end date for Search Console data delay
+    endDate.setDate(endDate.getDate() - 3)
+    previousEndDate.setDate(previousEndDate.getDate() - 3)
+    
     // Calculate start date based on dateRange parameter
     switch(dateRange) {
       case 'week':
-        // Last 7 days
-        startDate.setDate(startDate.getDate() - 7)
-        // Previous 7 days for comparison
-        previousEndDate.setDate(previousEndDate.getDate() - 7)
-        previousStartDate.setDate(previousStartDate.getDate() - 14)
+        // Last 7 days from adjusted end date
+        startDate.setDate(endDate.getDate() - 7)
+        // Previous 7 days for comparison (from adjusted end date)
+        previousEndDate.setDate(endDate.getDate() - 7)
+        previousStartDate.setDate(endDate.getDate() - 14)
         break
         
       case 'month': {
@@ -218,19 +227,19 @@ export async function POST(
         break
         
       case 'last30':
-        // Last 30 days
-        startDate.setDate(startDate.getDate() - 30)
+        // Last 30 days from adjusted end date
+        startDate.setDate(endDate.getDate() - 30)
         // Previous 30 days
-        previousEndDate.setDate(previousEndDate.getDate() - 30)
-        previousStartDate.setDate(previousStartDate.getDate() - 60)
+        previousEndDate.setDate(endDate.getDate() - 30)
+        previousStartDate.setDate(endDate.getDate() - 60)
         break
         
       case 'last90':
-        // Last 90 days
-        startDate.setDate(startDate.getDate() - 90)
+        // Last 90 days from adjusted end date
+        startDate.setDate(endDate.getDate() - 90)
         // Previous 90 days
-        previousEndDate.setDate(previousEndDate.getDate() - 90)
-        previousStartDate.setDate(previousStartDate.getDate() - 180)
+        previousEndDate.setDate(endDate.getDate() - 90)
+        previousStartDate.setDate(endDate.getDate() - 180)
         break
         
       case 'monthToDate':
@@ -252,10 +261,10 @@ export async function POST(
         break
         
       default:
-        // Default to last 7 days
-        startDate.setDate(startDate.getDate() - 7)
-        previousEndDate.setDate(previousEndDate.getDate() - 7)
-        previousStartDate.setDate(previousStartDate.getDate() - 14)
+        // Default to last 7 days from adjusted end date
+        startDate.setDate(endDate.getDate() - 7)
+        previousEndDate.setDate(endDate.getDate() - 7)
+        previousStartDate.setDate(endDate.getDate() - 14)
     }
     
     console.log(`Fetching data for ${dateRange || 'month'}: ${startDate.toISOString()} to ${endDate.toISOString()}`)
@@ -373,9 +382,10 @@ export async function POST(
         
         if (overallMetrics.status === 'fulfilled' && overallMetrics.value?.data?.rows?.[0]) {
           const row = overallMetrics.value.data.rows[0]
+          debugLogSearchConsoleResponse(overallMetrics.value.data, 'Refresh Overall Metrics')
           aggregatedMetrics.clicks = row.clicks || 0
           aggregatedMetrics.impressions = row.impressions || 0
-          aggregatedMetrics.ctr = row.ctr || 0
+          aggregatedMetrics.ctr = row.ctr || 0 // Keep as decimal (0-1) from Google
           aggregatedMetrics.position = row.position || 0
         }
         
@@ -402,7 +412,16 @@ export async function POST(
         
         // Process date data
         if (byDate.status === 'fulfilled' && byDate.value?.data?.rows) {
-          searchConsoleData.byDate = byDate.value.data.rows
+          debugLogSearchConsoleResponse(byDate.value.data, 'Refresh Date Data')
+          // Map rows and ensure CTR is properly handled
+          searchConsoleData.byDate = byDate.value.data.rows.map((row: any) => ({
+            ...row,
+            keys: row.keys || [],
+            clicks: row.clicks || 0,
+            impressions: row.impressions || 0,
+            ctr: row.ctr || 0, // Keep as decimal (0-1)
+            position: row.position || 0
+          }))
         }
         
         // Process country data
@@ -428,6 +447,19 @@ export async function POST(
         }
         
         searchConsoleData.summary = aggregatedMetrics
+        
+        // Validate the Search Console data
+        const scValidation = validateSearchConsoleData(searchConsoleData)
+        if (!scValidation.isValid) {
+          console.error('[Search Console] Validation failed:', scValidation.issues)
+        }
+        if (scValidation.warnings.length > 0) {
+          console.warn('[Search Console] Warnings:', scValidation.warnings)
+        }
+        if (scValidation.dataFreshness.isStale) {
+          console.warn(`[Search Console] Data is ${scValidation.dataFreshness.daysBehind} days old`)
+        }
+        
         console.log('[Search Console] Completed with metrics:', aggregatedMetrics)
         
         return searchConsoleData

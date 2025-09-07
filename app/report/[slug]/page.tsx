@@ -5,6 +5,7 @@ import { useParams } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import ComprehensiveDashboard from "@/components/report/ComprehensiveDashboard"
+import DataFreshnessIndicator from "@/components/report/DataFreshnessIndicator"
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -45,6 +46,7 @@ export default function PublicReportPage() {
   const [fetchingData, setFetchingData] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showLegacyView, setShowLegacyView] = useState(false)
+  const [isRefreshing, setIsRefreshing] = useState(false)
   
   useEffect(() => {
     fetchReport()
@@ -210,20 +212,18 @@ export default function PublicReportPage() {
                 </a>
               )}
             </p>
-            <div className="flex items-center gap-4 mt-2">
-              <p className="text-sm text-gray-500">
-                {fetchingData ? 'Refreshing data...' : `Last updated: ${reportData?.last_updated ? new Date(reportData.last_updated).toLocaleString() : 'Never'}`}
-              </p>
-              <Button
-                onClick={refreshData}
-                disabled={fetchingData}
-                variant="outline"
-                size="sm"
-                className="flex items-center gap-2"
-              >
-                <RefreshCw className={`h-4 w-4 ${fetchingData ? 'animate-spin' : ''}`} />
-                Refresh Data
-              </Button>
+            <div className="flex items-center gap-4 mt-4">
+              {/* Data Freshness Indicator */}
+              <div className="flex-1">
+                <DataFreshnessIndicator 
+                  data={reportData}
+                  onRefresh={refreshData}
+                  isRefreshing={fetchingData}
+                  showDetails={true}
+                />
+              </div>
+              
+              {/* View Toggle Buttons */}
               <Button
                 onClick={() => setShowLegacyView(!showLegacyView)}
                 variant="outline"

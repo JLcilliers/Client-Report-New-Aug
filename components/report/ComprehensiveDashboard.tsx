@@ -429,21 +429,21 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
         current: {
           clicks: searchConsole.summary?.clicks || 0,
           impressions: searchConsole.summary?.impressions || 0,
-          ctr: (searchConsole.summary?.ctr || 0) / 100, // Convert percentage to decimal
+          ctr: searchConsole.summary?.ctr || 0, // Already a decimal (0-1) from API
           position: searchConsole.summary?.position || 0
         },
         topQueries: (searchConsole.topQueries || []).map((q: any) => ({
           query: q.keys?.[0] || 'Unknown',
           clicks: q.clicks || 0,
           impressions: q.impressions || 0,
-          ctr: (q.ctr || 0) / 100,
+          ctr: q.ctr || 0, // Already a decimal from API
           position: q.position || 0
         })),
         topPages: (searchConsole.topPages || []).map((p: any) => ({
           page: p.keys?.[0] || 'Unknown',
           clicks: p.clicks || 0,
           impressions: p.impressions || 0,
-          ctr: (p.ctr || 0) / 100,
+          ctr: p.ctr || 0, // Already a decimal from API
           position: p.position || 0
         })),
         // Add raw data for charts

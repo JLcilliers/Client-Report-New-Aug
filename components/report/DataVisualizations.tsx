@@ -44,6 +44,7 @@ export default function DataVisualizations({ searchData, analyticsData, competit
           date: new Date(dateKey).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
           clicks: item.clicks || 0,
           impressions: item.impressions || 0,
+          // Google returns CTR as decimal (0-1), convert to percentage for display
           ctr: ((item.ctr || 0) * 100).toFixed(2),
           position: (item.position || 0).toFixed(1)
         };

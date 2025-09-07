@@ -1,5 +1,7 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+import { useRouter, useParams } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -13,7 +15,9 @@ import {
   ArrowRight,
   Clock,
   Zap,
-  DollarSign
+  DollarSign,
+  Plus,
+  Edit2
 } from 'lucide-react';
 
 interface InsightProps {
@@ -21,7 +25,63 @@ interface InsightProps {
   metrics: any;
 }
 
+interface ActionPlan {
+  id: string;
+  title: string;
+  status: string;
+  priority: number;
+  deadline?: string;
+  tasks?: Array<{ id: string; isCompleted: boolean; }>
+}
+
 export default function ActionableInsights({ reportId, metrics }: InsightProps) {
+  const router = useRouter();
+  const params = useParams();
+  const slug = params?.slug as string || reportId;
+  const [actionPlans, setActionPlans] = useState<ActionPlan[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    fetchActionPlans();
+  }, [slug]);
+
+  const fetchActionPlans = async () => {
+    if (!slug) return;
+    setLoading(true);
+    try {
+      const response = await fetch(`/api/reports/${slug}/action-plans`);
+      if (response.ok) {
+        const data = await response.json();
+        setActionPlans(data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch action plans:', error);
+    }
+    setLoading(false);
+  };
+
+  const handleViewDetails = (task: any) => {
+    // Check if an action plan already exists for this task
+    const existingPlan = actionPlans.find(plan => 
+      plan.title.toLowerCase() === task.task?.toLowerCase() || 
+      plan.title.toLowerCase() === task.title?.toLowerCase()
+    );
+    
+    if (existingPlan) {
+      router.push(`/report/${slug}/action-plan/${existingPlan.id}`);
+    } else {
+      // Create new action plan with pre-filled data
+      const params = new URLSearchParams({
+        title: task.task || task.title || '',
+        category: task.category || 'seo',
+        impact: task.impact || 'medium',
+        effort: task.effort || 'medium',
+        deadline: task.deadline || '',
+        timeframe: task.timeframe || ''
+      });
+      router.push(`/report/${slug}/action-plan/new?${params.toString()}`);
+    }
+  };
   // Generate insights based on actual metrics with proper thresholds
   const generateInsights = () => {
     const insights = [];
@@ -328,6 +388,22 @@ export default function ActionableInsights({ reportId, metrics }: InsightProps) 
                   </div>
                   <span className="text-gray-500">{win.timeframe}</span>
                 </div>
+                <Button 
+                  size="sm" 
+                  variant="ghost" 
+                  className="w-full mt-2 text-xs"
+                  onClick={() => handleViewDetails({
+                    title: win.title,
+                    category: 'seo',
+                    impact: win.impact.toLowerCase(),
+                    effort: win.effort.toLowerCase(),
+                    timeframe: win.timeframe,
+                    estimatedValue: win.value
+                  })}
+                >
+                  <Plus className="w-3 h-3 mr-1" />
+                  Create Action Plan
+                </Button>
               </div>
             ))}
           </div>
@@ -365,8 +441,16 @@ export default function ActionableInsights({ reportId, metrics }: InsightProps) 
                   <p className="text-xs text-gray-600 mb-2">{task.reason}</p>
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-gray-500">Deadline: {task.deadline}</span>
-                    <Button size="sm" variant="ghost" className="text-xs">
-                      View Details
+                    <Button 
+                      size="sm" 
+                      variant="ghost" 
+                      className="text-xs"
+                      onClick={() => handleViewDetails(task)}
+                    >
+                      {actionPlans.find(p => p.title.toLowerCase() === task.task.toLowerCase()) ? 
+                        <><Edit2 className="w-3 h-3 mr-1" /> Edit Plan</> : 
+                        <><Plus className="w-3 h-3 mr-1" /> Create Plan</>
+                      }
                       <ArrowRight className="w-3 h-3 ml-1" />
                     </Button>
                   </div>

@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from "next/server"
 import { cookies } from "next/headers"
 import { getPrisma } from "@/lib/db/prisma"
+import { 
+  validateSearchConsoleData, 
+  getOptimalDateRange, 
+  formatDateForGoogleAPI,
+  debugLogSearchConsoleResponse 
+} from "@/lib/google/data-validator"
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -91,19 +97,24 @@ export async function POST(request: NextRequest) {
       }
     }
     
-    // Calculate date range
-    const endDate = new Date()
-    const startDate = new Date()
+    // Calculate date range with Search Console's 2-3 day delay in mind
+    let endDate = new Date()
+    let startDate = new Date()
+    
+    // Account for Search Console data delay (typically 2-3 days)
+    endDate.setDate(endDate.getDate() - 3)
     
     if (dateRange === 'last7days') {
-      startDate.setDate(startDate.getDate() - 7)
+      startDate.setDate(endDate.getDate() - 7)
     } else if (dateRange === 'last30days') {
-      startDate.setDate(startDate.getDate() - 30)
+      startDate.setDate(endDate.getDate() - 30)
     } else if (dateRange === 'last90days') {
-      startDate.setDate(startDate.getDate() - 90)
+      startDate.setDate(endDate.getDate() - 90)
     } else {
-      startDate.setDate(startDate.getDate() - 30) // Default to 30 days
+      startDate.setDate(endDate.getDate() - 30) // Default to 30 days
     }
+    
+    console.log(`[Search Console] Date range: ${formatDateForGoogleAPI(startDate)} to ${formatDateForGoogleAPI(endDate)}`)
     
     const allData: any = {
       summary: {
@@ -136,8 +147,8 @@ export async function POST(request: NextRequest) {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              startDate: startDate.toISOString().split('T')[0],
-              endDate: endDate.toISOString().split('T')[0],
+              startDate: formatDateForGoogleAPI(startDate),
+              endDate: formatDateForGoogleAPI(endDate),
               dimensions: [],
               rowLimit: 1,
             }),
@@ -146,6 +157,7 @@ export async function POST(request: NextRequest) {
         
         if (metricsResponse.ok) {
           const metricsData = await metricsResponse.json()
+          debugLogSearchConsoleResponse(metricsData, 'Overall Metrics')
           const metrics = metricsData.rows?.[0] || {}
           
           allData.summary.clicks += metrics.clicks || 0
@@ -156,7 +168,7 @@ export async function POST(request: NextRequest) {
             metrics: {
               clicks: metrics.clicks || 0,
               impressions: metrics.impressions || 0,
-              ctr: metrics.ctr || 0,
+              ctr: metrics.ctr || 0, // This is already a decimal (0-1) from Google
               position: metrics.position || 0,
             }
           })
@@ -172,8 +184,8 @@ export async function POST(request: NextRequest) {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              startDate: startDate.toISOString().split('T')[0],
-              endDate: endDate.toISOString().split('T')[0],
+              startDate: formatDateForGoogleAPI(startDate),
+              endDate: formatDateForGoogleAPI(endDate),
               dimensions: ["date"],
               rowLimit: 1000,
             }),
@@ -182,7 +194,12 @@ export async function POST(request: NextRequest) {
         
         if (dateResponse.ok) {
           const dateData = await dateResponse.json()
-          allData.byDate = dateData.rows || []
+          debugLogSearchConsoleResponse(dateData, 'Date Data')
+          // Ensure CTR is correctly handled (Google returns it as decimal 0-1)
+          allData.byDate = (dateData.rows || []).map((row: any) => ({
+            ...row,
+            ctr: row.ctr || 0 // Keep as decimal for consistency
+          }))
         }
         
         // Fetch top pages
@@ -195,8 +212,8 @@ export async function POST(request: NextRequest) {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              startDate: startDate.toISOString().split('T')[0],
-              endDate: endDate.toISOString().split('T')[0],
+              startDate: formatDateForGoogleAPI(startDate),
+              endDate: formatDateForGoogleAPI(endDate),
               dimensions: ["page"],
               rowLimit: 10,
             }),
@@ -218,8 +235,8 @@ export async function POST(request: NextRequest) {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              startDate: startDate.toISOString().split('T')[0],
-              endDate: endDate.toISOString().split('T')[0],
+              startDate: formatDateForGoogleAPI(startDate),
+              endDate: formatDateForGoogleAPI(endDate),
               dimensions: ["query"],
               rowLimit: 20,
             }),
@@ -236,9 +253,18 @@ export async function POST(request: NextRequest) {
       }
     }
     
-    // Calculate summary CTR and position
+    // Calculate summary CTR (as decimal 0-1, matching Google's format)
     if (allData.summary.impressions > 0) {
       allData.summary.ctr = allData.summary.clicks / allData.summary.impressions
+    }
+    
+    // Validate the data
+    const validation = validateSearchConsoleData(allData)
+    if (!validation.isValid) {
+      console.error('[Search Console] Data validation failed:', validation.issues)
+    }
+    if (validation.warnings.length > 0) {
+      console.warn('[Search Console] Data warnings:', validation.warnings)
     }
     
     // Calculate average position from all properties
@@ -279,9 +305,11 @@ export async function POST(request: NextRequest) {
       success: true,
       data: allData,
       dateRange: {
-        start: startDate.toISOString().split('T')[0],
-        end: endDate.toISOString().split('T')[0],
-      }
+        start: formatDateForGoogleAPI(startDate),
+        end: formatDateForGoogleAPI(endDate),
+        note: 'Adjusted for Search Console 2-3 day data delay'
+      },
+      validation: validation
     })
     
   } catch (error: any) {

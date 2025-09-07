@@ -94,6 +94,7 @@ model ClientReport {
   accessLogs              ReportAccessLog[]
   cache                   ReportCache[]
   seoAudits               SEOAudit[]
+  actionPlans             ActionPlan[]
 }
 
 model ReportAccessLog {
@@ -323,4 +324,47 @@ model ContentQuality {
   @@unique([url])
   @@index([url])
   @@index([collectedAt])
+}
+
+// Action Plan Management
+model ActionPlan {
+  id              String             @id @default(cuid())
+  reportId        String
+  title           String
+  description     String?
+  priority        Int                @default(1)
+  category        String             // 'seo', 'technical', 'conversion', 'engagement', 'traffic'
+  status          String             @default("not_started") // 'not_started', 'in_progress', 'completed', 'blocked'
+  impact          String?            // 'high', 'medium', 'low'
+  effort          String?            // 'high', 'medium', 'low'
+  estimatedValue  String?
+  timeframe       String?
+  deadline        DateTime?
+  notes           String?            @db.Text
+  blockers        String?            @db.Text
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  completedAt     DateTime?
+  report          ClientReport       @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  tasks           ActionPlanTask[]
+  
+  @@index([reportId])
+  @@index([status])
+  @@index([priority])
+}
+
+model ActionPlanTask {
+  id            String      @id @default(cuid())
+  actionPlanId  String
+  title         String
+  description   String?
+  order         Int         @default(0)
+  isCompleted   Boolean     @default(false)
+  completedAt   DateTime?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  actionPlan    ActionPlan  @relation(fields: [actionPlanId], references: [id], onDelete: Cascade)
+  
+  @@index([actionPlanId])
+  @@index([order])
 }
