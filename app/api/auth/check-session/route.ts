@@ -27,37 +27,8 @@ export async function GET(request: NextRequest) {
         }
       })
       
-      // If session exists and is valid, extend it for active users
+      // If session exists and is valid, return authenticated
       if (session) {
-        const now = new Date()
-        const sessionAge = now.getTime() - session.user.updatedAt.getTime()
-        const oneWeekInMs = 7 * 24 * 60 * 60 * 1000
-        
-        // If session was used recently (within a week), extend it
-        if (sessionAge < oneWeekInMs) {
-          const newExpiry = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // Extend 30 days
-          await prisma.session.update({
-            where: { id: session.id },
-            data: { expires: newExpiry }
-          })
-          
-          // Set updated session cookie
-          const response = NextResponse.json({ 
-            authenticated: true,
-            email: session.user.email,
-            sessionExtended: true
-          })
-          
-          response.cookies.set('session_token', sessionToken.value, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            maxAge: 60 * 60 * 24 * 30, // 30 days
-            path: '/'
-          })
-          
-          return response
-        }
         
         return NextResponse.json({ 
           authenticated: true,

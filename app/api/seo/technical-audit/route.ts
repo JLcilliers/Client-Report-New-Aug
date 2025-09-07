@@ -1529,8 +1529,7 @@ async function compileComprehensiveAudit(
     pageSpeed: pageSpeedAudit || { mobile: null, desktop: null, averageScore: 0 },
     crawlability: crawlabilityAudit || { score: 0, robotsTxt: null, sitemap: null, indexability: null },
     linkAnalysis: linkAnalysisAudit || { internalLinks: null, externalLinks: null, issues: [] },
-    contentAnalysis: contentAnalysisAudit || { duplicateContent: null, errorPages: null, contentQuality: null },
-    contentQuality: contentQualityAudit || null,
+    contentAnalysis: contentAnalysisAudit || { duplicateContent: null, errorPages: null, contentQuality: contentQualityAudit || null },
     securityAnalysis: sslAudit || { ssl: null, headers: null, mixedContent: false },
     recommendations: recommendations.sort((a, b) => {
       const priorityOrder = { high: 0, medium: 1, low: 2 };
