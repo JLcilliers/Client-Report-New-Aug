@@ -40,7 +40,7 @@ export default function EnhancedMetrics({ reportId, domain }: EnhancedMetricsPro
       'Contact Form': 89,
       'Purchase': 97
     },
-    roi: 325
+    // roi: 325 // ROI removed per requirements
   };
 
   const coreWebVitals = {
@@ -194,10 +194,7 @@ export default function EnhancedMetrics({ reportId, domain }: EnhancedMetricsPro
               <p className="text-sm text-gray-500">Cost Per Acquisition</p>
               <p className="text-2xl font-bold">{formatCurrency(conversionMetrics.costPerAcquisition)}</p>
             </div>
-            <div className="space-y-2">
-              <p className="text-sm text-gray-500">ROI</p>
-              <p className="text-2xl font-bold text-green-600">{conversionMetrics.roi}%</p>
-            </div>
+            {/* ROI metric removed per requirements */}
           </div>
           
           <div className="mt-6">

@@ -1,22 +1,131 @@
 import { NextRequest, NextResponse } from "next/server"
 import { cookies } from "next/headers"
+import { prisma } from "@/lib/db/prisma"
+import { OAuth2Client } from "google-auth-library"
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   try {
     const cookieStore = cookies()
+    const sessionToken = cookieStore.get('session_token')
     const accessToken = cookieStore.get('google_access_token')
+    const refreshToken = cookieStore.get('google_refresh_token')
     const tokenExpiry = cookieStore.get('google_token_expiry')
+    const userEmail = cookieStore.get('google_user_email')
     
+    // First check for session token in database
+    let session = null
+    if (sessionToken) {
+      session = await prisma.session.findFirst({
+        where: {
+          sessionToken: sessionToken.value,
+          expires: { gte: new Date() }
+        },
+        include: {
+          user: true
+        }
+      })
+      
+      // If session exists and is valid, extend it for active users
+      if (session) {
+        const now = new Date()
+        const sessionAge = now.getTime() - session.user.updatedAt.getTime()
+        const oneWeekInMs = 7 * 24 * 60 * 60 * 1000
+        
+        // If session was used recently (within a week), extend it
+        if (sessionAge < oneWeekInMs) {
+          const newExpiry = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // Extend 30 days
+          await prisma.session.update({
+            where: { id: session.id },
+            data: { expires: newExpiry }
+          })
+          
+          // Set updated session cookie
+          const response = NextResponse.json({ 
+            authenticated: true,
+            email: session.user.email,
+            sessionExtended: true
+          })
+          
+          response.cookies.set('session_token', sessionToken.value, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 60 * 60 * 24 * 30, // 30 days
+            path: '/'
+          })
+          
+          return response
+        }
+        
+        return NextResponse.json({ 
+          authenticated: true,
+          email: session.user.email
+        })
+      }
+    }
+    
+    // Fallback to token-based authentication
     if (!accessToken) {
       return NextResponse.json({ authenticated: false })
     }
     
-    // Check if token is expired
+    // Check if access token is expired and try to refresh
     if (tokenExpiry) {
       const expiryDate = new Date(tokenExpiry.value)
-      if (expiryDate < new Date()) {
+      const now = new Date()
+      
+      // If token expires within 5 minutes, try to refresh
+      if (expiryDate.getTime() - now.getTime() < 5 * 60 * 1000) {
+        if (refreshToken) {
+          try {
+            const oauth2Client = new OAuth2Client(
+              process.env.GOOGLE_CLIENT_ID,
+              process.env.GOOGLE_CLIENT_SECRET
+            )
+            
+            oauth2Client.setCredentials({
+              refresh_token: refreshToken.value
+            })
+            
+            const { credentials } = await oauth2Client.refreshAccessToken()
+            
+            // Update cookies with new tokens
+            const response = NextResponse.json({ 
+              authenticated: true,
+              email: userEmail?.value || "johanlcilliers@gmail.com",
+              tokenRefreshed: true
+            })
+            
+            if (credentials.access_token) {
+              response.cookies.set('google_access_token', credentials.access_token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'lax',
+                maxAge: 60 * 60 * 24 * 30, // 30 days
+                path: '/'
+              })
+            }
+            
+            if (credentials.expiry_date) {
+              response.cookies.set('google_token_expiry', new Date(credentials.expiry_date).toISOString(), {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'lax',
+                maxAge: 60 * 60 * 24 * 30, // 30 days
+                path: '/'
+              })
+            }
+            
+            return response
+            
+          } catch (refreshError) {
+            console.error('Token refresh failed:', refreshError)
+            return NextResponse.json({ authenticated: false, expired: true })
+          }
+        }
+        
         return NextResponse.json({ authenticated: false, expired: true })
       }
     }
@@ -24,9 +133,10 @@ export async function GET(request: NextRequest) {
     // Token exists and is not expired
     return NextResponse.json({ 
       authenticated: true,
-      email: "johanlcilliers@gmail.com" // You can decode this from the token if needed
+      email: userEmail?.value || "johanlcilliers@gmail.com"
     })
   } catch (error) {
+    console.error('Session check error:', error)
     return NextResponse.json({ authenticated: false, error: "Failed to check session" })
   }
 }

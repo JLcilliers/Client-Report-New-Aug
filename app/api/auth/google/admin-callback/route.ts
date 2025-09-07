@@ -3,6 +3,7 @@ import { OAuth2Client } from "google-auth-library"
 import { prisma } from "@/lib/db/prisma"
 import { cookies } from "next/headers"
 import { getOAuthRedirectUri } from "@/lib/utils/oauth-config"
+import crypto from 'crypto'
 
 export const dynamic = 'force-dynamic'
 
@@ -189,20 +190,59 @@ export async function GET(request: NextRequest) {
     const redirectUrl = `${baseUrl}/admin/google-accounts?success=true`;
     console.log('[OAuth Callback] Redirecting to:', redirectUrl);
     
+    // Create persistent session in database
+    const sessionToken = require('crypto').randomBytes(32).toString('hex')
+    const sessionExpires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days default
+    
+    console.log('[OAuth Callback] Creating persistent session...');
+    try {
+      await prisma.session.create({
+        data: {
+          sessionToken,
+          userId: user.id,
+          expires: sessionExpires
+        }
+      })
+      console.log('[OAuth Callback] Persistent session created successfully');
+    } catch (sessionError: any) {
+      console.error('[OAuth Callback] Failed to create session:', sessionError.message);
+      throw sessionError;
+    }
+    
     // Create response with redirect
     const response = NextResponse.redirect(redirectUrl)
     
-    // Set cookies on the response
+    // Set persistent cookies with extended expiration
     response.cookies.set('google_access_token', tokens.access_token!, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7, // 7 days
+      maxAge: 60 * 60 * 24 * 30, // 30 days
       path: '/'
     })
     
     if (tokens.refresh_token) {
       response.cookies.set('google_refresh_token', tokens.refresh_token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 * 90, // 90 days for refresh token
+        path: '/'
+      })
+    }
+    
+    // Set session token cookie
+    response.cookies.set('session_token', sessionToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 30, // 30 days
+      path: '/'
+    })
+    
+    // Set token expiry cookie for client-side validation
+    if (tokens.expiry_date) {
+      response.cookies.set('google_token_expiry', new Date(tokens.expiry_date).toISOString(), {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
@@ -216,7 +256,7 @@ export async function GET(request: NextRequest) {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7, // 7 days
+      maxAge: 60 * 60 * 24 * 30, // 30 days
       path: '/'
     })
     

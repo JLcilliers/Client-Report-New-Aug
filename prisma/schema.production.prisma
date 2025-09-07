@@ -101,6 +101,7 @@ model ClientReport {
   accessLogs              ReportAccessLog[]
   cache                   ReportCache[]
   seoAudits               SEOAudit[]
+  competitors             Competitor[]
 }
 
 model ReportAccessLog {
@@ -374,4 +375,22 @@ model ActionPlanTask {
   actionPlan      ActionPlan   @relation(fields: [actionPlanId], references: [id], onDelete: Cascade)
   
   @@index([actionPlanId])
+}
+
+// Competitor tracking for brand-specific reports
+model Competitor {
+  id              String        @id @default(cuid())
+  clientReportId  String
+  name            String
+  domain          String
+  notes           String?       @db.Text
+  addedAt         DateTime      @default(now())
+  lastAnalyzed    DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  
+  clientReport    ClientReport  @relation(fields: [clientReportId], references: [id], onDelete: Cascade)
+  
+  @@index([clientReportId])
+  @@index([domain])
 }

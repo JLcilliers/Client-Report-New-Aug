@@ -35,7 +35,7 @@ export function calculateComparison(current: number, previous: number): Comparis
     current,
     previous,
     change,
-    changePercent: Math.round(changePercent * 100) / 100, // Round to 2 decimals
+    changePercent: parseFloat(changePercent.toFixed(2)), // FIXED: Round to 2 decimals without double * 100
     trend
   }
 }

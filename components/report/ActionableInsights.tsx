@@ -199,11 +199,11 @@ export default function ActionableInsights({ reportId, metrics }: InsightProps) 
         type: 'critical',
         category: 'conversion',
         title: 'Conversion Tracking Not Set Up',
-        description: 'No conversion tracking detected. Unable to measure ROI.',
+        description: 'No conversion tracking detected. Unable to measure conversions.',
         impact: 'critical',
         effort: 'low',
         recommendation: 'Immediately set up Google Analytics 4 conversion tracking for key actions.',
-        estimatedValue: 'Cannot calculate ROI without tracking',
+        estimatedValue: 'Cannot calculate value without tracking',
         timeframe: '1-2 days'
       });
     }
@@ -250,7 +250,7 @@ export default function ActionableInsights({ reportId, metrics }: InsightProps) 
     {
       priority: 1,
       task: 'Implement conversion tracking',
-      reason: 'Cannot measure ROI without proper tracking',
+      reason: 'Cannot measure performance without proper tracking',
       status: 'not_started',
       deadline: '2024-02-01'
     },

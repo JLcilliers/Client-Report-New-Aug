@@ -171,7 +171,9 @@ export async function POST(request: NextRequest) {
         const sessions = parseInt(row.metricValues?.[0]?.value || "0")
         const users = parseInt(row.metricValues?.[1]?.value || "0")
         const newUsers = parseInt(row.metricValues?.[2]?.value || "0")
-        const bounceRate = parseFloat(row.metricValues?.[3]?.value || "0")
+        // Google Analytics API returns bounceRate as decimal (0-1), convert to percentage (0-100)
+        const bounceRate = parseFloat(row.metricValues?.[3]?.value || "0") * 100
+        // avgDuration is already in seconds from Google API
         const avgDuration = parseFloat(row.metricValues?.[4]?.value || "0")
         const pageviews = parseInt(row.metricValues?.[5]?.value || "0")
         
@@ -221,7 +223,7 @@ export async function POST(request: NextRequest) {
         page: row.dimensionValues?.[0]?.value || "",
         sessions: parseInt(row.metricValues?.[0]?.value || "0"),
         users: parseInt(row.metricValues?.[1]?.value || "0"),
-        bounceRate: parseFloat(row.metricValues?.[2]?.value || "0"),
+        bounceRate: parseFloat(row.metricValues?.[2]?.value || "0") * 100, // Convert decimal to percentage
         avgSessionDuration: parseFloat(row.metricValues?.[3]?.value || "0")
       }))
     }

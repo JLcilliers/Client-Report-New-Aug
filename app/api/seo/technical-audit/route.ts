@@ -1360,7 +1360,36 @@ async function compileComprehensiveAudit(
 
   categories.seo.score = seoScore;
 
-  // Content quality checks
+  // Enhanced Content Quality checks (from contentQualityAudit)
+  if (contentQualityAudit) {
+    const contentScore = contentQualityAudit.score || 0;
+    categories.contentQuality.score = contentScore;
+    
+    categories.contentQuality.checks.push({
+      name: 'Enhanced Content Quality',
+      status: contentScore >= 80 ? 'pass' : 
+              contentScore >= 60 ? 'warning' : 'fail',
+      message: `Content quality score: ${contentScore}/100`,
+      details: contentQualityAudit
+    });
+    
+    if (contentScore < 60) {
+      criticalCount++;
+      recommendations.push({
+        priority: 'high',
+        category: 'Content Quality',
+        issue: 'Poor content quality score',
+        recommendation: contentQualityAudit.issues?.[0] || 'Improve content quality',
+        impact: 'Poor content affects SEO and user engagement'
+      });
+    } else if (contentScore < 80) {
+      warningCount++;
+    } else {
+      passedCount++;
+    }
+  }
+
+  // Legacy Content quality checks
   if (contentAudit) {
     categories.accessibility.checks.push({
       name: 'Content Quality',
@@ -1475,7 +1504,9 @@ async function compileComprehensiveAudit(
     categories.security.score,
     categories.seo.score,
     categories.accessibility.score,
-    categories.mobile.score
+    categories.mobile.score,
+    categories.contentQuality.score,
+    categories.crawlability.score
   ].filter(score => score > 0);
   
   const overallScore = categoryScores.length > 0 ?
@@ -1499,6 +1530,7 @@ async function compileComprehensiveAudit(
     crawlability: crawlabilityAudit || { score: 0, robotsTxt: null, sitemap: null, indexability: null },
     linkAnalysis: linkAnalysisAudit || { internalLinks: null, externalLinks: null, issues: [] },
     contentAnalysis: contentAnalysisAudit || { duplicateContent: null, errorPages: null, contentQuality: null },
+    contentQuality: contentQualityAudit || null,
     securityAnalysis: sslAudit || { ssl: null, headers: null, mixedContent: false },
     recommendations: recommendations.sort((a, b) => {
       const priorityOrder = { high: 0, medium: 1, low: 2 };
@@ -1645,6 +1677,10 @@ async function auditContentQualityEnhanced(url: string) {
     return {
       score: Math.max(0, Math.round(score)),
       issues: issues.slice(0, 3), // Top 3 issues
+      h1: !!h1, // Boolean whether H1 exists
+      metaDescLength: metaDesc.length,
+      imageAltCoverage: `${withAlt}/${images.length}`,
+      readingGrade: 12.0, // Mock reading grade for now
       details: {
         title: title,
         h1: h1,
@@ -1659,6 +1695,10 @@ async function auditContentQualityEnhanced(url: string) {
     return {
       score: 0,
       issues: ['Failed to analyze content'],
+      h1: false,
+      metaDescLength: 0,
+      imageAltCoverage: '0/0',
+      readingGrade: 0,
       details: {},
       error: String(error),
       timestamp: new Date().toISOString()

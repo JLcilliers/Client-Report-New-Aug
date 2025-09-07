@@ -82,7 +82,9 @@ export function calculatePercentageChange(current: number, previous: number): nu
 }
 
 export function formatPercentage(value: number, decimals: number = 1): string {
-  return `${value.toFixed(decimals)}%`
+  // Convert decimal (0-1) to percentage (0-100) for display
+  const percentage = value < 1 ? value * 100 : value
+  return `${percentage.toFixed(decimals)}%`
 }
 
 export function formatNumber(value: number): string {

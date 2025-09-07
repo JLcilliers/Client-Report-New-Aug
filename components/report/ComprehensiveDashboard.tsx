@@ -36,6 +36,7 @@ import {
 import EnhancedMetrics from './EnhancedMetrics';
 import ActionableInsights from './ActionableInsights';
 import DataVisualizations from './DataVisualizations';
+import CompetitorManagement from './CompetitorManagement';
 
 interface DashboardProps {
   reportId: string;
@@ -678,8 +679,9 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
 
       {/* Main Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4 md:grid-cols-8">
+        <TabsList className="grid w-full grid-cols-4 md:grid-cols-9">
           <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="competitors">Competitors</TabsTrigger>
           <TabsTrigger value="insights">Insights</TabsTrigger>
           <TabsTrigger value="metrics">Metrics</TabsTrigger>
           <TabsTrigger value="search">Search</TabsTrigger>
@@ -774,16 +776,37 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
           </Card>
         </TabsContent>
 
+        {/* Competitors Tab */}
+        <TabsContent value="competitors" className="space-y-6">
+          <CompetitorManagement reportSlug={reportSlug} />
+        </TabsContent>
+
         {/* Search Performance Tab */}
         <TabsContent value="search" className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {renderMetricCard({
+              title: 'Total Impressions',
+              value: formatNumber(metrics?.searchConsole?.current?.impressions || 0),
+              change: comparisonData?.searchConsole?.impressions || 0,
+              changeType: comparisonData?.searchConsole?.impressions > 0 ? 'positive' : 'negative',
+              period: `vs ${comparisonPeriod} ago`,
+              icon: <Eye className="w-4 h-4 text-purple-500" />
+            })}
+            {renderMetricCard({
+              title: 'Total Clicks',
+              value: formatNumber(metrics?.searchConsole?.current?.clicks || 0),
+              change: comparisonData?.searchConsole?.clicks || 0,
+              changeType: comparisonData?.searchConsole?.clicks > 0 ? 'positive' : 'negative',
+              period: `vs ${comparisonPeriod} ago`,
+              icon: <MousePointer className="w-4 h-4 text-blue-500" />
+            })}
             {renderMetricCard({
               title: 'Average CTR',
               value: formatPercentage(metrics?.searchConsole?.current?.ctr || 0),
               change: comparisonData?.searchConsole?.ctr || 0,
               changeType: comparisonData?.searchConsole?.ctr > 0 ? 'positive' : 'negative',
               period: `vs ${comparisonPeriod} ago`,
-              icon: <Activity className="w-4 h-4 text-blue-500" />
+              icon: <Activity className="w-4 h-4 text-green-500" />
             })}
             {renderMetricCard({
               title: 'Average Position',
@@ -791,7 +814,7 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
               change: comparisonData?.searchConsole?.position || 0,
               changeType: comparisonData?.searchConsole?.position > 0 ? 'positive' : 'negative',
               period: `vs ${comparisonPeriod} ago`,
-              icon: <BarChart3 className="w-4 h-4 text-purple-500" />
+              icon: <BarChart3 className="w-4 h-4 text-orange-500" />
             })}
           </div>
 
@@ -848,6 +871,14 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
               changeType: comparisonData?.analytics?.sessions > 0 ? 'positive' : 'negative',
               period: `vs ${comparisonPeriod} ago`,
               icon: <Activity className="w-4 h-4 text-blue-500" />
+            })}
+            {renderMetricCard({
+              title: 'Engaged Sessions',
+              value: formatNumber(Math.round((metrics?.analytics?.current?.sessions || 0) * (metrics?.analytics?.current?.engagementRate || 0)) || 0),
+              change: comparisonData?.analytics?.engagementRate || 0,
+              changeType: comparisonData?.analytics?.engagementRate > 0 ? 'positive' : 'negative',
+              period: `vs ${comparisonPeriod} ago`,
+              icon: <Target className="w-4 h-4 text-orange-500" />
             })}
             {renderMetricCard({
               title: 'New Users',
@@ -993,8 +1024,8 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
                   <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                     <div>
                       <p className="text-sm font-medium">Overall SEO Score</p>
-                      <p className={`text-3xl font-bold mt-1 ${getScoreColor(seoAuditData.score)}`}>
-                        {seoAuditData.score}/100
+                      <p className={`text-3xl font-bold mt-1 ${getScoreColor(seoAuditData.overallScore || 0)}`}>
+                        {seoAuditData.overallScore || 0}/100
                       </p>
                     </div>
                     <div className="flex gap-6">
@@ -1084,7 +1115,13 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
                       <CardContent>
                         <div className="space-y-4">
                           <div className="text-center">
-                            <div className={`text-4xl font-bold ${getScoreColor(seoAuditData.coreWebVitals?.grade || 0)}`}>
+                            <div className={`text-4xl font-bold ${
+                              seoAuditData.coreWebVitals?.grade === 'good' ? 'text-green-600' :
+                              seoAuditData.coreWebVitals?.grade === 'needs-improvement' ? 'text-yellow-600' :
+                              seoAuditData.coreWebVitals?.grade === 'poor' ? 'text-red-600' :
+                              typeof seoAuditData.coreWebVitals?.grade === 'number' ? getScoreColor(seoAuditData.coreWebVitals.grade) :
+                              'text-gray-500'
+                            }`}>
                               {seoAuditData.coreWebVitals?.grade || 'N/A'}
                             </div>
                             <p className="text-sm text-gray-500">Overall Grade</p>
@@ -1099,28 +1136,28 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
                                     <div className="flex justify-between text-xs">
                                       <span>LCP</span>
                                       <span className={
-                                        (seoAuditData.coreWebVitals.mobile.LCP || 0) <= 2500 ? 'text-green-600' :
-                                        (seoAuditData.coreWebVitals.mobile.LCP || 0) <= 4000 ? 'text-yellow-600' : 'text-red-600'
+                                        (seoAuditData.coreWebVitals.mobile.LCP?.value || seoAuditData.coreWebVitals.mobile.LCP || 0) <= 2500 ? 'text-green-600' :
+                                        (seoAuditData.coreWebVitals.mobile.LCP?.value || seoAuditData.coreWebVitals.mobile.LCP || 0) <= 4000 ? 'text-yellow-600' : 'text-red-600'
                                       }>
-                                        {((seoAuditData.coreWebVitals.mobile.LCP || 0) / 1000).toFixed(1)}s
+                                        {((seoAuditData.coreWebVitals.mobile.LCP?.value || seoAuditData.coreWebVitals.mobile.LCP || 0) / 1000).toFixed(1)}s
                                       </span>
                                     </div>
                                     <div className="flex justify-between text-xs">
                                       <span>INP</span>
                                       <span className={
-                                        (seoAuditData.coreWebVitals.mobile.INP || 0) <= 200 ? 'text-green-600' :
-                                        (seoAuditData.coreWebVitals.mobile.INP || 0) <= 500 ? 'text-yellow-600' : 'text-red-600'
+                                        (seoAuditData.coreWebVitals.mobile.INP?.value || seoAuditData.coreWebVitals.mobile.INP || 0) <= 200 ? 'text-green-600' :
+                                        (seoAuditData.coreWebVitals.mobile.INP?.value || seoAuditData.coreWebVitals.mobile.INP || 0) <= 500 ? 'text-yellow-600' : 'text-red-600'
                                       }>
-                                        {seoAuditData.coreWebVitals.mobile.INP || 0}ms
+                                        {seoAuditData.coreWebVitals.mobile.INP?.value || seoAuditData.coreWebVitals.mobile.INP || 0}ms
                                       </span>
                                     </div>
                                     <div className="flex justify-between text-xs">
                                       <span>CLS</span>
                                       <span className={
-                                        (seoAuditData.coreWebVitals.mobile.CLS || 0) <= 0.1 ? 'text-green-600' :
-                                        (seoAuditData.coreWebVitals.mobile.CLS || 0) <= 0.25 ? 'text-yellow-600' : 'text-red-600'
+                                        (seoAuditData.coreWebVitals.mobile.CLS?.value || seoAuditData.coreWebVitals.mobile.CLS || 0) <= 0.1 ? 'text-green-600' :
+                                        (seoAuditData.coreWebVitals.mobile.CLS?.value || seoAuditData.coreWebVitals.mobile.CLS || 0) <= 0.25 ? 'text-yellow-600' : 'text-red-600'
                                       }>
-                                        {(seoAuditData.coreWebVitals.mobile.CLS || 0).toFixed(3)}
+                                        {(seoAuditData.coreWebVitals.mobile.CLS?.value || seoAuditData.coreWebVitals.mobile.CLS || 0).toFixed(3)}
                                       </span>
                                     </div>
                                   </div>
@@ -1134,28 +1171,28 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
                                     <div className="flex justify-between text-xs">
                                       <span>LCP</span>
                                       <span className={
-                                        (seoAuditData.coreWebVitals.desktop.LCP || 0) <= 2500 ? 'text-green-600' :
-                                        (seoAuditData.coreWebVitals.desktop.LCP || 0) <= 4000 ? 'text-yellow-600' : 'text-red-600'
+                                        (seoAuditData.coreWebVitals.desktop.LCP?.value || seoAuditData.coreWebVitals.desktop.LCP || 0) <= 2500 ? 'text-green-600' :
+                                        (seoAuditData.coreWebVitals.desktop.LCP?.value || seoAuditData.coreWebVitals.desktop.LCP || 0) <= 4000 ? 'text-yellow-600' : 'text-red-600'
                                       }>
-                                        {((seoAuditData.coreWebVitals.desktop.LCP || 0) / 1000).toFixed(1)}s
+                                        {((seoAuditData.coreWebVitals.desktop.LCP?.value || seoAuditData.coreWebVitals.desktop.LCP || 0) / 1000).toFixed(1)}s
                                       </span>
                                     </div>
                                     <div className="flex justify-between text-xs">
                                       <span>INP</span>
                                       <span className={
-                                        (seoAuditData.coreWebVitals.desktop.INP || 0) <= 200 ? 'text-green-600' :
-                                        (seoAuditData.coreWebVitals.desktop.INP || 0) <= 500 ? 'text-yellow-600' : 'text-red-600'
+                                        (seoAuditData.coreWebVitals.desktop.INP?.value || seoAuditData.coreWebVitals.desktop.INP || 0) <= 200 ? 'text-green-600' :
+                                        (seoAuditData.coreWebVitals.desktop.INP?.value || seoAuditData.coreWebVitals.desktop.INP || 0) <= 500 ? 'text-yellow-600' : 'text-red-600'
                                       }>
-                                        {seoAuditData.coreWebVitals.desktop.INP || 0}ms
+                                        {seoAuditData.coreWebVitals.desktop.INP?.value || seoAuditData.coreWebVitals.desktop.INP || 0}ms
                                       </span>
                                     </div>
                                     <div className="flex justify-between text-xs">
                                       <span>CLS</span>
                                       <span className={
-                                        (seoAuditData.coreWebVitals.desktop.CLS || 0) <= 0.1 ? 'text-green-600' :
-                                        (seoAuditData.coreWebVitals.desktop.CLS || 0) <= 0.25 ? 'text-yellow-600' : 'text-red-600'
+                                        (seoAuditData.coreWebVitals.desktop.CLS?.value || seoAuditData.coreWebVitals.desktop.CLS || 0) <= 0.1 ? 'text-green-600' :
+                                        (seoAuditData.coreWebVitals.desktop.CLS?.value || seoAuditData.coreWebVitals.desktop.CLS || 0) <= 0.25 ? 'text-yellow-600' : 'text-red-600'
                                       }>
-                                        {(seoAuditData.coreWebVitals.desktop.CLS || 0).toFixed(3)}
+                                        {(seoAuditData.coreWebVitals.desktop.CLS?.value || seoAuditData.coreWebVitals.desktop.CLS || 0).toFixed(3)}
                                       </span>
                                     </div>
                                   </div>
@@ -1178,42 +1215,42 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
                       <CardContent>
                         <div className="space-y-4">
                           <div className="text-center">
-                            <div className={`text-4xl font-bold ${getScoreColor(seoAuditData.contentQuality?.score || 0)}`}>
-                              {seoAuditData.contentQuality?.score || 0}
+                            <div className={`text-4xl font-bold ${getScoreColor(seoAuditData.categories?.contentQuality?.score || 0)}`}>
+                              {seoAuditData.categories?.contentQuality?.score || 0}
                             </div>
                             <p className="text-sm text-gray-500">Content Score</p>
                           </div>
                           
-                          {seoAuditData.contentQuality && (
+                          {(seoAuditData.categories?.contentQuality || seoAuditData.contentQuality) && (
                             <div className="space-y-2">
                               <div className="flex justify-between text-xs">
                                 <span>H1 Present</span>
-                                <span className={seoAuditData.contentQuality.h1 ? 'text-green-600' : 'text-red-600'}>
-                                  {seoAuditData.contentQuality.h1 ? '✓' : '✗'}
+                                <span className={seoAuditData.contentQuality?.h1 ? 'text-green-600' : 'text-red-600'}>
+                                  {seoAuditData.contentQuality?.h1 ? '✓' : '✗'}
                                 </span>
                               </div>
                               <div className="flex justify-between text-xs">
                                 <span>Meta Description</span>
-                                <span className={seoAuditData.contentQuality.metaDescLength > 0 ? 'text-green-600' : 'text-red-600'}>
-                                  {seoAuditData.contentQuality.metaDescLength}
+                                <span className={(seoAuditData.contentQuality?.metaDescLength || 0) > 0 ? 'text-green-600' : 'text-red-600'}>
+                                  {seoAuditData.contentQuality?.metaDescLength || 0}
                                 </span>
                               </div>
                               <div className="flex justify-between text-xs">
                                 <span>Image Alt Coverage</span>
                                 <span className="text-gray-600">
-                                  {seoAuditData.contentQuality.imageAltCoverage || '0/0'}
+                                  {seoAuditData.contentQuality?.imageAltCoverage || '0/0'}
                                 </span>
                               </div>
                               <div className="flex justify-between text-xs">
                                 <span>Reading Grade</span>
                                 <span className={
-                                  (seoAuditData.contentQuality.readingGrade || 0) <= 14 ? 'text-green-600' : 'text-yellow-600'
+                                  (seoAuditData.contentQuality?.readingGrade || 0) <= 14 ? 'text-green-600' : 'text-yellow-600'
                                 }>
-                                  {(seoAuditData.contentQuality.readingGrade || 0).toFixed(1)}
+                                  {(seoAuditData.contentQuality?.readingGrade || 0).toFixed(1)}
                                 </span>
                               </div>
                               
-                              {seoAuditData.contentQuality.issues && seoAuditData.contentQuality.issues.length > 0 && (
+                              {seoAuditData.contentQuality?.issues && seoAuditData.contentQuality.issues.length > 0 && (
                                 <div className="space-y-1 mt-2">
                                   <p className="text-xs font-medium text-gray-600">Issues:</p>
                                   {seoAuditData.contentQuality.issues.slice(0, 3).map((issue: string, idx: number) => (
