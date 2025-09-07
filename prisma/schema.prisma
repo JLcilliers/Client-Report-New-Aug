@@ -1,10 +1,14 @@
+// This is your production Prisma schema file for PostgreSQL
+// Use this for production deployments
+
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model Account {
@@ -13,14 +17,15 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @map("refresh_token")
-  access_token      String? @map("access_token")
+  refresh_token     String? @map("refresh_token") @db.Text
+  access_token      String? @map("access_token") @db.Text
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String?
+  id_token          String? @db.Text
   session_state     String?
-  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -40,11 +45,11 @@ model User {
   name           String?
   image          String?
   accounts       Account[]
-  clientReports  ClientReport[]
-  googleAccounts GoogleAccount[]
-  reports        Report[]
   sessions       Session[]
+  reports        Report[]
+  clientReports  ClientReport[]
   googleTokens   GoogleTokens[]
+  googleAccounts GoogleAccount[]
 }
 
 model VerificationToken {
@@ -56,24 +61,26 @@ model VerificationToken {
 }
 
 model Report {
-  id              String                @id @default(cuid())
+  id              String    @id @default(cuid())
   name            String
   userId          String
   propertyId      String?
   siteUrl         String?
   dateRange       String
-  metrics         String
-  data            String?
-  shareToken      String?               @unique
-  isPublic        Boolean               @default(false)
+  metrics         String    @db.Text
+  data            String?   @db.Text
+  shareToken      String?   @unique
+  isPublic        Boolean   @default(false)
   refreshInterval Int?
   lastRefreshed   DateTime?
-  createdAt       DateTime              @default(now())
-  updatedAt       DateTime              @updatedAt
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
   user            User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
   seoAudits       SEOAudit[]
   coreWebVitals   CoreWebVitalsMetric[]
   pageSpeedAudits PageSpeedAudit[]
+  actionPlans     ActionPlan[]
 }
 
 model ClientReport {
@@ -94,38 +101,37 @@ model ClientReport {
   accessLogs              ReportAccessLog[]
   cache                   ReportCache[]
   seoAudits               SEOAudit[]
-  actionPlans             ActionPlan[]
 }
 
 model ReportAccessLog {
   id         String       @id @default(cuid())
   reportId   String
-  ipAddress  String?
-  userAgent  String?
-  accessedAt DateTime     @default(now())
   report     ClientReport @relation(fields: [reportId], references: [id])
+  ipAddress  String?
+  userAgent  String?      @db.Text
+  accessedAt DateTime     @default(now())
 }
 
 model ReportCache {
   id        String       @id @default(cuid())
   reportId  String
-  dataType  String
-  data      String
+  report    ClientReport @relation(fields: [reportId], references: [id])
+  dataType  String // 'ga4', 'searchConsole', 'webVitals'
+  data      String       @db.Text // JSON string
   cachedAt  DateTime     @default(now())
   expiresAt DateTime
-  report    ClientReport @relation(fields: [reportId], references: [id])
 }
 
 model Log {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
-  level     String
-  source    String
+  level     String // 'debug' | 'info' | 'warn' | 'error'
+  source    String // e.g. 'api/google/properties'
   requestId String?
   userId    String?
   accountId String?
   message   String
-  meta      String?
+  meta      Json?
 
   @@index([createdAt, source])
 }
@@ -134,14 +140,15 @@ model GoogleTokens {
   id            String   @id @default(cuid())
   google_sub    String
   email         String?
-  access_token  String?
-  refresh_token String?
+  access_token  String?  @db.Text
+  refresh_token String?  @db.Text
   scope         String?
-  expires_at    BigInt?
+  expires_at    BigInt? // BIGINT (epoch seconds)
   created_at    DateTime @default(now()) @map("created_at")
   updated_at    DateTime @default(now()) @updatedAt @map("updated_at")
-  userId        String?
-  user          User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        String? // we added this
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, google_sub])
   @@index([userId])
@@ -152,13 +159,14 @@ model GoogleAccount {
   id           String   @id @default(cuid())
   userId       String
   email        String   @unique
-  accessToken  String
-  refreshToken String?
+  accessToken  String   @db.Text
+  refreshToken String?  @db.Text
   expiresAt    Int?
-  scope        String?
+  scope        String?  @db.Text
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
@@ -175,21 +183,21 @@ model SEOAudit {
   accessibilityScore   Int                   @default(0)
   securityScore        Int                   @default(0)
   mobileScore          Int                   @default(0)
-  coreWebVitals        String? // LCP, FID, CLS, TTFB, FCP, INP
-  pageSpeedMetrics     String? // Desktop/Mobile PageSpeed data
-  mobileUsability      String? // Mobile-friendly test results
-  crawlabilityData     String? // Robots.txt, sitemap analysis
-  metaTagsAnalysis     String? // Title, description, canonical, hreflang
-  structuredData       String? // Schema markup validation
-  securityChecks       String? // HTTPS, mixed content, headers
-  imageOptimization    String? // Image analysis data
-  resourceOptimization String? // CSS/JS optimization data
-  linkAnalysis         String? // Internal/external links
-  redirectChains       String? // Redirect analysis
-  errorPages           String? // 404 and other errors
-  duplicateContent     String? // Content duplication issues
-  technicalIssues      String? // Technical SEO problems
-  recommendations      String? // Prioritized action items
+  coreWebVitals        String?               @db.Text // LCP, FID, CLS, TTFB, FCP, INP
+  pageSpeedMetrics     String?               @db.Text // Desktop/Mobile PageSpeed data
+  mobileUsability      String?               @db.Text // Mobile-friendly test results
+  crawlabilityData     String?               @db.Text // Robots.txt, sitemap analysis
+  metaTagsAnalysis     String?               @db.Text // Title, description, canonical, hreflang
+  structuredData       String?               @db.Text // Schema markup validation
+  securityChecks       String?               @db.Text // HTTPS, mixed content, headers
+  imageOptimization    String?               @db.Text // Image analysis data
+  resourceOptimization String?               @db.Text // CSS/JS optimization data
+  linkAnalysis         String?               @db.Text // Internal/external links
+  redirectChains       String?               @db.Text // Redirect analysis
+  errorPages           String?               @db.Text // 404 and other errors
+  duplicateContent     String?               @db.Text // Content duplication issues
+  technicalIssues      String?               @db.Text // Technical SEO problems
+  recommendations      String?               @db.Text // Prioritized action items
   auditedAt            DateTime              @default(now())
   createdAt            DateTime              @default(now())
   updatedAt            DateTime              @updatedAt
@@ -256,12 +264,12 @@ model PageSpeedAudit {
   url              String
   device           String // 'mobile' | 'desktop'
   performanceScore Int?
-  opportunities    String? // Performance optimization opportunities
-  diagnostics      String? // Performance diagnostics
-  labData          String? // Lab data metrics
-  fieldData        String? // Real user experience data
-  auditDetails     String? // Detailed audit results
-  screenshots      String? // Performance screenshots
+  opportunities    String?   @db.Text // Performance optimization opportunities
+  diagnostics      String?   @db.Text // Performance diagnostics
+  labData          String?   @db.Text // Lab data metrics
+  fieldData        String?   @db.Text // Real user experience data
+  auditDetails     String?   @db.Text // Detailed audit results
+  screenshots      String?   @db.Text // Performance screenshots
   auditedAt        DateTime  @default(now())
   audit            SEOAudit? @relation(fields: [auditId], references: [id], onDelete: Cascade)
   report           Report?   @relation(fields: [reportId], references: [id], onDelete: Cascade)
@@ -277,7 +285,7 @@ model PageAudit {
   url         String
   strategy    String   // 'mobile' | 'desktop'
   source      String   // 'PSI' | 'Lighthouse'
-  rawJson     String   // JSON stored as string for SQLite
+  rawJson     String   @db.Text // JSON stored as text for PostgreSQL
   collectedAt DateTime @default(now())
   
   @@unique([url, strategy, source])
@@ -299,7 +307,7 @@ model CwvMeasurement {
   grade        String?  // Overall grade A-F
   windowStart  DateTime
   windowEnd    DateTime
-  histJson     String?  // Full histogram data as JSON string
+  histJson     String?  @db.Text // Full histogram data as JSON text
   collectedAt  DateTime @default(now())
   
   @@unique([url, formFactor])
@@ -317,8 +325,8 @@ model ContentQuality {
   tagsScore         Float    // 0-40
   mediaScore        Float    // 0-10
   linkHealthScore   Float    // 0-20
-  details           String   // Detailed metrics as JSON string
-  topIssues         String   // Array of issue strings as JSON
+  details           String   @db.Text // Detailed metrics as JSON text
+  topIssues         String   @db.Text // Array of issue strings as JSON
   collectedAt       DateTime @default(now())
   
   @@unique([url])
@@ -326,17 +334,17 @@ model ContentQuality {
   @@index([collectedAt])
 }
 
-// Action Plan Management
+// Action Plans for SEO improvements
 model ActionPlan {
   id              String             @id @default(cuid())
   reportId        String
   title           String
   description     String?
   priority        Int                @default(1)
-  category        String             // 'seo', 'technical', 'conversion', 'engagement', 'traffic'
-  status          String             @default("not_started") // 'not_started', 'in_progress', 'completed', 'blocked'
-  impact          String?            // 'high', 'medium', 'low'
-  effort          String?            // 'high', 'medium', 'low'
+  category        String
+  status          String             @default("not_started")
+  impact          String?
+  effort          String?
   estimatedValue  String?
   timeframe       String?
   deadline        DateTime?
@@ -344,8 +352,8 @@ model ActionPlan {
   blockers        String?            @db.Text
   createdAt       DateTime           @default(now())
   updatedAt       DateTime           @updatedAt
-  completedAt     DateTime?
-  report          ClientReport       @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  
+  report          Report             @relation(fields: [reportId], references: [id], onDelete: Cascade)
   tasks           ActionPlanTask[]
   
   @@index([reportId])
@@ -354,17 +362,16 @@ model ActionPlan {
 }
 
 model ActionPlanTask {
-  id            String      @id @default(cuid())
-  actionPlanId  String
-  title         String
-  description   String?
-  order         Int         @default(0)
-  isCompleted   Boolean     @default(false)
-  completedAt   DateTime?
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  actionPlan    ActionPlan  @relation(fields: [actionPlanId], references: [id], onDelete: Cascade)
+  id              String       @id @default(cuid())
+  actionPlanId    String
+  title           String
+  description     String?
+  isCompleted     Boolean      @default(false)
+  order           Int          @default(0)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  
+  actionPlan      ActionPlan   @relation(fields: [actionPlanId], references: [id], onDelete: Cascade)
   
   @@index([actionPlanId])
-  @@index([order])
 }
