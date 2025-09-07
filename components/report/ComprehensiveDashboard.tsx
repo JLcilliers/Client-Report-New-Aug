@@ -477,47 +477,53 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
         summary: analytics.summary || {},
         topPages: analytics.topPages || []
       },
-      comparisons: {
+      comparisons: data.comparisons || {
         weekOverWeek: {
           searchConsole: {
-            clicks: Math.random() * 20 - 10, // Placeholder until we have real comparison data
-            impressions: Math.random() * 20 - 10,
-            ctr: Math.random() * 10 - 5,
-            position: Math.random() * 2 - 1
+            clicks: { changePercent: 0, trend: 'neutral' },
+            impressions: { changePercent: 0, trend: 'neutral' },
+            ctr: { changePercent: 0, trend: 'neutral' },
+            position: { changePercent: 0, trend: 'neutral' }
           },
           analytics: {
-            sessions: Math.random() * 20 - 10,
-            users: Math.random() * 20 - 10,
-            engagementRate: Math.random() * 10 - 5,
-            conversions: Math.random() * 30 - 15
+            sessions: { changePercent: 0, trend: 'neutral' },
+            users: { changePercent: 0, trend: 'neutral' },
+            newUsers: { changePercent: 0, trend: 'neutral' },
+            pageviews: { changePercent: 0, trend: 'neutral' },
+            engagementRate: { changePercent: 0, trend: 'neutral' },
+            conversions: { changePercent: 0, trend: 'neutral' }
           }
         },
         monthOverMonth: {
           searchConsole: {
-            clicks: Math.random() * 40 - 20,
-            impressions: Math.random() * 40 - 20,
-            ctr: Math.random() * 15 - 7,
-            position: Math.random() * 3 - 1.5
+            clicks: { changePercent: 0, trend: 'neutral' },
+            impressions: { changePercent: 0, trend: 'neutral' },
+            ctr: { changePercent: 0, trend: 'neutral' },
+            position: { changePercent: 0, trend: 'neutral' }
           },
           analytics: {
-            sessions: Math.random() * 40 - 20,
-            users: Math.random() * 40 - 20,
-            engagementRate: Math.random() * 15 - 7,
-            conversions: Math.random() * 50 - 25
+            sessions: { changePercent: 0, trend: 'neutral' },
+            users: { changePercent: 0, trend: 'neutral' },
+            newUsers: { changePercent: 0, trend: 'neutral' },
+            pageviews: { changePercent: 0, trend: 'neutral' },
+            engagementRate: { changePercent: 0, trend: 'neutral' },
+            conversions: { changePercent: 0, trend: 'neutral' }
           }
         },
         yearOverYear: {
           searchConsole: {
-            clicks: Math.random() * 100 - 50,
-            impressions: Math.random() * 100 - 50,
-            ctr: Math.random() * 25 - 12,
-            position: Math.random() * 5 - 2.5
+            clicks: { changePercent: 0, trend: 'neutral' },
+            impressions: { changePercent: 0, trend: 'neutral' },
+            ctr: { changePercent: 0, trend: 'neutral' },
+            position: { changePercent: 0, trend: 'neutral' }
           },
           analytics: {
-            sessions: Math.random() * 100 - 50,
-            users: Math.random() * 100 - 50,
-            engagementRate: Math.random() * 25 - 12,
-            conversions: Math.random() * 80 - 40
+            sessions: { changePercent: 0, trend: 'neutral' },
+            users: { changePercent: 0, trend: 'neutral' },
+            newUsers: { changePercent: 0, trend: 'neutral' },
+            pageviews: { changePercent: 0, trend: 'neutral' },
+            engagementRate: { changePercent: 0, trend: 'neutral' },
+            conversions: { changePercent: 0, trend: 'neutral' }
           }
         }
       }
@@ -883,16 +889,16 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
             {renderMetricCard({
               title: 'New Users',
               value: formatNumber(metrics?.analytics?.current?.newUsers || 0),
-              change: ((metrics?.analytics?.current?.newUsers || 0) - (metrics?.analytics?.previousWeek?.newUsers || 0)) / (metrics?.analytics?.previousWeek?.newUsers || 1) * 100,
-              changeType: 'positive',
+              change: comparisonData?.analytics?.newUsers?.changePercent || 0,
+              changeType: comparisonData?.analytics?.newUsers?.trend === 'up' ? 'positive' : comparisonData?.analytics?.newUsers?.trend === 'down' ? 'negative' : 'neutral',
               period: `vs ${comparisonPeriod} ago`,
               icon: <Users className="w-4 h-4 text-green-500" />
             })}
             {renderMetricCard({
               title: 'Page Views',
               value: formatNumber(metrics?.analytics?.current?.pageViews || 0),
-              change: 0,
-              changeType: 'neutral',
+              change: comparisonData?.analytics?.pageviews?.changePercent || 0,
+              changeType: comparisonData?.analytics?.pageviews?.trend === 'up' ? 'positive' : comparisonData?.analytics?.pageviews?.trend === 'down' ? 'negative' : 'neutral',
               period: `vs ${comparisonPeriod} ago`,
               icon: <Eye className="w-4 h-4 text-purple-500" />
             })}

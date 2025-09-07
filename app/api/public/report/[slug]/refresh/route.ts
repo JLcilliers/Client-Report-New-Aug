@@ -8,6 +8,11 @@ import {
   formatDateForGoogleAPI,
   debugLogSearchConsoleResponse
 } from "@/lib/google/data-validator"
+import {
+  calculateSearchConsoleComparisons,
+  calculateAnalyticsComparisons,
+  aggregateMetricsForPeriod
+} from "@/lib/analytics/comparisons"
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -630,15 +635,44 @@ export async function POST(
           }))
         }
         
-        // Process pages data
+        // Process pages data with filtering
         if (pagesData.status === 'fulfilled' && pagesData.value?.data?.rows) {
-          analyticsResult.topPages = pagesData.value.data.rows.map(row => ({
-            page: row.dimensionValues?.[0]?.value || "",
-            sessions: parseInt(row.metricValues?.[0]?.value || "0"),
-            users: parseInt(row.metricValues?.[1]?.value || "0"),
-            bounceRate: parseFloat(row.metricValues?.[2]?.value || "0"),
-            avgSessionDuration: parseFloat(row.metricValues?.[3]?.value || "0")
-          }))
+          // Filter out irrelevant pages (tracking, pixels, etc.)
+          const irrelevantPatterns = [
+            /\/wp-content\/(uploads|themes|plugins)/,
+            /\.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|pdf)$/,
+            /\/(wp-admin|wp-json|admin|xmlrpc|wp-login)/,
+            /facebook\.com\/tr/,
+            /google(analytics|tagmanager|ads)/,
+            /\.well-known\//,
+            /\/feed\//,
+            /\?utm_/,
+            /\?fb/,
+            /\?gclid/,
+            /pixel/i,
+            /track/i,
+            /beacon/i,
+            /gtag/i,
+            /ga\.js/i
+          ]
+          
+          const filteredPages = pagesData.value.data.rows
+            .map(row => ({
+              page: row.dimensionValues?.[0]?.value || "",
+              sessions: parseInt(row.metricValues?.[0]?.value || "0"),
+              users: parseInt(row.metricValues?.[1]?.value || "0"),
+              bounceRate: parseFloat(row.metricValues?.[2]?.value || "0"),
+              avgSessionDuration: parseFloat(row.metricValues?.[3]?.value || "0")
+            }))
+            .filter(page => {
+              // Filter out irrelevant pages
+              return !irrelevantPatterns.some(pattern => pattern.test(page.page))
+            })
+            .sort((a, b) => b.sessions - a.sessions) // Sort by sessions descending
+            .slice(0, 10) // Take top 10
+          
+          analyticsResult.topPages = filteredPages
+          console.log(`[Analytics] Filtered ${pagesData.value.data.rows.length} pages down to ${filteredPages.length} relevant pages`)
         }
         
         // Calculate percentages
@@ -733,11 +767,164 @@ export async function POST(
       console.log('[PageSpeed] No domain URL available to test')
     }
 
+    // Fetch comparison data for previous period
+    console.log('[Comparison] Fetching data for previous period comparison')
+    let previousSearchConsoleData: any = {}
+    let previousAnalyticsData: any = {}
+    
+    // Only fetch comparison data if we have current data
+    if ((searchConsoleResult.status === 'fulfilled' && searchConsoleData.summary) || 
+        (analyticsDataResult.status === 'fulfilled' && analyticsResult.summary)) {
+      
+      const [previousSearchConsoleResult, previousAnalyticsResult] = await Promise.allSettled([
+        // Previous Search Console data
+        report.searchConsolePropertyId ? (async () => {
+          const property = report.searchConsolePropertyId
+          console.log('[Search Console] Fetching previous period data for:', property)
+          
+          try {
+            const overallMetricsPrevious = await withTimeout(
+              searchconsole.searchanalytics.query({
+                auth: oauth2Client,
+                siteUrl: property,
+                requestBody: {
+                  startDate: formatDate(previousStartDate),
+                  endDate: formatDate(previousEndDate),
+                  dimensions: [],
+                  rowLimit: 1,
+                },
+              }),
+              5000
+            )
+            
+            if (overallMetricsPrevious?.data?.rows?.[0]) {
+              const row = overallMetricsPrevious.data.rows[0]
+              return {
+                clicks: row.clicks || 0,
+                impressions: row.impressions || 0,
+                ctr: row.ctr || 0,
+                position: row.position || 0
+              }
+            }
+            return {}
+          } catch (error) {
+            console.warn('[Search Console] Previous period fetch failed:', error)
+            return {}
+          }
+        })() : Promise.resolve({}),
+        
+        // Previous Analytics data
+        report.ga4PropertyId ? (async () => {
+          console.log('[Analytics] Fetching previous period data for:', report.ga4PropertyId)
+          const formattedPropertyId = report.ga4PropertyId.startsWith('properties/') 
+            ? report.ga4PropertyId 
+            : `properties/${report.ga4PropertyId}`
+          
+          try {
+            const channelDataPrevious = await withTimeout(
+              analyticsData.properties.runReport({
+                property: formattedPropertyId,
+                requestBody: {
+                  dateRanges: [{
+                    startDate: formatDate(previousStartDate),
+                    endDate: formatDate(previousEndDate)
+                  }],
+                  dimensions: [{ name: "sessionDefaultChannelGroup" }],
+                  metrics: [
+                    { name: "sessions" },
+                    { name: "activeUsers" },
+                    { name: "newUsers" },
+                    { name: "bounceRate" },
+                    { name: "averageSessionDuration" },
+                    { name: "screenPageViews" },
+                    { name: "eventCount" }
+                  ]
+                },
+                auth: oauth2Client
+              }),
+              5000
+            )
+            
+            const previousSummary = {
+              sessions: 0,
+              users: 0,
+              newUsers: 0,
+              pageviews: 0,
+              events: 0,
+              bounceRate: 0,
+              avgSessionDuration: 0
+            }
+            
+            if (channelDataPrevious?.data?.rows) {
+              channelDataPrevious.data.rows.forEach(row => {
+                const sessions = parseInt(row.metricValues?.[0]?.value || "0")
+                const users = parseInt(row.metricValues?.[1]?.value || "0")
+                const newUsers = parseInt(row.metricValues?.[2]?.value || "0")
+                const bounceRate = parseFloat(row.metricValues?.[3]?.value || "0")
+                const avgDuration = parseFloat(row.metricValues?.[4]?.value || "0")
+                const pageviews = parseInt(row.metricValues?.[5]?.value || "0")
+                const eventCount = parseInt(row.metricValues?.[6]?.value || "0")
+                
+                previousSummary.sessions += sessions
+                previousSummary.users += users
+                previousSummary.newUsers += newUsers
+                previousSummary.pageviews += pageviews
+                previousSummary.events += eventCount
+                
+                // Weight the averages by sessions
+                if (sessions > 0) {
+                  previousSummary.bounceRate += bounceRate * sessions
+                  previousSummary.avgSessionDuration += avgDuration * sessions
+                }
+              })
+              
+              // Calculate final averages
+              if (previousSummary.sessions > 0) {
+                previousSummary.bounceRate /= previousSummary.sessions
+                previousSummary.avgSessionDuration /= previousSummary.sessions
+              }
+            }
+            
+            return previousSummary
+          } catch (error) {
+            console.warn('[Analytics] Previous period fetch failed:', error)
+            return {}
+          }
+        })() : Promise.resolve({})
+      ])
+      
+      if (previousSearchConsoleResult.status === 'fulfilled') {
+        previousSearchConsoleData = previousSearchConsoleResult.value
+      }
+      if (previousAnalyticsResult.status === 'fulfilled') {
+        previousAnalyticsData = previousAnalyticsResult.value
+      }
+    }
+    
+    // Calculate comparisons
+    const comparisons = {
+      weekOverWeek: {
+        searchConsole: calculateSearchConsoleComparisons(searchConsoleData.summary, previousSearchConsoleData),
+        analytics: calculateAnalyticsComparisons(analyticsResult.summary, previousAnalyticsData)
+      },
+      monthOverMonth: {
+        searchConsole: calculateSearchConsoleComparisons(searchConsoleData.summary, previousSearchConsoleData),
+        analytics: calculateAnalyticsComparisons(analyticsResult.summary, previousAnalyticsData)
+      },
+      yearOverYear: {
+        searchConsole: calculateSearchConsoleComparisons(searchConsoleData.summary, previousSearchConsoleData),
+        analytics: calculateAnalyticsComparisons(analyticsResult.summary, previousAnalyticsData)
+      }
+    }
+
+    console.log('[Comparison] Calculated comparisons:', JSON.stringify(comparisons, null, 2))
+
     // Combine all data
     const combinedData = {
       search_console: searchConsoleData,
       analytics: analyticsResult,
       pagespeed: pageSpeedData,
+      comparisons: comparisons,
       fetched_at: new Date().toISOString(),
       date_range: {
         type: dateRange,
