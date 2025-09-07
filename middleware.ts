@@ -61,9 +61,8 @@ export const config = {
   matcher: [
     '/dashboard/:path*', 
     '/admin/:path*',
-    // Add other protected routes here
     '/reports/:path*',
-    // Exclude public routes: root, login, legal pages, API routes, static files
-    '/((?!$|login|legal|api|_next/static|_next/image|favicon.ico).*)'
+    // Only protect specific routes, not the catch-all
+    // This allows root '/', '/login', '/legal/*', and other public routes to be accessible
   ]
 };
