@@ -52,9 +52,9 @@ export async function middleware(req: NextRequest) {
     }
   }
   
-  // No valid authentication found, redirect to home
+  // No valid authentication found, redirect to login
   const baseUrl = req.nextUrl.origin || process.env.NEXT_PUBLIC_URL || 'https://searchsignal.online';
-  return NextResponse.redirect(`${baseUrl}/?auth=required`);
+  return NextResponse.redirect(`${baseUrl}/login?auth=required`);
 }
 
 export const config = {

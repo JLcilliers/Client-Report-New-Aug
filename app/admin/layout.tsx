@@ -43,14 +43,14 @@ export default function AdminLayout({
     if (status === "loading") {
       setLoading(true)
     } else if (status === "unauthenticated") {
-      router.push("/?auth=required")
+      router.push("/login?auth=required")
     } else {
       setLoading(false)
     }
   }, [status, router])
 
   const handleSignOut = async () => {
-    await signOut({ callbackUrl: "/" })
+    await signOut({ callbackUrl: "/login" })
   }
 
   if (loading || status === "loading") {
