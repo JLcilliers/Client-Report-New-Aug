@@ -125,10 +125,10 @@ export default function CookiePolicy() {
 
               <h3 className="text-xl font-semibold text-gray-800 mb-3">4.2 Browser-Specific Instructions</h3>
               <ul className="list-disc pl-6 mb-4 space-y-2">
-                <li><strong>Chrome:</strong> Settings > Privacy and Security > Cookies and other site data</li>
-                <li><strong>Firefox:</strong> Options > Privacy & Security > Cookies and Site Data</li>
-                <li><strong>Safari:</strong> Preferences > Privacy > Manage Website Data</li>
-                <li><strong>Edge:</strong> Settings > Cookies and site permissions > Cookies and site data</li>
+                <li><strong>Chrome:</strong> Settings {'>'}  Privacy and Security {'>'} Cookies and other site data</li>
+                <li><strong>Firefox:</strong> Options {'>'} Privacy & Security {'>'} Cookies and Site Data</li>
+                <li><strong>Safari:</strong> Preferences {'>'} Privacy {'>'} Manage Website Data</li>
+                <li><strong>Edge:</strong> Settings {'>'} Cookies and site permissions {'>'} Cookies and site data</li>
               </ul>
             </section>
 
