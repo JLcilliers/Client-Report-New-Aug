@@ -35,12 +35,6 @@ export default function Header() {
             >
               How It Works
             </Link>
-            <Link
-              href="#pricing"
-              className="text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              Pricing
-            </Link>
           </div>
 
           {/* Desktop CTA */}
@@ -88,13 +82,6 @@ export default function Header() {
                 onClick={() => setMobileMenuOpen(false)}
               >
                 How It Works
-              </Link>
-              <Link
-                href="#pricing"
-                className="text-gray-600 hover:text-gray-900 transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Pricing
               </Link>
               <div className="flex flex-col space-y-2 pt-4 border-t">
                 <Link

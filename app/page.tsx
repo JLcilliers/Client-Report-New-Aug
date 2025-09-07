@@ -44,7 +44,7 @@ export default function LandingPage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" asChild className="text-lg px-8 py-4">
                 <Link href="/login">
-                  Start Free Trial
+                  Get Started
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
@@ -253,7 +253,7 @@ export default function LandingPage() {
                 </p>
                 <Button size="lg" asChild className="w-full">
                   <Link href="/login">
-                    Start Your Free Trial
+                    Get Started Today
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Link>
                 </Button>
@@ -263,85 +263,23 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Pricing Section */}
-      <section id="pricing" className="py-20 bg-gray-50">
+      {/* CTA Section */}
+      <section id="cta" className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
+          <div className="text-center">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Simple, Transparent Pricing
+              Ready to Transform Your SEO Reporting?
             </h2>
-            <p className="text-xl text-gray-600">
-              Choose the plan that works best for your agency
+            <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+              Join hundreds of SEO professionals who have streamlined their workflow 
+              and impressed their clients with professional, data-driven reports.
             </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            <Card className="border-2">
-              <CardHeader className="text-center">
-                <CardTitle className="text-2xl">Starter</CardTitle>
-                <div className="text-4xl font-bold text-blue-600 mt-4">Free</div>
-                <p className="text-gray-600 mt-2">Perfect for getting started</p>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-3 mb-8">
-                  <li className="flex items-center">
-                    <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-                    Up to 3 clients
-                  </li>
-                  <li className="flex items-center">
-                    <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-                    Basic reporting features
-                  </li>
-                  <li className="flex items-center">
-                    <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-                    Google Analytics integration
-                  </li>
-                  <li className="flex items-center">
-                    <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-                    Search Console data
-                  </li>
-                </ul>
-                <Button className="w-full" variant="outline" asChild>
-                  <Link href="/login">Get Started Free</Link>
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card className="border-2 border-blue-500 relative">
-              <Badge className="absolute top-4 right-4 bg-blue-600">Popular</Badge>
-              <CardHeader className="text-center">
-                <CardTitle className="text-2xl">Professional</CardTitle>
-                <div className="text-4xl font-bold text-blue-600 mt-4">$29<span className="text-lg text-gray-600">/month</span></div>
-                <p className="text-gray-600 mt-2">For growing agencies</p>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-3 mb-8">
-                  <li className="flex items-center">
-                    <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-                    Unlimited clients
-                  </li>
-                  <li className="flex items-center">
-                    <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-                    Advanced reporting & branding
-                  </li>
-                  <li className="flex items-center">
-                    <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-                    All integrations included
-                  </li>
-                  <li className="flex items-center">
-                    <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-                    Technical SEO audits
-                  </li>
-                  <li className="flex items-center">
-                    <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-                    Priority support
-                  </li>
-                </ul>
-                <Button className="w-full" asChild>
-                  <Link href="/login">Start Free Trial</Link>
-                </Button>
-              </CardContent>
-            </Card>
+            <Button size="lg" asChild className="text-lg px-8 py-4">
+              <Link href="/login">
+                Get Started Now
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
+            </Button>
           </div>
         </div>
       </section>
