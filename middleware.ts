@@ -63,7 +63,7 @@ export const config = {
     '/admin/:path*',
     // Add other protected routes here
     '/reports/:path*',
-    // Exclude API routes from middleware (they handle their own auth)
-    '/((?!api|_next/static|_next/image|favicon.ico).*)'
+    // Exclude public routes: root, login, legal pages, API routes, static files
+    '/((?!$|login|legal|api|_next/static|_next/image|favicon.ico).*)'
   ]
 };
