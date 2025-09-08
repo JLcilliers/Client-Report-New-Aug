@@ -77,14 +77,48 @@ export function getPreviousPeriod(startDate: Date, endDate: Date): { startDate: 
 }
 
 export function calculatePercentageChange(current: number, previous: number): number {
-  if (previous === 0) return current > 0 ? 100 : 0
-  return ((current - previous) / previous) * 100
+  // Handle edge cases
+  if (typeof current !== 'number' || typeof previous !== 'number') {
+    console.warn('Invalid input to calculatePercentageChange:', { current, previous });
+    return 0;
+  }
+  
+  if (previous === 0) {
+    return current > 0 ? 100 : 0;
+  }
+  
+  const change = ((current - previous) / previous) * 100;
+  
+  // Handle Infinity and NaN
+  if (!isFinite(change)) {
+    return 0;
+  }
+  
+  // Cap at reasonable limits (-100% to +999%)
+  return Math.max(-100, Math.min(999, change));
 }
 
 export function formatPercentage(value: number, decimals: number = 1): string {
-  // Convert decimal (0-1) to percentage (0-100) for display
-  const percentage = value < 1 ? value * 100 : value
-  return `${percentage.toFixed(decimals)}%`
+  // Handle invalid inputs
+  if (typeof value !== 'number' || !isFinite(value)) {
+    console.warn('Invalid value for formatPercentage:', value);
+    return '0.0%';
+  }
+  
+  // Determine if value is already a percentage or needs conversion
+  // CTR from Google is typically 0-1, but percentage changes are already 0-100
+  let percentage = value;
+  
+  // If value is between 0 and 1 (exclusive), likely a decimal that needs conversion
+  // But if it's exactly 0 or 1, it could be either format
+  if (value > 0 && value < 1) {
+    percentage = value * 100;
+  }
+  
+  // Ensure reasonable bounds
+  percentage = Math.max(-999, Math.min(999, percentage));
+  
+  return `${percentage.toFixed(decimals)}%`;
 }
 
 export function formatNumber(value: number): string {

@@ -1,6 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { google } from 'googleapis';
 import { createClient } from '@supabase/supabase-js';
+import { 
+  validateAnalyticsResponse, 
+  validateSearchConsoleResponse,
+  normalizeSearchConsoleMetrics,
+  extractAnalyticsMetric,
+  extractAnalyticsDimension,
+  calculateSafePercentageChange,
+  checkApiQuotaError
+} from '@/lib/utils/api-validation';
 
 // Initialize Google APIs
 const searchconsole = google.searchconsole('v1');
@@ -22,25 +31,28 @@ function getDateRanges(): DateRange {
   const today = new Date();
   const currentDate = today.toISOString().split('T')[0];
   
+  // Helper function to safely subtract days
+  const subtractDays = (date: Date, days: number): Date => {
+    const result = new Date(date);
+    result.setUTCDate(result.getUTCDate() - days);
+    return result;
+  };
+  
   // Current period (last 7 days)
-  const weekAgo = new Date(today);
-  weekAgo.setDate(today.getDate() - 7);
+  const weekAgo = subtractDays(today, 7);
   
   // Previous week (8-14 days ago)
-  const twoWeeksAgo = new Date(today);
-  twoWeeksAgo.setDate(today.getDate() - 14);
+  const twoWeeksAgo = subtractDays(today, 14);
   
   // Current month (last 30 days)
-  const monthAgo = new Date(today);
-  monthAgo.setDate(today.getDate() - 30);
+  const monthAgo = subtractDays(today, 30);
   
   // Previous month (31-60 days ago)
-  const twoMonthsAgo = new Date(today);
-  twoMonthsAgo.setDate(today.getDate() - 60);
+  const twoMonthsAgo = subtractDays(today, 60);
   
-  // Year ago (365 days ago)
-  const yearAgo = new Date(today);
-  yearAgo.setFullYear(today.getFullYear() - 1);
+  // Year ago (365 days ago) - use days to avoid leap year issues
+  const yearAgo = subtractDays(today, 365);
+  const yearAgoPlusWeek = subtractDays(today, 358); // 365 - 7 days
   
   return {
     current: {
@@ -57,7 +69,7 @@ function getDateRanges(): DateRange {
     },
     previousYear: {
       startDate: yearAgo.toISOString().split('T')[0],
-      endDate: new Date(yearAgo.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+      endDate: yearAgoPlusWeek.toISOString().split('T')[0]
     }
   };
 }
@@ -109,23 +121,28 @@ export async function POST(request: NextRequest) {
       refresh_token: googleAccount.refresh_token,
     });
 
-    // Check for token refresh
-    if (googleAccount.token_expiry && new Date(googleAccount.token_expiry) < new Date()) {
+    // Check for token refresh (with 5-minute buffer)
+    const tokenExpiry = googleAccount.token_expiry ? new Date(googleAccount.token_expiry) : null;
+    const needsRefresh = !tokenExpiry || tokenExpiry < new Date(Date.now() + 5 * 60 * 1000);
+    
+    if (needsRefresh) {
       try {
         const { credentials } = await oauth2Client.refreshAccessToken();
         oauth2Client.setCredentials(credentials);
         
         // Update tokens in database
-        await supabase
-          .from('google_accounts')
-          .update({
-            access_token: credentials.access_token,
-            token_expiry: new Date(credentials.expiry_date!).toISOString(),
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', googleAccountId);
+        if (credentials.access_token && credentials.expiry_date) {
+          await supabase
+            .from('google_accounts')
+            .update({
+              access_token: credentials.access_token,
+              token_expiry: new Date(credentials.expiry_date).toISOString(),
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', googleAccountId);
+        }
       } catch (refreshError) {
-        
+        console.error('Token refresh failed:', refreshError);
         return NextResponse.json({ error: 'Authentication failed' }, { status: 401 });
       }
     }
@@ -144,9 +161,9 @@ export async function POST(request: NextRequest) {
     };
 
     // Fetch Search Console data for all periods
-    const searchConsoleProperties = report.report_properties?.filter(
-      (p: any) => p.property_type === 'search_console'
-    ) || [];
+    const searchConsoleProperties = (report.report_properties && Array.isArray(report.report_properties))
+      ? report.report_properties.filter((p: any) => p.property_type === 'search_console')
+      : [];
 
     for (const property of searchConsoleProperties) {
       try {
@@ -214,15 +231,20 @@ export async function POST(request: NextRequest) {
           ...metrics.searchConsole,
           [property.property_id]: processedData
         };
-      } catch (error) {
-        
+      } catch (error: any) {
+        const quotaCheck = checkApiQuotaError(error);
+        if (quotaCheck.isQuotaError) {
+          console.error(`Search Console API quota exceeded for ${property.property_id}: ${quotaCheck.message}`);
+        } else {
+          console.error(`Failed to fetch Search Console data for ${property.property_id}:`, error);
+        }
       }
     }
 
     // Fetch Google Analytics data
-    const analyticsProperties = report.report_properties?.filter(
-      (p: any) => p.property_type === 'analytics'
-    ) || [];
+    const analyticsProperties = (report.report_properties && Array.isArray(report.report_properties))
+      ? report.report_properties.filter((p: any) => p.property_type === 'analytics')
+      : [];
 
     for (const property of analyticsProperties) {
       try {
@@ -293,8 +315,13 @@ export async function POST(request: NextRequest) {
           ...metrics.analytics,
           [property.property_id]: processedAnalytics
         };
-      } catch (error) {
-        
+      } catch (error: any) {
+        const quotaCheck = checkApiQuotaError(error);
+        if (quotaCheck.isQuotaError) {
+          console.error(`Analytics API quota exceeded for ${property.property_id}: ${quotaCheck.message}`);
+        } else {
+          console.error(`Failed to fetch Analytics data for ${property.property_id}:`, error);
+        }
       }
     }
 
@@ -315,12 +342,12 @@ export async function POST(request: NextRequest) {
       });
 
     if (saveError) {
-      
+      console.error('Failed to save metrics to database:', saveError);
     }
 
     return NextResponse.json(metrics);
   } catch (error) {
-    
+    console.error('Failed to fetch comprehensive metrics:', error);
     return NextResponse.json(
       { error: 'Failed to fetch comprehensive metrics' },
       { status: 500 }
@@ -329,11 +356,20 @@ export async function POST(request: NextRequest) {
 }
 
 function processSearchConsoleData(current: any, prevWeek: any, prevMonth: any, yearAgo: any) {
+  // Validate input data
+  if (!current || typeof current !== 'object') {
+    console.warn('Invalid current data for Search Console processing');
+    current = { rows: [] };
+  }
+  if (!prevWeek || typeof prevWeek !== 'object') prevWeek = { rows: [] };
+  if (!prevMonth || typeof prevMonth !== 'object') prevMonth = { rows: [] };
+  if (!yearAgo || typeof yearAgo !== 'object') yearAgo = { rows: [] };
+  
   // Calculate totals and averages
-  const currentTotals = calculateTotals(current?.rows || []);
-  const prevWeekTotals = calculateTotals(prevWeek?.rows || []);
-  const prevMonthTotals = calculateTotals(prevMonth?.rows || []);
-  const yearAgoTotals = calculateTotals(yearAgo?.rows || []);
+  const currentTotals = calculateTotals(current.rows || []);
+  const prevWeekTotals = calculateTotals(prevWeek.rows || []);
+  const prevMonthTotals = calculateTotals(prevMonth.rows || []);
+  const yearAgoTotals = calculateTotals(yearAgo.rows || []);
 
   // Extract top queries and pages
   const topQueries = extractTopQueries(current?.rows || []);
@@ -358,19 +394,29 @@ function calculateTotals(rows: any[]) {
     position: 0
   };
 
-  if (!rows.length) return totals;
+  if (!Array.isArray(rows) || rows.length === 0) return totals;
 
+  let positionSum = 0;
+  let positionCount = 0;
+  
   rows.forEach(row => {
-    totals.clicks += row.clicks || 0;
-    totals.impressions += row.impressions || 0;
+    if (row && typeof row === 'object') {
+      totals.clicks += Number(row.clicks) || 0;
+      totals.impressions += Number(row.impressions) || 0;
+      
+      // Only count position if it's valid (> 0)
+      if (row.position && row.position > 0) {
+        positionSum += Number(row.position);
+        positionCount++;
+      }
+    }
   });
 
   if (totals.impressions > 0) {
     totals.ctr = totals.clicks / totals.impressions;
   }
 
-  const positionSum = rows.reduce((sum, row) => sum + (row.position || 0), 0);
-  totals.position = rows.length > 0 ? positionSum / rows.length : 0;
+  totals.position = positionCount > 0 ? positionSum / positionCount : 0;
 
   return totals;
 }
@@ -468,17 +514,32 @@ function calculateTrends(current: any, prevWeek: any, prevMonth: any, yearAgo: a
   };
 }
 
-function calculateChange(current: number, previous: number) {
-  if (!previous || previous === 0) return current > 0 ? 100 : 0;
-  return ((current - previous) / previous) * 100;
+function calculateChange(current: number, previous: number): number {
+  // Handle edge cases
+  if (!previous || previous === 0) {
+    return current > 0 ? 100 : 0;
+  }
+  
+  // Calculate percentage change and handle Infinity/NaN
+  const change = ((current - previous) / previous) * 100;
+  
+  if (!isFinite(change)) {
+    return 0;
+  }
+  
+  // Cap at reasonable limits (-100% to +1000%)
+  return Math.max(-100, Math.min(1000, change));
 }
 
 function processAnalyticsData(current: any, comparisons: any) {
   // Process current data
   const currentMetrics = aggregateAnalyticsMetrics(current);
   
-  // Process comparison data (3 date ranges)
-  const [prevWeek, prevMonth, yearAgo] = comparisons?.rows || [];
+  // Process comparison data (3 date ranges) - validate array length
+  const comparisonRows = comparisons?.rows || [];
+  const prevWeek = comparisonRows[0] || null;
+  const prevMonth = comparisonRows[1] || null;
+  const yearAgo = comparisonRows[2] || null;
   
   return {
     current: currentMetrics,
@@ -506,25 +567,40 @@ function aggregateAnalyticsMetrics(data: any) {
     events: 0
   };
 
+  if (!Array.isArray(rows) || rows.length === 0) return totals;
+
+  let totalSessionDuration = 0;
+  let totalBounceRate = 0;
+  
   rows.forEach((row: any) => {
-    const metrics = row.metricValues || [];
-    totals.sessions += parseInt(metrics[0]?.value || 0);
-    totals.users += parseInt(metrics[1]?.value || 0);
-    totals.newUsers += parseInt(metrics[2]?.value || 0);
-    totals.engagedSessions += parseInt(metrics[3]?.value || 0);
-    totals.engagementRate += parseFloat(metrics[4]?.value || 0);
-    totals.bounceRate += parseFloat(metrics[5]?.value || 0);
-    totals.avgSessionDuration += parseFloat(metrics[6]?.value || 0);
-    totals.pageViews += parseInt(metrics[7]?.value || 0);
-    totals.conversions += parseInt(metrics[8]?.value || 0);
-    totals.events += parseInt(metrics[9]?.value || 0);
+    if (row && row.metricValues && Array.isArray(row.metricValues)) {
+      const metrics = row.metricValues;
+      const sessionCount = parseInt(metrics[0]?.value || '0', 10);
+      
+      totals.sessions += sessionCount;
+      totals.users += parseInt(metrics[1]?.value || '0', 10);
+      totals.newUsers += parseInt(metrics[2]?.value || '0', 10);
+      totals.engagedSessions += parseInt(metrics[3]?.value || '0', 10);
+      
+      // For rate metrics, weight by sessions
+      const engagementRate = parseFloat(metrics[4]?.value || '0');
+      const bounceRate = parseFloat(metrics[5]?.value || '0');
+      const avgDuration = parseFloat(metrics[6]?.value || '0');
+      
+      totalBounceRate += bounceRate * sessionCount;
+      totalSessionDuration += avgDuration * sessionCount;
+      
+      totals.pageViews += parseInt(metrics[7]?.value || '0', 10);
+      totals.conversions += parseInt(metrics[8]?.value || '0', 10);
+      totals.events += parseInt(metrics[9]?.value || '0', 10);
+    }
   });
 
-  // Calculate averages for rate metrics
-  if (rows.length > 0) {
-    totals.engagementRate /= rows.length;
-    totals.bounceRate /= rows.length;
-    totals.avgSessionDuration /= rows.length;
+  // Calculate weighted averages for rate metrics
+  if (totals.sessions > 0) {
+    totals.engagementRate = totals.engagedSessions / totals.sessions;
+    totals.bounceRate = totalBounceRate / totals.sessions;
+    totals.avgSessionDuration = totalSessionDuration / totals.sessions;
   }
 
   return totals;
