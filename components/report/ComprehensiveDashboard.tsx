@@ -1082,7 +1082,7 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
             })}
           </div>
 
-          {/* Trend Charts */}
+          {/* Search Performance and Traffic Charts */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
@@ -1090,8 +1090,8 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
                 <CardDescription>Clicks and impressions over time</CardDescription>
               </CardHeader>
               <CardContent>
-                <DataVisualizations 
-                  searchData={metrics?.searchConsole} 
+                <DataVisualizations
+                  searchData={metrics?.searchConsole}
                   analyticsData={metrics?.analytics}
                   chartType="search"
                 />
@@ -1104,8 +1104,8 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
                 <CardDescription>Sessions breakdown by acquisition channel</CardDescription>
               </CardHeader>
               <CardContent>
-                <DataVisualizations 
-                  searchData={metrics?.searchConsole} 
+                <DataVisualizations
+                  searchData={metrics?.searchConsole}
                   analyticsData={metrics?.analytics}
                   chartType="traffic-bar"
                 />
@@ -1120,13 +1120,44 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
               <CardDescription>Percentage breakdown of traffic sources</CardDescription>
             </CardHeader>
             <CardContent>
-              <DataVisualizations 
-                searchData={metrics?.searchConsole} 
+              <DataVisualizations
+                searchData={metrics?.searchConsole}
                 analyticsData={metrics?.analytics}
                 chartType="traffic-pie"
               />
             </CardContent>
           </Card>
+
+          {/* Position and CTR Charts */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Average Position Over Time</CardTitle>
+                <CardDescription>Search ranking position trends (lower is better)</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <DataVisualizations
+                  searchData={metrics?.searchConsole}
+                  analyticsData={metrics?.analytics}
+                  chartType="position"
+                />
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>CTR (Click-Through Rate) Over Time</CardTitle>
+                <CardDescription>Percentage of impressions that resulted in clicks</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <DataVisualizations
+                  searchData={metrics?.searchConsole}
+                  analyticsData={metrics?.analytics}
+                  chartType="ctr"
+                />
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
 
         {/* Competitors Tab */}

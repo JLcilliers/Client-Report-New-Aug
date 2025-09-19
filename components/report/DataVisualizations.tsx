@@ -30,7 +30,7 @@ interface VisualizationProps {
   searchData: any;
   analyticsData: any;
   competitorData?: any;
-  chartType?: 'all' | 'search' | 'traffic-bar' | 'traffic-pie';
+  chartType?: 'all' | 'search' | 'traffic-bar' | 'traffic-pie' | 'position' | 'ctr';
 }
 
 export default function DataVisualizations({ searchData, analyticsData, competitorData, chartType = 'all' }: VisualizationProps) {
@@ -250,6 +250,58 @@ export default function DataVisualizations({ searchData, analyticsData, competit
           ))}
         </div>
       </div>
+    );
+  }
+
+  // Render position chart only
+  if (chartType === 'position') {
+    return (
+      <ResponsiveContainer width="100%" height={300}>
+        <LineChart data={searchTrendData}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+          <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+          <YAxis
+            domain={['dataMin - 1', 'dataMax + 1']}
+            tick={{ fontSize: 12 }}
+            reversed={true}
+          />
+          <Tooltip content={<CustomTooltip />} />
+          <Legend />
+          <Line
+            type="monotone"
+            dataKey="position"
+            stroke={COLORS.tertiary}
+            strokeWidth={3}
+            dot={{ fill: COLORS.tertiary, r: 4 }}
+            activeDot={{ r: 6 }}
+            name="Avg Position (lower is better)"
+          />
+        </LineChart>
+      </ResponsiveContainer>
+    );
+  }
+
+  // Render CTR chart only
+  if (chartType === 'ctr') {
+    return (
+      <ResponsiveContainer width="100%" height={300}>
+        <LineChart data={searchTrendData}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+          <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+          <YAxis tick={{ fontSize: 12 }} />
+          <Tooltip content={<CustomTooltip />} />
+          <Legend />
+          <Line
+            type="monotone"
+            dataKey="ctr"
+            stroke={COLORS.purple}
+            strokeWidth={3}
+            dot={{ fill: COLORS.purple, r: 4 }}
+            activeDot={{ r: 6 }}
+            name="Click-Through Rate (%)"
+          />
+        </LineChart>
+      </ResponsiveContainer>
     );
   }
 
