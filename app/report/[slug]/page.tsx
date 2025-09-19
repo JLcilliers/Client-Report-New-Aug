@@ -216,7 +216,7 @@ export default function PublicReportPage() {
               {/* Data Freshness Status */}
               <DataFreshnessIndicator
                 data={reportData}
-                onRefresh={null}  // We'll handle refresh with the separate button
+                onRefresh={undefined}  // We'll handle refresh with the separate button
                 isRefreshing={fetchingData}
                 showDetails={true}
               />
