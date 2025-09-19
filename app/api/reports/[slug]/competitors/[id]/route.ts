@@ -10,8 +10,11 @@ export async function PUT(
 ) {
   try {
     const { slug, id } = await params;
+    console.log('[Competitor Update API] Updating competitor:', id, 'for report:', slug);
+
     const body = await request.json();
     const { name, domain, notes } = body;
+    console.log('[Competitor Update API] Request body:', { name, domain, notes });
     
     if (!name || !domain) {
       return NextResponse.json(
@@ -44,11 +47,12 @@ export async function PUT(
       return NextResponse.json({ error: 'Competitor does not belong to this report' }, { status: 403 });
     }
     
-    // Validate domain format
-    const domainRegex = /^[a-zA-Z0-9][a-zA-Z0-9-_.]*[a-zA-Z0-9]$/;
-    if (!domainRegex.test(domain)) {
+    // Validate domain format (use same logic as POST endpoint)
+    const cleanDomain = domain.replace(/^https?:\/\//, '').replace(/\/$/, '');
+    const domainRegex = /^([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)*[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?$/;
+    if (!domainRegex.test(cleanDomain) && cleanDomain.length > 0) {
       return NextResponse.json(
-        { error: 'Invalid domain format' },
+        { error: 'Invalid domain format. Please enter a valid domain like example.com' },
         { status: 400 }
       );
     }
@@ -57,7 +61,7 @@ export async function PUT(
     const duplicateCompetitor = await prisma.competitor.findFirst({
       where: {
         clientReportId: report.id,
-        domain: domain.toLowerCase(),
+        domain: cleanDomain.toLowerCase(),
         id: { not: id }
       }
     });
@@ -74,7 +78,7 @@ export async function PUT(
       where: { id },
       data: {
         name: name.trim(),
-        domain: domain.toLowerCase().trim(),
+        domain: cleanDomain.toLowerCase().trim(),
         notes: notes?.trim() || null
       }
     });

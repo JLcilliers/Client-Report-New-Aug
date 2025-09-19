@@ -77,6 +77,7 @@ export default function CompetitorManagement({ reportSlug }: CompetitorManagemen
   const fetchCompetitors = async () => {
     try {
       setLoading(true);
+      console.log('[CompetitorManagement] Fetching competitors for reportSlug:', reportSlug);
       const response = await fetch(`/api/reports/${reportSlug}/competitors`);
       
       if (!response.ok) {
@@ -84,11 +85,18 @@ export default function CompetitorManagement({ reportSlug }: CompetitorManagemen
       }
       
       const data = await response.json();
+      console.log('[CompetitorManagement] Competitors data received:', data);
       setCompetitors(data.competitors || []);
       setBrandName(data.brandName || 'Brand');
     } catch (error) {
       console.error('Error fetching competitors:', error);
-      toast.error('Failed to load competitors');
+
+      // More specific error handling
+      if (error instanceof Error && error.message.includes('Report not found')) {
+        toast.error('Report not found. Please check the URL and try again.');
+      } else {
+        toast.error('Failed to load competitors. Please refresh the page.');
+      }
     } finally {
       setLoading(false);
     }
@@ -101,14 +109,25 @@ export default function CompetitorManagement({ reportSlug }: CompetitorManagemen
       return;
     }
 
+    // Clean and validate domain before sending
+    const cleanDomain = formData.domain.trim().replace(/^https?:\/\//, '').replace(/\/$/, '');
+    if (cleanDomain.length === 0) {
+      toast.error('Please enter a valid domain');
+      return;
+    }
+
     setAdding(true);
     try {
+      console.log('[CompetitorManagement] Adding competitor:', { name: formData.name, domain: cleanDomain });
       const response = await fetch(`/api/reports/${reportSlug}/competitors`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          domain: cleanDomain
+        }),
       });
 
       if (!response.ok) {
@@ -123,7 +142,17 @@ export default function CompetitorManagement({ reportSlug }: CompetitorManagemen
       toast.success('Competitor added successfully');
     } catch (error: any) {
       console.error('Error adding competitor:', error);
-      toast.error(error.message || 'Failed to add competitor');
+
+      // Show more specific error messages
+      if (error.message.includes('already exists')) {
+        toast.error('A competitor with this domain already exists for this brand');
+      } else if (error.message.includes('Invalid domain')) {
+        toast.error('Please enter a valid domain (e.g., example.com)');
+      } else if (error.message.includes('required')) {
+        toast.error('Name and domain are required fields');
+      } else {
+        toast.error(error.message || 'Failed to add competitor. Please try again.');
+      }
     } finally {
       setAdding(false);
     }
@@ -298,7 +327,7 @@ export default function CompetitorManagement({ reportSlug }: CompetitorManagemen
                       value={formData.domain}
                       onChange={(e) => setFormData(prev => ({ ...prev, domain: e.target.value }))}
                       className="col-span-3"
-                      placeholder="e.g., competitor.com"
+                      placeholder="e.g., competitor.com (no https://)"
                     />
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
@@ -451,6 +480,7 @@ export default function CompetitorManagement({ reportSlug }: CompetitorManagemen
                 value={formData.domain}
                 onChange={(e) => setFormData(prev => ({ ...prev, domain: e.target.value }))}
                 className="col-span-3"
+                placeholder="e.g., competitor.com (no https://)"
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
