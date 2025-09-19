@@ -235,7 +235,7 @@ export async function GET(request: NextRequest) {
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 30, // 30 days
       path: '/',
-      domain: isProduction ? '.searchsignal.online' : undefined
+      // Don't set domain - let browser handle it for better compatibility
     })
 
     if (tokens.refresh_token) {
@@ -245,7 +245,7 @@ export async function GET(request: NextRequest) {
         sameSite: 'lax',
         maxAge: 60 * 60 * 24 * 90, // 90 days for refresh token
         path: '/',
-        domain: isProduction ? '.searchsignal.online' : undefined
+        // Don't set domain - let browser handle it for better compatibility
       })
     }
 
@@ -256,7 +256,7 @@ export async function GET(request: NextRequest) {
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 30, // 30 days
       path: '/',
-      domain: isProduction ? '.searchsignal.online' : undefined
+      // Don't set domain - let browser handle it for better compatibility
     })
 
     // Set token expiry cookie for client-side validation
@@ -267,7 +267,7 @@ export async function GET(request: NextRequest) {
         sameSite: 'lax',
         maxAge: 60 * 60 * 24 * 30, // 30 days
         path: '/',
-        domain: isProduction ? '.searchsignal.online' : undefined
+        // Don't set domain - let browser handle it for better compatibility
       })
     }
 
@@ -278,7 +278,7 @@ export async function GET(request: NextRequest) {
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 30, // 30 days
       path: '/',
-      domain: isProduction ? '.searchsignal.online' : undefined
+      // Don't set domain - let browser handle it for better compatibility
     })
     
     return response
