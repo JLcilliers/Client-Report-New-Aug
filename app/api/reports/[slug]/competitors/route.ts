@@ -111,7 +111,12 @@ export async function POST(
         { status: 400 }
       );
     }
-    
+
+    // TypeScript guard - at this point finalReport is definitely not null
+    if (!finalReport) {
+      return NextResponse.json({ error: 'Report not found' }, { status: 404 });
+    }
+
     // Check if competitor with this domain already exists for this report
     console.log('[Competitor API] Checking for existing competitor with domain:', cleanDomain.toLowerCase());
     const existingCompetitor = await prisma.competitor.findFirst({
