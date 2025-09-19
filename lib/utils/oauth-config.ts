@@ -1,6 +1,16 @@
 import { NextRequest } from "next/server"
 
 /**
+ * Determine if we're in a production environment
+ * Uses consistent logic across the application
+ */
+export function isProductionEnvironment(request?: NextRequest): boolean {
+  return process.env.VERCEL_ENV === 'production' ||
+         process.env.NODE_ENV === 'production' ||
+         !!(request && !request.nextUrl.hostname.includes('localhost'));
+}
+
+/**
  * Get the base URL for OAuth redirects
  * Handles localhost vs production environments correctly
  */
@@ -28,8 +38,8 @@ export function getOAuthBaseUrl(request: NextRequest): string {
  */
 export function getOAuthRedirectUri(request: NextRequest): string {
   const baseUrl = getOAuthBaseUrl(request)
-  // Use the callback URI that matches what's in Google Cloud Console
-  return `${baseUrl}/api/auth/google/callback`
+  // Use the callback URI that matches the actual route handler
+  return `${baseUrl}/api/auth/google/admin-callback`
 }
 
 /**

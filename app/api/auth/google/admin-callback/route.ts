@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { OAuth2Client } from "google-auth-library"
 import { prisma } from "@/lib/db/prisma"
 import { cookies } from "next/headers"
-import { getOAuthRedirectUri } from "@/lib/utils/oauth-config"
+import { getOAuthRedirectUri, isProductionEnvironment } from "@/lib/utils/oauth-config"
 import crypto from 'crypto'
 
 export const dynamic = 'force-dynamic'
@@ -224,10 +224,7 @@ export async function GET(request: NextRequest) {
     const response = NextResponse.redirect(redirectUrl)
     
     // Set persistent cookies with extended expiration
-    // Force secure: true in production even if NODE_ENV isn't set properly
-    const isProduction = process.env.VERCEL_ENV === 'production' ||
-                        process.env.NODE_ENV === 'production' ||
-                        !request.nextUrl.hostname.includes('localhost');
+    const isProduction = isProductionEnvironment(request);
 
     response.cookies.set('google_access_token', tokens.access_token!, {
       httpOnly: true,
