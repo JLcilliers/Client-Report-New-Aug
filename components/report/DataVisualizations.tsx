@@ -123,56 +123,69 @@ export default function DataVisualizations({ searchData, analyticsData, competit
   // Render search performance chart
   if (chartType === 'search') {
     return (
-      <ResponsiveContainer width="100%" height={350}>
-        <LineChart data={searchTrendData}>
-          <defs>
-            <linearGradient id="colorClicks" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor={COLORS.primary} stopOpacity={0.8}/>
-              <stop offset="95%" stopColor={COLORS.primary} stopOpacity={0.1}/>
-            </linearGradient>
-            <linearGradient id="colorImpressions" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor={COLORS.secondary} stopOpacity={0.8}/>
-              <stop offset="95%" stopColor={COLORS.secondary} stopOpacity={0.1}/>
-            </linearGradient>
-          </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-          <XAxis dataKey="date" tick={{ fontSize: 12 }} />
-          <YAxis yAxisId="left" tick={{ fontSize: 12 }} />
-          <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 12 }} />
-          <Tooltip content={<CustomTooltip />} />
-          <Legend />
-          <Line
-            yAxisId="left"
-            type="monotone"
-            dataKey="clicks"
-            stroke={COLORS.primary}
-            strokeWidth={2}
-            dot={{ fill: COLORS.primary, r: 4 }}
-            activeDot={{ r: 6 }}
-            name="Clicks"
-          />
-          <Line
-            yAxisId="left"
-            type="monotone"
-            dataKey="impressions"
-            stroke={COLORS.secondary}
-            strokeWidth={2}
-            dot={{ fill: COLORS.secondary, r: 3 }}
-            activeDot={{ r: 5 }}
-            name="Impressions"
-          />
-          <Line
-            yAxisId="right"
-            type="monotone"
-            dataKey="position"
-            stroke={COLORS.tertiary}
-            strokeWidth={2}
-            dot={{ fill: COLORS.tertiary, r: 3 }}
-            activeDot={{ r: 5 }}
-            name="Avg Position"
-          />
-        </LineChart>
-      </ResponsiveContainer>
+      <div className="space-y-6">
+        {/* Clicks and Impressions Chart */}
+        <div>
+          <h4 className="text-sm font-medium mb-3">Clicks & Impressions Over Time</h4>
+          <ResponsiveContainer width="100%" height={200}>
+            <LineChart data={searchTrendData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+              <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+              <YAxis yAxisId="left" tick={{ fontSize: 12 }} />
+              <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 12 }} />
+              <Tooltip content={<CustomTooltip />} />
+              <Legend />
+              <Line
+                yAxisId="left"
+                type="monotone"
+                dataKey="clicks"
+                stroke={COLORS.primary}
+                strokeWidth={3}
+                dot={{ fill: COLORS.primary, r: 4 }}
+                activeDot={{ r: 6 }}
+                name="Clicks"
+              />
+              <Line
+                yAxisId="right"
+                type="monotone"
+                dataKey="impressions"
+                stroke={COLORS.secondary}
+                strokeWidth={2}
+                dot={{ fill: COLORS.secondary, r: 3 }}
+                activeDot={{ r: 5 }}
+                name="Impressions"
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Average Position Chart */}
+        <div>
+          <h4 className="text-sm font-medium mb-3">Average Position Over Time</h4>
+          <ResponsiveContainer width="100%" height={150}>
+            <LineChart data={searchTrendData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+              <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+              <YAxis
+                domain={['dataMin - 1', 'dataMax + 1']}
+                tick={{ fontSize: 12 }}
+                reversed={true}
+              />
+              <Tooltip content={<CustomTooltip />} />
+              <Legend />
+              <Line
+                type="monotone"
+                dataKey="position"
+                stroke={COLORS.tertiary}
+                strokeWidth={3}
+                dot={{ fill: COLORS.tertiary, r: 4 }}
+                activeDot={{ r: 6 }}
+                name="Avg Position (lower is better)"
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
     );
   }
 
@@ -243,56 +256,106 @@ export default function DataVisualizations({ searchData, analyticsData, competit
   // Default: render all charts
   return (
     <div className="space-y-6">
-      {/* Search Performance Trend */}
+      {/* Search Performance Trend - Split into separate charts */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <TrendingUp className="w-5 h-5" />
-            Search Performance Trend
+            Search Performance Trends
           </CardTitle>
-          <CardDescription>Click-through rate and position trends over time</CardDescription>
+          <CardDescription>Separate views for better clarity and accurate scaling</CardDescription>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={350}>
-            <LineChart data={searchTrendData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis dataKey="date" tick={{ fontSize: 12 }} />
-              <YAxis yAxisId="left" tick={{ fontSize: 12 }} />
-              <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 12 }} />
-              <Tooltip content={<CustomTooltip />} />
-              <Legend />
-              <Line
-                yAxisId="left"
-                type="monotone"
-                dataKey="clicks"
-                stroke={COLORS.primary}
-                strokeWidth={2}
-                dot={{ fill: COLORS.primary, r: 4 }}
-                activeDot={{ r: 6 }}
-                name="Clicks"
-              />
-              <Line
-                yAxisId="left"
-                type="monotone"
-                dataKey="impressions"
-                stroke={COLORS.secondary}
-                strokeWidth={2}
-                dot={{ fill: COLORS.secondary, r: 3 }}
-                activeDot={{ r: 5 }}
-                name="Impressions"
-              />
-              <Line
-                yAxisId="right"
-                type="monotone"
-                dataKey="position"
-                stroke={COLORS.tertiary}
-                strokeWidth={2}
-                dot={{ fill: COLORS.tertiary, r: 3 }}
-                activeDot={{ r: 5 }}
-                name="Avg Position"
-              />
-            </LineChart>
-          </ResponsiveContainer>
+          <div className="space-y-8">
+            {/* Clicks and Impressions Chart */}
+            <div>
+              <h4 className="text-sm font-medium mb-3 text-gray-700">Clicks & Impressions Over Time</h4>
+              <ResponsiveContainer width="100%" height={250}>
+                <LineChart data={searchTrendData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+                  <YAxis yAxisId="left" label={{ value: 'Clicks', angle: -90, position: 'insideLeft' }} tick={{ fontSize: 12 }} />
+                  <YAxis yAxisId="right" orientation="right" label={{ value: 'Impressions', angle: 90, position: 'insideRight' }} tick={{ fontSize: 12 }} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Legend />
+                  <Line
+                    yAxisId="left"
+                    type="monotone"
+                    dataKey="clicks"
+                    stroke={COLORS.primary}
+                    strokeWidth={3}
+                    dot={{ fill: COLORS.primary, r: 4 }}
+                    activeDot={{ r: 6 }}
+                    name="Clicks"
+                  />
+                  <Line
+                    yAxisId="right"
+                    type="monotone"
+                    dataKey="impressions"
+                    stroke={COLORS.secondary}
+                    strokeWidth={2}
+                    dot={{ fill: COLORS.secondary, r: 3 }}
+                    activeDot={{ r: 5 }}
+                    name="Impressions"
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* Average Position Chart */}
+            <div>
+              <h4 className="text-sm font-medium mb-3 text-gray-700">Average Position Over Time</h4>
+              <ResponsiveContainer width="100%" height={200}>
+                <LineChart data={searchTrendData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+                  <YAxis
+                    domain={['dataMin - 1', 'dataMax + 1']}
+                    label={{ value: 'Position (lower is better)', angle: -90, position: 'insideLeft' }}
+                    tick={{ fontSize: 12 }}
+                    reversed={true}
+                  />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Legend />
+                  <Line
+                    type="monotone"
+                    dataKey="position"
+                    stroke={COLORS.tertiary}
+                    strokeWidth={3}
+                    dot={{ fill: COLORS.tertiary, r: 4 }}
+                    activeDot={{ r: 6 }}
+                    name="Avg Position (lower is better)"
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* CTR Chart */}
+            <div>
+              <h4 className="text-sm font-medium mb-3 text-gray-700">Click-Through Rate (CTR) Over Time</h4>
+              <ResponsiveContainer width="100%" height={200}>
+                <LineChart data={searchTrendData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+                  <YAxis
+                    label={{ value: 'CTR (%)', angle: -90, position: 'insideLeft' }}
+                    tick={{ fontSize: 12 }}
+                  />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Legend />
+                  <Line
+                    type="monotone"
+                    dataKey="ctr"
+                    stroke={COLORS.purple}
+                    strokeWidth={3}
+                    dot={{ fill: COLORS.purple, r: 4 }}
+                    activeDot={{ r: 6 }}
+                    name="Click-Through Rate (%)"
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
