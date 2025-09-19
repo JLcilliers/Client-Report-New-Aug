@@ -2,12 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
 
-// Redirect from old callback path to new admin-callback path
+// This is the main callback that Google redirects to
+// We'll handle the OAuth flow here by importing the admin-callback logic
 export async function GET(request: NextRequest) {
-  const searchParams = request.nextUrl.searchParams.toString()
-  const baseUrl = request.nextUrl.origin || process.env.NEXT_PUBLIC_URL || 'https://searchsignal.online'
-  const redirectUrl = `${baseUrl}/api/auth/google/admin-callback${searchParams ? `?${searchParams}` : ''}`
-  
-  console.log('[OAuth Redirect] Redirecting from /api/auth/google/callback to /api/auth/google/admin-callback')
-  return NextResponse.redirect(redirectUrl)
+  // Use the admin-callback handler directly
+  const adminCallbackModule = await import('../admin-callback/route')
+  return adminCallbackModule.GET(request)
 }

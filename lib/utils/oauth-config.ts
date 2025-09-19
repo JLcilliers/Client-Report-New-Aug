@@ -28,7 +28,8 @@ export function getOAuthBaseUrl(request: NextRequest): string {
  */
 export function getOAuthRedirectUri(request: NextRequest): string {
   const baseUrl = getOAuthBaseUrl(request)
-  return `${baseUrl}/api/auth/google/admin-callback`
+  // Use the callback URI that matches what's in Google Cloud Console
+  return `${baseUrl}/api/auth/google/callback`
 }
 
 /**

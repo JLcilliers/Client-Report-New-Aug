@@ -4,8 +4,12 @@ import type { NextRequest } from 'next/server';
 import { withAuth } from 'next-auth/middleware';
 
 export async function middleware(req: NextRequest) {
-  // Allow auth success page to always pass through
-  if (req.nextUrl.pathname.startsWith('/auth/')) {
+  // Skip middleware for public pages and API routes
+  const publicPaths = ['/', '/login', '/auth', '/api/auth', '/legal', '/report'];
+  const pathname = req.nextUrl.pathname;
+
+  // Check if this is a public path
+  if (publicPaths.some(path => pathname === path || pathname.startsWith(`${path}/`))) {
     return NextResponse.next();
   }
 
