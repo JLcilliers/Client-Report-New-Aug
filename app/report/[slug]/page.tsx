@@ -212,35 +212,47 @@ export default function PublicReportPage() {
                 </a>
               )}
             </p>
-            <div className="flex items-center gap-4 mt-4">
-              {/* Data Freshness Indicator */}
-              <div className="flex-1">
-                <DataFreshnessIndicator 
-                  data={reportData}
-                  onRefresh={refreshData}
-                  isRefreshing={fetchingData}
-                  showDetails={true}
-                />
-              </div>
-              
-              {/* View Toggle Buttons */}
-              <Button
-                onClick={() => setShowLegacyView(!showLegacyView)}
-                variant="outline"
-                size="sm"
-              >
-                {showLegacyView ? 'Show Dashboard' : 'Show Legacy View'}
-              </Button>
-              <Link href={`/report/${slug}/seo-dashboard`}>
+            <div className="mt-4">
+              {/* Data Freshness Status */}
+              <DataFreshnessIndicator
+                data={reportData}
+                onRefresh={null}  // We'll handle refresh with the separate button
+                isRefreshing={fetchingData}
+                showDetails={true}
+              />
+
+              {/* Action Buttons - All aligned in one row */}
+              <div className="flex items-center gap-2 mt-4">
                 <Button
+                  onClick={refreshData}
+                  disabled={fetchingData}
                   variant="outline"
                   size="sm"
                   className="flex items-center gap-2"
                 >
-                  <Search className="h-4 w-4" />
-                  Technical SEO
+                  <RefreshCw className={`h-4 w-4 ${fetchingData ? 'animate-spin' : ''}`} />
+                  {fetchingData ? 'Refreshing...' : 'Refresh'}
                 </Button>
-              </Link>
+
+                <Button
+                  onClick={() => setShowLegacyView(!showLegacyView)}
+                  variant="outline"
+                  size="sm"
+                >
+                  {showLegacyView ? 'Show Dashboard' : 'Show Legacy View'}
+                </Button>
+
+                <Link href={`/report/${slug}/seo-dashboard`}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center gap-2"
+                  >
+                    <Search className="h-4 w-4" />
+                    Technical SEO
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
         </div>

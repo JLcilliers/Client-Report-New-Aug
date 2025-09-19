@@ -423,40 +423,134 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
     // Transform the legacy data format to match our comprehensive metrics format
     const searchConsole = data.search_console || {};
     const analytics = data.analytics || {};
-    
+    const comparisons = data.comparisons || {};
+
+    // Extract comparison percentages from the API data
+    const getComparisonValue = (comparisonData: any, metric: string) => {
+      return comparisonData?.[metric]?.changePercent || 0;
+    };
+
+    // Calculate previous period values based on current values and change percentages
+    const calculatePreviousValue = (current: number, changePercent: number) => {
+      if (changePercent === 0) return current;
+      // If changePercent is positive, previous = current / (1 + changePercent/100)
+      // If changePercent is negative, previous = current / (1 + changePercent/100)
+      return current / (1 + changePercent / 100);
+    };
+
+    // Get the appropriate comparison based on what's available
+    const monthComparison = comparisons.monthOverMonth || comparisons.weekOverWeek || {};
+    const yearComparison = comparisons.yearOverYear || {};
+
+    // Current values
+    const currentSearchConsole = {
+      clicks: searchConsole.summary?.clicks || 0,
+      impressions: searchConsole.summary?.impressions || 0,
+      ctr: searchConsole.summary?.ctr || 0,
+      position: searchConsole.summary?.position || 0
+    };
+
+    const currentAnalytics = {
+      sessions: analytics.summary?.sessions || 0,
+      users: analytics.summary?.users || 0,
+      newUsers: analytics.summary?.newUsers || 0,
+      pageviews: analytics.summary?.pageviews || 0,
+      events: analytics.summary?.events || 0,
+      bounceRate: analytics.summary?.bounceRate || 0,
+      avgSessionDuration: analytics.summary?.avgSessionDuration || 0
+    };
+
+    // Calculate previous period values using comparison data
+    const previousSearchConsole = {
+      clicks: calculatePreviousValue(currentSearchConsole.clicks, getComparisonValue(monthComparison.searchConsole, 'clicks')),
+      impressions: calculatePreviousValue(currentSearchConsole.impressions, getComparisonValue(monthComparison.searchConsole, 'impressions')),
+      ctr: calculatePreviousValue(currentSearchConsole.ctr, getComparisonValue(monthComparison.searchConsole, 'ctr')),
+      position: currentSearchConsole.position - (getComparisonValue(monthComparison.searchConsole, 'position') || 0)
+    };
+
+    const previousAnalytics = {
+      sessions: calculatePreviousValue(currentAnalytics.sessions, getComparisonValue(monthComparison.analytics, 'sessions')),
+      users: calculatePreviousValue(currentAnalytics.users, getComparisonValue(monthComparison.analytics, 'users')),
+      newUsers: calculatePreviousValue(currentAnalytics.newUsers, getComparisonValue(monthComparison.analytics, 'newUsers')),
+      pageviews: calculatePreviousValue(currentAnalytics.pageviews, getComparisonValue(monthComparison.analytics, 'pageviews')),
+      events: calculatePreviousValue(currentAnalytics.events, getComparisonValue(monthComparison.analytics, 'events')),
+      bounceRate: currentAnalytics.bounceRate,
+      avgSessionDuration: currentAnalytics.avgSessionDuration
+    };
+
+    // Calculate year-ago values using year-over-year comparison data
+    const yearAgoSearchConsole = {
+      clicks: calculatePreviousValue(currentSearchConsole.clicks, getComparisonValue(yearComparison.searchConsole, 'clicks')),
+      impressions: calculatePreviousValue(currentSearchConsole.impressions, getComparisonValue(yearComparison.searchConsole, 'impressions')),
+      ctr: calculatePreviousValue(currentSearchConsole.ctr, getComparisonValue(yearComparison.searchConsole, 'ctr')),
+      position: currentSearchConsole.position - (getComparisonValue(yearComparison.searchConsole, 'position') || 0)
+    };
+
+    const yearAgoAnalytics = {
+      sessions: calculatePreviousValue(currentAnalytics.sessions, getComparisonValue(yearComparison.analytics, 'sessions')),
+      users: calculatePreviousValue(currentAnalytics.users, getComparisonValue(yearComparison.analytics, 'users')),
+      newUsers: calculatePreviousValue(currentAnalytics.newUsers, getComparisonValue(yearComparison.analytics, 'newUsers')),
+      pageviews: calculatePreviousValue(currentAnalytics.pageviews, getComparisonValue(yearComparison.analytics, 'pageviews')),
+      events: calculatePreviousValue(currentAnalytics.events, getComparisonValue(yearComparison.analytics, 'events')),
+      bounceRate: currentAnalytics.bounceRate,
+      avgSessionDuration: currentAnalytics.avgSessionDuration
+    };
+
     return {
       fetchedAt: data.fetched_at || new Date().toISOString(),
-      searchConsole: {
-        current: {
-          clicks: searchConsole.summary?.clicks || 0,
-          impressions: searchConsole.summary?.impressions || 0,
-          ctr: searchConsole.summary?.ctr || 0, // Already a decimal (0-1) from API
-          position: searchConsole.summary?.position || 0
+      // Current data structure for Executive Overview
+      current: {
+        search_console: {
+          summary: currentSearchConsole
         },
+        analytics: {
+          summary: currentAnalytics
+        }
+      },
+      // Previous period data for month-over-month comparison
+      previous: {
+        search_console: {
+          summary: previousSearchConsole
+        },
+        analytics: {
+          summary: previousAnalytics
+        }
+      },
+      // Year-ago data for year-over-year comparison
+      yearAgo: {
+        search_console: {
+          summary: yearAgoSearchConsole
+        },
+        analytics: {
+          summary: yearAgoAnalytics
+        }
+      },
+      // Keep the original structure for other components
+      searchConsole: {
+        current: currentSearchConsole,
         topQueries: (searchConsole.topQueries || []).map((q: any) => ({
           query: q.keys?.[0] || 'Unknown',
           clicks: q.clicks || 0,
           impressions: q.impressions || 0,
-          ctr: q.ctr || 0, // Already a decimal from API
+          ctr: q.ctr || 0,
           position: q.position || 0
         })),
         topPages: (searchConsole.topPages || []).map((p: any) => ({
           page: p.keys?.[0] || 'Unknown',
           clicks: p.clicks || 0,
           impressions: p.impressions || 0,
-          ctr: p.ctr || 0, // Already a decimal from API
+          ctr: p.ctr || 0,
           position: p.position || 0
         })),
-        // Add raw data for charts
         byDate: searchConsole.byDate || [],
         summary: searchConsole.summary || {}
       },
       analytics: {
         current: {
-          sessions: analytics.summary?.sessions || 0,
-          users: analytics.summary?.users || 0,
-          newUsers: analytics.summary?.newUsers || 0,
-          pageViews: analytics.summary?.pageviews || 0,
+          sessions: currentAnalytics.sessions,
+          users: currentAnalytics.users,
+          newUsers: currentAnalytics.newUsers,
+          pageViews: currentAnalytics.pageviews,
           engagementRate: calculateEngagementRate(analytics),
           bounceRate: calculateAverageBounceRate(analytics),
           avgSessionDuration: calculateAverageSessionDuration(analytics),
@@ -472,61 +566,11 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
         })),
         topLandingPages: analytics.topPages || [],
         dailyData: searchConsole.byDate || [],
-        // Add raw data for charts
         trafficSources: analytics.trafficSources || [],
         summary: analytics.summary || {},
         topPages: analytics.topPages || []
       },
-      comparisons: data.comparisons || {
-        weekOverWeek: {
-          searchConsole: {
-            clicks: { changePercent: 0, trend: 'neutral' },
-            impressions: { changePercent: 0, trend: 'neutral' },
-            ctr: { changePercent: 0, trend: 'neutral' },
-            position: { changePercent: 0, trend: 'neutral' }
-          },
-          analytics: {
-            sessions: { changePercent: 0, trend: 'neutral' },
-            users: { changePercent: 0, trend: 'neutral' },
-            newUsers: { changePercent: 0, trend: 'neutral' },
-            pageviews: { changePercent: 0, trend: 'neutral' },
-            engagementRate: { changePercent: 0, trend: 'neutral' },
-            conversions: { changePercent: 0, trend: 'neutral' }
-          }
-        },
-        monthOverMonth: {
-          searchConsole: {
-            clicks: { changePercent: 0, trend: 'neutral' },
-            impressions: { changePercent: 0, trend: 'neutral' },
-            ctr: { changePercent: 0, trend: 'neutral' },
-            position: { changePercent: 0, trend: 'neutral' }
-          },
-          analytics: {
-            sessions: { changePercent: 0, trend: 'neutral' },
-            users: { changePercent: 0, trend: 'neutral' },
-            newUsers: { changePercent: 0, trend: 'neutral' },
-            pageviews: { changePercent: 0, trend: 'neutral' },
-            engagementRate: { changePercent: 0, trend: 'neutral' },
-            conversions: { changePercent: 0, trend: 'neutral' }
-          }
-        },
-        yearOverYear: {
-          searchConsole: {
-            clicks: { changePercent: 0, trend: 'neutral' },
-            impressions: { changePercent: 0, trend: 'neutral' },
-            ctr: { changePercent: 0, trend: 'neutral' },
-            position: { changePercent: 0, trend: 'neutral' }
-          },
-          analytics: {
-            sessions: { changePercent: 0, trend: 'neutral' },
-            users: { changePercent: 0, trend: 'neutral' },
-            newUsers: { changePercent: 0, trend: 'neutral' },
-            pageviews: { changePercent: 0, trend: 'neutral' },
-            engagementRate: { changePercent: 0, trend: 'neutral' },
-            conversions: { changePercent: 0, trend: 'neutral' }
-          }
-        }
-      }
+      comparisons: comparisons
     };
   };
 
