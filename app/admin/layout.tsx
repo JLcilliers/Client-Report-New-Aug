@@ -31,18 +31,21 @@ export default function AdminLayout({
     // Check for our Google OAuth cookies or demo auth first
     const hasGoogleAuth = document.cookie.includes('google_access_token');
     const hasDemoAuth = document.cookie.includes('demo_auth=true');
+    const hasSessionToken = document.cookie.includes('session_token');
     const isDevelopment = process.env.NEXT_PUBLIC_DEV_MODE === 'true' || window.location.hostname === 'localhost';
-    
+
     // If we have valid cookie-based auth, allow access regardless of NextAuth status
-    if (hasGoogleAuth || hasDemoAuth) {
+    if (hasGoogleAuth || hasDemoAuth || hasSessionToken) {
       setLoading(false);
       return;
     }
-    
+
     // Only check NextAuth if no cookie-based auth is present
     if (status === "loading") {
-      setLoading(true)
-    } else if (status === "unauthenticated") {
+      // Wait for NextAuth to finish loading
+      return;
+    } else if (status === "unauthenticated" && !hasGoogleAuth && !hasDemoAuth && !hasSessionToken) {
+      // Only redirect if we truly have no auth
       router.push("/login?auth=required")
     } else {
       setLoading(false)
@@ -53,7 +56,13 @@ export default function AdminLayout({
     await signOut({ callbackUrl: "/login" })
   }
 
-  if (loading || status === "loading") {
+  // Check for authentication cookies
+  const hasGoogleAuth = typeof window !== 'undefined' && document.cookie.includes('google_access_token');
+  const hasDemoAuth = typeof window !== 'undefined' && document.cookie.includes('demo_auth=true');
+  const hasSessionToken = typeof window !== 'undefined' && document.cookie.includes('session_token');
+
+  // Show loading only if we're still checking and don't have any auth cookies
+  if (loading && !hasGoogleAuth && !hasDemoAuth && !hasSessionToken) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -64,11 +73,8 @@ export default function AdminLayout({
     )
   }
 
-  // Allow access if we have Google OAuth cookies, demo auth, or NextAuth session
-  const hasGoogleAuth = typeof window !== 'undefined' && document.cookie.includes('google_access_token');
-  const hasDemoAuth = typeof window !== 'undefined' && document.cookie.includes('demo_auth=true');
-  
-  if (!session && !hasGoogleAuth && !hasDemoAuth) {
+  // Allow access if we have any form of authentication
+  if (!session && !hasGoogleAuth && !hasDemoAuth && !hasSessionToken) {
     return null
   }
 
