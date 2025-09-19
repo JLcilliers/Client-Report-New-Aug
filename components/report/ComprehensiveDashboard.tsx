@@ -748,32 +748,32 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
             {renderMetricCard({
               title: 'Total Clicks',
               value: formatNumber(metrics?.searchConsole?.current?.clicks || 0),
-              change: comparisonData?.searchConsole?.clicks || 0,
-              changeType: comparisonData?.searchConsole?.clicks > 0 ? 'positive' : 'negative',
+              change: comparisonData?.searchConsole?.clicks?.changePercent || 0,
+              changeType: comparisonData?.searchConsole?.clicks?.changePercent > 0 ? 'positive' : comparisonData?.searchConsole?.clicks?.changePercent < 0 ? 'negative' : 'neutral',
               period: `vs ${comparisonPeriod} ago`,
               icon: <MousePointer className="w-4 h-4 text-blue-500" />
             })}
             {renderMetricCard({
               title: 'Impressions',
               value: formatNumber(metrics?.searchConsole?.current?.impressions || 0),
-              change: comparisonData?.searchConsole?.impressions || 0,
-              changeType: comparisonData?.searchConsole?.impressions > 0 ? 'positive' : 'negative',
+              change: comparisonData?.searchConsole?.impressions?.changePercent || 0,
+              changeType: comparisonData?.searchConsole?.impressions?.changePercent > 0 ? 'positive' : comparisonData?.searchConsole?.impressions?.changePercent < 0 ? 'negative' : 'neutral',
               period: `vs ${comparisonPeriod} ago`,
               icon: <Eye className="w-4 h-4 text-purple-500" />
             })}
             {renderMetricCard({
               title: 'Total Users',
               value: formatNumber(metrics?.analytics?.current?.users || 0),
-              change: comparisonData?.analytics?.users || 0,
-              changeType: comparisonData?.analytics?.users > 0 ? 'positive' : 'negative',
+              change: comparisonData?.analytics?.users?.changePercent || 0,
+              changeType: comparisonData?.analytics?.users?.changePercent > 0 ? 'positive' : comparisonData?.analytics?.users?.changePercent < 0 ? 'negative' : 'neutral',
               period: `vs ${comparisonPeriod} ago`,
               icon: <Users className="w-4 h-4 text-green-500" />
             })}
             {renderMetricCard({
               title: 'Conversions',
               value: formatNumber(metrics?.analytics?.current?.conversions || 0),
-              change: comparisonData?.analytics?.conversions || 0,
-              changeType: comparisonData?.analytics?.conversions > 0 ? 'positive' : 'negative',
+              change: comparisonData?.analytics?.conversions?.changePercent || 0,
+              changeType: comparisonData?.analytics?.conversions?.changePercent > 0 ? 'positive' : comparisonData?.analytics?.conversions?.changePercent < 0 ? 'negative' : 'neutral',
               period: `vs ${comparisonPeriod} ago`,
               icon: <Target className="w-4 h-4 text-orange-500" />
             })}
@@ -837,32 +837,32 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
             {renderMetricCard({
               title: 'Total Impressions',
               value: formatNumber(metrics?.searchConsole?.current?.impressions || 0),
-              change: comparisonData?.searchConsole?.impressions || 0,
-              changeType: comparisonData?.searchConsole?.impressions > 0 ? 'positive' : 'negative',
+              change: comparisonData?.searchConsole?.impressions?.changePercent || 0,
+              changeType: comparisonData?.searchConsole?.impressions?.changePercent > 0 ? 'positive' : comparisonData?.searchConsole?.impressions?.changePercent < 0 ? 'negative' : 'neutral',
               period: `vs ${comparisonPeriod} ago`,
               icon: <Eye className="w-4 h-4 text-purple-500" />
             })}
             {renderMetricCard({
               title: 'Total Clicks',
               value: formatNumber(metrics?.searchConsole?.current?.clicks || 0),
-              change: comparisonData?.searchConsole?.clicks || 0,
-              changeType: comparisonData?.searchConsole?.clicks > 0 ? 'positive' : 'negative',
+              change: comparisonData?.searchConsole?.clicks?.changePercent || 0,
+              changeType: comparisonData?.searchConsole?.clicks?.changePercent > 0 ? 'positive' : comparisonData?.searchConsole?.clicks?.changePercent < 0 ? 'negative' : 'neutral',
               period: `vs ${comparisonPeriod} ago`,
               icon: <MousePointer className="w-4 h-4 text-blue-500" />
             })}
             {renderMetricCard({
               title: 'Average CTR',
               value: formatPercentage(metrics?.searchConsole?.current?.ctr || 0),
-              change: comparisonData?.searchConsole?.ctr || 0,
-              changeType: comparisonData?.searchConsole?.ctr > 0 ? 'positive' : 'negative',
+              change: comparisonData?.searchConsole?.ctr?.changePercent || 0,
+              changeType: comparisonData?.searchConsole?.ctr?.changePercent > 0 ? 'positive' : comparisonData?.searchConsole?.ctr?.changePercent < 0 ? 'negative' : 'neutral',
               period: `vs ${comparisonPeriod} ago`,
               icon: <Activity className="w-4 h-4 text-green-500" />
             })}
             {renderMetricCard({
               title: 'Average Position',
               value: (metrics?.searchConsole?.current?.position || 0).toFixed(1),
-              change: comparisonData?.searchConsole?.position || 0,
-              changeType: comparisonData?.searchConsole?.position > 0 ? 'positive' : 'negative',
+              change: comparisonData?.searchConsole?.position?.changePercent || 0,
+              changeType: comparisonData?.searchConsole?.position?.changePercent < 0 ? 'positive' : comparisonData?.searchConsole?.position?.changePercent > 0 ? 'negative' : 'neutral',
               period: `vs ${comparisonPeriod} ago`,
               icon: <BarChart3 className="w-4 h-4 text-orange-500" />
             })}
@@ -917,16 +917,16 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
             {renderMetricCard({
               title: 'Sessions',
               value: formatNumber(metrics?.analytics?.current?.sessions || 0),
-              change: comparisonData?.analytics?.sessions || 0,
-              changeType: comparisonData?.analytics?.sessions > 0 ? 'positive' : 'negative',
+              change: comparisonData?.analytics?.sessions?.changePercent || 0,
+              changeType: comparisonData?.analytics?.sessions?.changePercent > 0 ? 'positive' : comparisonData?.analytics?.sessions?.changePercent < 0 ? 'negative' : 'neutral',
               period: `vs ${comparisonPeriod} ago`,
               icon: <Activity className="w-4 h-4 text-blue-500" />
             })}
             {renderMetricCard({
               title: 'Engaged Sessions',
               value: formatNumber(Math.round((metrics?.analytics?.current?.sessions || 0) * (metrics?.analytics?.current?.engagementRate || 0)) || 0),
-              change: comparisonData?.analytics?.engagementRate || 0,
-              changeType: comparisonData?.analytics?.engagementRate > 0 ? 'positive' : 'negative',
+              change: comparisonData?.analytics?.engagementRate?.changePercent || 0,
+              changeType: comparisonData?.analytics?.engagementRate?.changePercent > 0 ? 'positive' : comparisonData?.analytics?.engagementRate?.changePercent < 0 ? 'negative' : 'neutral',
               period: `vs ${comparisonPeriod} ago`,
               icon: <Target className="w-4 h-4 text-orange-500" />
             })}
@@ -979,16 +979,16 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
             {renderMetricCard({
               title: 'Engagement Rate',
               value: formatPercentage(metrics?.analytics?.current?.engagementRate || 0),
-              change: comparisonData?.analytics?.engagementRate || 0,
-              changeType: comparisonData?.analytics?.engagementRate > 0 ? 'positive' : 'negative',
+              change: comparisonData?.analytics?.engagementRate?.changePercent || 0,
+              changeType: comparisonData?.analytics?.engagementRate?.changePercent > 0 ? 'positive' : comparisonData?.analytics?.engagementRate?.changePercent < 0 ? 'negative' : 'neutral',
               period: `vs ${comparisonPeriod} ago`,
               icon: <Activity className="w-4 h-4 text-green-500" />
             })}
             {renderMetricCard({
               title: 'Bounce Rate',
               value: formatPercentage(metrics?.analytics?.current?.bounceRate || 0),
-              change: -comparisonData?.analytics?.bounceRate || 0,
-              changeType: comparisonData?.analytics?.bounceRate < 0 ? 'positive' : 'negative',
+              change: -comparisonData?.analytics?.bounceRate?.changePercent || 0,
+              changeType: comparisonData?.analytics?.bounceRate?.changePercent < 0 ? 'positive' : comparisonData?.analytics?.bounceRate?.changePercent > 0 ? 'negative' : 'neutral',
               period: `vs ${comparisonPeriod} ago`,
               icon: <TrendingDown className="w-4 h-4 text-red-500" />
             })}
