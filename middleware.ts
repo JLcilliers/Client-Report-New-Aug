@@ -59,10 +59,10 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    '/dashboard/:path*', 
+    '/dashboard/:path*',
     '/admin/:path*',
     '/reports/:path*',
     // Only protect specific routes, not the catch-all
-    // This allows root '/', '/login', '/legal/*', and other public routes to be accessible
+    // This allows root '/', '/login', '/auth/*', '/legal/*', and other public routes to be accessible
   ]
 };

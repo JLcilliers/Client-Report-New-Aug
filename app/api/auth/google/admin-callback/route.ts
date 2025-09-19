@@ -65,6 +65,16 @@ export async function GET(request: NextRequest) {
       console.error('[OAuth Callback] Token exchange failed!');
       console.error('  - Error:', tokenError.message);
       console.error('  - Stack:', tokenError.stack);
+
+      // Check for specific error types
+      if (tokenError.message?.includes('invalid_client')) {
+        console.error('  - This is an INVALID_CLIENT error!');
+        console.error('  - Check that GOOGLE_CLIENT_SECRET matches Google Cloud Console');
+        console.error('  - Client ID:', process.env.GOOGLE_CLIENT_ID);
+        const baseUrl = request.nextUrl.origin || process.env.NEXT_PUBLIC_URL || 'https://searchsignal.online'
+        return NextResponse.redirect(`${baseUrl}/login?error=invalid_client_credentials`)
+      }
+
       throw tokenError;
     }
     
@@ -187,7 +197,8 @@ export async function GET(request: NextRequest) {
     console.log('========== OAuth Callback END (SUCCESS) ==========\n');
     
     const baseUrl = request.nextUrl.origin || process.env.NEXT_PUBLIC_URL || 'https://searchsignal.online'
-    const redirectUrl = `${baseUrl}/admin/google-accounts?success=true`;
+    // Redirect to a page that can establish the session properly
+    const redirectUrl = `${baseUrl}/auth/success?email=${encodeURIComponent(userInfo.email)}`;
     console.log('[OAuth Callback] Redirecting to:', redirectUrl);
     
     // Create persistent session in database
@@ -272,6 +283,6 @@ export async function GET(request: NextRequest) {
     
     const errorMessage = error.message || 'callback_failed'
     const baseUrl = request.nextUrl.origin || process.env.NEXT_PUBLIC_URL || 'https://searchsignal.online'
-    return NextResponse.redirect(`${baseUrl}/admin?error=${encodeURIComponent(errorMessage)}`)
+    return NextResponse.redirect(`${baseUrl}/login?error=${encodeURIComponent(errorMessage)}`)
   }
 }

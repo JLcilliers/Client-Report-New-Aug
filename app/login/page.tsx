@@ -1,16 +1,38 @@
 "use client"
 
 import { useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useState } from "react"
 import { signIn } from "next-auth/react"
 import Link from "next/link"
 
 export default function LoginPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [loading, setLoading] = useState(false)
+  const error = searchParams.get('error')
+
+  const getErrorMessage = (error: string | null) => {
+    switch (error) {
+      case 'invalid_client_credentials':
+        return 'Invalid OAuth credentials. Please check Google Cloud Console configuration.'
+      case 'session_failed':
+        return 'Failed to establish session. Please try logging in again.'
+      case 'session_check_failed':
+        return 'Session verification failed. Please try logging in again.'
+      case 'auth_required':
+        return 'Authentication required. Please sign in to continue.'
+      case 'no_code':
+        return 'OAuth authorization failed. No authorization code received.'
+      default:
+        return error ? `Authentication error: ${error}` : null
+    }
+  }
+
+  const errorMessage = getErrorMessage(error)
 
   const handleGoogleLogin = () => {
     setLoading(true)
@@ -54,6 +76,11 @@ export default function LoginPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            {errorMessage && (
+              <Alert variant="destructive">
+                <AlertDescription>{errorMessage}</AlertDescription>
+              </Alert>
+            )}
             <div className="space-y-3">
               <Button 
                 onClick={handleGoogleLogin}
