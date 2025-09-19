@@ -4,12 +4,18 @@ import type { NextRequest } from 'next/server';
 import { withAuth } from 'next-auth/middleware';
 
 export async function middleware(req: NextRequest) {
-  // Skip middleware for public pages and API routes
-  const publicPaths = ['/', '/login', '/auth', '/api/auth', '/legal', '/report'];
   const pathname = req.nextUrl.pathname;
+
+  // Debug logging for production
+  console.log(`[Middleware] Path: ${pathname}`);
+  console.log(`[Middleware] Cookies: session=${req.cookies.has('session_token')}, google=${req.cookies.has('google_access_token')}, demo=${req.cookies.has('demo_auth')}`);
+
+  // Skip middleware for public pages and API routes
+  const publicPaths = ['/', '/login', '/auth', '/api', '/legal', '/report'];
 
   // Check if this is a public path
   if (publicPaths.some(path => pathname === path || pathname.startsWith(`${path}/`))) {
+    console.log(`[Middleware] Public path, allowing through`);
     return NextResponse.next();
   }
 
@@ -21,6 +27,7 @@ export async function middleware(req: NextRequest) {
   // Check for demo auth cookie first
   const demoAuth = req.cookies.get('demo_auth');
   if (demoAuth?.value === 'true') {
+    console.log(`[Middleware] Demo auth detected, allowing through`);
     return NextResponse.next();
   }
   
@@ -31,37 +38,36 @@ export async function middleware(req: NextRequest) {
   
   // Check session token first (preferred method)
   if (sessionToken?.value) {
-    try {
-      // For middleware, we'll do a lightweight check
-      // The full validation happens in the check-session endpoint
-      
-      // If we have a session token, allow access
-      // The check-session endpoint will handle expired sessions
-      return NextResponse.next();
-    } catch (error) {
-      console.error('Session token validation failed:', error);
-      // Fall through to other auth methods
-    }
+    console.log(`[Middleware] Session token found, allowing through`);
+    // If we have a session token, allow access
+    // The check-session endpoint will handle expired sessions
+    return NextResponse.next();
   }
   
   // Check for valid Google OAuth tokens
   if (googleAccessToken?.value) {
+    console.log(`[Middleware] Google access token found`);
     // Check if token is expired
     if (googleTokenExpiry?.value) {
       const expiryDate = new Date(googleTokenExpiry.value);
       const now = new Date();
-      
+
       // If token expires within 5 minutes, still allow (refresh will happen in check-session)
       if (expiryDate.getTime() - now.getTime() > -5 * 60 * 1000) {
+        console.log(`[Middleware] Token not expired, allowing through`);
         return NextResponse.next();
+      } else {
+        console.log(`[Middleware] Token expired`);
       }
     } else {
       // No expiry info, assume token is valid
+      console.log(`[Middleware] No expiry info, assuming valid, allowing through`);
       return NextResponse.next();
     }
   }
   
   // No valid authentication found, redirect to login
+  console.log(`[Middleware] No valid auth found, redirecting to login`);
   const baseUrl = req.nextUrl.origin || process.env.NEXT_PUBLIC_URL || 'https://searchsignal.online';
   return NextResponse.redirect(`${baseUrl}/login?auth=required`);
 }
