@@ -11,7 +11,8 @@ export async function middleware(req: NextRequest) {
   console.log(`[Middleware] Cookies: session=${req.cookies.has('session_token')}, google=${req.cookies.has('google_access_token')}, demo=${req.cookies.has('demo_auth')}`);
 
   // Skip middleware for public pages and API routes
-  const publicPaths = ['/', '/login', '/auth', '/api', '/legal', '/report'];
+  // TEMPORARILY adding /admin to test if middleware is the issue
+  const publicPaths = ['/', '/login', '/auth', '/api', '/legal', '/report', '/admin', '/dashboard'];
 
   // Check if this is a public path
   if (publicPaths.some(path => pathname === path || pathname.startsWith(`${path}/`))) {
