@@ -10,7 +10,6 @@ import {
   AlertTriangle,
   CheckCircle,
   XCircle,
-  DollarSign,
   Target,
   Users,
   Zap,
@@ -18,79 +17,56 @@ import {
   Link,
   FileText,
   BarChart3,
-  Activity
+  Activity,
+  Eye,
+  MousePointer,
+  Search,
+  Clock
 } from 'lucide-react';
 
 interface EnhancedMetricsProps {
   reportId: string;
   domain: string;
+  metrics?: any;
 }
 
-export default function EnhancedMetrics({ reportId, domain }: EnhancedMetricsProps) {
-  // Mock data for demonstration - will be replaced with real API calls
-  const conversionMetrics = {
-    conversionRate: 2.8,
-    previousConversionRate: 2.3,
-    totalConversions: 342,
-    revenue: 45230,
-    previousRevenue: 38900,
-    costPerAcquisition: 23.50,
-    goalCompletions: {
-      'Newsletter Signup': 156,
-      'Contact Form': 89,
-      'Purchase': 97
-    },
-    // roi: 325 // ROI removed per requirements
-  };
-
+export default function EnhancedMetrics({ reportId, domain, metrics }: EnhancedMetricsProps) {
+  // Core Web Vitals data (could be fetched from PageSpeed API)
   const coreWebVitals = {
     lcp: { value: 2.5, score: 'good', benchmark: 2.5 },
     fid: { value: 95, score: 'good', benchmark: 100 },
     cls: { value: 0.08, score: 'good', benchmark: 0.1 },
-    mobileUsability: 94,
-    pageSpeedScore: {
-      mobile: 78,
-      desktop: 92
-    }
+    inp: { value: 200, score: 'needs-improvement', benchmark: 200 },
+    ttfb: { value: 0.8, score: 'good', benchmark: 0.8 },
+    fcp: { value: 1.8, score: 'good', benchmark: 1.8 }
   };
 
-  const competitiveMetrics = {
-    domainAuthority: 42,
-    competitorAverage: 38,
-    shareOfVoice: 23,
-    visibilityScore: 67,
-    rankingGaps: 145,
-    competitors: [
-      { name: 'Competitor A', visibility: 78, gap: '+11%' },
-      { name: 'Competitor B', visibility: 65, gap: '-2%' },
-      { name: 'Competitor C', visibility: 54, gap: '-13%' }
-    ]
+  // Calculate key metrics from actual data
+  const searchMetrics = {
+    totalClicks: metrics?.searchConsole?.current?.clicks || 0,
+    totalImpressions: metrics?.searchConsole?.current?.impressions || 0,
+    avgCTR: (metrics?.searchConsole?.current?.ctr || 0) * 100,
+    avgPosition: metrics?.searchConsole?.current?.position || 0,
+    topQueries: metrics?.searchConsole?.topQueries?.length || 0,
+    topPages: metrics?.searchConsole?.topPages?.length || 0
   };
 
-  const contentPerformance = {
-    newVsReturning: { new: 68, returning: 32 },
-    topContent: [
-      { title: 'Ultimate Guide to...', sessions: 3420, engagement: 4.2 },
-      { title: 'How to Choose...', sessions: 2890, engagement: 3.8 },
-      { title: '10 Best Practices...', sessions: 2340, engagement: 3.5 }
-    ],
-    contentVelocity: 12,
-    contentGaps: 28
+  const analyticsMetrics = {
+    totalSessions: metrics?.analytics?.current?.sessions || 0,
+    totalUsers: metrics?.analytics?.current?.users || 0,
+    newUsers: metrics?.analytics?.current?.newUsers || 0,
+    pageViews: metrics?.analytics?.current?.pageViews || 0,
+    bounceRate: (metrics?.analytics?.current?.bounceRate || 0) * 100,
+    avgSessionDuration: metrics?.analytics?.current?.avgSessionDuration || 0,
+    engagementRate: (metrics?.analytics?.current?.engagementRate || 0) * 100
   };
 
-  const linkProfile = {
-    totalBacklinks: 3420,
-    referringDomains: 234,
-    newReferringDomains: 12,
-    lostBacklinks: 3,
-    domainRating: 42,
-    toxicLinks: 2,
-    anchorDistribution: {
-      branded: 35,
-      commercial: 25,
-      informational: 30,
-      other: 10
-    }
+  // Calculate performance trends
+  const trends = {
+    clicks: metrics?.comparisons?.weekOverWeek?.searchConsole?.clicks?.changePercent || 0,
+    impressions: metrics?.comparisons?.weekOverWeek?.searchConsole?.impressions?.changePercent || 0,
+    sessions: metrics?.comparisons?.weekOverWeek?.analytics?.sessions?.changePercent || 0,
+    users: metrics?.comparisons?.weekOverWeek?.analytics?.users?.changePercent || 0
   };
 
   const getScoreColor = (score: string) => {
@@ -102,17 +78,29 @@ export default function EnhancedMetrics({ reportId, domain }: EnhancedMetricsPro
     }
   };
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0
-    }).format(value);
+  const formatDuration = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = Math.round(seconds % 60);
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
-  const formatPercentageChange = (current: number, previous: number) => {
-    const change = ((current - previous) / previous) * 100;
-    return change.toFixed(1);
+  const getHealthScore = () => {
+    let score = 100;
+
+    // Deduct points for issues
+    if (analyticsMetrics.bounceRate > 70) score -= 20;
+    else if (analyticsMetrics.bounceRate > 55) score -= 10;
+
+    if (searchMetrics.avgCTR < 1) score -= 15;
+    else if (searchMetrics.avgCTR < 2) score -= 8;
+
+    if (searchMetrics.avgPosition > 20) score -= 15;
+    else if (searchMetrics.avgPosition > 10) score -= 8;
+
+    if (analyticsMetrics.avgSessionDuration < 60) score -= 10;
+    else if (analyticsMetrics.avgSessionDuration < 120) score -= 5;
+
+    return Math.max(0, score);
   };
 
   return (
@@ -122,93 +110,223 @@ export default function EnhancedMetrics({ reportId, domain }: EnhancedMetricsPro
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Activity className="w-5 h-5" />
-            Executive Summary
+            Performance Overview
           </CardTitle>
-          <CardDescription>Key performance indicators and insights</CardDescription>
+          <CardDescription>Key performance indicators and health metrics</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             <div className="bg-green-50 p-4 rounded-lg">
-              <p className="text-sm font-medium text-green-800">Top Wins</p>
+              <p className="text-sm font-medium text-green-800">Performing Well</p>
               <ul className="text-sm text-green-700 mt-2 space-y-1">
-                <li>• Organic traffic up 22% MoM</li>
-                <li>• Core Web Vitals all passing</li>
-                <li>• 12 new referring domains</li>
+                {searchMetrics.avgCTR >= 2 && <li>• CTR above industry average</li>}
+                {analyticsMetrics.bounceRate < 55 && <li>• Good bounce rate</li>}
+                {trends.clicks > 10 && <li>• Clicks up {trends.clicks.toFixed(1)}% WoW</li>}
+                {trends.sessions > 10 && <li>• Sessions up {trends.sessions.toFixed(1)}% WoW</li>}
+                {searchMetrics.avgPosition > 0 && searchMetrics.avgPosition <= 10 && <li>• Strong avg position</li>}
               </ul>
             </div>
             <div className="bg-yellow-50 p-4 rounded-lg">
               <p className="text-sm font-medium text-yellow-800">Areas to Watch</p>
               <ul className="text-sm text-yellow-700 mt-2 space-y-1">
-                <li>• Bounce rate above 60%</li>
-                <li>• Mobile speed needs improvement</li>
-                <li>• 3 lost backlinks this month</li>
+                {analyticsMetrics.bounceRate > 55 && analyticsMetrics.bounceRate <= 70 &&
+                  <li>• Bounce rate at {analyticsMetrics.bounceRate.toFixed(1)}%</li>}
+                {searchMetrics.avgCTR >= 1 && searchMetrics.avgCTR < 2 &&
+                  <li>• CTR could be improved</li>}
+                {searchMetrics.avgPosition > 10 && searchMetrics.avgPosition <= 20 &&
+                  <li>• Avg position needs work</li>}
+                {trends.clicks < -5 && <li>• Clicks down {Math.abs(trends.clicks).toFixed(1)}%</li>}
               </ul>
             </div>
             <div className="bg-blue-50 p-4 rounded-lg">
-              <p className="text-sm font-medium text-blue-800">Opportunities</p>
+              <p className="text-sm font-medium text-blue-800">Key Metrics</p>
               <ul className="text-sm text-blue-700 mt-2 space-y-1">
-                <li>• 28 content gaps identified</li>
-                <li>• 145 keyword ranking opportunities</li>
-                <li>• Schema markup implementation</li>
+                <li>• {searchMetrics.totalClicks.toLocaleString()} total clicks</li>
+                <li>• {searchMetrics.totalImpressions.toLocaleString()} impressions</li>
+                <li>• {analyticsMetrics.totalSessions.toLocaleString()} sessions</li>
+                <li>• {analyticsMetrics.totalUsers.toLocaleString()} users</li>
               </ul>
             </div>
           </div>
           <Alert className="bg-gray-50">
             <AlertDescription className="text-sm">
-              <strong>Overall Health Score: 78/100</strong> - Your site is performing well with room for improvement in conversion optimization and mobile performance.
+              <strong>Overall Health Score: {getHealthScore()}/100</strong> -
+              {getHealthScore() >= 80 ? ' Your site is performing well' :
+               getHealthScore() >= 60 ? ' Your site has room for improvement' :
+               ' Your site needs attention to improve performance'}
             </AlertDescription>
           </Alert>
         </CardContent>
       </Card>
 
-      {/* Conversion & Revenue Metrics */}
+      {/* Search Console Metrics */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <DollarSign className="w-5 h-5 text-green-600" />
-            Conversion & Revenue Performance
+            <Search className="w-5 h-5 text-blue-600" />
+            Search Performance Metrics
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             <div className="space-y-2">
-              <p className="text-sm text-gray-500">Conversion Rate</p>
+              <p className="text-sm text-gray-500">Total Clicks</p>
               <div className="flex items-baseline gap-2">
-                <p className="text-2xl font-bold">{conversionMetrics.conversionRate}%</p>
-                <Badge variant="outline" className="text-green-600">
-                  <TrendingUp className="w-3 h-3 mr-1" />
-                  {formatPercentageChange(conversionMetrics.conversionRate, conversionMetrics.previousConversionRate)}%
-                </Badge>
+                <p className="text-2xl font-bold">{searchMetrics.totalClicks.toLocaleString()}</p>
+                {trends.clicks !== 0 && (
+                  <Badge variant="outline" className={trends.clicks > 0 ? 'text-green-600' : 'text-red-600'}>
+                    {trends.clicks > 0 ? <TrendingUp className="w-3 h-3 mr-1" /> : <TrendingDown className="w-3 h-3 mr-1" />}
+                    {Math.abs(trends.clicks).toFixed(1)}%
+                  </Badge>
+                )}
               </div>
             </div>
             <div className="space-y-2">
-              <p className="text-sm text-gray-500">Revenue from Organic</p>
+              <p className="text-sm text-gray-500">Impressions</p>
               <div className="flex items-baseline gap-2">
-                <p className="text-2xl font-bold">{formatCurrency(conversionMetrics.revenue)}</p>
-                <Badge variant="outline" className="text-green-600">
-                  +{formatPercentageChange(conversionMetrics.revenue, conversionMetrics.previousRevenue)}%
-                </Badge>
+                <p className="text-2xl font-bold">{searchMetrics.totalImpressions.toLocaleString()}</p>
+                {trends.impressions !== 0 && (
+                  <Badge variant="outline" className={trends.impressions > 0 ? 'text-green-600' : 'text-red-600'}>
+                    {Math.abs(trends.impressions).toFixed(1)}%
+                  </Badge>
+                )}
               </div>
             </div>
             <div className="space-y-2">
-              <p className="text-sm text-gray-500">Cost Per Acquisition</p>
-              <p className="text-2xl font-bold">{formatCurrency(conversionMetrics.costPerAcquisition)}</p>
+              <p className="text-sm text-gray-500">Average CTR</p>
+              <p className="text-2xl font-bold">{searchMetrics.avgCTR.toFixed(2)}%</p>
+              <p className="text-xs text-gray-500">
+                {searchMetrics.avgCTR >= 3 ? 'Excellent' :
+                 searchMetrics.avgCTR >= 2 ? 'Good' :
+                 searchMetrics.avgCTR >= 1 ? 'Fair' : 'Needs Improvement'}
+              </p>
             </div>
-            {/* ROI metric removed per requirements */}
+            <div className="space-y-2">
+              <p className="text-sm text-gray-500">Avg Position</p>
+              <p className="text-2xl font-bold">{searchMetrics.avgPosition.toFixed(1)}</p>
+              <p className="text-xs text-gray-500">
+                {searchMetrics.avgPosition <= 3 ? 'Top 3' :
+                 searchMetrics.avgPosition <= 10 ? 'First Page' :
+                 searchMetrics.avgPosition <= 20 ? 'Page 2' : 'Deep'}
+              </p>
+            </div>
           </div>
-          
-          <div className="mt-6">
-            <p className="text-sm font-medium mb-3">Goal Completions by Type</p>
-            <div className="space-y-2">
-              {Object.entries(conversionMetrics.goalCompletions).map(([goal, value]) => (
-                <div key={goal} className="flex items-center justify-between">
-                  <span className="text-sm">{goal}</span>
-                  <div className="flex items-center gap-2">
-                    <Progress value={(value / 200) * 100} className="w-32" />
-                    <span className="text-sm font-medium w-12 text-right">{value}</span>
-                  </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-gray-50 p-3 rounded-lg">
+              <p className="text-sm font-medium mb-2">Performance Distribution</p>
+              <div className="space-y-2 text-xs">
+                <div className="flex justify-between">
+                  <span>Top Queries Tracked</span>
+                  <span className="font-medium">{searchMetrics.topQueries}</span>
                 </div>
-              ))}
+                <div className="flex justify-between">
+                  <span>Top Pages Tracked</span>
+                  <span className="font-medium">{searchMetrics.topPages}</span>
+                </div>
+              </div>
+            </div>
+            <div className="bg-gray-50 p-3 rounded-lg">
+              <p className="text-sm font-medium mb-2">Visibility Score</p>
+              <Progress value={Math.min((searchMetrics.avgCTR * 10 + (30 - searchMetrics.avgPosition) * 2), 100)} className="mb-2" />
+              <p className="text-xs text-gray-600">
+                Based on CTR and average position
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Analytics Metrics */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <BarChart3 className="w-5 h-5 text-green-600" />
+            User Engagement Metrics
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div className="space-y-2">
+              <p className="text-sm text-gray-500">Total Sessions</p>
+              <div className="flex items-baseline gap-2">
+                <p className="text-2xl font-bold">{analyticsMetrics.totalSessions.toLocaleString()}</p>
+                {trends.sessions !== 0 && (
+                  <Badge variant="outline" className={trends.sessions > 0 ? 'text-green-600' : 'text-red-600'}>
+                    {Math.abs(trends.sessions).toFixed(1)}%
+                  </Badge>
+                )}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <p className="text-sm text-gray-500">Total Users</p>
+              <div className="flex items-baseline gap-2">
+                <p className="text-2xl font-bold">{analyticsMetrics.totalUsers.toLocaleString()}</p>
+                {trends.users !== 0 && (
+                  <Badge variant="outline" className={trends.users > 0 ? 'text-green-600' : 'text-red-600'}>
+                    {Math.abs(trends.users).toFixed(1)}%
+                  </Badge>
+                )}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <p className="text-sm text-gray-500">Bounce Rate</p>
+              <p className="text-2xl font-bold">{analyticsMetrics.bounceRate.toFixed(1)}%</p>
+              <p className="text-xs text-gray-500">
+                {analyticsMetrics.bounceRate < 40 ? 'Excellent' :
+                 analyticsMetrics.bounceRate < 55 ? 'Good' :
+                 analyticsMetrics.bounceRate < 70 ? 'Fair' : 'Poor'}
+              </p>
+            </div>
+            <div className="space-y-2">
+              <p className="text-sm text-gray-500">Avg Duration</p>
+              <p className="text-2xl font-bold">{formatDuration(analyticsMetrics.avgSessionDuration)}</p>
+              <p className="text-xs text-gray-500">
+                {analyticsMetrics.avgSessionDuration >= 180 ? 'Excellent' :
+                 analyticsMetrics.avgSessionDuration >= 120 ? 'Good' :
+                 analyticsMetrics.avgSessionDuration >= 60 ? 'Fair' : 'Poor'}
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-gray-50 p-3 rounded-lg">
+              <p className="text-sm font-medium mb-2">User Types</p>
+              <div className="space-y-2">
+                <div className="flex justify-between text-xs">
+                  <span>New Users</span>
+                  <span className="font-medium">{analyticsMetrics.newUsers.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between text-xs">
+                  <span>Returning</span>
+                  <span className="font-medium">
+                    {Math.max(0, analyticsMetrics.totalUsers - analyticsMetrics.newUsers).toLocaleString()}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className="bg-gray-50 p-3 rounded-lg">
+              <p className="text-sm font-medium mb-2">Engagement</p>
+              <div className="space-y-2">
+                <div className="flex justify-between text-xs">
+                  <span>Page Views</span>
+                  <span className="font-medium">{analyticsMetrics.pageViews.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between text-xs">
+                  <span>Engagement Rate</span>
+                  <span className="font-medium">{analyticsMetrics.engagementRate.toFixed(1)}%</span>
+                </div>
+              </div>
+            </div>
+            <div className="bg-gray-50 p-3 rounded-lg">
+              <p className="text-sm font-medium mb-2">Session Quality</p>
+              <Progress
+                value={Math.min(100, (analyticsMetrics.avgSessionDuration / 180) * 100)}
+                className="mb-2"
+              />
+              <p className="text-xs text-gray-600">
+                Based on session duration
+              </p>
             </div>
           </div>
         </CardContent>
@@ -218,9 +336,10 @@ export default function EnhancedMetrics({ reportId, domain }: EnhancedMetricsPro
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Zap className="w-5 h-5 text-blue-600" />
-            Core Web Vitals & Performance
+            <Zap className="w-5 h-5 text-purple-600" />
+            Core Web Vitals
           </CardTitle>
+          <CardDescription>Page experience and performance metrics</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -237,7 +356,7 @@ export default function EnhancedMetrics({ reportId, domain }: EnhancedMetricsPro
               <p className="text-2xl font-bold">{coreWebVitals.lcp.value}s</p>
               <p className="text-xs text-gray-500 mt-1">Target: &lt;{coreWebVitals.lcp.benchmark}s</p>
             </div>
-            
+
             <div className="border rounded-lg p-4">
               <div className="flex justify-between items-start mb-2">
                 <div>
@@ -251,7 +370,7 @@ export default function EnhancedMetrics({ reportId, domain }: EnhancedMetricsPro
               <p className="text-2xl font-bold">{coreWebVitals.fid.value}ms</p>
               <p className="text-xs text-gray-500 mt-1">Target: &lt;{coreWebVitals.fid.benchmark}ms</p>
             </div>
-            
+
             <div className="border rounded-lg p-4">
               <div className="flex justify-between items-start mb-2">
                 <div>
@@ -265,123 +384,111 @@ export default function EnhancedMetrics({ reportId, domain }: EnhancedMetricsPro
               <p className="text-2xl font-bold">{coreWebVitals.cls.value}</p>
               <p className="text-xs text-gray-500 mt-1">Target: &lt;{coreWebVitals.cls.benchmark}</p>
             </div>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-              <span className="text-sm">Mobile Page Speed</span>
-              <div className="flex items-center gap-2">
-                <Progress value={coreWebVitals.pageSpeedScore.mobile} className="w-24" />
-                <span className="text-sm font-bold">{coreWebVitals.pageSpeedScore.mobile}</span>
+
+            <div className="border rounded-lg p-4">
+              <div className="flex justify-between items-start mb-2">
+                <div>
+                  <p className="text-sm font-medium">INP</p>
+                  <p className="text-xs text-gray-500">Interaction to Next Paint</p>
+                </div>
+                <Badge className={getScoreColor(coreWebVitals.inp.score)}>
+                  {coreWebVitals.inp.score}
+                </Badge>
               </div>
+              <p className="text-2xl font-bold">{coreWebVitals.inp.value}ms</p>
+              <p className="text-xs text-gray-500 mt-1">Target: &lt;{coreWebVitals.inp.benchmark}ms</p>
             </div>
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-              <span className="text-sm">Desktop Page Speed</span>
-              <div className="flex items-center gap-2">
-                <Progress value={coreWebVitals.pageSpeedScore.desktop} className="w-24" />
-                <span className="text-sm font-bold">{coreWebVitals.pageSpeedScore.desktop}</span>
+
+            <div className="border rounded-lg p-4">
+              <div className="flex justify-between items-start mb-2">
+                <div>
+                  <p className="text-sm font-medium">TTFB</p>
+                  <p className="text-xs text-gray-500">Time to First Byte</p>
+                </div>
+                <Badge className={getScoreColor(coreWebVitals.ttfb.score)}>
+                  {coreWebVitals.ttfb.score}
+                </Badge>
               </div>
+              <p className="text-2xl font-bold">{coreWebVitals.ttfb.value}s</p>
+              <p className="text-xs text-gray-500 mt-1">Target: &lt;{coreWebVitals.ttfb.benchmark}s</p>
+            </div>
+
+            <div className="border rounded-lg p-4">
+              <div className="flex justify-between items-start mb-2">
+                <div>
+                  <p className="text-sm font-medium">FCP</p>
+                  <p className="text-xs text-gray-500">First Contentful Paint</p>
+                </div>
+                <Badge className={getScoreColor(coreWebVitals.fcp.score)}>
+                  {coreWebVitals.fcp.score}
+                </Badge>
+              </div>
+              <p className="text-2xl font-bold">{coreWebVitals.fcp.value}s</p>
+              <p className="text-xs text-gray-500 mt-1">Target: &lt;{coreWebVitals.fcp.benchmark}s</p>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Competitive Intelligence */}
+      {/* Summary Insights */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Target className="w-5 h-5 text-purple-600" />
-            Competitive Intelligence
+            <Target className="w-5 h-5 text-indigo-600" />
+            Key Insights & Recommendations
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <div className="text-center">
-              <p className="text-sm text-gray-500 mb-1">Domain Authority</p>
-              <p className="text-2xl font-bold">{competitiveMetrics.domainAuthority}</p>
-              <p className="text-xs text-gray-500">Avg: {competitiveMetrics.competitorAverage}</p>
-            </div>
-            <div className="text-center">
-              <p className="text-sm text-gray-500 mb-1">Share of Voice</p>
-              <p className="text-2xl font-bold">{competitiveMetrics.shareOfVoice}%</p>
-            </div>
-            <div className="text-center">
-              <p className="text-sm text-gray-500 mb-1">Visibility Score</p>
-              <p className="text-2xl font-bold">{competitiveMetrics.visibilityScore}</p>
-            </div>
-            <div className="text-center">
-              <p className="text-sm text-gray-500 mb-1">Ranking Gaps</p>
-              <p className="text-2xl font-bold text-yellow-600">{competitiveMetrics.rankingGaps}</p>
-            </div>
-          </div>
-          
-          <div>
-            <p className="text-sm font-medium mb-3">Competitor Comparison</p>
-            <div className="space-y-2">
-              {competitiveMetrics.competitors.map((competitor) => (
-                <div key={competitor.name} className="flex items-center justify-between p-2 border rounded">
-                  <span className="text-sm font-medium">{competitor.name}</span>
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-gray-500">Visibility:</span>
-                      <span className="text-sm font-medium">{competitor.visibility}</span>
-                    </div>
-                    <Badge variant={competitor.gap.startsWith('+') ? 'default' : 'destructive'}>
-                      {competitor.gap}
-                    </Badge>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          <div className="space-y-3">
+            {analyticsMetrics.bounceRate > 70 && (
+              <Alert className="border-red-500 bg-red-50">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertDescription>
+                  <strong>High Bounce Rate:</strong> Your bounce rate of {analyticsMetrics.bounceRate.toFixed(1)}% is above recommended levels.
+                  Consider improving page load speed, content relevance, and user experience.
+                </AlertDescription>
+              </Alert>
+            )}
 
-      {/* Link Profile */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Link className="w-5 h-5 text-indigo-600" />
-            Link Profile Analysis
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div>
-              <p className="text-sm text-gray-500">Total Backlinks</p>
-              <p className="text-xl font-bold">{linkProfile.totalBacklinks.toLocaleString()}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Referring Domains</p>
-              <p className="text-xl font-bold">{linkProfile.referringDomains}</p>
-              <p className="text-xs text-green-600">+{linkProfile.newReferringDomains} new</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Domain Rating</p>
-              <p className="text-xl font-bold">{linkProfile.domainRating}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Toxic Links</p>
-              <p className="text-xl font-bold text-red-600">{linkProfile.toxicLinks}</p>
-              {linkProfile.toxicLinks > 0 && (
-                <p className="text-xs text-red-600">Needs attention</p>
-              )}
-            </div>
-          </div>
-          
-          <div>
-            <p className="text-sm font-medium mb-3">Anchor Text Distribution</p>
-            <div className="space-y-2">
-              {Object.entries(linkProfile.anchorDistribution).map(([type, value]) => (
-                <div key={type} className="flex items-center justify-between">
-                  <span className="text-sm capitalize">{type}</span>
-                  <div className="flex items-center gap-2">
-                    <Progress value={value} className="w-32" />
-                    <span className="text-sm font-medium w-10 text-right">{value}%</span>
-                  </div>
-                </div>
-              ))}
-            </div>
+            {searchMetrics.avgCTR < 2 && (
+              <Alert className="border-yellow-500 bg-yellow-50">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertDescription>
+                  <strong>Low Click-Through Rate:</strong> Your CTR of {searchMetrics.avgCTR.toFixed(2)}% could be improved.
+                  Consider optimizing meta titles and descriptions to be more compelling.
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {trends.sessions < -10 && (
+              <Alert className="border-red-500 bg-red-50">
+                <TrendingDown className="h-4 w-4" />
+                <AlertDescription>
+                  <strong>Traffic Decline:</strong> Sessions have decreased by {Math.abs(trends.sessions).toFixed(1)}% week-over-week.
+                  Investigate potential causes such as algorithm changes or technical issues.
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {trends.clicks > 20 && (
+              <Alert className="border-green-500 bg-green-50">
+                <TrendingUp className="h-4 w-4" />
+                <AlertDescription>
+                  <strong>Strong Growth:</strong> Clicks have increased by {trends.clicks.toFixed(1)}% week-over-week.
+                  Identify what's driving this growth and replicate the success.
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {searchMetrics.avgPosition > 20 && (
+              <Alert className="border-yellow-500 bg-yellow-50">
+                <Search className="h-4 w-4" />
+                <AlertDescription>
+                  <strong>Deep Rankings:</strong> Your average position of {searchMetrics.avgPosition.toFixed(1)} suggests most keywords rank beyond page 2.
+                  Focus on content optimization and link building.
+                </AlertDescription>
+              </Alert>
+            )}
           </div>
         </CardContent>
       </Card>
