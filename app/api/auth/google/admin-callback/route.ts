@@ -224,51 +224,61 @@ export async function GET(request: NextRequest) {
     const response = NextResponse.redirect(redirectUrl)
     
     // Set persistent cookies with extended expiration
+    // Force secure: true in production even if NODE_ENV isn't set properly
+    const isProduction = process.env.VERCEL_ENV === 'production' ||
+                        process.env.NODE_ENV === 'production' ||
+                        !request.nextUrl.hostname.includes('localhost');
+
     response.cookies.set('google_access_token', tokens.access_token!, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: isProduction,
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 30, // 30 days
-      path: '/'
+      path: '/',
+      domain: isProduction ? '.searchsignal.online' : undefined
     })
-    
+
     if (tokens.refresh_token) {
       response.cookies.set('google_refresh_token', tokens.refresh_token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
+        secure: isProduction,
         sameSite: 'lax',
         maxAge: 60 * 60 * 24 * 90, // 90 days for refresh token
-        path: '/'
+        path: '/',
+        domain: isProduction ? '.searchsignal.online' : undefined
       })
     }
-    
+
     // Set session token cookie
     response.cookies.set('session_token', sessionToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: isProduction,
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 30, // 30 days
-      path: '/'
+      path: '/',
+      domain: isProduction ? '.searchsignal.online' : undefined
     })
-    
+
     // Set token expiry cookie for client-side validation
     if (tokens.expiry_date) {
       response.cookies.set('google_token_expiry', new Date(tokens.expiry_date).toISOString(), {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
+        secure: isProduction,
         sameSite: 'lax',
         maxAge: 60 * 60 * 24 * 30, // 30 days
-        path: '/'
+        path: '/',
+        domain: isProduction ? '.searchsignal.online' : undefined
       })
     }
-    
+
     // Also set a user cookie for the middleware
     response.cookies.set('google_user_email', userInfo.email, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: isProduction,
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 30, // 30 days
-      path: '/'
+      path: '/',
+      domain: isProduction ? '.searchsignal.online' : undefined
     })
     
     return response

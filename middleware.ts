@@ -4,11 +4,16 @@ import type { NextRequest } from 'next/server';
 import { withAuth } from 'next-auth/middleware';
 
 export async function middleware(req: NextRequest) {
+  // Allow auth success page to always pass through
+  if (req.nextUrl.pathname.startsWith('/auth/')) {
+    return NextResponse.next();
+  }
+
   // In development, bypass auth completely
   if (process.env.NODE_ENV === 'development') {
     return NextResponse.next();
   }
-  
+
   // Check for demo auth cookie first
   const demoAuth = req.cookies.get('demo_auth');
   if (demoAuth?.value === 'true') {

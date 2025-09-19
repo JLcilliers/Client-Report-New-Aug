@@ -40,22 +40,26 @@ export default function LoginPage() {
     window.location.href = '/api/auth/google/add-account'
   }
 
-  const handleSimpleAdminLogin = () => {
+  const handleSimpleAdminLogin = async () => {
     setLoading(true)
-    // Use simple admin authentication for testing
-    fetch("/api/auth/simple-admin", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ adminKey: "admin123" })
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          router.push("/admin")
-        }
+    try {
+      const response = await fetch("/api/auth/demo-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
       })
-      .catch(err => console.error("Login error:", err))
-      .finally(() => setLoading(false))
+      const data = await response.json()
+
+      if (data.success) {
+        // Use window.location for hard redirect to ensure cookies are set
+        window.location.href = data.redirectUrl || "/admin"
+      } else {
+        console.error("Demo login failed:", data.error)
+      }
+    } catch (err) {
+      console.error("Login error:", err)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
