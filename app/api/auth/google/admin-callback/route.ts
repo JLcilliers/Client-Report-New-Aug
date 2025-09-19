@@ -223,22 +223,20 @@ export async function GET(request: NextRequest) {
     // Create response with redirect
     const response = NextResponse.redirect(redirectUrl)
     
-    // Set persistent cookies with extended expiration
-    const isProduction = isProductionEnvironment(request);
-
+    // Set persistent cookies with production-safe settings
+    // Simplified cookie setting to avoid production issues
     response.cookies.set('google_access_token', tokens.access_token!, {
       httpOnly: true,
-      secure: isProduction,
+      secure: true, // Always use secure in production
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 30, // 30 days
-      path: '/',
-      // Don't set domain - let browser handle it for better compatibility
+      path: '/'
     })
 
     if (tokens.refresh_token) {
       response.cookies.set('google_refresh_token', tokens.refresh_token, {
         httpOnly: true,
-        secure: isProduction,
+        secure: true, // Always secure in production
         sameSite: 'lax',
         maxAge: 60 * 60 * 24 * 90, // 90 days for refresh token
         path: '/',
@@ -249,7 +247,7 @@ export async function GET(request: NextRequest) {
     // Set session token cookie
     response.cookies.set('session_token', sessionToken, {
       httpOnly: true,
-      secure: isProduction,
+      secure: true, // Always secure in production
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 30, // 30 days
       path: '/',
@@ -260,7 +258,7 @@ export async function GET(request: NextRequest) {
     if (tokens.expiry_date) {
       response.cookies.set('google_token_expiry', new Date(tokens.expiry_date).toISOString(), {
         httpOnly: true,
-        secure: isProduction,
+        secure: true, // Always secure in production
         sameSite: 'lax',
         maxAge: 60 * 60 * 24 * 30, // 30 days
         path: '/',
@@ -271,7 +269,7 @@ export async function GET(request: NextRequest) {
     // Also set a user cookie for the middleware
     response.cookies.set('google_user_email', userInfo.email, {
       httpOnly: true,
-      secure: isProduction,
+      secure: true, // Always secure in production
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 30, // 30 days
       path: '/',

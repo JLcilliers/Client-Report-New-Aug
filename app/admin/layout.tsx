@@ -2,13 +2,12 @@
 
 import { useEffect, useState } from "react"
 import { useRouter, usePathname } from "next/navigation"
-import { useSession, signOut } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { 
-  LayoutDashboard, 
-  Users, 
-  Settings, 
+import {
+  LayoutDashboard,
+  Users,
+  Settings,
   LogOut,
   FileText,
   BarChart3,
@@ -24,45 +23,60 @@ export default function AdminLayout({
 }) {
   const router = useRouter()
   const pathname = usePathname()
-  const { data: session, status } = useSession()
   const [loading, setLoading] = useState(true)
+  const [userEmail, setUserEmail] = useState<string>("")
 
   useEffect(() => {
-    // Check for our Google OAuth cookies or demo auth first
-    const hasGoogleAuth = document.cookie.includes('google_access_token');
-    const hasDemoAuth = document.cookie.includes('demo_auth=true');
-    const hasSessionToken = document.cookie.includes('session_token');
-    const isDevelopment = process.env.NEXT_PUBLIC_DEV_MODE === 'true' || window.location.hostname === 'localhost';
+    // Custom auth check - no NextAuth dependency
+    const checkAuth = async () => {
+      try {
+        // Check session via our custom endpoint
+        const response = await fetch('/api/auth/check-session')
+        const data = await response.json()
 
-    // If we have valid cookie-based auth, allow access regardless of NextAuth status
-    if (hasGoogleAuth || hasDemoAuth || hasSessionToken) {
-      setLoading(false);
-      return;
+        if (data.authenticated) {
+          setUserEmail(data.email || "Admin")
+          setLoading(false)
+        } else {
+          // No valid session, redirect to login
+          router.push("/login?auth=required")
+        }
+      } catch (error) {
+        console.error('Auth check failed:', error)
+        // Check cookies as fallback
+        const hasAuth = document.cookie.includes('session_token') ||
+                       document.cookie.includes('google_access_token') ||
+                       document.cookie.includes('demo_auth=true')
+
+        if (hasAuth) {
+          // Extract email from cookie if available
+          const emailMatch = document.cookie.match(/google_user_email=([^;]+)/)
+          if (emailMatch) {
+            setUserEmail(decodeURIComponent(emailMatch[1]))
+          } else {
+            setUserEmail("Admin")
+          }
+          setLoading(false)
+        } else {
+          router.push("/login?auth=required")
+        }
+      }
     }
 
-    // Only check NextAuth if no cookie-based auth is present
-    if (status === "loading") {
-      // Wait for NextAuth to finish loading
-      return;
-    } else if (status === "unauthenticated" && !hasGoogleAuth && !hasDemoAuth && !hasSessionToken) {
-      // Only redirect if we truly have no auth
-      router.push("/login?auth=required")
-    } else {
-      setLoading(false)
-    }
-  }, [status, router])
+    checkAuth()
+  }, [router])
 
   const handleSignOut = async () => {
-    await signOut({ callbackUrl: "/login" })
+    // Clear all auth cookies
+    document.cookie.split(";").forEach((c) => {
+      document.cookie = c
+        .replace(/^ +/, "")
+        .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/")
+    })
+    router.push("/login")
   }
 
-  // Check for authentication cookies
-  const hasGoogleAuth = typeof window !== 'undefined' && document.cookie.includes('google_access_token');
-  const hasDemoAuth = typeof window !== 'undefined' && document.cookie.includes('demo_auth=true');
-  const hasSessionToken = typeof window !== 'undefined' && document.cookie.includes('session_token');
-
-  // Show loading only if we're still checking and don't have any auth cookies
-  if (loading && !hasGoogleAuth && !hasDemoAuth && !hasSessionToken) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -71,11 +85,6 @@ export default function AdminLayout({
         </div>
       </div>
     )
-  }
-
-  // Allow access if we have any form of authentication
-  if (!session && !hasGoogleAuth && !hasDemoAuth && !hasSessionToken) {
-    return null
   }
 
   const navigation = [
@@ -95,20 +104,17 @@ export default function AdminLayout({
             <div className="p-4 border-b">
               <h2 className="text-xl font-bold text-gray-800">SEO Platform</h2>
               <p className="text-sm text-gray-600 mt-1">
-                {session?.user?.email || 
-                 (typeof window !== 'undefined' && document.cookie.match(/google_user_email=([^;]+)/)?.[1] ? 
-                  decodeURIComponent(document.cookie.match(/google_user_email=([^;]+)/)?.[1] || '') : 
-                  (hasDemoAuth ? 'Demo Mode' : 'Admin'))}
+                {userEmail}
               </p>
             </div>
-            
+
             <nav className="flex-1 p-4">
               <ul className="space-y-2">
                 {navigation.map((item) => {
                   const Icon = item.icon
-                  const isActive = pathname === item.href || 
+                  const isActive = pathname === item.href ||
                     (item.href !== "/admin" && pathname.startsWith(item.href))
-                  
+
                   return (
                     <li key={item.name}>
                       <Link
@@ -128,7 +134,7 @@ export default function AdminLayout({
                 })}
               </ul>
             </nav>
-            
+
             <div className="p-4 border-t">
               <Button
                 variant="outline"
