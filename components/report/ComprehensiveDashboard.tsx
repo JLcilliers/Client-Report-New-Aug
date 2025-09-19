@@ -702,39 +702,10 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
 
   // Helper functions for Search Performance analytics
   const calculatePerformanceChanges = (queries: SearchQuery[], type: 'improvements' | 'declines'): PerformanceChange[] => {
-    if (!queries || queries.length === 0) return [];
-
-    const changes: PerformanceChange[] = [];
-
-    queries.forEach((query) => {
-      // In a real implementation, this would compare against historical data
-      // For now, we simulate based on current performance patterns
-      const baseChange = type === 'improvements'
-        ? Math.random() * 100 + 10  // Positive changes 10-110%
-        : -(Math.random() * 60 + 10); // Negative changes -10% to -70%
-
-      // Weight changes based on current performance
-      const performanceWeight = query.clicks > 100 ? 1.2 :
-                               query.clicks > 50 ? 1.0 : 0.8;
-      const change = baseChange * performanceWeight;
-
-      if ((type === 'improvements' && change > 15) ||
-          (type === 'declines' && change < -15)) {
-        changes.push({
-          type: 'query',
-          name: query.query,
-          metric: 'clicks',
-          current: query.clicks,
-          change,
-          ctr: query.ctr,
-          position: query.position
-        });
-      }
-    });
-
-    return changes.sort((a, b) =>
-      type === 'improvements' ? b.change - a.change : a.change - b.change
-    ).slice(0, 10);
+    // Return empty array when no data available
+    // In a production environment, this would compare against historical data
+    // Currently returning empty to avoid showing misleading mock data
+    return [];
   };
 
   const findQueryOpportunities = (queries: SearchQuery[]): QueryOpportunity[] => {
@@ -882,25 +853,9 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
   };
 
   const detectCannibalization = (): CannibalizationIssue[] => {
-    // In a real implementation, this would analyze actual data
-    // For demo purposes, we return simulated cannibalization issues
-    return [
-      {
-        keyword: 'best digital marketing tools',
-        pages: [
-          { url: '/blog/digital-marketing-tools', position: 8.2, clicks: 45 },
-          { url: '/tools/marketing-software', position: 12.1, clicks: 32 }
-        ]
-      },
-      {
-        keyword: 'seo optimization guide',
-        pages: [
-          { url: '/seo-guide', position: 5.8, clicks: 78 },
-          { url: '/blog/seo-tips', position: 9.4, clicks: 41 },
-          { url: '/services/seo', position: 15.2, clicks: 23 }
-        ]
-      }
-    ];
+    // Return empty array - requires actual keyword/page analysis
+    // In production, this would analyze queries to find multiple pages ranking for same keywords
+    return [];
   };
 
   const getComparisonData = () => {
@@ -1221,6 +1176,16 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
                       'improvements'
                     );
 
+                    if (improvements.length === 0) {
+                      return (
+                        <div className="text-center py-4 text-gray-500">
+                          <TrendingUp className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                          <p className="text-sm">No historical data available</p>
+                          <p className="text-xs">Performance changes require comparison with previous periods</p>
+                        </div>
+                      );
+                    }
+
                     return improvements.map((item, idx) => (
                       <div key={idx} className="flex items-center justify-between py-2 border-b border-gray-100">
                         <div className="flex-1">
@@ -1245,13 +1210,6 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
                       </div>
                     ));
                   })()}
-                  {!metrics?.searchConsole?.topQueries?.length && (
-                    <div className="text-center py-4 text-gray-500">
-                      <TrendingUp className="w-8 h-8 mx-auto mb-2 text-gray-300" />
-                      <p className="text-sm">No improvement data available</p>
-                      <p className="text-xs">Data will appear after multiple reports</p>
-                    </div>
-                  )}
                 </div>
               </CardContent>
             </Card>
@@ -1272,6 +1230,16 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
                       metrics?.searchConsole?.topQueries || [],
                       'declines'
                     );
+
+                    if (declines.length === 0) {
+                      return (
+                        <div className="text-center py-4 text-gray-500">
+                          <TrendingDown className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                          <p className="text-sm">No historical data available</p>
+                          <p className="text-xs">Performance changes require comparison with previous periods</p>
+                        </div>
+                      );
+                    }
 
                     return declines.map((item, idx) => (
                       <div key={idx} className="flex items-center justify-between py-2 border-b border-gray-100">
@@ -1297,13 +1265,6 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
                       </div>
                     ));
                   })()}
-                  {!metrics?.searchConsole?.topQueries?.length && (
-                    <div className="text-center py-4 text-gray-500">
-                      <TrendingDown className="w-8 h-8 mx-auto mb-2 text-gray-300" />
-                      <p className="text-sm">No decline data available</p>
-                      <p className="text-xs">Data will appear after multiple reports</p>
-                    </div>
-                  )}
                 </div>
               </CardContent>
             </Card>
@@ -1534,6 +1495,16 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
                     }
 
                     const cannibalizationIssues = detectCannibalization();
+
+                    if (cannibalizationIssues.length === 0) {
+                      return (
+                        <div className="text-center py-6 text-gray-500">
+                          <AlertCircle className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                          <p className="text-sm">No cannibalization detected</p>
+                          <p className="text-xs">Multi-page keyword analysis requires historical data</p>
+                        </div>
+                      );
+                    }
 
                     return cannibalizationIssues.map((issue, idx) => (
                       <div key={idx} className="p-3 border border-yellow-200 rounded-lg bg-yellow-50/30">

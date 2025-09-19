@@ -64,23 +64,17 @@ export default function DataVisualizations({ searchData, analyticsData, competit
       }))
     : [];
 
-  // Mock competitor data for demonstration
-  const competitorComparisonData = [
-    { metric: 'Visibility', yourSite: 67, competitor1: 78, competitor2: 65, industry: 70 },
-    { metric: 'Domain Authority', yourSite: 42, competitor1: 48, competitor2: 38, industry: 45 },
-    { metric: 'Backlinks', yourSite: 65, competitor1: 82, competitor2: 55, industry: 60 },
-    { metric: 'Content Quality', yourSite: 75, competitor1: 70, competitor2: 68, industry: 72 },
-    { metric: 'Site Speed', yourSite: 78, competitor1: 65, competitor2: 72, industry: 70 },
-    { metric: 'Mobile Score', yourSite: 82, competitor1: 75, competitor2: 80, industry: 78 }
-  ];
+  // Competitor comparison data - empty until actual competitor data is available
+  const competitorComparisonData: any[] = [];
+  // In production, this would fetch real competitor metrics from an API
 
-  // Engagement metrics over time
-  const engagementTrendData = [
-    { date: 'Week 1', bounceRate: 62, avgDuration: 145, pagesPerSession: 2.3 },
-    { date: 'Week 2', bounceRate: 58, avgDuration: 156, pagesPerSession: 2.5 },
-    { date: 'Week 3', bounceRate: 55, avgDuration: 162, pagesPerSession: 2.7 },
-    { date: 'Week 4', bounceRate: 53, avgDuration: 168, pagesPerSession: 2.8 }
-  ];
+  // Engagement metrics over time - using real analytics data if available
+  const engagementTrendData = analyticsData?.performanceData?.map((item: any, index: number) => ({
+    date: item.date || `Day ${index + 1}`,
+    bounceRate: item.bounceRate || 0,
+    avgDuration: item.avgSessionDuration || 0,
+    pagesPerSession: item.pagesPerSession || 0
+  })) || [];
 
   // Colors for charts
   const COLORS = {
@@ -497,40 +491,48 @@ export default function DataVisualizations({ searchData, analyticsData, competit
           <CardDescription>How you stack up against competitors across key metrics</CardDescription>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={400}>
-            <RadarChart data={competitorComparisonData}>
-              <PolarGrid stroke="#e0e0e0" />
-              <PolarAngleAxis dataKey="metric" tick={{ fontSize: 12 }} />
-              <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fontSize: 10 }} />
-              <Radar
-                name="Your Site"
-                dataKey="yourSite"
-                stroke={COLORS.primary}
-                fill={COLORS.primary}
-                fillOpacity={0.6}
-                strokeWidth={2}
-              />
-              <Radar
-                name="Competitor 1"
-                dataKey="competitor1"
-                stroke={COLORS.secondary}
-                fill={COLORS.secondary}
-                fillOpacity={0.3}
-                strokeWidth={2}
-              />
-              <Radar
-                name="Industry Avg"
-                dataKey="industry"
-                stroke={COLORS.tertiary}
-                fill={COLORS.tertiary}
-                fillOpacity={0.2}
-                strokeWidth={2}
-                strokeDasharray="5 5"
-              />
-              <Legend />
-              <Tooltip />
-            </RadarChart>
-          </ResponsiveContainer>
+          {competitorComparisonData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={400}>
+              <RadarChart data={competitorComparisonData}>
+                <PolarGrid stroke="#e0e0e0" />
+                <PolarAngleAxis dataKey="metric" tick={{ fontSize: 12 }} />
+                <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fontSize: 10 }} />
+                <Radar
+                  name="Your Site"
+                  dataKey="yourSite"
+                  stroke={COLORS.primary}
+                  fill={COLORS.primary}
+                  fillOpacity={0.6}
+                  strokeWidth={2}
+                />
+                <Radar
+                  name="Competitor 1"
+                  dataKey="competitor1"
+                  stroke={COLORS.secondary}
+                  fill={COLORS.secondary}
+                  fillOpacity={0.3}
+                  strokeWidth={2}
+                />
+                <Radar
+                  name="Industry Avg"
+                  dataKey="industry"
+                  stroke={COLORS.tertiary}
+                  fill={COLORS.tertiary}
+                  fillOpacity={0.2}
+                  strokeWidth={2}
+                  strokeDasharray="5 5"
+                />
+                <Legend />
+                <Tooltip />
+              </RadarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="flex flex-col items-center justify-center h-[400px] text-gray-500">
+              <Activity className="w-12 h-12 mb-3 text-gray-300" />
+              <p className="text-sm font-medium">No competitor data available</p>
+              <p className="text-xs text-gray-400 mt-1">Competitor analysis requires external data sources</p>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -544,43 +546,51 @@ export default function DataVisualizations({ searchData, analyticsData, competit
           <CardDescription>User engagement patterns over time</CardDescription>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={engagementTrendData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis dataKey="date" tick={{ fontSize: 12 }} />
-              <YAxis yAxisId="left" tick={{ fontSize: 12 }} />
-              <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 12 }} />
-              <Tooltip content={<CustomTooltip />} />
-              <Legend />
-              <Line
-                yAxisId="left"
-                type="monotone"
-                dataKey="bounceRate"
-                stroke={COLORS.quaternary}
-                strokeWidth={2}
-                dot={{ fill: COLORS.quaternary }}
-                name="Bounce Rate %"
-              />
-              <Line
-                yAxisId="right"
-                type="monotone"
-                dataKey="avgDuration"
-                stroke={COLORS.secondary}
-                strokeWidth={2}
-                dot={{ fill: COLORS.secondary }}
-                name="Avg Duration (s)"
-              />
-              <Line
-                yAxisId="left"
-                type="monotone"
-                dataKey="pagesPerSession"
-                stroke={COLORS.purple}
-                strokeWidth={2}
-                dot={{ fill: COLORS.purple }}
-                name="Pages/Session"
-              />
-            </LineChart>
-          </ResponsiveContainer>
+          {engagementTrendData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={engagementTrendData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+                <YAxis yAxisId="left" tick={{ fontSize: 12 }} />
+                <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 12 }} />
+                <Tooltip content={<CustomTooltip />} />
+                <Legend />
+                <Line
+                  yAxisId="left"
+                  type="monotone"
+                  dataKey="bounceRate"
+                  stroke={COLORS.quaternary}
+                  strokeWidth={2}
+                  dot={{ fill: COLORS.quaternary }}
+                  name="Bounce Rate %"
+                />
+                <Line
+                  yAxisId="right"
+                  type="monotone"
+                  dataKey="avgDuration"
+                  stroke={COLORS.secondary}
+                  strokeWidth={2}
+                  dot={{ fill: COLORS.secondary }}
+                  name="Avg Duration (s)"
+                />
+                <Line
+                  yAxisId="left"
+                  type="monotone"
+                  dataKey="pagesPerSession"
+                  stroke={COLORS.purple}
+                  strokeWidth={2}
+                  dot={{ fill: COLORS.purple }}
+                  name="Pages/Session"
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="flex flex-col items-center justify-center h-[300px] text-gray-500">
+              <TrendingUp className="w-12 h-12 mb-3 text-gray-300" />
+              <p className="text-sm font-medium">No engagement data available</p>
+              <p className="text-xs text-gray-400 mt-1">Engagement trends will appear after collecting analytics data</p>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -589,45 +599,65 @@ export default function DataVisualizations({ searchData, analyticsData, competit
         <Card className="p-4">
           <div className="space-y-2">
             <p className="text-sm text-gray-500">Organic Traffic Trend</p>
-            <p className="text-2xl font-bold">+22%</p>
-            <Sparkline 
-              data={searchTrendData.slice(-7)} 
-              dataKey="clicks" 
-              color={COLORS.primary} 
-            />
+            <p className="text-2xl font-bold">
+              {searchData?.summary?.totalClicks?.toLocaleString() || 'N/A'}
+            </p>
+            {searchTrendData.length > 0 && (
+              <Sparkline
+                data={searchTrendData.slice(-7)}
+                dataKey="clicks"
+                color={COLORS.primary}
+              />
+            )}
           </div>
         </Card>
         <Card className="p-4">
           <div className="space-y-2">
             <p className="text-sm text-gray-500">CTR Trend</p>
-            <p className="text-2xl font-bold">2.8%</p>
-            <Sparkline 
-              data={searchTrendData.slice(-7)} 
-              dataKey="ctr" 
-              color={COLORS.secondary} 
-            />
+            <p className="text-2xl font-bold">
+              {searchData?.summary?.avgCTR ? `${(searchData.summary.avgCTR * 100).toFixed(1)}%` : 'N/A'}
+            </p>
+            {searchTrendData.length > 0 && (
+              <Sparkline
+                data={searchTrendData.slice(-7)}
+                dataKey="ctr"
+                color={COLORS.secondary}
+              />
+            )}
           </div>
         </Card>
         <Card className="p-4">
           <div className="space-y-2">
             <p className="text-sm text-gray-500">Avg Position</p>
-            <p className="text-2xl font-bold">24.5</p>
-            <Sparkline 
-              data={searchTrendData.slice(-7)} 
-              dataKey="position" 
-              color={COLORS.tertiary} 
-            />
+            <p className="text-2xl font-bold">
+              {searchData?.summary?.avgPosition ? searchData.summary.avgPosition.toFixed(1) : 'N/A'}
+            </p>
+            {searchTrendData.length > 0 && (
+              <Sparkline
+                data={searchTrendData.slice(-7)}
+                dataKey="position"
+                color={COLORS.tertiary}
+              />
+            )}
           </div>
         </Card>
         <Card className="p-4">
           <div className="space-y-2">
             <p className="text-sm text-gray-500">Impressions</p>
-            <p className="text-2xl font-bold">45.2K</p>
-            <Sparkline 
-              data={searchTrendData.slice(-7)} 
-              dataKey="impressions" 
-              color={COLORS.purple} 
-            />
+            <p className="text-2xl font-bold">
+              {searchData?.summary?.totalImpressions
+                ? (searchData.summary.totalImpressions > 1000
+                    ? `${(searchData.summary.totalImpressions / 1000).toFixed(1)}K`
+                    : searchData.summary.totalImpressions.toLocaleString())
+                : 'N/A'}
+            </p>
+            {searchTrendData.length > 0 && (
+              <Sparkline
+                data={searchTrendData.slice(-7)}
+                dataKey="impressions"
+                color={COLORS.purple}
+              />
+            )}
           </div>
         </Card>
       </div>
