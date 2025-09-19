@@ -1502,25 +1502,6 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
                       );
                     }
 
-                    // Simulate cannibalization detection
-                    const cannibalizationIssues = [
-                      {
-                        keyword: 'best digital marketing tools',
-                        pages: [
-                          { url: '/blog/digital-marketing-tools', position: 8.2, clicks: 45 },
-                          { url: '/tools/marketing-software', position: 12.1, clicks: 32 }
-                        ]
-                      },
-                      {
-                        keyword: 'seo optimization guide',
-                        pages: [
-                          { url: '/seo-guide', position: 5.8, clicks: 78 },
-                          { url: '/blog/seo-tips', position: 9.4, clicks: 41 },
-                          { url: '/services/seo', position: 15.2, clicks: 23 }
-                        ]
-                      }
-                    ];
-
                     const cannibalizationIssues = detectCannibalization();
 
                     return cannibalizationIssues.map((issue, idx) => (
