@@ -21,8 +21,24 @@ import {
   Eye,
   MousePointer,
   Search,
-  Clock
+  Clock,
+  AlertCircle,
+  Info,
+  Lightbulb,
+  Settings,
+  ShoppingCart,
+  Navigation
 } from 'lucide-react';
+
+interface Recommendation {
+  priority: 'critical' | 'high' | 'medium' | 'low';
+  category: 'content' | 'technical' | 'ux' | 'seo' | 'conversion';
+  issue: string;
+  impact: string;
+  recommendation: string;
+  metrics: string[];
+  expectedImprovement: string;
+}
 
 interface EnhancedMetricsProps {
   reportId: string;
@@ -82,6 +98,274 @@ export default function EnhancedMetrics({ reportId, domain, metrics }: EnhancedM
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = Math.round(seconds % 60);
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+  };
+
+  const generateIntelligentRecommendations = (): Recommendation[] => {
+    const recommendations: Recommendation[] = [];
+
+    // Analyze CTR performance
+    if (searchMetrics.avgCTR < 1) {
+      recommendations.push({
+        priority: 'critical',
+        category: 'seo',
+        issue: 'Very Low Click-Through Rate',
+        impact: 'Missing out on potential traffic despite search visibility',
+        recommendation: 'Urgently review and optimize meta titles and descriptions. Make them more compelling, include power words, and ensure they match search intent.',
+        metrics: [`CTR: ${searchMetrics.avgCTR.toFixed(2)}%`, 'Industry benchmark: 1-2%'],
+        expectedImprovement: 'Could double your organic traffic without improving rankings'
+      });
+    } else if (searchMetrics.avgCTR >= 1 && searchMetrics.avgCTR < 2) {
+      recommendations.push({
+        priority: 'high',
+        category: 'seo',
+        issue: 'Below Average Click-Through Rate',
+        impact: 'Losing potential traffic to competitors',
+        recommendation: 'A/B test different meta titles and descriptions. Add structured data for rich snippets.',
+        metrics: [`CTR: ${searchMetrics.avgCTR.toFixed(2)}%`, 'Target: 2-3%'],
+        expectedImprovement: '30-50% increase in organic clicks'
+      });
+    }
+
+    // Analyze bounce rate
+    if (analyticsMetrics.bounceRate > 60) {
+      if (analyticsMetrics.avgSessionDuration < 30) {
+        recommendations.push({
+          priority: 'critical',
+          category: 'content',
+          issue: 'Critical Content Quality Issue',
+          impact: 'Users immediately leaving - severe engagement problem',
+          recommendation: 'Content doesn\'t match user intent or expectations. Audit your landing pages, ensure content above the fold is relevant, and improve page load speed.',
+          metrics: [`Bounce: ${analyticsMetrics.bounceRate.toFixed(1)}%`, `Duration: ${formatDuration(analyticsMetrics.avgSessionDuration)}`],
+          expectedImprovement: 'Could reduce bounce rate by 20-30% and double session duration'
+        });
+      } else {
+        recommendations.push({
+          priority: 'high',
+          category: 'ux',
+          issue: 'Poor User Experience',
+          impact: 'High bounce rate despite reasonable engagement time',
+          recommendation: 'Improve internal navigation, add clear CTAs, and ensure mobile responsiveness. Users are reading but not finding next steps.',
+          metrics: [`Bounce: ${analyticsMetrics.bounceRate.toFixed(1)}%`],
+          expectedImprovement: '15-25% reduction in bounce rate'
+        });
+      }
+    } else if (analyticsMetrics.bounceRate > 45 && analyticsMetrics.bounceRate <= 60) {
+      recommendations.push({
+        priority: 'medium',
+        category: 'ux',
+        issue: 'Bounce Rate Needs Improvement',
+        impact: 'Losing engagement opportunities',
+        recommendation: 'Add related content suggestions, improve page layout, and optimize load times.',
+        metrics: [`Bounce: ${analyticsMetrics.bounceRate.toFixed(1)}%`, 'Target: 20-45%'],
+        expectedImprovement: '10-15% reduction in bounce rate'
+      });
+    } else if (analyticsMetrics.bounceRate < 20) {
+      recommendations.push({
+        priority: 'low',
+        category: 'technical',
+        issue: 'Suspiciously Low Bounce Rate',
+        impact: 'Analytics tracking may be incorrect',
+        recommendation: 'Verify analytics implementation. Check for duplicate tracking codes or event tracking issues.',
+        metrics: [`Bounce: ${analyticsMetrics.bounceRate.toFixed(1)}%`],
+        expectedImprovement: 'Accurate data for better decision making'
+      });
+    }
+
+    // Analyze session duration
+    if (analyticsMetrics.avgSessionDuration < 30) {
+      recommendations.push({
+        priority: 'critical',
+        category: 'content',
+        issue: 'Extremely Poor Engagement',
+        impact: 'Users not finding value in your content',
+        recommendation: 'Completely revamp content strategy. Focus on user intent, add multimedia, improve readability.',
+        metrics: [`Duration: ${formatDuration(analyticsMetrics.avgSessionDuration)}`],
+        expectedImprovement: '200-300% increase in session duration'
+      });
+    } else if (analyticsMetrics.avgSessionDuration >= 30 && analyticsMetrics.avgSessionDuration < 60) {
+      recommendations.push({
+        priority: 'high',
+        category: 'content',
+        issue: 'Below Average Engagement Time',
+        impact: 'Users not fully exploring your content',
+        recommendation: 'Add interactive elements, improve content depth, use better formatting and visuals.',
+        metrics: [`Duration: ${formatDuration(analyticsMetrics.avgSessionDuration)}`, 'Target: 60-120s'],
+        expectedImprovement: '50-100% increase in engagement time'
+      });
+    }
+
+    // Analyze average position
+    if (searchMetrics.avgPosition > 50) {
+      recommendations.push({
+        priority: 'critical',
+        category: 'seo',
+        issue: 'Critical Ranking Problem',
+        impact: 'Virtually no organic visibility',
+        recommendation: 'Complete SEO overhaul needed. Conduct technical audit, improve content quality, build quality backlinks.',
+        metrics: [`Position: ${searchMetrics.avgPosition.toFixed(1)}`],
+        expectedImprovement: 'Could 10x your organic traffic'
+      });
+    } else if (searchMetrics.avgPosition > 20 && searchMetrics.avgPosition <= 50) {
+      recommendations.push({
+        priority: 'high',
+        category: 'seo',
+        issue: 'Poor Search Rankings',
+        impact: 'Missing significant traffic opportunities',
+        recommendation: 'Focus on on-page SEO, improve content depth, target long-tail keywords, build topical authority.',
+        metrics: [`Position: ${searchMetrics.avgPosition.toFixed(1)}`, 'Target: Top 10'],
+        expectedImprovement: '300-500% increase in organic traffic'
+      });
+    } else if (searchMetrics.avgPosition > 10 && searchMetrics.avgPosition <= 20) {
+      recommendations.push({
+        priority: 'medium',
+        category: 'seo',
+        issue: 'Second Page Rankings',
+        impact: 'Close to first page but missing most clicks',
+        recommendation: 'Small improvements can yield big results. Update content, improve internal linking, optimize Core Web Vitals.',
+        metrics: [`Position: ${searchMetrics.avgPosition.toFixed(1)}`],
+        expectedImprovement: '100-200% increase in clicks'
+      });
+    }
+
+    // Correlation analysis
+
+    // High bounce + low session duration = Content quality issue
+    if (analyticsMetrics.bounceRate > 60 && analyticsMetrics.avgSessionDuration < 60) {
+      recommendations.push({
+        priority: 'critical',
+        category: 'content',
+        issue: 'Content-Expectation Mismatch',
+        impact: 'Users immediately abandon due to irrelevant content',
+        recommendation: 'Align content with search intent. Review top performing competitors and match user expectations.',
+        metrics: [`Bounce: ${analyticsMetrics.bounceRate.toFixed(1)}%`, `Duration: ${formatDuration(analyticsMetrics.avgSessionDuration)}`],
+        expectedImprovement: 'Could halve bounce rate and triple engagement'
+      });
+    }
+
+    // Low CTR + good position = Title/meta description issue
+    if (searchMetrics.avgCTR < 2 && searchMetrics.avgPosition <= 10) {
+      recommendations.push({
+        priority: 'high',
+        category: 'seo',
+        issue: 'Poor SERP Appearance Despite Good Rankings',
+        impact: 'Ranking well but not attracting clicks',
+        recommendation: 'Your rankings are good but titles/descriptions aren\'t compelling. Add emotional triggers, numbers, and clear value propositions.',
+        metrics: [`CTR: ${searchMetrics.avgCTR.toFixed(2)}%`, `Position: ${searchMetrics.avgPosition.toFixed(1)}`],
+        expectedImprovement: 'Could double clicks without improving rankings'
+      });
+    }
+
+    // High impressions + low clicks = CTR optimization needed
+    if (searchMetrics.totalImpressions > 1000 && searchMetrics.avgCTR < 1.5) {
+      recommendations.push({
+        priority: 'high',
+        category: 'seo',
+        issue: 'High Visibility but Low Engagement',
+        impact: 'Wasting thousands of impression opportunities',
+        recommendation: 'Focus on CTR optimization. Test different titles, add schema markup, use compelling meta descriptions.',
+        metrics: [`Impressions: ${searchMetrics.totalImpressions.toLocaleString()}`, `CTR: ${searchMetrics.avgCTR.toFixed(2)}%`],
+        expectedImprovement: 'Could gain hundreds of additional clicks immediately'
+      });
+    }
+
+    // Good CTR + high bounce = Landing page expectation mismatch
+    if (searchMetrics.avgCTR > 2 && analyticsMetrics.bounceRate > 70) {
+      recommendations.push({
+        priority: 'high',
+        category: 'ux',
+        issue: 'Landing Page Fails to Meet Expectations',
+        impact: 'Good click attraction but poor experience delivery',
+        recommendation: 'Your SERP presence is effective but landing pages disappoint. Ensure landing page content matches meta description promises.',
+        metrics: [`CTR: ${searchMetrics.avgCTR.toFixed(2)}%`, `Bounce: ${analyticsMetrics.bounceRate.toFixed(1)}%`],
+        expectedImprovement: 'Could reduce bounce by 30% and improve conversions'
+      });
+    }
+
+    // Low position + low CTR = Overall SEO improvement needed
+    if (searchMetrics.avgPosition > 15 && searchMetrics.avgCTR < 1) {
+      recommendations.push({
+        priority: 'critical',
+        category: 'seo',
+        issue: 'Comprehensive SEO Problems',
+        impact: 'Both visibility and attractiveness issues',
+        recommendation: 'Need complete SEO strategy: technical audit, content optimization, link building, and SERP snippet optimization.',
+        metrics: [`Position: ${searchMetrics.avgPosition.toFixed(1)}`, `CTR: ${searchMetrics.avgCTR.toFixed(2)}%`],
+        expectedImprovement: 'Could 5-10x your organic traffic with proper optimization'
+      });
+    }
+
+    // High bounce + low pages per session (assuming single page views)
+    const pagesPerSession = analyticsMetrics.pageViews / Math.max(1, analyticsMetrics.totalSessions);
+    if (analyticsMetrics.bounceRate > 60 && pagesPerSession < 1.5) {
+      recommendations.push({
+        priority: 'high',
+        category: 'ux',
+        issue: 'Poor Navigation and Content Discovery',
+        impact: 'Users can\'t find related content or next steps',
+        recommendation: 'Improve internal linking, add related content sections, implement clear navigation menu, add search functionality.',
+        metrics: [`Bounce: ${analyticsMetrics.bounceRate.toFixed(1)}%`, `Pages/Session: ${pagesPerSession.toFixed(2)}`],
+        expectedImprovement: 'Could double pages per session and reduce bounce by 20%'
+      });
+    }
+
+    // Good traffic + assumed low conversions (when bounce is high with good traffic)
+    if (analyticsMetrics.totalSessions > 500 && analyticsMetrics.bounceRate > 65) {
+      recommendations.push({
+        priority: 'high',
+        category: 'conversion',
+        issue: 'Traffic Not Converting',
+        impact: 'Wasting valuable traffic without conversions',
+        recommendation: 'Implement conversion rate optimization: clear CTAs, trust signals, simplified forms, social proof, urgency elements.',
+        metrics: [`Sessions: ${analyticsMetrics.totalSessions.toLocaleString()}`, `Bounce: ${analyticsMetrics.bounceRate.toFixed(1)}%`],
+        expectedImprovement: 'Could 2-3x conversion rate with proper CRO'
+      });
+    }
+
+    // Traffic trend analysis
+    if (trends.sessions < -20 || trends.clicks < -20) {
+      recommendations.push({
+        priority: 'critical',
+        category: 'technical',
+        issue: 'Significant Traffic Decline',
+        impact: 'Losing visibility and traffic rapidly',
+        recommendation: 'Investigate immediately: check for penalties, technical issues, major algorithm updates, or competitive changes.',
+        metrics: [`Sessions: ${trends.sessions.toFixed(1)}%`, `Clicks: ${trends.clicks.toFixed(1)}%`],
+        expectedImprovement: 'Stop the decline and recover lost traffic'
+      });
+    }
+
+    // Engagement rate issues
+    if (analyticsMetrics.engagementRate < 30) {
+      recommendations.push({
+        priority: 'medium',
+        category: 'content',
+        issue: 'Low User Engagement',
+        impact: 'Content not resonating with audience',
+        recommendation: 'Add interactive elements, videos, infographics. Improve content structure and readability.',
+        metrics: [`Engagement Rate: ${analyticsMetrics.engagementRate.toFixed(1)}%`],
+        expectedImprovement: 'Could double engagement metrics'
+      });
+    }
+
+    // New vs returning users balance
+    const returningUserRatio = (analyticsMetrics.totalUsers - analyticsMetrics.newUsers) / Math.max(1, analyticsMetrics.totalUsers);
+    if (returningUserRatio < 0.2 && analyticsMetrics.totalUsers > 100) {
+      recommendations.push({
+        priority: 'medium',
+        category: 'content',
+        issue: 'Low User Retention',
+        impact: 'Failing to build loyal audience',
+        recommendation: 'Implement email capture, create content series, improve user experience to encourage returns.',
+        metrics: [`Returning Users: ${(returningUserRatio * 100).toFixed(1)}%`],
+        expectedImprovement: 'Could double returning visitor rate'
+      });
+    }
+
+    // Sort recommendations by priority
+    const priorityOrder = { critical: 0, high: 1, medium: 2, low: 3 };
+    recommendations.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
+
+    return recommendations;
   };
 
   const getHealthScore = () => {
@@ -434,61 +718,111 @@ export default function EnhancedMetrics({ reportId, domain, metrics }: EnhancedM
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Target className="w-5 h-5 text-indigo-600" />
+            <Lightbulb className="w-5 h-5 text-indigo-600" />
             Key Insights & Recommendations
           </CardTitle>
+          <CardDescription>
+            AI-powered analysis of your metrics with actionable recommendations
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
-            {analyticsMetrics.bounceRate > 70 && (
-              <Alert className="border-red-500 bg-red-50">
-                <AlertTriangle className="h-4 w-4" />
-                <AlertDescription>
-                  <strong>High Bounce Rate:</strong> Your bounce rate of {analyticsMetrics.bounceRate.toFixed(1)}% is above recommended levels.
-                  Consider improving page load speed, content relevance, and user experience.
+          <div className="space-y-4">
+            {generateIntelligentRecommendations().map((rec, index) => {
+              const getPriorityColor = (priority: string) => {
+                switch(priority) {
+                  case 'critical': return 'bg-red-100 text-red-700 border-red-300';
+                  case 'high': return 'bg-orange-100 text-orange-700 border-orange-300';
+                  case 'medium': return 'bg-yellow-100 text-yellow-700 border-yellow-300';
+                  case 'low': return 'bg-green-100 text-green-700 border-green-300';
+                  default: return 'bg-gray-100 text-gray-700 border-gray-300';
+                }
+              };
+
+              const getCategoryIcon = (category: string) => {
+                switch(category) {
+                  case 'content': return <FileText className="w-4 h-4" />;
+                  case 'technical': return <Settings className="w-4 h-4" />;
+                  case 'ux': return <Navigation className="w-4 h-4" />;
+                  case 'seo': return <Search className="w-4 h-4" />;
+                  case 'conversion': return <ShoppingCart className="w-4 h-4" />;
+                  default: return <Info className="w-4 h-4" />;
+                }
+              };
+
+              const getPriorityIcon = (priority: string) => {
+                switch(priority) {
+                  case 'critical': return <AlertCircle className="w-4 h-4" />;
+                  case 'high': return <AlertTriangle className="w-4 h-4" />;
+                  case 'medium': return <Info className="w-4 h-4" />;
+                  case 'low': return <CheckCircle className="w-4 h-4" />;
+                  default: return <Info className="w-4 h-4" />;
+                }
+              };
+
+              return (
+                <div key={index} className={`border rounded-lg p-4 ${getPriorityColor(rec.priority)}`}>
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 mt-0.5">
+                      {getPriorityIcon(rec.priority)}
+                    </div>
+                    <div className="flex-grow space-y-2">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <Badge className={`${getPriorityColor(rec.priority)} font-semibold uppercase text-xs`}>
+                          {rec.priority}
+                        </Badge>
+                        <Badge variant="outline" className="flex items-center gap-1">
+                          {getCategoryIcon(rec.category)}
+                          <span className="capitalize">{rec.category}</span>
+                        </Badge>
+                      </div>
+
+                      <h4 className="font-semibold text-base">{rec.issue}</h4>
+
+                      <p className="text-sm opacity-90">
+                        <strong>Impact:</strong> {rec.impact}
+                      </p>
+
+                      <div className="bg-white/50 rounded p-3 space-y-2">
+                        <p className="text-sm">
+                          <strong>Recommendation:</strong> {rec.recommendation}
+                        </p>
+
+                        <div className="flex flex-wrap gap-2 text-xs">
+                          <strong>Related Metrics:</strong>
+                          {rec.metrics.map((metric, idx) => (
+                            <span key={idx} className="bg-white/70 px-2 py-1 rounded">
+                              {metric}
+                            </span>
+                          ))}
+                        </div>
+
+                        <p className="text-sm font-medium text-green-700">
+                          <TrendingUp className="inline w-3 h-3 mr-1" />
+                          Expected Improvement: {rec.expectedImprovement}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+
+            {generateIntelligentRecommendations().length === 0 && (
+              <Alert className="bg-green-50 border-green-200">
+                <CheckCircle className="h-4 w-4 text-green-600" />
+                <AlertDescription className="text-green-800">
+                  <strong>Excellent Performance!</strong> Your website is performing well across all key metrics.
+                  Continue monitoring for any changes and maintain your current optimization strategies.
                 </AlertDescription>
               </Alert>
             )}
 
-            {searchMetrics.avgCTR < 2 && (
-              <Alert className="border-yellow-500 bg-yellow-50">
-                <AlertTriangle className="h-4 w-4" />
-                <AlertDescription>
-                  <strong>Low Click-Through Rate:</strong> Your CTR of {searchMetrics.avgCTR.toFixed(2)}% could be improved.
-                  Consider optimizing meta titles and descriptions to be more compelling.
-                </AlertDescription>
-              </Alert>
-            )}
-
-            {trends.sessions < -10 && (
-              <Alert className="border-red-500 bg-red-50">
-                <TrendingDown className="h-4 w-4" />
-                <AlertDescription>
-                  <strong>Traffic Decline:</strong> Sessions have decreased by {Math.abs(trends.sessions).toFixed(1)}% week-over-week.
-                  Investigate potential causes such as algorithm changes or technical issues.
-                </AlertDescription>
-              </Alert>
-            )}
-
-            {trends.clicks > 20 && (
-              <Alert className="border-green-500 bg-green-50">
-                <TrendingUp className="h-4 w-4" />
-                <AlertDescription>
-                  <strong>Strong Growth:</strong> Clicks have increased by {trends.clicks.toFixed(1)}% week-over-week.
-                  Identify what's driving this growth and replicate the success.
-                </AlertDescription>
-              </Alert>
-            )}
-
-            {searchMetrics.avgPosition > 20 && (
-              <Alert className="border-yellow-500 bg-yellow-50">
-                <Search className="h-4 w-4" />
-                <AlertDescription>
-                  <strong>Deep Rankings:</strong> Your average position of {searchMetrics.avgPosition.toFixed(1)} suggests most keywords rank beyond page 2.
-                  Focus on content optimization and link building.
-                </AlertDescription>
-              </Alert>
-            )}
+            <div className="mt-4 p-3 bg-gray-100 rounded-lg">
+              <p className="text-xs text-gray-600">
+                <strong>Note:</strong> These recommendations are based on industry benchmarks and correlation analysis of your metrics.
+                Prioritize critical and high-priority items for maximum impact. Recommendations are updated in real-time as your metrics change.
+              </p>
+            </div>
           </div>
         </CardContent>
       </Card>
