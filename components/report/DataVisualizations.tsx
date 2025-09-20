@@ -225,14 +225,14 @@ export default function DataVisualizations({ searchData, analyticsData, competit
 
     return (
       <ResponsiveContainer width="100%" height={300}>
-        <LineChart data={searchTrendData}>
+        <LineChart data={searchTrendData} margin={{ top: 5, right: 30, left: 50, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
           <XAxis dataKey="date" tick={{ fontSize: 12 }} />
           <YAxis
             domain={[domainMin, domainMax]}
             tick={{ fontSize: 12 }}
             reversed={true}
-            label={{ value: 'Position (lower is better)', angle: -90, position: 'insideLeft' }}
+            label={{ value: 'Position', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle' } }}
           />
           <Tooltip content={<CustomTooltip />} />
           <Legend />
