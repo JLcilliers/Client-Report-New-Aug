@@ -459,8 +459,8 @@ export default function EnhancedMetrics({ reportId, domain, metrics }: EnhancedM
                 <p className="text-2xl font-bold">{searchMetrics.totalClicks.toLocaleString()}</p>
                 {trends.clicks !== 0 && (
                   <Badge variant="outline" className={trends.clicks > 0 ? 'text-green-600' : 'text-red-600'}>
-                    {trends.clicks > 0 ? <TrendingUp className="w-3 h-3 mr-1" /> : <TrendingDown className="w-3 h-3 mr-1" />}
-                    {Math.abs(trends.clicks).toFixed(1)}%
+                    {trends.clicks > 0 ? <TrendingUp className="w-3 h-3 mr-1 inline" /> : <TrendingDown className="w-3 h-3 mr-1 inline" />}
+                    {trends.clicks > 0 && '+'}{Math.abs(trends.clicks).toFixed(1)}%
                   </Badge>
                 )}
               </div>
@@ -471,7 +471,8 @@ export default function EnhancedMetrics({ reportId, domain, metrics }: EnhancedM
                 <p className="text-2xl font-bold">{searchMetrics.totalImpressions.toLocaleString()}</p>
                 {trends.impressions !== 0 && (
                   <Badge variant="outline" className={trends.impressions > 0 ? 'text-green-600' : 'text-red-600'}>
-                    {Math.abs(trends.impressions).toFixed(1)}%
+                    {trends.impressions > 0 ? <TrendingUp className="w-3 h-3 mr-1 inline" /> : <TrendingDown className="w-3 h-3 mr-1 inline" />}
+                    {trends.impressions > 0 && '+'}{Math.abs(trends.impressions).toFixed(1)}%
                   </Badge>
                 )}
               </div>
@@ -537,7 +538,8 @@ export default function EnhancedMetrics({ reportId, domain, metrics }: EnhancedM
                 <p className="text-2xl font-bold">{analyticsMetrics.totalSessions.toLocaleString()}</p>
                 {trends.sessions !== 0 && (
                   <Badge variant="outline" className={trends.sessions > 0 ? 'text-green-600' : 'text-red-600'}>
-                    {Math.abs(trends.sessions).toFixed(1)}%
+                    {trends.sessions > 0 ? <TrendingUp className="w-3 h-3 mr-1 inline" /> : <TrendingDown className="w-3 h-3 mr-1 inline" />}
+                    {trends.sessions > 0 && '+'}{Math.abs(trends.sessions).toFixed(1)}%
                   </Badge>
                 )}
               </div>
@@ -548,7 +550,8 @@ export default function EnhancedMetrics({ reportId, domain, metrics }: EnhancedM
                 <p className="text-2xl font-bold">{analyticsMetrics.totalUsers.toLocaleString()}</p>
                 {trends.users !== 0 && (
                   <Badge variant="outline" className={trends.users > 0 ? 'text-green-600' : 'text-red-600'}>
-                    {Math.abs(trends.users).toFixed(1)}%
+                    {trends.users > 0 ? <TrendingUp className="w-3 h-3 mr-1 inline" /> : <TrendingDown className="w-3 h-3 mr-1 inline" />}
+                    {trends.users > 0 && '+'}{Math.abs(trends.users).toFixed(1)}%
                   </Badge>
                 )}
               </div>

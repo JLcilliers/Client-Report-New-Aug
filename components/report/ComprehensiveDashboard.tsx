@@ -687,9 +687,16 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
     }
   };
 
-  const getChangeIndicator = (change: number) => {
-    if (change > 0) return <ArrowUp className="w-4 h-4 text-green-500" />;
-    if (change < 0) return <ArrowDown className="w-4 h-4 text-red-500" />;
+  const getChangeIndicator = (change: number, isPositionMetric: boolean = false) => {
+    // For position metrics, lower is better, so reverse the logic
+    if (isPositionMetric) {
+      if (change < 0) return <TrendingUp className="w-4 h-4 text-green-500" />; // Negative change is good for position
+      if (change > 0) return <TrendingDown className="w-4 h-4 text-red-500" />; // Positive change is bad for position
+    } else {
+      // For all other metrics, higher is better
+      if (change > 0) return <TrendingUp className="w-4 h-4 text-green-500" />;
+      if (change < 0) return <TrendingDown className="w-4 h-4 text-red-500" />;
+    }
     return <Minus className="w-4 h-4 text-gray-400" />;
   };
 
@@ -1070,29 +1077,38 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
     return metrics.comparisons?.[period];
   };
 
-  const renderMetricCard = (card: MetricCard) => (
-    <Card key={card.title}>
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardDescription>{card.title}</CardDescription>
-          {card.icon}
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold">{card.value}</div>
-        <div className="flex items-center gap-2 mt-2">
-          {getChangeIndicator(card.change)}
-          <span className={`text-sm ${
-            card.changeType === 'positive' ? 'text-green-600' : 
-            card.changeType === 'negative' ? 'text-red-600' : 'text-gray-600'
-          }`}>
-            {Math.abs(card.change).toFixed(1)}%
-          </span>
-          <span className="text-sm text-gray-500">{card.period}</span>
-        </div>
-      </CardContent>
-    </Card>
-  );
+  const renderMetricCard = (card: MetricCard) => {
+    const isPositionMetric = card.title.toLowerCase().includes('position');
+    const actualChangeType = isPositionMetric ?
+      (card.change < 0 ? 'positive' : card.change > 0 ? 'negative' : 'neutral') :
+      card.changeType;
+
+    return (
+      <Card key={card.title}>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <CardDescription>{card.title}</CardDescription>
+            {card.icon}
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{card.value}</div>
+          <div className="flex items-center gap-2 mt-2">
+            {getChangeIndicator(card.change, isPositionMetric)}
+            <span className={`text-sm font-medium ${
+              actualChangeType === 'positive' ? 'text-green-600' :
+              actualChangeType === 'negative' ? 'text-red-600' : 'text-gray-600'
+            }`}>
+              {card.change > 0 && !isPositionMetric && '+'}
+              {card.change < 0 && isPositionMetric && '+'}
+              {Math.abs(card.change).toFixed(1)}%
+            </span>
+            <span className="text-sm text-gray-500">{card.period}</span>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
 
   if (loading) {
     return (
