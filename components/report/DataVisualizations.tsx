@@ -114,72 +114,39 @@ export default function DataVisualizations({ searchData, analyticsData, competit
     </ResponsiveContainer>
   );
 
-  // Render search performance chart
+  // Render search performance chart (ONLY Clicks & Impressions)
   if (chartType === 'search') {
     return (
-      <div className="space-y-6">
-        {/* Clicks and Impressions Chart */}
-        <div>
-          <h4 className="text-sm font-medium mb-3">Clicks & Impressions Over Time</h4>
-          <ResponsiveContainer width="100%" height={200}>
-            <LineChart data={searchTrendData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis dataKey="date" tick={{ fontSize: 12 }} />
-              <YAxis yAxisId="left" tick={{ fontSize: 12 }} />
-              <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 12 }} />
-              <Tooltip content={<CustomTooltip />} />
-              <Legend />
-              <Line
-                yAxisId="left"
-                type="monotone"
-                dataKey="clicks"
-                stroke={COLORS.primary}
-                strokeWidth={3}
-                dot={{ fill: COLORS.primary, r: 4 }}
-                activeDot={{ r: 6 }}
-                name="Clicks"
-              />
-              <Line
-                yAxisId="right"
-                type="monotone"
-                dataKey="impressions"
-                stroke={COLORS.secondary}
-                strokeWidth={2}
-                dot={{ fill: COLORS.secondary, r: 3 }}
-                activeDot={{ r: 5 }}
-                name="Impressions"
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Average Position Chart */}
-        <div>
-          <h4 className="text-sm font-medium mb-3">Average Position Over Time</h4>
-          <ResponsiveContainer width="100%" height={150}>
-            <LineChart data={searchTrendData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis dataKey="date" tick={{ fontSize: 12 }} />
-              <YAxis
-                domain={['dataMin - 1', 'dataMax + 1']}
-                tick={{ fontSize: 12 }}
-                reversed={true}
-              />
-              <Tooltip content={<CustomTooltip />} />
-              <Legend />
-              <Line
-                type="monotone"
-                dataKey="position"
-                stroke={COLORS.tertiary}
-                strokeWidth={3}
-                dot={{ fill: COLORS.tertiary, r: 4 }}
-                activeDot={{ r: 6 }}
-                name="Avg Position (lower is better)"
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
+      <ResponsiveContainer width="100%" height={300}>
+        <LineChart data={searchTrendData}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+          <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+          <YAxis yAxisId="left" label={{ value: 'Clicks', angle: -90, position: 'insideLeft' }} tick={{ fontSize: 12 }} />
+          <YAxis yAxisId="right" orientation="right" label={{ value: 'Impressions', angle: 90, position: 'insideRight' }} tick={{ fontSize: 12 }} />
+          <Tooltip content={<CustomTooltip />} />
+          <Legend />
+          <Line
+            yAxisId="left"
+            type="monotone"
+            dataKey="clicks"
+            stroke={COLORS.primary}
+            strokeWidth={3}
+            dot={{ fill: COLORS.primary, r: 4 }}
+            activeDot={{ r: 6 }}
+            name="Clicks"
+          />
+          <Line
+            yAxisId="right"
+            type="monotone"
+            dataKey="impressions"
+            stroke={COLORS.secondary}
+            strokeWidth={2}
+            dot={{ fill: COLORS.secondary, r: 3 }}
+            activeDot={{ r: 5 }}
+            name="Impressions"
+          />
+        </LineChart>
+      </ResponsiveContainer>
     );
   }
 
@@ -247,17 +214,25 @@ export default function DataVisualizations({ searchData, analyticsData, competit
     );
   }
 
-  // Render position chart only
+  // Render position chart only (with proper 1-100 scaling)
   if (chartType === 'position') {
+    // Calculate proper domain for position data
+    const positions = searchTrendData.map((d: any) => parseFloat(d.position)).filter((p: number) => p > 0);
+    const minPos = positions.length > 0 ? Math.min(...positions) : 1;
+    const maxPos = positions.length > 0 ? Math.max(...positions) : 100;
+    const domainMin = Math.max(1, Math.floor(minPos - 2));
+    const domainMax = Math.min(100, Math.ceil(maxPos + 2));
+
     return (
       <ResponsiveContainer width="100%" height={300}>
         <LineChart data={searchTrendData}>
           <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
           <XAxis dataKey="date" tick={{ fontSize: 12 }} />
           <YAxis
-            domain={['dataMin - 1', 'dataMax + 1']}
+            domain={[domainMin, domainMax]}
             tick={{ fontSize: 12 }}
             reversed={true}
+            label={{ value: 'Position (lower is better)', angle: -90, position: 'insideLeft' }}
           />
           <Tooltip content={<CustomTooltip />} />
           <Legend />
