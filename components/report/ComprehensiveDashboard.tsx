@@ -833,15 +833,15 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
           score: weightedScore
         };
       })
-      .filter(opp => opp !== null && opp.uplift > 0) // Only opportunities with positive uplift
+      .filter((opp): opp is NonNullable<typeof opp> => opp !== null && opp.uplift > 0) // Type guard to ensure non-null
       .sort((a, b) => {
         // Sort by opportunity type priority first, then by score
         const priorityOrder = ['Striking Distance', 'Near Top 3', 'CTR Optimization', 'High Volume Low CTR', 'Page 3 Opportunity', 'Zero Click Query'];
-        const aPriority = priorityOrder.indexOf(a.opportunityType);
-        const bPriority = priorityOrder.indexOf(b.opportunityType);
+        const aPriority = priorityOrder.indexOf(a.opportunityType || '');
+        const bPriority = priorityOrder.indexOf(b.opportunityType || '');
 
         if (aPriority !== bPriority) return aPriority - bPriority;
-        return b.score - a.score;
+        return (b.score || 0) - (a.score || 0);
       })
       .slice(0, 20); // Show more opportunities (increased from 8 to 20)
 
