@@ -100,6 +100,8 @@ interface QueryOpportunity {
   position: number;
   potentialClicks: number;
   uplift: number;
+  opportunityType?: string;
+  score?: number;
 }
 
 interface PositionDistribution {
@@ -762,32 +764,62 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
   const findQueryOpportunities = (queries: SearchQuery[]): QueryOpportunity[] => {
     if (!queries) return [];
 
-    return queries
-      .filter(query => {
-        // SEO best practices criteria:
-        // 1. High impressions (>100) but low CTR (<2%)
-        // 2. Position 4-20 (close to top 3)
-        // 3. High search volume potential
-        return query.impressions > 100 &&
-               query.ctr < 0.02 &&
-               query.position >= 4 &&
-               query.position <= 20;
-      })
+    // Categorize opportunities into different types
+    const opportunities = queries
       .map(query => {
-        // Calculate potential based on position-specific CTR benchmarks
-        let targetCTR = 0.02; // Default 2%
-        if (query.position <= 3) targetCTR = 0.25; // 25% for top 3
-        else if (query.position <= 5) targetCTR = 0.15; // 15% for 4-5
-        else if (query.position <= 10) targetCTR = 0.08; // 8% for 6-10
-        else if (query.position <= 20) targetCTR = 0.04; // 4% for 11-20
+        let opportunityType = '';
+        let targetCTR = 0;
+        let priority = 0;
+
+        // Striking Distance Keywords (Position 11-20) - HIGHEST PRIORITY QUICK WINS
+        if (query.position >= 11 && query.position <= 20 && query.impressions > 50) {
+          opportunityType = 'Striking Distance';
+          targetCTR = 0.08; // Target 8% CTR when on page 1
+          priority = 10; // Highest priority - easiest wins
+        }
+        // Near Top 3 (Position 4-10) - Good opportunities
+        else if (query.position >= 4 && query.position <= 10) {
+          opportunityType = 'Near Top 3';
+          targetCTR = 0.15; // Target 15% CTR in top 3
+          priority = 8;
+        }
+        // Low CTR in Top 3 - Title/Meta optimization needed
+        else if (query.position <= 3 && query.ctr < 0.15) {
+          opportunityType = 'CTR Optimization';
+          targetCTR = 0.30; // Target 30% CTR for top 3
+          priority = 7;
+        }
+        // High Impressions, Low CTR (any position)
+        else if (query.impressions > 500 && query.ctr < 0.02) {
+          opportunityType = 'High Volume Low CTR';
+          targetCTR = query.position <= 10 ? 0.08 : 0.04;
+          priority = 6;
+        }
+        // Position 21-30 with decent impressions
+        else if (query.position >= 21 && query.position <= 30 && query.impressions > 100) {
+          opportunityType = 'Page 3 Opportunity';
+          targetCTR = 0.05;
+          priority = 5;
+        }
+        // Low hanging fruit - Any query with impressions but 0 clicks
+        else if (query.impressions > 30 && query.clicks === 0) {
+          opportunityType = 'Zero Click Query';
+          targetCTR = 0.02;
+          priority = 4;
+        }
+
+        // Skip if no opportunity identified
+        if (!opportunityType) return null;
 
         const potentialClicks = Math.round(query.impressions * targetCTR);
         const uplift = potentialClicks - query.clicks;
 
-        // Bonus points for high volume keywords
-        const volumeMultiplier = query.impressions > 1000 ? 1.5 :
-                                query.impressions > 500 ? 1.2 : 1.0;
-        const weightedUplift = uplift * volumeMultiplier;
+        // Weight by impression volume and priority
+        const volumeMultiplier = query.impressions > 1000 ? 2.0 :
+                                query.impressions > 500 ? 1.5 :
+                                query.impressions > 200 ? 1.2 : 1.0;
+
+        const weightedScore = (uplift * volumeMultiplier * priority) / 10;
 
         return {
           query: query.query,
@@ -796,11 +828,24 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
           ctr: query.ctr,
           position: query.position,
           potentialClicks,
-          uplift: weightedUplift
+          uplift,
+          opportunityType,
+          score: weightedScore
         };
       })
-      .sort((a, b) => b.uplift - a.uplift)
-      .slice(0, 8);
+      .filter(opp => opp !== null && opp.uplift > 0) // Only opportunities with positive uplift
+      .sort((a, b) => {
+        // Sort by opportunity type priority first, then by score
+        const priorityOrder = ['Striking Distance', 'Near Top 3', 'CTR Optimization', 'High Volume Low CTR', 'Page 3 Opportunity', 'Zero Click Query'];
+        const aPriority = priorityOrder.indexOf(a.opportunityType);
+        const bPriority = priorityOrder.indexOf(b.opportunityType);
+
+        if (aPriority !== bPriority) return aPriority - bPriority;
+        return b.score - a.score;
+      })
+      .slice(0, 20); // Show more opportunities (increased from 8 to 20)
+
+    return opportunities;
   };
 
   const calculatePositionDistribution = (queries: SearchQuery[]): PositionDistribution => {
@@ -1435,51 +1480,92 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Target className="w-5 h-5 text-blue-500" />
-                  Query Opportunities
+                  Query Opportunities & Quick Wins
                 </CardTitle>
-                <CardDescription>High impression queries with optimization potential</CardDescription>
+                <CardDescription>Striking distance keywords and optimization opportunities (showing {Math.min(20, metrics?.searchConsole?.topQueries?.length || 0)} opportunities)</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
+                <div className="space-y-3 max-h-[600px] overflow-y-auto">
                   {(() => {
                     const opportunities = findQueryOpportunities(
                       metrics?.searchConsole?.topQueries || []
                     );
 
-                    return opportunities.map((opportunity, idx) => (
-                      <div key={idx} className="p-3 border border-blue-100 rounded-lg bg-blue-50/30">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm font-medium truncate" title={opportunity.query}>
-                            {opportunity.query.length > 35 ? opportunity.query.substring(0, 35) + '...' : opportunity.query}
-                          </span>
-                          <Badge variant="outline" className="text-xs">
-                            #{opportunity.position.toFixed(1)}
-                          </Badge>
+                    if (opportunities.length === 0) {
+                      return (
+                        <div className="text-center py-4 text-gray-500">
+                          <Target className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                          <p className="text-sm">No opportunities found</p>
+                          <p className="text-xs">Try refreshing data or expanding search date range</p>
                         </div>
-                        <div className="grid grid-cols-2 gap-4 text-xs">
-                          <div>
-                            <p className="text-gray-500">Current Performance</p>
-                            <p className="font-medium">{formatNumber(opportunity.impressions)} impressions</p>
-                            <p className="font-medium">{formatNumber(opportunity.clicks)} clicks</p>
-                            <p className="font-medium text-red-600">{formatPercentage(opportunity.ctr)} CTR</p>
+                      );
+                    }
+
+                    // Group opportunities by type for better organization
+                    const groupedOpportunities = opportunities.reduce((acc, opp) => {
+                      const type = opp.opportunityType || 'Other';
+                      if (!acc[type]) acc[type] = [];
+                      acc[type].push(opp);
+                      return acc;
+                    }, {} as Record<string, typeof opportunities>);
+
+                    return Object.entries(groupedOpportunities).map(([type, opps]) => (
+                      <div key={type} className="space-y-2">
+                        <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                          {type === 'Striking Distance' && <span className="text-green-600">🎯 {type} (Position 11-20)</span>}
+                          {type === 'Near Top 3' && <span className="text-blue-600">🔥 {type} (Position 4-10)</span>}
+                          {type === 'CTR Optimization' && <span className="text-purple-600">💎 {type} (Top 3 Low CTR)</span>}
+                          {type === 'High Volume Low CTR' && <span className="text-orange-600">📊 {type}</span>}
+                          {type === 'Page 3 Opportunity' && <span className="text-yellow-600">📈 {type}</span>}
+                          {type === 'Zero Click Query' && <span className="text-red-600">⚠️ {type}</span>}
+                          <Badge variant="secondary" className="text-xs">{opps.length}</Badge>
+                        </h4>
+                        {opps.map((opportunity, idx) => (
+                          <div key={idx} className="p-3 border border-blue-100 rounded-lg bg-gradient-to-r from-blue-50/30 to-green-50/30">
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-sm font-medium truncate" title={opportunity.query}>
+                                {opportunity.query.length > 35 ? opportunity.query.substring(0, 35) + '...' : opportunity.query}
+                              </span>
+                              <div className="flex gap-2">
+                                <Badge variant="outline" className="text-xs">
+                                  Pos: {opportunity.position.toFixed(1)}
+                                </Badge>
+                                {type === 'Striking Distance' && (
+                                  <Badge className="text-xs bg-green-100 text-green-700">Quick Win!</Badge>
+                                )}
+                              </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4 text-xs">
+                              <div>
+                                <p className="text-gray-500">Current Performance</p>
+                                <p className="font-medium">{formatNumber(opportunity.impressions)} impressions</p>
+                                <p className="font-medium">{formatNumber(opportunity.clicks)} clicks</p>
+                                <p className="font-medium text-red-600">{formatPercentage(opportunity.ctr)} CTR</p>
+                              </div>
+                              <div>
+                                <p className="text-gray-500">Potential if Optimized</p>
+                                <p className="text-green-600 font-medium">+{formatNumber(opportunity.uplift)} clicks</p>
+                                <p className="text-blue-600 font-medium">
+                                  {opportunity.clicks > 0
+                                    ? `${((opportunity.uplift / opportunity.clicks) * 100).toFixed(0)}% increase`
+                                    : `${opportunity.potentialClicks} new clicks`
+                                  }
+                                </p>
+                                <p className="text-purple-600 font-medium">Target CTR: {(opportunity.potentialClicks / opportunity.impressions * 100).toFixed(1)}%</p>
+                              </div>
+                            </div>
+                            {type === 'Striking Distance' && (
+                              <div className="mt-2 p-2 bg-green-50 rounded text-xs">
+                                <p className="text-green-700 font-medium">
+                                  💡 Quick Win: Small optimizations can move this to page 1
+                                </p>
+                              </div>
+                            )}
                           </div>
-                          <div>
-                            <p className="text-gray-500">Opportunity</p>
-                            <p className="text-green-600 font-medium">+{formatNumber(opportunity.uplift)} clicks</p>
-                            <p className="text-blue-600 font-medium">Target: 8% CTR</p>
-                            <p className="text-purple-600 font-medium">{((opportunity.uplift / opportunity.clicks) * 100).toFixed(0)}% increase</p>
-                          </div>
-                        </div>
+                        ))}
                       </div>
                     ));
                   })()}
-                  {!metrics?.searchConsole?.topQueries?.some((q: any) => q.impressions > 1000 && q.ctr < 0.05) && (
-                    <div className="text-center py-4 text-gray-500">
-                      <Target className="w-8 h-8 mx-auto mb-2 text-gray-300" />
-                      <p className="text-sm">No immediate opportunities found</p>
-                      <p className="text-xs">All high-impression queries have good CTR</p>
-                    </div>
-                  )}
                 </div>
               </CardContent>
             </Card>
