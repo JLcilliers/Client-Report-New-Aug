@@ -197,7 +197,7 @@ async function getKeywordPerformanceData(prisma: any, reportId: string) {
     }
   });
 
-  const processedKeywords = keywords.map(kw => {
+  const processedKeywords = keywords.map((kw: any) => {
     const latest = kw.performanceHistory[0];
     const previous = kw.performanceHistory[1];
 
