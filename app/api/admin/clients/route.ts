@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
       data: {
         clientName: name.trim(),
         reportName: `${name.trim()} SEO Report`,
-        searchConsolePropertyId: domain ? `sc-domain:${domain.replace('https://', '').replace('http://', '')}` : null,
+        searchConsolePropertyId: `sc-domain:${domain.replace('https://', '').replace('http://', '')}`,
         isActive: true,
         refreshInterval: 'weekly'
       }
