@@ -97,8 +97,7 @@ export async function POST(
           keyword,
           clientReportId: params.reportId,
           trackingStatus: 'active',
-          targetPosition: 10, // Default target
-          priority: 'medium'
+          priority: 2 // Medium priority (1=high, 2=medium, 3=low)
         })),
         skipDuplicates: true
       });
