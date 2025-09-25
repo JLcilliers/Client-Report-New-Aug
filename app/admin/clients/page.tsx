@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
 import ClientListPrisma from "@/components/admin/ClientListPrisma"
-import ClientForm from "@/components/admin/ClientForm"
+import ClientForm from "@/components/admin/ClientFormWithGoogleAccounts"
 import {
   Dialog,
   DialogContent,
