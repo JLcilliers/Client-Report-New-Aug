@@ -214,9 +214,9 @@ async function getKeywordPerformanceData(prisma: any, reportId: string) {
   });
 
   const all = processedKeywords;
-  const improved = all.filter(k => k.positionChange && k.positionChange > 0);
-  const declined = all.filter(k => k.positionChange && k.positionChange < 0);
-  const newKeywords = all.filter(k => !k.previousPosition);
+  const improved = all.filter((k: any) => k.positionChange && k.positionChange > 0);
+  const declined = all.filter((k: any) => k.positionChange && k.positionChange < 0);
+  const newKeywords = all.filter((k: any) => !k.previousPosition);
 
   return {
     keywords: all,
