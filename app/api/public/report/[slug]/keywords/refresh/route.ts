@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getPrisma } from '@/lib/db/prisma';
 import { getValidGoogleToken } from '@/lib/google/refresh-token';
+import type { PrismaClient, Keyword, KeywordPerformance } from '@prisma/client';
 
 // Rate limiting map to prevent abuse
 const refreshCooldowns = new Map<string, number>();
@@ -91,7 +92,7 @@ export async function POST(
 }
 
 async function refreshKeywordData(
-  prisma: any,
+  prisma: PrismaClient,
   reportId: string,
   propertyId: string,
   accessToken: string,
@@ -182,7 +183,7 @@ async function refreshKeywordData(
   return performanceUpdates;
 }
 
-async function getKeywordPerformanceData(prisma: any, reportId: string) {
+async function getKeywordPerformanceData(prisma: PrismaClient, reportId: string) {
   // Get latest performance for each keyword
   const keywords = await prisma.keyword.findMany({
     where: {
@@ -197,7 +198,11 @@ async function getKeywordPerformanceData(prisma: any, reportId: string) {
     }
   });
 
-  const processedKeywords = keywords.map((kw: any) => {
+  type KeywordWithPerformance = Keyword & {
+    performanceHistory: KeywordPerformance[];
+  };
+
+  const processedKeywords = keywords.map((kw: KeywordWithPerformance) => {
     const latest = kw.performanceHistory[0];
     const previous = kw.performanceHistory[1];
 
@@ -214,9 +219,20 @@ async function getKeywordPerformanceData(prisma: any, reportId: string) {
   });
 
   const all = processedKeywords;
-  const improved = all.filter((k: any) => k.positionChange && k.positionChange > 0);
-  const declined = all.filter((k: any) => k.positionChange && k.positionChange < 0);
-  const newKeywords = all.filter((k: any) => !k.previousPosition);
+  type ProcessedKeyword = {
+    query: string;
+    clicks: number;
+    impressions: number;
+    ctr: number;
+    position: number;
+    previousPosition: number | undefined;
+    positionChange: number | null;
+    rankingPage: string | null;
+  };
+
+  const improved = all.filter((k: ProcessedKeyword) => k.positionChange && k.positionChange > 0);
+  const declined = all.filter((k: ProcessedKeyword) => k.positionChange && k.positionChange < 0);
+  const newKeywords = all.filter((k: ProcessedKeyword) => !k.previousPosition);
 
   return {
     keywords: all,

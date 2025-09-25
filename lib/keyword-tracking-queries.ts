@@ -79,7 +79,9 @@ export async function batchInsertPerformanceData(
   performanceData: Array<{
     keywordId: string;
     weekStartDate: Date;
+    weekEndDate: Date;
     avgPosition: number;
+    bestPosition: number;
     impressions: number;
     clicks: number;
     // ... other fields
@@ -148,25 +150,38 @@ export async function detectCannibalization(clientReportId: string) {
 
   // Create cannibalization records
   for (const issue of recentPerformance) {
-    await prisma.keywordCannibalization.upsert({
+    // Find existing cannibalization record
+    const existing = await prisma.keywordCannibalization.findFirst({
       where: {
-        clientReportId_keyword: {
-          clientReportId,
-          keyword: issue.keyword
-        }
-      },
-      update: {
-        affectedUrls: JSON.stringify(issue.urls),
-        severity: issue.url_count > 3 ? 'high' : issue.url_count > 2 ? 'medium' : 'low',
-        status: 'active'
-      },
-      create: {
         clientReportId,
-        keyword: issue.keyword,
-        affectedUrls: JSON.stringify(issue.urls),
-        severity: issue.url_count > 3 ? 'high' : issue.url_count > 2 ? 'medium' : 'low'
+        keyword: issue.keyword
       }
     });
+
+    const severity = issue.url_count > 3 ? 'high' : issue.url_count > 2 ? 'medium' : 'low';
+    const affectedUrls = JSON.stringify(issue.urls);
+
+    if (existing) {
+      // Update existing record
+      await prisma.keywordCannibalization.update({
+        where: { id: existing.id },
+        data: {
+          affectedUrls,
+          severity,
+          status: 'active'
+        }
+      });
+    } else {
+      // Create new record
+      await prisma.keywordCannibalization.create({
+        data: {
+          clientReportId,
+          keyword: issue.keyword,
+          affectedUrls,
+          severity
+        }
+      });
+    }
   }
 
   return recentPerformance;
@@ -481,9 +496,11 @@ async function updatePositionChanges(
 }
 
 // ============================================
-// CACHING LAYER EXAMPLES
+// CACHING LAYER EXAMPLES (OPTIONAL - REQUIRES ioredis)
 // ============================================
 
+// Uncomment below if Redis caching is needed:
+/*
 import { Redis } from 'ioredis';
 
 const redis = new Redis({
@@ -491,9 +508,6 @@ const redis = new Redis({
   port: parseInt(process.env.REDIS_PORT || '6379')
 });
 
-/**
- * Cached query wrapper for expensive operations
- */
 export async function getCachedKeywordData(
   clientReportId: string,
   cacheKey: string,
@@ -509,9 +523,7 @@ export async function getCachedKeywordData(
   return data;
 }
 
-/**
- * Cache invalidation for real-time updates
- */
+// Cache invalidation for real-time updates
 export async function invalidateKeywordCache(clientReportId: string) {
   const pattern = `keywords:${clientReportId}:*`;
   const keys = await redis.keys(pattern);
@@ -519,3 +531,4 @@ export async function invalidateKeywordCache(clientReportId: string) {
     await redis.del(...keys);
   }
 }
+*/
