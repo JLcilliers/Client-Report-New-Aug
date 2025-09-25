@@ -19,6 +19,9 @@ export async function GET(
               take: 1
             }
           }
+        },
+        competitors: {
+          orderBy: { createdAt: 'desc' }
         }
       }
     });
@@ -29,10 +32,6 @@ export async function GET(
         { status: 404 }
       );
     }
-
-    // Get competitors (stored as JSON or in a separate table if available)
-    // For now, we'll use a placeholder
-    const competitors: any[] = [];
 
     // Transform to client structure with all details
     const clientData = {
@@ -47,7 +46,7 @@ export async function GET(
         shareableId: report.shareableId,
         createdAt: report.createdAt
       }],
-      competitors: competitors,
+      competitors: report.competitors || [],
       keywords: report.keywords.map(kw => {
         const latestPerf = kw.performanceHistory[0];
         return {

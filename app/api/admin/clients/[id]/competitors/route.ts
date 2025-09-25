@@ -78,35 +78,3 @@ export async function POST(
   }
 }
 
-// DELETE - Remove a competitor
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  try {
-    const { searchParams } = new URL(request.url)
-    const competitorId = searchParams.get('competitorId')
-
-    if (!competitorId) {
-      return NextResponse.json(
-        { error: 'Competitor ID is required' },
-        { status: 400 }
-      )
-    }
-
-    await prisma.competitor.delete({
-      where: {
-        id: competitorId,
-        clientReportId: params.id
-      }
-    })
-
-    return NextResponse.json({ success: true })
-  } catch (error) {
-    console.error('Error deleting competitor:', error)
-    return NextResponse.json(
-      { error: 'Failed to delete competitor' },
-      { status: 500 }
-    )
-  }
-}

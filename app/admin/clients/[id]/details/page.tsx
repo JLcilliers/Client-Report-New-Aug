@@ -143,6 +143,8 @@ export default function ClientDetailsPage() {
         body: JSON.stringify(newCompetitor)
       });
 
+      const data = await response.json();
+
       if (response.ok) {
         toast({
           title: 'Success',
@@ -151,12 +153,13 @@ export default function ClientDetailsPage() {
         setNewCompetitor({ name: '', domain: '' });
         fetchClientDetails();
       } else {
-        throw new Error('Failed to add competitor');
+        // Handle specific error messages from the API
+        throw new Error(data.error || 'Failed to add competitor');
       }
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: 'Error',
-        description: 'Failed to add competitor',
+        description: error.message || 'Failed to add competitor',
         variant: 'destructive'
       });
     }
