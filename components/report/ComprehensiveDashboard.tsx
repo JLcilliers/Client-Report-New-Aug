@@ -37,6 +37,7 @@ import EnhancedMetrics from './EnhancedMetrics';
 import ActionableInsights from './ActionableInsights';
 import DataVisualizations from './DataVisualizations';
 import CompetitorManagement from './CompetitorManagement';
+import KeywordPerformance from './KeywordPerformance';
 
 interface DashboardProps {
   reportId: string;
@@ -166,6 +167,7 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
   const [seoAuditData, setSeoAuditData] = useState<any>(null);
   const [loadingSEO, setLoadingSEO] = useState(false);
+  const [keywordData, setKeywordData] = useState<any>(null);
 
   useEffect(() => {
     console.log('📊 ComprehensiveDashboard mounted/updated - reportId:', reportId, 'slug:', reportSlug);
@@ -237,9 +239,17 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
   const loadExistingData = async () => {
     console.log('📖 Loading existing data for slug:', reportSlug);
     try {
+      // Fetch the main report data which includes keywords
+      const reportResponse = await fetch(`/api/public/report/${reportSlug}`);
+      if (reportResponse.ok) {
+        const reportData = await reportResponse.json();
+        console.log('📖 Loaded report with keywords:', reportData.keywordPerformance);
+        setKeywordData(reportData.keywordPerformance);
+      }
+
       const dataResponse = await fetch(`/api/public/report/${reportSlug}/data`);
       console.log('📖 Data response status:', dataResponse.status);
-      
+
       if (dataResponse.ok) {
         const data = await dataResponse.json();
         console.log('📖 Loaded existing data:', data);
@@ -1206,8 +1216,9 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
 
       {/* Main Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4 md:grid-cols-9">
+        <TabsList className="grid w-full grid-cols-5 md:grid-cols-10">
           <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="keywords">Keywords</TabsTrigger>
           <TabsTrigger value="competitors">Competitors</TabsTrigger>
           <TabsTrigger value="insights">Insights</TabsTrigger>
           <TabsTrigger value="metrics">Metrics</TabsTrigger>
@@ -1332,6 +1343,14 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        {/* Keywords Tab */}
+        <TabsContent value="keywords" className="space-y-6">
+          <KeywordPerformance
+            data={keywordData || { keywords: [], improved: [], declined: [], new: [], stats: { total: 0, improved: 0, declined: 0, new: 0 } }}
+            reportSlug={reportSlug}
+          />
         </TabsContent>
 
         {/* Competitors Tab */}
