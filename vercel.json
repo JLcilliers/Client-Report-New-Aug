@@ -11,6 +11,9 @@
     },
     "app/api/cron/weekly-audit/route.ts": {
       "maxDuration": 60
+    },
+    "app/api/cron/update-keywords/route.ts": {
+      "maxDuration": 60
     }
   },
   "crons": [
@@ -21,6 +24,10 @@
     {
       "path": "/api/cron/weekly-audit",
       "schedule": "0 6 * * 0"
+    },
+    {
+      "path": "/api/cron/update-keywords",
+      "schedule": "0 2 * * 1"
     }
   ]
 }

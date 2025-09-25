@@ -1,0 +1,320 @@
+// ============================================
+// KEYWORD TRACKING SCHEMA DESIGN
+// ============================================
+// This schema extension provides comprehensive keyword tracking capabilities
+// for up to 30 keywords per client with weekly performance history
+
+// Main keyword definition and configuration
+model Keyword {
+  id                    String                @id @default(cuid())
+  clientReportId        String
+  keyword               String                // The primary keyword phrase
+  searchVolume          Int?                  // Monthly search volume
+  difficulty            Int?                  // Keyword difficulty score (0-100)
+  priority              Int                   @default(1) // Priority ranking (1-30)
+  targetUrl             String?               // Target/preferred URL to rank
+  trackingStatus        String                @default("active") // active, paused, archived
+  tags                  String?               // Comma-separated tags for categorization
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+
+  // Relations
+  clientReport          ClientReport          @relation(fields: [clientReportId], references: [id], onDelete: Cascade)
+  performanceHistory    KeywordPerformance[]
+  variations            KeywordVariation[]
+  competitorRankings    CompetitorKeywordRank[]
+  alerts                KeywordAlert[]
+
+  // Indexes for query performance
+  @@unique([clientReportId, keyword]) // Prevent duplicate keywords per client
+  @@index([clientReportId, trackingStatus])
+  @@index([clientReportId, priority])
+  @@index([keyword])
+  @@index([createdAt])
+}
+
+// Weekly performance snapshots for each keyword
+model KeywordPerformance {
+  id                    String                @id @default(cuid())
+  keywordId             String
+  weekStartDate         DateTime              // Start of the week (Monday)
+  weekEndDate           DateTime              // End of the week (Sunday)
+
+  // Position metrics
+  avgPosition           Float                 // Average position for the week
+  bestPosition          Int                   // Best position achieved in the week
+  worstPosition         Int?                  // Worst position in the week
+  positionChange        Float?                // Change from previous week
+
+  // Visibility metrics
+  impressions           Int                   @default(0)
+  clicks                Int                   @default(0)
+  ctr                   Float                 @default(0) // Click-through rate
+
+  // Ranking details
+  rankingUrl            String?               // The URL that's ranking
+  rankingTitle          String?               // Page title of ranking URL
+  rankingDescription    String?               @db.Text // Meta description
+
+  // SERP features
+  featuredSnippet       Boolean               @default(false)
+  siteLinks             Boolean               @default(false)
+  peopleAlsoAsk         Boolean               @default(false)
+  localPack             Boolean               @default(false)
+  knowledgePanel        Boolean               @default(false)
+  imageCarousel         Boolean               @default(false)
+  videoCarousel         Boolean               @default(false)
+
+  // Competitor context
+  topCompetitors        String?               @db.Text // JSON array of top 5 competitors
+
+  // Data quality
+  dataSource            String                @default("search_console") // search_console, manual, api
+  confidence            Float                 @default(1.0) // Data confidence score
+
+  createdAt             DateTime              @default(now())
+
+  // Relations
+  keyword               Keyword               @relation(fields: [keywordId], references: [id], onDelete: Cascade)
+
+  // Indexes for efficient queries
+  @@unique([keywordId, weekStartDate]) // One record per keyword per week
+  @@index([keywordId, weekStartDate])
+  @@index([weekStartDate])
+  @@index([avgPosition])
+  @@index([positionChange])
+}
+
+// Track keyword variations and related searches
+model KeywordVariation {
+  id                    String                @id @default(cuid())
+  keywordId             String
+  variation             String                // The variation/related keyword
+  type                  String                // 'variation', 'long_tail', 'related', 'question', 'branded'
+  searchVolume          Int?
+  relevanceScore        Float?                // 0-1 relevance to main keyword
+  isTracked             Boolean               @default(false) // Whether we're actively tracking this
+  discoveredAt          DateTime              @default(now())
+
+  // Relations
+  keyword               Keyword               @relation(fields: [keywordId], references: [id], onDelete: Cascade)
+
+  // Indexes
+  @@index([keywordId])
+  @@index([variation])
+  @@index([type])
+}
+
+// Track competitor rankings for the same keywords
+model CompetitorKeywordRank {
+  id                    String                @id @default(cuid())
+  keywordId             String
+  competitorDomain      String
+  position              Int
+  url                   String?
+  title                 String?
+  snippet               String?               @db.Text
+  measuredAt            DateTime              @default(now())
+
+  // Relations
+  keyword               Keyword               @relation(fields: [keywordId], references: [id], onDelete: Cascade)
+
+  // Indexes
+  @@index([keywordId, measuredAt])
+  @@index([competitorDomain])
+  @@index([position])
+}
+
+// Alert configuration for keyword tracking
+model KeywordAlert {
+  id                    String                @id @default(cuid())
+  keywordId             String
+  alertType             String                // 'position_drop', 'position_gain', 'serp_feature', 'competitor_change'
+  threshold             Float?                // Threshold value for triggering
+  isActive              Boolean               @default(true)
+  lastTriggered         DateTime?
+  notificationsSent     Int                   @default(0)
+  createdAt             DateTime              @default(now())
+
+  // Relations
+  keyword               Keyword               @relation(fields: [keywordId], references: [id], onDelete: Cascade)
+  alertHistory          KeywordAlertHistory[]
+
+  // Indexes
+  @@index([keywordId, isActive])
+  @@index([alertType])
+}
+
+// History of triggered alerts
+model KeywordAlertHistory {
+  id                    String                @id @default(cuid())
+  alertId               String
+  triggeredAt           DateTime              @default(now())
+  previousValue         String?
+  currentValue          String?
+  changeDescription     String
+  severity              String                @default("info") // 'critical', 'warning', 'info'
+  actionTaken           String?               @db.Text
+
+  // Relations
+  alert                 KeywordAlert          @relation(fields: [alertId], references: [id], onDelete: Cascade)
+
+  // Indexes
+  @@index([alertId, triggeredAt])
+  @@index([severity])
+}
+
+// Aggregated keyword group performance
+model KeywordGroup {
+  id                    String                @id @default(cuid())
+  clientReportId        String
+  groupName             String
+  description           String?
+  keywordIds            String                @db.Text // JSON array of keyword IDs
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+
+  // Relations
+  clientReport          ClientReport          @relation(fields: [clientReportId], references: [id], onDelete: Cascade)
+  groupPerformance      KeywordGroupPerformance[]
+
+  // Indexes
+  @@unique([clientReportId, groupName])
+  @@index([clientReportId])
+}
+
+// Weekly aggregated performance for keyword groups
+model KeywordGroupPerformance {
+  id                    String                @id @default(cuid())
+  groupId               String
+  weekStartDate         DateTime
+  avgPosition           Float                 // Average across all keywords in group
+  totalImpressions      Int
+  totalClicks           Int
+  avgCtr                Float
+  keywordsImproved      Int                   // Number of keywords that improved
+  keywordsDeclined      Int                   // Number of keywords that declined
+  keywordsStable        Int                   // Number of keywords that stayed stable
+  topPerformers         String?               @db.Text // JSON array of top 5 performing keywords
+  createdAt             DateTime              @default(now())
+
+  // Relations
+  group                 KeywordGroup          @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  // Indexes
+  @@unique([groupId, weekStartDate])
+  @@index([groupId, weekStartDate])
+  @@index([weekStartDate])
+}
+
+// Keyword cannibalization tracking
+model KeywordCannibalization {
+  id                    String                @id @default(cuid())
+  clientReportId        String
+  keyword               String
+  affectedUrls          String                @db.Text // JSON array of URLs
+  severity              String                // 'high', 'medium', 'low'
+  impact                String?               @db.Text // Description of the impact
+  recommendedAction     String?               @db.Text
+  status                String                @default("active") // 'active', 'resolved', 'monitoring'
+  detectedAt            DateTime              @default(now())
+  resolvedAt            DateTime?
+
+  // Relations
+  clientReport          ClientReport          @relation(fields: [clientReportId], references: [id], onDelete: Cascade)
+
+  // Indexes
+  @@index([clientReportId, status])
+  @@index([keyword])
+  @@index([severity])
+  @@index([detectedAt])
+}
+
+// ============================================
+// REQUIRED UPDATES TO EXISTING MODELS
+// ============================================
+
+// Add these relations to the existing ClientReport model:
+// keywords              Keyword[]
+// keywordGroups         KeywordGroup[]
+// keywordCannibalization KeywordCannibalization[]
+
+// ============================================
+// INDEXING STRATEGY
+// ============================================
+
+// Primary indexes are included in the schema above.
+// Additional composite indexes for common query patterns:
+
+// 1. Find keywords with recent position changes
+// @@index([clientReportId, positionChange, weekStartDate]) on KeywordPerformance
+
+// 2. Trending keywords analysis
+// @@index([keywordId, weekStartDate, avgPosition]) on KeywordPerformance
+
+// 3. Quick competitor analysis
+// @@index([competitorDomain, position, measuredAt]) on CompetitorKeywordRank
+
+// 4. Alert monitoring
+// @@index([alertType, isActive, lastTriggered]) on KeywordAlert
+
+// ============================================
+// DATA RETENTION STRATEGY
+// ============================================
+
+// 1. Keep detailed weekly data for 52 weeks (1 year)
+// 2. Aggregate to monthly after 1 year
+// 3. Keep monthly aggregates for 2 additional years
+// 4. Archive or delete data older than 3 years
+
+// ============================================
+// QUERY OPTIMIZATION NOTES
+// ============================================
+
+// 1. Use database views for common aggregations:
+//    - WeeklyKeywordSummary: Aggregate performance by week
+//    - KeywordTrends: Calculate trend lines and predictions
+//    - CompetitorComparison: Side-by-side competitor analysis
+
+// 2. Implement materialized views for:
+//    - Dashboard metrics (refresh every hour)
+//    - Historical trend calculations
+//    - Ranking distribution analysis
+
+// 3. Partition KeywordPerformance table by:
+//    - weekStartDate for time-based queries
+//    - Consider monthly partitions for large datasets
+
+// ============================================
+// CACHING STRATEGY
+// ============================================
+
+// 1. Cache keyword performance data:
+//    - Current week: No cache (real-time)
+//    - Previous 4 weeks: 1-hour cache
+//    - Older than 4 weeks: 24-hour cache
+
+// 2. Pre-calculate and cache:
+//    - Weekly trend indicators
+//    - Position change percentages
+//    - Competitor movement patterns
+
+// ============================================
+// SCALABILITY CONSIDERATIONS
+// ============================================
+
+// 1. Expected data volume (per client):
+//    - 30 keywords max
+//    - 52 weekly snapshots per year = 1,560 records/client/year
+//    - With 1,000 clients = 1.56M records/year
+
+// 2. Performance optimizations:
+//    - Implement database connection pooling
+//    - Use read replicas for analytics queries
+//    - Consider time-series database for historical data
+//    - Implement batch inserts for weekly updates
+
+// 3. Storage optimization:
+//    - Compress old performance data
+//    - Archive data older than 1 year to cold storage
+//    - Use JSONB for flexible schema fields

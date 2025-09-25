@@ -74,7 +74,62 @@ export async function GET(
     } catch (cacheError) {
       console.log("Cache retrieval error:", cacheError)
     }
-    
+
+    // Get keyword performance data
+    let keywordPerformance = null
+    try {
+      const keywords = await prisma.keyword.findMany({
+        where: {
+          clientReportId: report.id,
+          trackingStatus: 'active'
+        },
+        include: {
+          performanceHistory: {
+            orderBy: { weekStartDate: 'desc' },
+            take: 2 // Get last 2 to calculate change
+          }
+        }
+      })
+
+      if (keywords.length > 0) {
+        const processedKeywords = keywords.map(kw => {
+          const latest = kw.performanceHistory[0]
+          const previous = kw.performanceHistory[1]
+
+          return {
+            query: kw.keyword,
+            clicks: latest?.clicks || 0,
+            impressions: latest?.impressions || 0,
+            ctr: latest?.ctr || 0,
+            position: latest?.avgPosition || 999,
+            previousPosition: previous?.avgPosition,
+            positionChange: latest?.positionChange || null,
+            rankingPage: latest?.rankingUrl || null
+          }
+        })
+
+        const all = processedKeywords
+        const improved = all.filter(k => k.positionChange && k.positionChange > 0)
+        const declined = all.filter(k => k.positionChange && k.positionChange < 0)
+        const newKeywords = all.filter(k => !k.previousPosition)
+
+        keywordPerformance = {
+          keywords: all,
+          improved,
+          declined,
+          new: newKeywords,
+          stats: {
+            total: all.length,
+            improved: improved.length,
+            declined: declined.length,
+            new: newKeywords.length
+          }
+        }
+      }
+    } catch (keywordError) {
+      console.log("Error fetching keyword performance:", keywordError)
+    }
+
     // Return public data only (no sensitive info)
     return NextResponse.json({
       id: report.id,
@@ -88,7 +143,8 @@ export async function GET(
       refreshInterval: report.refreshInterval,
       created_at: report.createdAt,
       updated_at: report.updatedAt,
-      cachedData: cachedData
+      cachedData: cachedData,
+      keywordPerformance: keywordPerformance
     })
     
   } catch (error: any) {

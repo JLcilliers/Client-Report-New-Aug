@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import ComprehensiveDashboard from "@/components/report/ComprehensiveDashboard"
 import DataFreshnessIndicator from "@/components/report/DataFreshnessIndicator"
+import KeywordPerformance from "@/components/report/KeywordPerformance"
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -34,6 +35,7 @@ interface ReportData {
     topQueries: any[]
   }
   analytics?: any
+  keywordPerformance?: any
   last_updated: string | null
 }
 
@@ -386,7 +388,17 @@ export default function PublicReportPage() {
             </Link>
           </CardContent>
         </Card>
-        
+
+        {/* Keyword Performance Section */}
+        {report.keywordPerformance && (
+          <div className="mb-8">
+            <KeywordPerformance
+              data={report.keywordPerformance}
+              reportSlug={slug}
+            />
+          </div>
+        )}
+
         {/* Connected Properties */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           <Card>

@@ -1,24 +1,32 @@
+'use client';
+
 import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { KeywordPerformance as KeywordData, GSCQuery } from "@/types"
-import { 
+import {
   Search,
   TrendingUp,
   TrendingDown,
   Download,
   ArrowUp,
-  ArrowDown
+  ArrowDown,
+  RefreshCw,
+  Plus,
+  ExternalLink
 } from "lucide-react"
 
 interface KeywordPerformanceProps {
   data: KeywordData
+  reportSlug?: string
 }
 
-export default function KeywordPerformance({ data }: KeywordPerformanceProps) {
+export default function KeywordPerformance({ data, reportSlug }: KeywordPerformanceProps) {
   const [searchTerm, setSearchTerm] = useState("")
   const [filter, setFilter] = useState<"all" | "improved" | "declined" | "new">("all")
+  const [isRefreshing, setIsRefreshing] = useState(false)
 
   const getFilteredKeywords = () => {
     let keywords = data.keywords
@@ -37,6 +45,27 @@ export default function KeywordPerformance({ data }: KeywordPerformanceProps) {
   }
 
   const filteredKeywords = getFilteredKeywords()
+
+  const handleRefresh = async () => {
+    if (!reportSlug) return;
+
+    setIsRefreshing(true);
+    try {
+      const response = await fetch(`/api/public/report/${reportSlug}/keywords/refresh`, {
+        method: 'POST'
+      });
+
+      if (response.ok) {
+        window.location.reload();
+      } else {
+        console.error('Refresh failed');
+      }
+    } catch (error) {
+      console.error('Refresh error:', error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   const exportToCSV = () => {
     const csv = [
@@ -69,13 +98,26 @@ export default function KeywordPerformance({ data }: KeywordPerformanceProps) {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Keywords</CardTitle>
-              <CardDescription>Track your keyword rankings and performance</CardDescription>
+              <CardTitle>Tracked Keywords Performance</CardTitle>
+              <CardDescription>Monitor your targeted keywords rankings over time</CardDescription>
             </div>
-            <Button onClick={exportToCSV} variant="outline" size="sm">
-              <Download className="h-4 w-4 mr-2" />
-              Export CSV
-            </Button>
+            <div className="flex gap-2">
+              {reportSlug && (
+                <Button
+                  onClick={handleRefresh}
+                  disabled={isRefreshing}
+                  variant="outline"
+                  size="sm"
+                >
+                  <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+                  {isRefreshing ? 'Updating...' : 'Refresh'}
+                </Button>
+              )}
+              <Button onClick={exportToCSV} variant="outline" size="sm">
+                <Download className="h-4 w-4 mr-2" />
+                Export CSV
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -148,17 +190,29 @@ export default function KeywordPerformance({ data }: KeywordPerformanceProps) {
                 ) : (
                   filteredKeywords.slice(0, 20).map((keyword, index) => {
                     const positionChange = keyword.positionChange || 0
-                    const isImproved = positionChange < 0 // Lower position is better
-                    
+                    const isImproved = positionChange > 0 // Positive change means improvement
+                    const isNew = !keyword.previousPosition
+
                     return (
                       <tr key={index} className="border-b hover:bg-gray-50">
-                        <td className="py-2 px-4 font-medium">{keyword.query}</td>
+                        <td className="py-2 px-4">
+                          <div>
+                            <div className="font-medium">{keyword.query}</div>
+                            {isNew && (
+                              <Badge variant="secondary" className="text-xs mt-1">
+                                New
+                              </Badge>
+                            )}
+                          </div>
+                        </td>
                         <td className="text-right py-2 px-4">{keyword.impressions.toLocaleString()}</td>
                         <td className="text-right py-2 px-4">{keyword.clicks.toLocaleString()}</td>
-                        <td className="text-right py-2 px-4">{keyword.ctr.toFixed(2)}%</td>
-                        <td className="text-right py-2 px-4">{keyword.position.toFixed(1)}</td>
+                        <td className="text-right py-2 px-4">{(keyword.ctr * 100).toFixed(2)}%</td>
                         <td className="text-right py-2 px-4">
-                          {positionChange !== 0 && (
+                          {keyword.position < 999 ? keyword.position.toFixed(1) : '—'}
+                        </td>
+                        <td className="text-right py-2 px-4">
+                          {positionChange !== 0 && !isNew && (
                             <span className={`flex items-center justify-end ${
                               isImproved ? "text-green-600" : "text-red-600"
                             }`}>
@@ -170,6 +224,7 @@ export default function KeywordPerformance({ data }: KeywordPerformanceProps) {
                               {Math.abs(positionChange).toFixed(1)}
                             </span>
                           )}
+                          {isNew && <span className="text-gray-400">—</span>}
                         </td>
                       </tr>
                     )

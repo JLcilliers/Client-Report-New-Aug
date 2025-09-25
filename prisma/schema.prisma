@@ -102,6 +102,9 @@ model ClientReport {
   cache                   ReportCache[]
   seoAudits               SEOAudit[]
   competitors             Competitor[]
+  keywords                Keyword[]
+  keywordGroups           KeywordGroup[]
+  keywordCannibalization  KeywordCannibalization[]
 }
 
 model ReportAccessLog {
@@ -388,9 +391,208 @@ model Competitor {
   lastAnalyzed    DateTime?
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
-  
+
   clientReport    ClientReport  @relation(fields: [clientReportId], references: [id], onDelete: Cascade)
-  
+
   @@index([clientReportId])
   @@index([domain])
+}
+
+// ============================================
+// KEYWORD TRACKING MODELS
+// ============================================
+
+// Main keyword definition and configuration
+model Keyword {
+  id                    String                @id @default(cuid())
+  clientReportId        String
+  keyword               String
+  searchVolume          Int?
+  difficulty            Int?
+  priority              Int                   @default(1)
+  targetUrl             String?
+  trackingStatus        String                @default("active")
+  tags                  String?
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+
+  clientReport          ClientReport          @relation(fields: [clientReportId], references: [id], onDelete: Cascade)
+  performanceHistory    KeywordPerformance[]
+  variations            KeywordVariation[]
+  competitorRankings    CompetitorKeywordRank[]
+  alerts                KeywordAlert[]
+
+  @@unique([clientReportId, keyword])
+  @@index([clientReportId, trackingStatus])
+  @@index([clientReportId, priority])
+  @@index([keyword])
+  @@index([createdAt])
+}
+
+// Weekly performance snapshots for each keyword
+model KeywordPerformance {
+  id                    String                @id @default(cuid())
+  keywordId             String
+  weekStartDate         DateTime
+  weekEndDate           DateTime
+  avgPosition           Float
+  bestPosition          Int
+  worstPosition         Int?
+  positionChange        Float?
+  impressions           Int                   @default(0)
+  clicks                Int                   @default(0)
+  ctr                   Float                 @default(0)
+  rankingUrl            String?
+  rankingTitle          String?
+  rankingDescription    String?               @db.Text
+  featuredSnippet       Boolean               @default(false)
+  siteLinks             Boolean               @default(false)
+  peopleAlsoAsk         Boolean               @default(false)
+  localPack             Boolean               @default(false)
+  knowledgePanel        Boolean               @default(false)
+  imageCarousel         Boolean               @default(false)
+  videoCarousel         Boolean               @default(false)
+  topCompetitors        String?               @db.Text
+  dataSource            String                @default("search_console")
+  confidence            Float                 @default(1.0)
+  createdAt             DateTime              @default(now())
+
+  keyword               Keyword               @relation(fields: [keywordId], references: [id], onDelete: Cascade)
+
+  @@unique([keywordId, weekStartDate])
+  @@index([keywordId, weekStartDate])
+  @@index([weekStartDate])
+  @@index([avgPosition])
+  @@index([positionChange])
+}
+
+// Track keyword variations and related searches
+model KeywordVariation {
+  id                    String                @id @default(cuid())
+  keywordId             String
+  variation             String
+  type                  String
+  searchVolume          Int?
+  relevanceScore        Float?
+  isTracked             Boolean               @default(false)
+  discoveredAt          DateTime              @default(now())
+
+  keyword               Keyword               @relation(fields: [keywordId], references: [id], onDelete: Cascade)
+
+  @@index([keywordId])
+  @@index([variation])
+  @@index([type])
+}
+
+// Track competitor rankings for the same keywords
+model CompetitorKeywordRank {
+  id                    String                @id @default(cuid())
+  keywordId             String
+  competitorDomain      String
+  position              Int
+  url                   String?
+  title                 String?
+  snippet               String?               @db.Text
+  measuredAt            DateTime              @default(now())
+
+  keyword               Keyword               @relation(fields: [keywordId], references: [id], onDelete: Cascade)
+
+  @@index([keywordId, measuredAt])
+  @@index([competitorDomain])
+  @@index([position])
+}
+
+// Alert configuration for keyword tracking
+model KeywordAlert {
+  id                    String                @id @default(cuid())
+  keywordId             String
+  alertType             String
+  threshold             Float?
+  isActive              Boolean               @default(true)
+  lastTriggered         DateTime?
+  notificationsSent     Int                   @default(0)
+  createdAt             DateTime              @default(now())
+
+  keyword               Keyword               @relation(fields: [keywordId], references: [id], onDelete: Cascade)
+  alertHistory          KeywordAlertHistory[]
+
+  @@index([keywordId, isActive])
+  @@index([alertType])
+}
+
+// History of triggered alerts
+model KeywordAlertHistory {
+  id                    String                @id @default(cuid())
+  alertId               String
+  triggeredAt           DateTime              @default(now())
+  previousValue         String?
+  currentValue          String?
+  changeDescription     String
+  severity              String                @default("info")
+  actionTaken           String?               @db.Text
+
+  alert                 KeywordAlert          @relation(fields: [alertId], references: [id], onDelete: Cascade)
+
+  @@index([alertId, triggeredAt])
+  @@index([severity])
+}
+
+// Aggregated keyword group performance
+model KeywordGroup {
+  id                    String                @id @default(cuid())
+  clientReportId        String
+  groupName             String
+  description           String?
+  keywordIds            String                @db.Text
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+
+  clientReport          ClientReport          @relation(fields: [clientReportId], references: [id], onDelete: Cascade)
+  groupPerformance      KeywordGroupPerformance[]
+
+  @@unique([clientReportId, groupName])
+  @@index([clientReportId])
+}
+
+// Weekly aggregated performance for keyword groups
+model KeywordGroupPerformance {
+  id                    String                @id @default(cuid())
+  groupId               String
+  weekStartDate         DateTime
+  avgPosition           Float
+  totalImpressions      Int
+  totalClicks           Int
+  avgCtr                Float
+  keywordsImproved      Int
+  keywordsDeclined      Int
+  keywordsStable        Int
+  topPerformers         String?               @db.Text
+  createdAt             DateTime              @default(now())
+
+  group                 KeywordGroup          @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, weekStartDate])
+  @@index([groupId, weekStartDate])
+  @@index([weekStartDate])
+}
+
+// Keyword cannibalization tracking
+model KeywordCannibalization {
+  id                    String                @id @default(cuid())
+  clientReportId        String
+  keyword               String
+  affectedUrls          String                @db.Text
+  severity              String
+  impact                String?               @db.Text
+  recommendedAction     String?               @db.Text
+  status                String                @default("active")
+  detectedAt            DateTime              @default(now())
+  resolvedAt            DateTime?
+
+  clientReport          ClientReport          @relation(fields: [clientReportId], references: [id], onDelete: Cascade)
+
+  @@index([clientReportId, status])
+  @@index([keyword])
+  @@index([severity])
+  @@index([detectedAt])
 }
