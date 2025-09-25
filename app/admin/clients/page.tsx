@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
-import ClientList from "@/components/admin/ClientList"
+import ClientListPrisma from "@/components/admin/ClientListPrisma"
 import ClientForm from "@/components/admin/ClientForm"
 import {
   Dialog,
@@ -35,7 +35,7 @@ export default function ClientsPage() {
         </Button>
       </div>
 
-      <ClientList key={refreshKey} />
+      <ClientListPrisma key={refreshKey} />
 
       <Dialog open={showAddClient} onOpenChange={setShowAddClient}>
         <DialogContent className="sm:max-w-[500px]">
