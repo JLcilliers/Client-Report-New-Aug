@@ -111,7 +111,25 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
+    // First check if the client exists
+    const client = await prisma.clientReport.findUnique({
+      where: { id: params.id }
+    });
+
+    if (!client) {
+      return NextResponse.json(
+        { error: 'Client not found' },
+        { status: 404 }
+      );
+    }
+
     // Delete the client report and all related data (cascade)
+    // The cascade delete will automatically remove:
+    // - Keywords and their performance history
+    // - Competitors
+    // - SEO audits
+    // - Report cache
+    // - Access logs
     await prisma.clientReport.delete({
       where: { id: params.id }
     });
@@ -120,10 +138,26 @@ export async function DELETE(
       success: true,
       message: 'Client deleted successfully'
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error deleting client:', error);
+
+    // Handle specific Prisma errors
+    if (error.code === 'P2025') {
+      return NextResponse.json(
+        { error: 'Client not found' },
+        { status: 404 }
+      );
+    }
+
+    if (error.code === 'P2003') {
+      return NextResponse.json(
+        { error: 'Cannot delete client due to existing dependencies' },
+        { status: 400 }
+      );
+    }
+
     return NextResponse.json(
-      { error: 'Failed to delete client' },
+      { error: 'Failed to delete client', details: error.message },
       { status: 500 }
     );
   }
