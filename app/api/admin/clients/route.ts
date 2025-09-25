@@ -51,14 +51,34 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Name and domain are required" }, { status: 400 })
     }
 
+    // Generate unique IDs for shareable links
+    const shareableId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    const shareableLink = `${process.env.NEXT_PUBLIC_APP_URL || 'https://searchsignal.online'}/report/${shareableId}`;
+
     // Create a new ClientReport
+    // For now, we'll use a placeholder userId and Google Account ID
+    // In production, this should come from the authenticated user
     const newReport = await prisma.clientReport.create({
       data: {
         clientName: name.trim(),
         reportName: `${name.trim()} SEO Report`,
+        googleAccountId: 'placeholder-google-account',
+        ga4PropertyId: 'placeholder-ga4',
         searchConsolePropertyId: `sc-domain:${domain.replace('https://', '').replace('http://', '')}`,
+        shareableLink,
+        shareableId,
         isActive: true,
-        refreshInterval: 'weekly'
+        refreshInterval: 'weekly',
+        user: {
+          connectOrCreate: {
+            where: { email: 'admin@searchsignal.online' },
+            create: {
+              email: 'admin@searchsignal.online',
+              name: 'Admin User',
+              role: 'admin'
+            }
+          }
+        }
       }
     })
 
