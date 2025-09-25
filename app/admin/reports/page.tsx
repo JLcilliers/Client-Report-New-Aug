@@ -241,6 +241,12 @@ export default function ReportsPage() {
                         View
                       </Button>
                     </Link>
+                    <Link href={`/admin/reports/${report.id}/keywords`} className="flex-1">
+                      <Button variant="outline" size="sm" className="w-full">
+                        <Search className="w-4 h-4 mr-2" />
+                        Keywords
+                      </Button>
+                    </Link>
                     <Button
                       variant="outline"
                       size="sm"
