@@ -183,8 +183,11 @@ export default function KeywordPerformance({ data, reportSlug }: KeywordPerforma
               <tbody>
                 {filteredKeywords.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="text-center py-8 text-gray-500">
-                      No keywords found
+                    <td colSpan={6} className="text-center py-8">
+                      <div className="text-gray-500">
+                        <p>No keywords are being tracked yet</p>
+                        <p className="text-sm mt-2">Keywords need to be configured by the administrator</p>
+                      </div>
                     </td>
                   </tr>
                 ) : (

@@ -390,14 +390,12 @@ export default function PublicReportPage() {
         </Card>
 
         {/* Keyword Performance Section */}
-        {report.keywordPerformance && (
-          <div className="mb-8">
-            <KeywordPerformance
-              data={report.keywordPerformance}
-              reportSlug={slug}
-            />
-          </div>
-        )}
+        <div className="mb-8">
+          <KeywordPerformance
+            data={report.keywordPerformance || { keywords: [], improved: [], declined: [], new: [], stats: { total: 0, improved: 0, declined: 0, new: 0 } }}
+            reportSlug={slug}
+          />
+        </div>
 
         {/* Connected Properties */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
