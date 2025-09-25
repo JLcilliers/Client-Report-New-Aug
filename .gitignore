@@ -42,7 +42,6 @@ nul
 checkpoints/
 analytics-dashboard/
 __tests__/
-scripts/
 automation/
 generated/
 *.json
