@@ -208,38 +208,49 @@ export default function TechnicalSEODashboard({ reportId, domain, onDataUpdate }
         <>
           {/* Overall Score */}
           <Card>
-            <CardContent className="pt-6">
-              <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                <div className="text-center">
-                  <div className={`text-4xl font-bold ${getScoreColor(auditData.overallScore || auditData.score)}`}>
-                    {auditData.overallScore || auditData.score}
+            <CardHeader>
+              <CardTitle>Audit Overview</CardTitle>
+              <CardDescription>Comprehensive technical SEO analysis results</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
+                <div className="col-span-2 md:col-span-1">
+                  <div className="text-center p-4 border rounded-lg">
+                    <div className={`text-5xl font-bold ${getScoreColor(auditData.overallScore || auditData.score)}`}>
+                      {auditData.overallScore || auditData.score}
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-2">Overall Score</p>
+                    <Progress value={auditData.overallScore || auditData.score} className="mt-3" />
                   </div>
-                  <p className="text-sm text-muted-foreground">Overall Score</p>
                 </div>
-                
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-red-600">
+
+                <div className="text-center p-4 border rounded-lg border-red-200 bg-red-50">
+                  <XCircle className="w-8 h-8 text-red-600 mx-auto mb-2" />
+                  <div className="text-3xl font-bold text-red-600">
                     {auditData.summary.critical}
                   </div>
                   <p className="text-sm text-muted-foreground">Critical Issues</p>
                 </div>
-                
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-yellow-600">
+
+                <div className="text-center p-4 border rounded-lg border-yellow-200 bg-yellow-50">
+                  <AlertCircle className="w-8 h-8 text-yellow-600 mx-auto mb-2" />
+                  <div className="text-3xl font-bold text-yellow-600">
                     {auditData.summary.warnings}
                   </div>
                   <p className="text-sm text-muted-foreground">Warnings</p>
                 </div>
-                
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-green-600">
+
+                <div className="text-center p-4 border rounded-lg border-green-200 bg-green-50">
+                  <CheckCircle2 className="w-8 h-8 text-green-600 mx-auto mb-2" />
+                  <div className="text-3xl font-bold text-green-600">
                     {auditData.summary.passed}
                   </div>
                   <p className="text-sm text-muted-foreground">Passed</p>
                 </div>
-                
-                <div className="text-center">
-                  <div className="text-2xl font-bold">
+
+                <div className="text-center p-4 border rounded-lg">
+                  <BarChart3 className="w-8 h-8 text-gray-600 mx-auto mb-2" />
+                  <div className="text-3xl font-bold">
                     {auditData.summary.totalChecks}
                   </div>
                   <p className="text-sm text-muted-foreground">Total Checks</p>
@@ -249,21 +260,57 @@ export default function TechnicalSEODashboard({ reportId, domain, onDataUpdate }
           </Card>
 
           {/* Category Scores */}
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-            {Object.entries(auditData.categories).map(([key, category]: [string, any]) => (
-              <Card key={key} className="cursor-pointer hover:shadow-lg transition-shadow">
-                <CardContent className="pt-6">
-                  <div className="flex items-center justify-between mb-2">
-                    {getCategoryIcon(key)}
-                    <span className={`text-2xl font-bold ${getScoreColor(category.score)}`}>
-                      {category.score}
-                    </span>
-                  </div>
-                  <p className="text-sm font-medium capitalize">{key}</p>
-                  <Progress value={category.score} className="mt-2" />
-                </CardContent>
-              </Card>
-            ))}
+          <div className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Performance by Category</CardTitle>
+                <CardDescription>Detailed breakdown of SEO performance areas</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {Object.entries(auditData.categories).map(([key, category]: [string, any]) => {
+                    const criticalIssues = category.checks?.filter((c: any) => c.status === 'fail').length || 0;
+                    const warnings = category.checks?.filter((c: any) => c.status === 'warning').length || 0;
+                    const passed = category.checks?.filter((c: any) => c.status === 'pass').length || 0;
+
+                    return (
+                      <div key={key} className="border rounded-lg p-4 hover:shadow-lg transition-all">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-2">
+                            {getCategoryIcon(key)}
+                            <span className="font-semibold capitalize text-lg">{key.replace(/_/g, ' ')}</span>
+                          </div>
+                          <span className={`text-3xl font-bold ${getScoreColor(category.score)}`}>
+                            {category.score}
+                          </span>
+                        </div>
+                        <Progress value={category.score} className="mb-3 h-2" />
+                        <div className="flex gap-4 text-xs">
+                          {criticalIssues > 0 && (
+                            <div className="flex items-center gap-1">
+                              <XCircle className="w-3 h-3 text-red-500" />
+                              <span className="text-red-600">{criticalIssues} issues</span>
+                            </div>
+                          )}
+                          {warnings > 0 && (
+                            <div className="flex items-center gap-1">
+                              <AlertCircle className="w-3 h-3 text-yellow-500" />
+                              <span className="text-yellow-600">{warnings} warnings</span>
+                            </div>
+                          )}
+                          {passed > 0 && (
+                            <div className="flex items-center gap-1">
+                              <CheckCircle2 className="w-3 h-3 text-green-500" />
+                              <span className="text-green-600">{passed} passed</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Detailed Results */}
@@ -279,41 +326,104 @@ export default function TechnicalSEODashboard({ reportId, domain, onDataUpdate }
                   <TabsTrigger value="tools">Individual Tools</TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="recommendations" className="space-y-4">
-                  {auditData.recommendations.map((rec: any, index: number) => (
-                    <Alert key={index}>
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2">
-                          <Badge variant={
-                            rec.priority === 'high' ? 'destructive' :
-                            rec.priority === 'medium' ? 'default' : 'secondary'
-                          }>
-                            {rec.priority}
-                          </Badge>
-                          <Badge variant="outline">{rec.category}</Badge>
+                <TabsContent value="recommendations" className="space-y-4 mt-6">
+                  <div className="space-y-4">
+                    {auditData.recommendations && auditData.recommendations.length > 0 ? (
+                      auditData.recommendations.map((rec: any, index: number) => (
+                        <div key={index} className={
+                          `border rounded-lg p-4 ${
+                            rec.priority === 'high' ? 'border-red-300 bg-red-50' :
+                            rec.priority === 'medium' ? 'border-yellow-300 bg-yellow-50' :
+                            'border-gray-200 bg-gray-50'
+                          }`
+                        }>
+                          <div className="space-y-3">
+                            <div className="flex items-start justify-between">
+                              <div className="flex items-center gap-2">
+                                {rec.priority === 'high' ? (
+                                  <XCircle className="w-5 h-5 text-red-600" />
+                                ) : rec.priority === 'medium' ? (
+                                  <AlertCircle className="w-5 h-5 text-yellow-600" />
+                                ) : (
+                                  <AlertCircle className="w-5 h-5 text-gray-600" />
+                                )}
+                                <Badge variant={
+                                  rec.priority === 'high' ? 'destructive' :
+                                  rec.priority === 'medium' ? 'default' : 'secondary'
+                                }>
+                                  {rec.priority} Priority
+                                </Badge>
+                                <Badge variant="outline" className="capitalize">
+                                  {rec.category?.replace(/_/g, ' ')}
+                                </Badge>
+                              </div>
+                            </div>
+                            <div className="space-y-2">
+                              <h4 className="font-semibold text-lg">{rec.issue}</h4>
+                              <p className="text-sm text-gray-700">{rec.recommendation}</p>
+                              {rec.impact && (
+                                <div className="flex items-start gap-2 mt-2 p-2 bg-white rounded border">
+                                  <Zap className="w-4 h-4 text-orange-500 mt-0.5" />
+                                  <p className="text-sm text-gray-600 italic">
+                                    <strong>Impact:</strong> {rec.impact}
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+                          </div>
                         </div>
-                        <div className="font-medium">{rec.issue}</div>
-                        <div className="text-sm text-muted-foreground">{rec.recommendation}</div>
-                        <div className="text-sm text-muted-foreground italic">{rec.impact}</div>
+                      ))
+                    ) : (
+                      <div className="text-center py-8 text-gray-500">
+                        <CheckCircle2 className="w-12 h-12 mx-auto mb-3 text-green-500" />
+                        <p>No recommendations at this time</p>
+                        <p className="text-sm mt-2">Your site is performing well!</p>
                       </div>
-                    </Alert>
-                  ))}
+                    )}
+                  </div>
                 </TabsContent>
 
-                <TabsContent value="checks" className="space-y-4">
+                <TabsContent value="checks" className="space-y-6 mt-6">
                   {Object.entries(auditData.categories).map(([category, data]: [string, any]) => (
-                    <div key={category}>
-                      <h3 className="font-semibold capitalize mb-2">{category}</h3>
-                      <div className="space-y-2">
-                        {data.checks.map((check: any, index: number) => (
-                          <div key={index} className="flex items-center justify-between p-2 border rounded">
-                            <div className="flex items-center gap-2">
-                              {getStatusIcon(check.status)}
-                              <span className="text-sm">{check.name}</span>
+                    <div key={category} className="space-y-3">
+                      <div className="flex items-center gap-3 mb-3">
+                        {getCategoryIcon(category)}
+                        <h3 className="font-semibold text-lg capitalize">{category.replace(/_/g, ' ')}</h3>
+                        <Badge variant="outline">
+                          {data.checks?.length || 0} checks
+                        </Badge>
+                      </div>
+                      <div className="grid gap-2">
+                        {data.checks && data.checks.length > 0 ? (
+                          data.checks.map((check: any, index: number) => (
+                            <div
+                              key={index}
+                              className={`flex items-start justify-between p-3 border rounded-lg transition-colors ${
+                                check.status === 'pass' ? 'bg-green-50 border-green-200 hover:bg-green-100' :
+                                check.status === 'warning' ? 'bg-yellow-50 border-yellow-200 hover:bg-yellow-100' :
+                                'bg-red-50 border-red-200 hover:bg-red-100'
+                              }`}
+                            >
+                              <div className="flex items-start gap-3 flex-1">
+                                {getStatusIcon(check.status)}
+                                <div className="space-y-1 flex-1">
+                                  <p className="font-medium text-sm">{check.name}</p>
+                                  <p className="text-sm text-gray-600">{check.message}</p>
+                                  {check.details && (
+                                    <p className="text-xs text-gray-500 mt-1">{check.details}</p>
+                                  )}
+                                </div>
+                              </div>
+                              {check.value && (
+                                <Badge variant="outline" className="ml-2">
+                                  {check.value}
+                                </Badge>
+                              )}
                             </div>
-                            <span className="text-sm text-muted-foreground">{check.message}</span>
-                          </div>
-                        ))}
+                          ))
+                        ) : (
+                          <p className="text-sm text-gray-500 italic">No checks available for this category</p>
+                        )}
                       </div>
                     </div>
                   ))}
