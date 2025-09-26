@@ -1242,7 +1242,7 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
           <TabsTrigger value="metrics">Metrics</TabsTrigger>
           <TabsTrigger value="search">Search</TabsTrigger>
           <TabsTrigger value="traffic">Traffic</TabsTrigger>
-          <TabsTrigger value="engagement">Engage</TabsTrigger>
+          <TabsTrigger value="engagement">Engagement</TabsTrigger>
           <TabsTrigger value="technical">Technical</TabsTrigger>
           <TabsTrigger value="visualize">Visualize</TabsTrigger>
         </TabsList>

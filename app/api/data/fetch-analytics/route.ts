@@ -219,7 +219,7 @@ export async function POST(request: NextRequest) {
     
     // Process top pages data
     if (pagesResponse.data.rows) {
-      analyticsResult.topPages = pagesResponse.data.rows.slice(0, 10).map(row => ({
+      analyticsResult.topPages = pagesResponse.data.rows.slice(0, 30).map(row => ({
         page: row.dimensionValues?.[0]?.value || "",
         sessions: parseInt(row.metricValues?.[0]?.value || "0"),
         users: parseInt(row.metricValues?.[1]?.value || "0"),
