@@ -12,8 +12,8 @@ export async function GET(request: NextRequest) {
       redirect_uri: `${request.nextUrl.origin}/api/test/google-auth?action=callback`,
       response_type: "code",
       scope: [
-        "https://www.googleapis.com/auth/webmasters",
-        "https://www.googleapis.com/auth/analytics",
+        "https://www.googleapis.com/auth/webmasters.readonly",
+        "https://www.googleapis.com/auth/analytics.readonly",
         "https://www.googleapis.com/auth/userinfo.email",
         "https://www.googleapis.com/auth/userinfo.profile"
       ].join(" "),

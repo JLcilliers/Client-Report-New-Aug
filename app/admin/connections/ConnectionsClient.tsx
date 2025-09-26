@@ -84,8 +84,7 @@ export default function ConnectionsClient({ initialConnection }: ConnectionsClie
       redirect_uri: `${window.location.origin}/api/auth/google/admin-callback`,
       response_type: "code",
       scope: [
-        "https://www.googleapis.com/auth/webmasters",
-        "https://www.googleapis.com/auth/analytics",
+        "https://www.googleapis.com/auth/webmasters.readonly",
         "https://www.googleapis.com/auth/analytics.readonly",
         "https://www.googleapis.com/auth/userinfo.email",
         "https://www.googleapis.com/auth/userinfo.profile"
