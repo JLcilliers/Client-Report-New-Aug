@@ -1217,17 +1217,18 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
               >
                 YoY
               </Button>
+              <Button
+                onClick={() => fetchMetrics(comparisonPeriod)}
+                disabled={refreshing || refreshingRef.current}
+                className="flex items-center gap-2 ml-4"
+                size="sm"
+              >
+                <RefreshCw className={`w-4 h-4 ${(refreshing || refreshingRef.current) ? 'animate-spin' : ''}`} />
+                {(refreshing || refreshingRef.current) ? 'Refreshing...' : 'Refresh Data'}
+              </Button>
             </div>
             <p className="text-xs text-gray-500">{getDateRangeExplanation(comparisonPeriod)}</p>
           </div>
-          <Button
-            onClick={() => fetchMetrics(comparisonPeriod)}
-            disabled={refreshing || refreshingRef.current}
-            className="flex items-center gap-2"
-          >
-            <RefreshCw className={`w-4 h-4 ${(refreshing || refreshingRef.current) ? 'animate-spin' : ''}`} />
-            {(refreshing || refreshingRef.current) ? 'Refreshing...' : 'Refresh Data'}
-          </Button>
         </div>
       </div>
 
@@ -1367,6 +1368,7 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
           <KeywordPerformance
             data={keywordData || { keywords: [], improved: [], declined: [], new: [], stats: { total: 0, improved: 0, declined: 0, new: 0 } }}
             reportSlug={reportSlug}
+            comparisonPeriod={comparisonPeriod}
           />
         </TabsContent>
 
