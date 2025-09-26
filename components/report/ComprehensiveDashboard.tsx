@@ -168,6 +168,7 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
   const [seoAuditData, setSeoAuditData] = useState<any>(null);
   const [loadingSEO, setLoadingSEO] = useState(false);
   const [keywordData, setKeywordData] = useState<any>(null);
+  const [competitors, setCompetitors] = useState<any[]>([]);
 
   useEffect(() => {
     console.log('📊 ComprehensiveDashboard mounted/updated - reportId:', reportId, 'slug:', reportSlug);
@@ -231,6 +232,8 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
       await loadExistingData();
       // Fetch agency updates
       await fetchAgencyUpdates();
+      // Fetch competitors
+      await fetchCompetitors();
     } finally {
       setLoading(false);
     }
@@ -694,6 +697,20 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
       }
     } catch (error) {
       console.error('Error fetching agency updates:', error);
+    }
+  };
+
+  const fetchCompetitors = async () => {
+    try {
+      console.log('📊 Fetching competitors for report slug:', reportSlug);
+      const response = await fetch(`/api/reports/${reportSlug}/competitors`);
+      if (response.ok) {
+        const data = await response.json();
+        console.log('📊 Fetched competitors:', data);
+        setCompetitors(data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching competitors:', error);
     }
   };
 
@@ -2526,9 +2543,10 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
 
         {/* Data Visualizations Tab */}
         <TabsContent value="visualize" className="space-y-6">
-          <DataVisualizations 
-            searchData={metrics?.searchConsole} 
+          <DataVisualizations
+            searchData={metrics?.searchConsole}
             analyticsData={metrics?.analytics}
+            competitorData={competitors}
           />
         </TabsContent>
 

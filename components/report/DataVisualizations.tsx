@@ -44,9 +44,11 @@ export default function DataVisualizations({ searchData, analyticsData, competit
           date: new Date(dateKey).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
           clicks: item.clicks || 0,
           impressions: item.impressions || 0,
-          // Google returns CTR as decimal (0-1), convert to percentage for display
-          ctr: ((item.ctr || 0) * 100).toFixed(2),
-          position: (item.position || 0).toFixed(1)
+          // Store CTR as both raw and formatted
+          ctr: (item.ctr || 0) * 100, // Raw percentage for sparkline
+          ctrFormatted: ((item.ctr || 0) * 100).toFixed(2), // Formatted for display
+          position: item.position || 0, // Raw number for sparkline
+          positionFormatted: (item.position || 0).toFixed(1) // Formatted for display
         };
       }).filter(Boolean)
     : [];
@@ -94,15 +96,24 @@ export default function DataVisualizations({ searchData, analyticsData, competit
       }))
     : [];
 
-  // Competitor comparison data - using mock data for demonstration
-  const competitorComparisonData = [
-    { metric: 'Visibility', yourSite: 75, competitor1: 65, industry: 70 },
-    { metric: 'Keywords', yourSite: 82, competitor1: 78, industry: 75 },
-    { metric: 'Backlinks', yourSite: 60, competitor1: 85, industry: 72 },
-    { metric: 'Site Speed', yourSite: 88, competitor1: 72, industry: 80 },
-    { metric: 'Content', yourSite: 70, competitor1: 80, industry: 76 },
-    { metric: 'Technical SEO', yourSite: 85, competitor1: 70, industry: 78 }
-  ];
+  // Competitor comparison data - using real data or mock for demonstration
+  const competitorComparisonData = competitorData && competitorData.length > 0
+    ? [
+        { metric: 'Visibility', yourSite: 75, competitor1: competitorData[0]?.visibility || 65, industry: 70 },
+        { metric: 'Keywords', yourSite: 82, competitor1: competitorData[0]?.keywords || 78, industry: 75 },
+        { metric: 'Backlinks', yourSite: 60, competitor1: competitorData[0]?.backlinks || 85, industry: 72 },
+        { metric: 'Site Speed', yourSite: 88, competitor1: competitorData[0]?.siteSpeed || 72, industry: 80 },
+        { metric: 'Content', yourSite: 70, competitor1: competitorData[0]?.content || 80, industry: 76 },
+        { metric: 'Technical SEO', yourSite: 85, competitor1: competitorData[0]?.technicalSEO || 70, industry: 78 }
+      ]
+    : [
+        { metric: 'Visibility', yourSite: 75, competitor1: 65, industry: 70 },
+        { metric: 'Keywords', yourSite: 82, competitor1: 78, industry: 75 },
+        { metric: 'Backlinks', yourSite: 60, competitor1: 85, industry: 72 },
+        { metric: 'Site Speed', yourSite: 88, competitor1: 72, industry: 80 },
+        { metric: 'Content', yourSite: 70, competitor1: 80, industry: 76 },
+        { metric: 'Technical SEO', yourSite: 85, competitor1: 70, industry: 78 }
+      ];
 
   // Engagement metrics over time - using real analytics data or mock data for demonstration
   const engagementTrendData = analyticsData?.performanceData?.length > 0
@@ -113,11 +124,11 @@ export default function DataVisualizations({ searchData, analyticsData, competit
         pagesPerSession: item.pagesPerSession || 0
       }))
     : searchTrendData.length > 0
-    ? searchTrendData.map((item: any) => ({
+    ? searchTrendData.map((item: any, index: number) => ({
         date: item.date,
-        bounceRate: 35 + Math.random() * 20,  // Mock bounce rate between 35-55%
-        avgDuration: 120 + Math.random() * 180, // Mock duration between 120-300 seconds
-        pagesPerSession: 2 + Math.random() * 3  // Mock pages between 2-5
+        bounceRate: parseFloat((40 + Math.sin(index * 0.3) * 15).toFixed(1)),
+        avgDuration: Math.round(180 + Math.cos(index * 0.2) * 60),
+        pagesPerSession: parseFloat((3.5 + Math.sin(index * 0.4) * 1.5).toFixed(1))
       }))
     : [];
 
@@ -139,11 +150,24 @@ export default function DataVisualizations({ searchData, analyticsData, competit
       return (
         <div className="bg-white p-3 border rounded-lg shadow-lg">
           <p className="text-sm font-medium">{label}</p>
-          {payload.map((entry: any, index: number) => (
-            <p key={index} className="text-xs" style={{ color: entry.color }}>
-              {entry.name}: {entry.value}
-            </p>
-          ))}
+          {payload.map((entry: any, index: number) => {
+            let formattedValue = entry.value;
+            // Format based on the metric type
+            if (entry.name?.includes('Rate') || entry.name?.includes('CTR')) {
+              formattedValue = `${parseFloat(entry.value).toFixed(1)}%`;
+            } else if (entry.name?.includes('Duration')) {
+              formattedValue = `${Math.round(entry.value)}s`;
+            } else if (entry.name?.includes('Pages')) {
+              formattedValue = parseFloat(entry.value).toFixed(1);
+            } else if (typeof entry.value === 'number') {
+              formattedValue = entry.value.toLocaleString();
+            }
+            return (
+              <p key={index} className="text-xs" style={{ color: entry.color }}>
+                {entry.name}: {formattedValue}
+              </p>
+            );
+          })}
         </div>
       );
     }
@@ -382,11 +406,13 @@ export default function DataVisualizations({ searchData, analyticsData, competit
                     height={60}
                   />
                   <YAxis
-                    domain={[0, 'dataMax + 5']}
+                    domain={[
+                      (dataMin: number) => Math.max(1, Math.floor(dataMin - 2)),
+                      (dataMax: number) => Math.min(100, Math.ceil(dataMax + 2))
+                    ]}
                     label={{ value: 'Position', angle: -90, position: 'insideLeft', style: { fontSize: 12, fill: '#666' } }}
                     tick={{ fontSize: 11, fill: '#666' }}
                     reversed={true}
-                    ticks={[0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]}
                   />
                   <Tooltip content={<CustomTooltip />} />
                   <Legend wrapperStyle={{ paddingTop: '10px' }} />
@@ -523,7 +549,7 @@ export default function DataVisualizations({ searchData, analyticsData, competit
               <RadarChart data={competitorComparisonData}>
                 <PolarGrid stroke="#e0e0e0" />
                 <PolarAngleAxis dataKey="metric" tick={{ fontSize: 12 }} />
-                <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fontSize: 10 }} />
+                <PolarRadiusAxis angle={90} domain={[0, 100]} tick={false} />
                 <Radar
                   name="Your Site"
                   dataKey="yourSite"
@@ -533,7 +559,7 @@ export default function DataVisualizations({ searchData, analyticsData, competit
                   strokeWidth={2}
                 />
                 <Radar
-                  name="Competitor 1"
+                  name={competitorData?.[0]?.name || "Competitor 1"}
                   dataKey="competitor1"
                   stroke={COLORS.secondary}
                   fill={COLORS.secondary}
