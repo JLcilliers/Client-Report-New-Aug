@@ -36,10 +36,14 @@ export default function TechnicalSEODashboard({ reportId, domain, onDataUpdate }
   const [selectedCategory, setSelectedCategory] = useState('overview');
   const [error, setError] = useState<string | null>(null);
 
-  // Load existing audit data on component mount
+  // Load existing audit data on component mount and run audit automatically
   useEffect(() => {
     if (reportId) {
       loadExistingAuditData();
+    }
+    // Automatically run audit when component mounts if no audit data exists
+    if (!auditData && domain) {
+      runAudit();
     }
   }, [reportId]);
 
@@ -67,11 +71,14 @@ export default function TechnicalSEODashboard({ reportId, domain, onDataUpdate }
     console.log('🚀 Starting SEO audit for domain:', domain);
     
     try {
-      console.log('📡 Calling technical audit API...');
-      const response = await fetch('/api/seo/technical-audit', {
+      console.log('📡 Calling comprehensive technical audit API...');
+      const response = await fetch('/api/seo/comprehensive-tech-audit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ domain, includePageSpeed: true })
+        body: JSON.stringify({
+          url: domain.startsWith('http') ? domain : `https://${domain}`,
+          reportId: reportId || undefined
+        })
       });
 
       console.log('📡 Audit response status:', response.status);
@@ -203,8 +210,8 @@ export default function TechnicalSEODashboard({ reportId, domain, onDataUpdate }
             <CardContent className="pt-6">
               <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
                 <div className="text-center">
-                  <div className={`text-4xl font-bold ${getScoreColor(auditData.score)}`}>
-                    {auditData.score}
+                  <div className={`text-4xl font-bold ${getScoreColor(auditData.overallScore || auditData.score)}`}>
+                    {auditData.overallScore || auditData.score}
                   </div>
                   <p className="text-sm text-muted-foreground">Overall Score</p>
                 </div>
