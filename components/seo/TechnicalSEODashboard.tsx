@@ -71,12 +71,13 @@ export default function TechnicalSEODashboard({ reportId, domain, onDataUpdate }
     console.log('🚀 Starting SEO audit for domain:', domain);
     
     try {
-      console.log('📡 Calling comprehensive technical audit API...');
-      const response = await fetch('/api/seo/comprehensive-tech-audit', {
+      console.log('📡 Calling technical audit API...');
+      const response = await fetch('/api/seo/technical-audit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          url: domain.startsWith('http') ? domain : `https://${domain}`,
+          domain,
+          includePageSpeed: true,
           reportId: reportId || undefined
         })
       });
