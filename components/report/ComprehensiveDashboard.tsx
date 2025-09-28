@@ -35,7 +35,7 @@ import {
 } from 'lucide-react';
 import EnhancedMetrics from './EnhancedMetrics';
 import ActionableInsights from './ActionableInsights';
-import DataVisualizations from './DataVisualizations';
+import DataVisualizationsImproved from './DataVisualizationsImproved';
 import CompetitorManagement from './CompetitorManagement';
 import KeywordPerformance from './KeywordPerformance';
 
@@ -1234,18 +1234,20 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
 
       {/* Main Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-5 md:grid-cols-10">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="keywords">Keywords</TabsTrigger>
-          <TabsTrigger value="competitors">Competitors</TabsTrigger>
-          <TabsTrigger value="insights">Insights</TabsTrigger>
-          <TabsTrigger value="metrics">Metrics</TabsTrigger>
-          <TabsTrigger value="search">Search</TabsTrigger>
-          <TabsTrigger value="traffic">Traffic</TabsTrigger>
-          <TabsTrigger value="engagement">Engagement</TabsTrigger>
-          <TabsTrigger value="technical">Technical</TabsTrigger>
-          <TabsTrigger value="visualize">Visualize</TabsTrigger>
-        </TabsList>
+        <div className="sticky top-0 z-40 bg-white border-b shadow-sm">
+          <TabsList className="grid w-full grid-cols-5 md:grid-cols-10 rounded-none">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="keywords">Keywords</TabsTrigger>
+            <TabsTrigger value="competitors">Competitors</TabsTrigger>
+            <TabsTrigger value="insights">Insights</TabsTrigger>
+            <TabsTrigger value="metrics">Metrics</TabsTrigger>
+            <TabsTrigger value="search">Search</TabsTrigger>
+            <TabsTrigger value="traffic">Traffic</TabsTrigger>
+            <TabsTrigger value="engagement">Engagement</TabsTrigger>
+            <TabsTrigger value="technical">Technical</TabsTrigger>
+            <TabsTrigger value="visualize">Visualize</TabsTrigger>
+          </TabsList>
+        </div>
 
         {/* Overview Tab */}
         <TabsContent value="overview" className="space-y-6">
@@ -2545,10 +2547,12 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
 
         {/* Data Visualizations Tab */}
         <TabsContent value="visualize" className="space-y-6">
-          <DataVisualizations
+          <DataVisualizationsImproved
             searchData={metrics?.searchConsole}
             analyticsData={metrics?.analytics}
             competitorData={competitors}
+            reportName={reportName || "SEO Report"}
+            dateRange={dateRange}
           />
         </TabsContent>
 
