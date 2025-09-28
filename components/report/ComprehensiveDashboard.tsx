@@ -35,7 +35,7 @@ import {
 } from 'lucide-react';
 import EnhancedMetrics from './EnhancedMetrics';
 import ActionableInsights from './ActionableInsights';
-import DataVisualizationsFinal from './DataVisualizationsFinal';
+import DataVisualizations from './DataVisualizations';
 import CompetitorManagement from './CompetitorManagement';
 import KeywordPerformance from './KeywordPerformance';
 
@@ -1234,20 +1234,18 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
 
       {/* Main Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <div className="sticky top-0 z-40 bg-white border-b shadow-sm">
-          <TabsList className="grid w-full grid-cols-5 md:grid-cols-10 rounded-none">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="keywords">Keywords</TabsTrigger>
-            <TabsTrigger value="competitors">Competitors</TabsTrigger>
-            <TabsTrigger value="insights">Insights</TabsTrigger>
-            <TabsTrigger value="metrics">Metrics</TabsTrigger>
-            <TabsTrigger value="search">Search</TabsTrigger>
-            <TabsTrigger value="traffic">Traffic</TabsTrigger>
-            <TabsTrigger value="engagement">Engagement</TabsTrigger>
-            <TabsTrigger value="technical">Technical</TabsTrigger>
-            <TabsTrigger value="visualize">Visualize</TabsTrigger>
-          </TabsList>
-        </div>
+        <TabsList className="grid w-full grid-cols-5 md:grid-cols-10">
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="keywords">Keywords</TabsTrigger>
+          <TabsTrigger value="competitors">Competitors</TabsTrigger>
+          <TabsTrigger value="insights">Insights</TabsTrigger>
+          <TabsTrigger value="metrics">Metrics</TabsTrigger>
+          <TabsTrigger value="search">Search</TabsTrigger>
+          <TabsTrigger value="traffic">Traffic</TabsTrigger>
+          <TabsTrigger value="engagement">Engagement</TabsTrigger>
+          <TabsTrigger value="technical">Technical</TabsTrigger>
+          <TabsTrigger value="visualize">Visualize</TabsTrigger>
+        </TabsList>
 
         {/* Overview Tab */}
         <TabsContent value="overview" className="space-y-6">
@@ -1295,7 +1293,7 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
                 <CardDescription>Clicks and impressions over time</CardDescription>
               </CardHeader>
               <CardContent>
-                <DataVisualizationsFinal
+                <DataVisualizations
                   searchData={metrics?.searchConsole}
                   analyticsData={metrics?.analytics}
                   chartType="search"
@@ -1309,7 +1307,7 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
                 <CardDescription>Sessions breakdown by acquisition channel</CardDescription>
               </CardHeader>
               <CardContent>
-                <DataVisualizationsFinal
+                <DataVisualizations
                   searchData={metrics?.searchConsole}
                   analyticsData={metrics?.analytics}
                   chartType="traffic-bar"
@@ -1325,7 +1323,7 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
               <CardDescription>Percentage breakdown of traffic sources</CardDescription>
             </CardHeader>
             <CardContent>
-              <DataVisualizationsFinal
+              <DataVisualizations
                 searchData={metrics?.searchConsole}
                 analyticsData={metrics?.analytics}
                 chartType="traffic-pie"
@@ -1341,7 +1339,7 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
                 <CardDescription>Search ranking position trends (lower is better)</CardDescription>
               </CardHeader>
               <CardContent>
-                <DataVisualizationsFinal
+                <DataVisualizations
                   searchData={metrics?.searchConsole}
                   analyticsData={metrics?.analytics}
                   chartType="position"
@@ -1355,7 +1353,7 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
                 <CardDescription>Percentage of impressions that resulted in clicks</CardDescription>
               </CardHeader>
               <CardContent>
-                <DataVisualizationsFinal
+                <DataVisualizations
                   searchData={metrics?.searchConsole}
                   analyticsData={metrics?.analytics}
                   chartType="ctr"
@@ -2547,12 +2545,10 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
 
         {/* Data Visualizations Tab */}
         <TabsContent value="visualize" className="space-y-6">
-          <DataVisualizationsFinal
+          <DataVisualizations
             searchData={metrics?.searchConsole}
             analyticsData={metrics?.analytics}
             competitorData={competitors}
-            reportName={reportSlug || "SEO Report"}
-            dateRange={getDateRangeExplanation(comparisonPeriod)}
           />
         </TabsContent>
 
