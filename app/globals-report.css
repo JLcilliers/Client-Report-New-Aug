@@ -1,4 +1,4 @@
-/* Report Design System Styles */
+/* Report Design System Styles - Final Version */
 
 :root {
   /* Neutrals */
@@ -7,6 +7,7 @@
   --text-900: #0F172A;
   --text-700: #334155;
   --text-500: #64748B;
+  --text-400: #94A3B8;
   --gridline: #E2E8F0;
 
   /* Accents - colorblind friendly categorical set */
@@ -24,8 +25,15 @@
 }
 
 /* Typography with tabular numbers */
-.report-dashboard {
+.report-dashboard,
+.report-dashboard * {
   font-family: Inter, system-ui, -apple-system, sans-serif;
+}
+
+.report-dashboard .tabular-nums,
+.report-dashboard .recharts-text,
+.report-dashboard .kpi-value,
+.report-dashboard .metric-value {
   font-variant-numeric: tabular-nums;
 }
 

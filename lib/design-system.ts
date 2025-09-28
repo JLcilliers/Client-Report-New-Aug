@@ -9,6 +9,7 @@ export const designTokens = {
       900: '#0F172A',       // titles
       700: '#334155',       // body
       500: '#64748B',       // captions, axes
+      400: '#94A3B8',       // muted
     },
     gridline: '#E2E8F0',    // chart grid
 
@@ -79,10 +80,14 @@ export const designTokens = {
   // Chart specifications
   chart: {
     height: {
-      timeSeries: 240,
-      category: 280,
-      mini: 40,
-      sparkline: 40,
+      timeSeries: {
+        desktop: 320,
+        laptop: 260,
+        tablet: 200,
+      },
+      category: 320,
+      mini: 32,
+      sparkline: 32,
     },
     padding: {
       left: 64,    // Fixed for y-axis labels
@@ -93,10 +98,17 @@ export const designTokens = {
     lineWidth: 2,
     lineWidthHover: 3,
     dotRadius: 0,     // Only show on hover
-    dotRadiusHover: 3,
+    dotRadiusHover: 4,  // Last point on sparklines
     gridOpacity: 0.1,
-    axisLabelSize: 12,
-    tickLabelSize: 11,
+    gridLines: {
+      horizontal: 5,  // Maximum horizontal lines
+      vertical: 6,    // Maximum x-axis ticks
+    },
+    axisLabelSize: 14,
+    tickLabelSize: 12,
+    captionSize: 12,
+    barWidth: 0.64,  // 64% of band
+    barRadius: 4,
   },
 
   // Responsive breakpoints
@@ -128,9 +140,12 @@ export const metricColorMap = {
 
 // Number formatting utilities
 export const formatters = {
-  number: (value: number): string => {
-    if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
-    if (value >= 1000) return `${(value / 1000).toFixed(1)}K`;
+  number: (value: number, forceUnit: boolean = false): string => {
+    const abs = Math.abs(value);
+    if (abs >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
+    if (abs >= 1000) return `${(value / 1000).toFixed(1)}K`;
+    if (abs >= 100) return Math.round(value).toLocaleString();
+    if (abs < 10 && value !== Math.floor(value)) return value.toFixed(1);
     return value.toString();
   },
 
@@ -148,7 +163,30 @@ export const formatters = {
       const secs = seconds % 60;
       return `${minutes}m ${secs}s`;
     }
-    return `${seconds}s`;
+    return `${Math.round(seconds)}s`;
+  },
+
+  delta: (value: number, showPlus: boolean = true): string => {
+    const formatted = formatters.percent(Math.abs(value));
+    if (value > 0) return showPlus ? `+${formatted}` : formatted;
+    if (value < 0) return `-${formatted}`;
+    return formatted;
+  },
+
+  roundToNearest: (value: number, nearest: number): number => {
+    return Math.round(value / nearest) * nearest;
+  },
+
+  date: {
+    short: (date: Date): string => {
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    },
+    monthYear: (date: Date): string => {
+      return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    },
+    weekday: (date: Date): string => {
+      return date.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric' });
+    }
   }
 };
 

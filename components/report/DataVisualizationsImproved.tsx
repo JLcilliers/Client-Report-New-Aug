@@ -555,7 +555,7 @@ export default function DataVisualizationsImproved({
               <h4 className="text-sm font-medium mb-3" style={{ color: designTokens.colors.text[700] }}>
                 Clicks & Impressions
               </h4>
-              <ResponsiveContainer width="100%" height={designTokens.chart.height.timeSeries}>
+              <ResponsiveContainer width="100%" height={240}>
                 <LineChart
                   data={searchTrendData}
                   margin={chartDefaults.margin}
@@ -603,7 +603,7 @@ export default function DataVisualizationsImproved({
               <h4 className="text-sm font-medium mb-3" style={{ color: designTokens.colors.text[700] }}>
                 Average Position
               </h4>
-              <ResponsiveContainer width="100%" height={designTokens.chart.height.timeSeries}>
+              <ResponsiveContainer width="100%" height={240}>
                 <LineChart
                   data={searchTrendData}
                   margin={chartDefaults.margin}
@@ -635,7 +635,7 @@ export default function DataVisualizationsImproved({
               <h4 className="text-sm font-medium mb-3" style={{ color: designTokens.colors.text[700] }}>
                 Click-Through Rate
               </h4>
-              <ResponsiveContainer width="100%" height={designTokens.chart.height.timeSeries}>
+              <ResponsiveContainer width="100%" height={240}>
                 <LineChart
                   data={searchTrendData}
                   margin={chartDefaults.margin}
@@ -674,7 +674,7 @@ export default function DataVisualizationsImproved({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={designTokens.chart.height.category}>
+            <ResponsiveContainer width="100%" height={280}>
               <BarChart data={trafficData} margin={chartDefaults.margin}>
                 <CartesianGrid {...chartDefaults.grid} />
                 <XAxis
@@ -705,7 +705,7 @@ export default function DataVisualizationsImproved({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={designTokens.chart.height.category}>
+            <ResponsiveContainer width="100%" height={280}>
               <BarChart
                 data={[{ name: 'Total Traffic', ...trafficData.reduce((acc: any, item: any) => ({ ...acc, [item.name]: item.percentage }), {}) }]}
                 layout="vertical"

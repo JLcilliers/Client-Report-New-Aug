@@ -35,7 +35,7 @@ import {
 } from 'lucide-react';
 import EnhancedMetrics from './EnhancedMetrics';
 import ActionableInsights from './ActionableInsights';
-import DataVisualizationsImproved from './DataVisualizationsImproved';
+import DataVisualizationsFinal from './DataVisualizationsFinal';
 import CompetitorManagement from './CompetitorManagement';
 import KeywordPerformance from './KeywordPerformance';
 
@@ -1295,7 +1295,7 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
                 <CardDescription>Clicks and impressions over time</CardDescription>
               </CardHeader>
               <CardContent>
-                <DataVisualizationsImproved
+                <DataVisualizationsFinal
                   searchData={metrics?.searchConsole}
                   analyticsData={metrics?.analytics}
                   chartType="search"
@@ -1309,7 +1309,7 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
                 <CardDescription>Sessions breakdown by acquisition channel</CardDescription>
               </CardHeader>
               <CardContent>
-                <DataVisualizationsImproved
+                <DataVisualizationsFinal
                   searchData={metrics?.searchConsole}
                   analyticsData={metrics?.analytics}
                   chartType="traffic-bar"
@@ -1325,7 +1325,7 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
               <CardDescription>Percentage breakdown of traffic sources</CardDescription>
             </CardHeader>
             <CardContent>
-              <DataVisualizationsImproved
+              <DataVisualizationsFinal
                 searchData={metrics?.searchConsole}
                 analyticsData={metrics?.analytics}
                 chartType="traffic-pie"
@@ -1341,7 +1341,7 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
                 <CardDescription>Search ranking position trends (lower is better)</CardDescription>
               </CardHeader>
               <CardContent>
-                <DataVisualizationsImproved
+                <DataVisualizationsFinal
                   searchData={metrics?.searchConsole}
                   analyticsData={metrics?.analytics}
                   chartType="position"
@@ -1355,7 +1355,7 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
                 <CardDescription>Percentage of impressions that resulted in clicks</CardDescription>
               </CardHeader>
               <CardContent>
-                <DataVisualizationsImproved
+                <DataVisualizationsFinal
                   searchData={metrics?.searchConsole}
                   analyticsData={metrics?.analytics}
                   chartType="ctr"
@@ -2547,7 +2547,7 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
 
         {/* Data Visualizations Tab */}
         <TabsContent value="visualize" className="space-y-6">
-          <DataVisualizationsImproved
+          <DataVisualizationsFinal
             searchData={metrics?.searchConsole}
             analyticsData={metrics?.analytics}
             competitorData={competitors}
