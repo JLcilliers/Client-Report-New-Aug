@@ -140,7 +140,10 @@ export const metricColorMap = {
 
 // Number formatting utilities
 export const formatters = {
-  number: (value: number, forceUnit: boolean = false): string => {
+  number: (value: number | undefined | null, forceUnit: boolean = false): string => {
+    // Handle undefined/null values
+    if (value === undefined || value === null || isNaN(value)) return '0';
+
     const abs = Math.abs(value);
     if (abs >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
     if (abs >= 1000) return `${(value / 1000).toFixed(1)}K`;
@@ -149,15 +152,18 @@ export const formatters = {
     return value.toString();
   },
 
-  percent: (value: number, decimals: number = 1): string => {
+  percent: (value: number | undefined | null, decimals: number = 1): string => {
+    if (value === undefined || value === null || isNaN(value)) return '0%';
     return `${value.toFixed(decimals)}%`;
   },
 
-  position: (value: number): string => {
+  position: (value: number | undefined | null): string => {
+    if (value === undefined || value === null || isNaN(value)) return '0.0';
     return value.toFixed(1);
   },
 
-  duration: (seconds: number): string => {
+  duration: (seconds: number | undefined | null): string => {
+    if (seconds === undefined || seconds === null || isNaN(seconds)) return '0s';
     if (seconds >= 60) {
       const minutes = Math.floor(seconds / 60);
       const secs = seconds % 60;
@@ -166,14 +172,16 @@ export const formatters = {
     return `${Math.round(seconds)}s`;
   },
 
-  delta: (value: number, showPlus: boolean = true): string => {
+  delta: (value: number | undefined | null, showPlus: boolean = true): string => {
+    if (value === undefined || value === null || isNaN(value)) return '0%';
     const formatted = formatters.percent(Math.abs(value));
     if (value > 0) return showPlus ? `+${formatted}` : formatted;
     if (value < 0) return `-${formatted}`;
     return formatted;
   },
 
-  roundToNearest: (value: number, nearest: number): number => {
+  roundToNearest: (value: number | undefined | null, nearest: number): number => {
+    if (value === undefined || value === null || isNaN(value)) return 0;
     return Math.round(value / nearest) * nearest;
   },
 
