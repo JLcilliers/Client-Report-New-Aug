@@ -1295,7 +1295,7 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
                 <CardDescription>Clicks and impressions over time</CardDescription>
               </CardHeader>
               <CardContent>
-                <DataVisualizations
+                <DataVisualizationsImproved
                   searchData={metrics?.searchConsole}
                   analyticsData={metrics?.analytics}
                   chartType="search"
@@ -1309,7 +1309,7 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
                 <CardDescription>Sessions breakdown by acquisition channel</CardDescription>
               </CardHeader>
               <CardContent>
-                <DataVisualizations
+                <DataVisualizationsImproved
                   searchData={metrics?.searchConsole}
                   analyticsData={metrics?.analytics}
                   chartType="traffic-bar"
@@ -1325,7 +1325,7 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
               <CardDescription>Percentage breakdown of traffic sources</CardDescription>
             </CardHeader>
             <CardContent>
-              <DataVisualizations
+              <DataVisualizationsImproved
                 searchData={metrics?.searchConsole}
                 analyticsData={metrics?.analytics}
                 chartType="traffic-pie"
@@ -1341,7 +1341,7 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
                 <CardDescription>Search ranking position trends (lower is better)</CardDescription>
               </CardHeader>
               <CardContent>
-                <DataVisualizations
+                <DataVisualizationsImproved
                   searchData={metrics?.searchConsole}
                   analyticsData={metrics?.analytics}
                   chartType="position"
@@ -1355,7 +1355,7 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
                 <CardDescription>Percentage of impressions that resulted in clicks</CardDescription>
               </CardHeader>
               <CardContent>
-                <DataVisualizations
+                <DataVisualizationsImproved
                   searchData={metrics?.searchConsole}
                   analyticsData={metrics?.analytics}
                   chartType="ctr"
@@ -2551,8 +2551,8 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
             searchData={metrics?.searchConsole}
             analyticsData={metrics?.analytics}
             competitorData={competitors}
-            reportName={reportName || "SEO Report"}
-            dateRange={dateRange}
+            reportName={reportSlug || "SEO Report"}
+            dateRange={getDateRangeExplanation(comparisonPeriod)}
           />
         </TabsContent>
 

@@ -43,6 +43,7 @@ interface VisualizationProps {
   competitorData?: any;
   reportName?: string;
   dateRange?: string;
+  chartType?: 'all' | 'search' | 'traffic-bar' | 'traffic-pie' | 'position' | 'ctr';
 }
 
 // Enhanced tooltip with trust indicators
@@ -181,7 +182,8 @@ export default function DataVisualizationsImproved({
   analyticsData,
   competitorData,
   reportName = "SEO Report",
-  dateRange = "Last 7 days"
+  dateRange = "Last 7 days",
+  chartType = 'all'
 }: VisualizationProps) {
   const [selectedTimeRange, setSelectedTimeRange] = useState('7d');
   const [hoveredChart, setHoveredChart] = useState<string | null>(null);
@@ -225,10 +227,10 @@ export default function DataVisualizationsImproved({
     const impressionsChange = previousImpressions ? ((currentImpressions - previousImpressions) / previousImpressions) * 100 : 0;
 
     const avgCTR = currentWeek.length > 0
-      ? currentWeek.reduce((sum, item) => sum + item.ctr, 0) / currentWeek.length
+      ? currentWeek.reduce((sum: number, item: any) => sum + item.ctr, 0) / currentWeek.length
       : 0;
     const prevAvgCTR = previousWeek.length > 0
-      ? previousWeek.reduce((sum, item) => sum + item.ctr, 0) / previousWeek.length
+      ? previousWeek.reduce((sum: number, item: any) => sum + item.ctr, 0) / previousWeek.length
       : 0;
     const ctrChange = prevAvgCTR ? ((avgCTR - prevAvgCTR) / prevAvgCTR) * 100 : 0;
 
@@ -255,7 +257,7 @@ export default function DataVisualizationsImproved({
         totalImpressions: currentImpressions,
         avgCTR,
         avgPosition: currentWeek.length > 0
-          ? currentWeek.reduce((sum, item) => sum + item.position, 0) / currentWeek.length
+          ? currentWeek.reduce((sum: number, item: any) => sum + item.position, 0) / currentWeek.length
           : 0,
         clicksChange,
         impressionsChange,
@@ -317,6 +319,143 @@ export default function DataVisualizationsImproved({
       industry: comp.industry
     }));
   }, [competitorData]);
+
+  // Handle specific chart types for backward compatibility
+  if (chartType !== 'all') {
+    // For search chart
+    if (chartType === 'search') {
+      return (
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={searchTrendData} margin={chartDefaults.margin}>
+            <CartesianGrid {...chartDefaults.grid} />
+            <XAxis dataKey="date" {...chartDefaults.axis.tick} />
+            <YAxis yAxisId="left" {...chartDefaults.axis.tick} />
+            <YAxis yAxisId="right" orientation="right" {...chartDefaults.axis.tick} />
+            <Tooltip content={<EnhancedTooltip />} />
+            <Legend {...chartDefaults.legend} />
+            <Line
+              yAxisId="left"
+              {...chartDefaults.line}
+              dataKey="clicks"
+              stroke={metricColorMap.clicks}
+              name="Clicks"
+            />
+            <Line
+              yAxisId="right"
+              {...chartDefaults.line}
+              dataKey="impressions"
+              stroke={metricColorMap.impressions}
+              name="Impressions"
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      );
+    }
+
+    // For traffic bar chart
+    if (chartType === 'traffic-bar') {
+      return (
+        <ResponsiveContainer width="100%" height={350}>
+          <BarChart data={trafficData} margin={chartDefaults.margin}>
+            <CartesianGrid {...chartDefaults.grid} />
+            <XAxis
+              dataKey="name"
+              {...chartDefaults.axis.tick}
+              angle={-45}
+              textAnchor="end"
+              height={80}
+            />
+            <YAxis {...chartDefaults.axis.tick} />
+            <Tooltip content={<EnhancedTooltip />} />
+            <Bar dataKey="sessions" radius={[4, 4, 0, 0]}>
+              {trafficData.map((entry: any, index: number) => (
+                <Cell key={`cell-${index}`} fill={Object.values(metricColorMap)[index % 6]} />
+              ))}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      );
+    }
+
+    // For traffic pie chart (now stacked bar)
+    if (chartType === 'traffic-pie') {
+      return (
+        <ResponsiveContainer width="100%" height={280}>
+          <BarChart
+            data={[{ name: 'Total Traffic', ...trafficData.reduce((acc: any, item: any) => ({ ...acc, [item.name]: item.percentage }), {}) }]}
+            layout="vertical"
+            margin={chartDefaults.margin}
+          >
+            <CartesianGrid {...chartDefaults.grid} />
+            <XAxis type="number" domain={[0, 100]} {...chartDefaults.axis.tick} />
+            <YAxis type="category" dataKey="name" {...chartDefaults.axis.tick} />
+            <Tooltip content={<EnhancedTooltip />} />
+            <Legend {...chartDefaults.legend} />
+            {trafficData.map((entry: any, index: number) => (
+              <Bar
+                key={entry.name}
+                dataKey={entry.name}
+                stackId="a"
+                fill={Object.values(metricColorMap)[index % 6]}
+              />
+            ))}
+          </BarChart>
+        </ResponsiveContainer>
+      );
+    }
+
+    // For position chart
+    if (chartType === 'position') {
+      const positions = searchTrendData.map((d: any) => parseFloat(d.position)).filter((p: number) => p > 0);
+      const minPos = positions.length > 0 ? Math.min(...positions) : 1;
+      const maxPos = positions.length > 0 ? Math.max(...positions) : 100;
+      const domainMin = Math.max(1, Math.floor(minPos - 2));
+      const domainMax = Math.min(100, Math.ceil(maxPos + 2));
+
+      return (
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={searchTrendData} margin={chartDefaults.margin}>
+            <CartesianGrid {...chartDefaults.grid} />
+            <XAxis dataKey="date" {...chartDefaults.axis.tick} />
+            <YAxis
+              domain={[domainMin, domainMax]}
+              reversed={true}
+              {...chartDefaults.axis.tick}
+            />
+            <Tooltip content={<EnhancedTooltip />} />
+            <Legend {...chartDefaults.legend} />
+            <Line
+              {...chartDefaults.line}
+              dataKey="position"
+              stroke={metricColorMap.position}
+              name="Avg Position (lower is better)"
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      );
+    }
+
+    // For CTR chart
+    if (chartType === 'ctr') {
+      return (
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={searchTrendData} margin={chartDefaults.margin}>
+            <CartesianGrid {...chartDefaults.grid} />
+            <XAxis dataKey="date" {...chartDefaults.axis.tick} />
+            <YAxis {...chartDefaults.axis.tick} />
+            <Tooltip content={<EnhancedTooltip />} />
+            <Legend {...chartDefaults.legend} />
+            <Line
+              {...chartDefaults.line}
+              dataKey="ctr"
+              stroke={metricColorMap.ctr}
+              name="Click-Through Rate (%)"
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      );
+    }
+  }
 
   return (
     <div
@@ -568,7 +707,7 @@ export default function DataVisualizationsImproved({
           <CardContent>
             <ResponsiveContainer width="100%" height={designTokens.chart.height.category}>
               <BarChart
-                data={[{ name: 'Total Traffic', ...trafficData.reduce((acc, item) => ({ ...acc, [item.name]: item.percentage }), {}) }]}
+                data={[{ name: 'Total Traffic', ...trafficData.reduce((acc: any, item: any) => ({ ...acc, [item.name]: item.percentage }), {}) }]}
                 layout="vertical"
                 margin={chartDefaults.margin}
               >
