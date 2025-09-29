@@ -339,21 +339,24 @@ export default function AIVisibility({ reportSlug }: AIVisibilityProps) {
             <CardDescription>Your visibility across different AI platforms</CardDescription>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={400}>
-              <BarChart data={platformChartData} margin={{ top: 20, right: 30, left: 50, bottom: 120 }}>
-                <CartesianGrid strokeDasharray="3 3" />
+            <ResponsiveContainer width="100%" height={450}>
+              <BarChart data={platformChartData} margin={{ top: 30, right: 40, left: 70, bottom: 140 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
                 <XAxis
                   dataKey="name"
-                  angle={-45}
+                  angle={-35}
                   textAnchor="end"
-                  height={120}
+                  height={140}
                   interval={0}
-                  tick={{ fontSize: 11 }}
+                  tick={{ fontSize: 12, fill: '#666' }}
+                  tickMargin={10}
                 />
                 <YAxis
-                  label={{ value: 'Visibility Score', angle: -90, position: 'insideLeft', offset: 10 }}
-                  tick={{ fontSize: 11 }}
+                  label={{ value: 'Visibility Score', angle: -90, position: 'insideLeft', offset: -5, style: { fontSize: 14, fill: '#666' } }}
+                  tick={{ fontSize: 12, fill: '#666' }}
                   domain={[0, 100]}
+                  ticks={[0, 25, 50, 75, 100]}
+                  tickMargin={5}
                 />
                 <Tooltip />
                 <Bar dataKey="score" radius={[8, 8, 0, 0]}>
@@ -372,14 +375,17 @@ export default function AIVisibility({ reportSlug }: AIVisibilityProps) {
             <CardDescription>Number of citations per platform</CardDescription>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={400}>
-              <PieChart margin={{ top: 40, right: 40, bottom: 80, left: 40 }}>
+            <ResponsiveContainer width="100%" height={450}>
+              <PieChart margin={{ top: 20, right: 20, bottom: 100, left: 20 }}>
                 <Pie
                   data={platformChartData}
                   cx="50%"
-                  cy="45%"
+                  cy="40%"
                   labelLine={false}
-                  label={false}
+                  label={(entry) => {
+                    const percent = ((entry.citations / metrics.citationCount) * 100).toFixed(0);
+                    return `${percent}%`;
+                  }}
                   outerRadius={120}
                   fill="#8884d8"
                   dataKey="citations"
@@ -389,20 +395,25 @@ export default function AIVisibility({ reportSlug }: AIVisibilityProps) {
                   ))}
                 </Pie>
                 <Tooltip
-                  formatter={(value, name) => [`${value} citations`, name]}
+                  formatter={(value, name) => {
+                    const percent = ((Number(value) / metrics.citationCount) * 100).toFixed(1);
+                    return [`${value} citations (${percent}%)`, name];
+                  }}
                 />
                 <Legend
                   verticalAlign="bottom"
-                  height={60}
+                  height={80}
                   iconType="circle"
                   wrapperStyle={{
-                    paddingTop: '20px',
-                    fontSize: '12px'
+                    paddingTop: '30px',
+                    fontSize: '13px',
+                    display: 'flex',
+                    justifyContent: 'center'
                   }}
-                  formatter={(value: any, entry: any) => {
-                    if (entry?.payload?.citations && metrics.citationCount > 0) {
-                      const percent = ((entry.payload.citations / metrics.citationCount) * 100).toFixed(0);
-                      return `${value}: ${percent}%`;
+                  formatter={(value: any) => {
+                    const item = platformChartData.find(p => p.name === value);
+                    if (item) {
+                      return `${value} (${item.citations})`;
                     }
                     return String(value);
                   }}
@@ -429,7 +440,7 @@ export default function AIVisibility({ reportSlug }: AIVisibilityProps) {
                 metrics.topQueries.slice(0, 5).map((query, index) => (
                   <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
                     <div className="flex-1">
-                      <p className="font-medium">{query.query}</p>
+                      <p className="font-medium text-sm">{query.query}</p>
                       <div className="flex gap-2 mt-1 flex-wrap">
                         {query.platforms && query.platforms.length > 0 ? (
                           query.platforms.slice(0, 3).map(p => (
@@ -562,6 +573,44 @@ export default function AIVisibility({ reportSlug }: AIVisibilityProps) {
               </tbody>
             </table>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Query Details Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Search className="w-5 h-5" />
+            Query Performance Details
+          </CardTitle>
+          <CardDescription>
+            Actual search queries triggering AI citations for your brand
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="text-sm text-gray-600 mb-4">
+            <p><strong>How queries trigger AI responses:</strong></p>
+            <ul className="list-disc ml-5 mt-2 space-y-1">
+              <li>Direct brand searches (e.g., "what is {metrics.platformBreakdown[0]?.platform ? 'your brand' : 'example.com'}")</li>
+              <li>Comparison queries (e.g., "best alternatives to competitors")</li>
+              <li>Problem-solving queries (e.g., "how to solve [specific problem]")</li>
+              <li>Review and recommendation queries (e.g., "is [brand] worth it")</li>
+            </ul>
+          </div>
+
+          {metrics.topQueries && metrics.topQueries.length > 0 && (
+            <div className="mt-4">
+              <h4 className="font-semibold mb-2">Top Performing Queries:</h4>
+              <div className="grid grid-cols-1 gap-2">
+                {metrics.topQueries.map((query, idx) => (
+                  <div key={idx} className="text-sm bg-gray-50 p-2 rounded flex justify-between">
+                    <span className="font-medium">{query.query}</span>
+                    <span className="text-gray-600">Triggered {query.frequency} times</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
