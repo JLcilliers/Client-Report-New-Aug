@@ -184,14 +184,15 @@ export default function AIVisibility({ reportSlug }: AIVisibilityProps) {
     );
   }
 
-  if (!metrics) {
+  if (!metrics || metrics.citationCount === 0) {
     return (
       <Alert className="m-4">
         <Info className="h-4 w-4" />
         <AlertDescription>
-          No AI visibility data available. Click refresh to generate your first report.
+          No AI visibility data available yet. Click the button below to generate your first AI visibility report. This will analyze how your brand appears across AI platforms like ChatGPT, Claude, and Google AI.
           <Button onClick={handleRefresh} className="ml-4" size="sm">
-            Generate Report
+            <Sparkles className="w-4 h-4 mr-2" />
+            Generate AI Visibility Report
           </Button>
         </AlertDescription>
       </Alert>
