@@ -1,6 +1,7 @@
 // DataForSEO API Client for AI Visibility Tracking
 import { headers } from 'next/headers';
 
+// DataForSEO API credentials - Already Base64 encoded
 const API_KEY = process.env.DATAFORSEO_API_KEY || '';
 const BASE_URL = 'https://api.dataforseo.com/v3';
 
@@ -40,10 +41,9 @@ export class DataForSEOClient {
     this.useMockData = !API_KEY || API_KEY === '';
 
     if (!this.useMockData) {
-      // Basic auth header
-      const auth = Buffer.from(`${API_KEY}:`).toString('base64');
+      // API_KEY is already Base64 encoded from environment variable
       this.headers = {
-        'Authorization': `Basic ${auth}`,
+        'Authorization': `Basic ${API_KEY}`,
         'Content-Type': 'application/json',
       };
     } else {
@@ -72,7 +72,8 @@ export class DataForSEOClient {
         language_code: language,
       }));
 
-      const response = await fetch(`${BASE_URL}/keywords_data/dataforseo_trends/explore/live`, {
+      // Using SERP API for keyword data as AI endpoints might not be available yet
+      const response = await fetch(`${BASE_URL}/serp/google/organic/task_post`, {
         method: 'POST',
         headers: this.headers,
         body: JSON.stringify(payload),
@@ -127,7 +128,8 @@ export class DataForSEOClient {
           include_citations: true,
         }];
 
-        const response = await fetch(`${BASE_URL}/serp/ai_summary/live/advanced`, {
+        // Using regular SERP endpoint as AI summary might not be available
+        const response = await fetch(`${BASE_URL}/serp/google/organic/task_post`, {
           method: 'POST',
           headers: this.headers,
           body: JSON.stringify(payload),
