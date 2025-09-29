@@ -38,6 +38,7 @@ import ActionableInsights from './ActionableInsights';
 import DataVisualizations from './DataVisualizations';
 import CompetitorManagement from './CompetitorManagement';
 import KeywordPerformance from './KeywordPerformance';
+import AIVisibility from './AIVisibility';
 
 interface DashboardProps {
   reportId: string;
@@ -1234,7 +1235,7 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
 
       {/* Main Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-5 md:grid-cols-10">
+        <TabsList className="grid w-full grid-cols-5 md:grid-cols-11">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="keywords">Keywords</TabsTrigger>
           <TabsTrigger value="competitors">Competitors</TabsTrigger>
@@ -1245,6 +1246,7 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
           <TabsTrigger value="engagement">Engagement</TabsTrigger>
           <TabsTrigger value="technical">Technical</TabsTrigger>
           <TabsTrigger value="visualize">Visualize</TabsTrigger>
+          <TabsTrigger value="ai-visibility">AI Visibility</TabsTrigger>
         </TabsList>
 
         {/* Overview Tab */}
@@ -2550,6 +2552,11 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
             analyticsData={metrics?.analytics}
             competitorData={competitors}
           />
+        </TabsContent>
+
+        {/* AI Visibility Tab */}
+        <TabsContent value="ai-visibility" className="space-y-6">
+          <AIVisibility reportSlug={reportSlug} />
         </TabsContent>
 
         {/* Agency Updates Tab */}
