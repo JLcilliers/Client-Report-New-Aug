@@ -400,8 +400,11 @@ export default function AIVisibility({ reportSlug }: AIVisibilityProps) {
                     fontSize: '12px'
                   }}
                   formatter={(value, entry) => {
-                    const percent = ((entry.payload.citations / metrics.citationCount) * 100).toFixed(0);
-                    return `${value}: ${percent}%`;
+                    if (entry?.payload?.citations) {
+                      const percent = ((entry.payload.citations / metrics.citationCount) * 100).toFixed(0);
+                      return `${value}: ${percent}%`;
+                    }
+                    return value;
                   }}
                 />
               </PieChart>
