@@ -91,6 +91,8 @@ export default function AIVisibility({ reportSlug }: AIVisibilityProps) {
       setError(null);
 
       const endpoint = `/api/reports/${reportSlug}/ai-visibility`;
+      console.log(`Fetching AI visibility data from ${endpoint}, forceRefresh: ${forceRefresh}`);
+
       const response = await fetch(endpoint, {
         method: forceRefresh ? 'POST' : 'GET',
         headers: {
@@ -99,13 +101,19 @@ export default function AIVisibility({ reportSlug }: AIVisibilityProps) {
         body: forceRefresh ? JSON.stringify({ forceRefresh: true }) : undefined,
       });
 
+      console.log('Response status:', response.status);
+
       if (!response.ok) {
-        throw new Error('Failed to fetch AI visibility data');
+        const errorData = await response.text();
+        console.error('API Error:', errorData);
+        throw new Error(`Failed to fetch AI visibility data: ${response.status}`);
       }
 
       const data = await response.json();
+      console.log('Received data:', data);
       setMetrics(data.data);
     } catch (err) {
+      console.error('Fetch error:', err);
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setLoading(false);
@@ -113,8 +121,9 @@ export default function AIVisibility({ reportSlug }: AIVisibilityProps) {
     }
   };
 
-  const handleRefresh = () => {
-    fetchAIVisibilityData(true);
+  const handleRefresh = async () => {
+    console.log('Refreshing AI Visibility data...');
+    await fetchAIVisibilityData(true);
   };
 
   const getScoreColor = (score: number) => {
@@ -190,9 +199,23 @@ export default function AIVisibility({ reportSlug }: AIVisibilityProps) {
         <Info className="h-4 w-4" />
         <AlertDescription>
           No AI visibility data available yet. Click the button below to generate your first AI visibility report. This will analyze how your brand appears across AI platforms like ChatGPT, Claude, and Google AI.
-          <Button onClick={handleRefresh} className="ml-4" size="sm">
-            <Sparkles className="w-4 h-4 mr-2" />
-            Generate AI Visibility Report
+          <Button
+            onClick={handleRefresh}
+            className="ml-4"
+            size="sm"
+            disabled={refreshing}
+          >
+            {refreshing ? (
+              <>
+                <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                Generating Report...
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-4 h-4 mr-2" />
+                Generate AI Visibility Report
+              </>
+            )}
           </Button>
         </AlertDescription>
       </Alert>
