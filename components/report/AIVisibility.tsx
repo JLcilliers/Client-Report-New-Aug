@@ -339,13 +339,24 @@ export default function AIVisibility({ reportSlug }: AIVisibilityProps) {
             <CardDescription>Your visibility across different AI platforms</CardDescription>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={platformChartData}>
+            <ResponsiveContainer width="100%" height={400}>
+              <BarChart data={platformChartData} margin={{ top: 20, right: 30, left: 50, bottom: 120 }}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} />
-                <YAxis />
+                <XAxis
+                  dataKey="name"
+                  angle={-45}
+                  textAnchor="end"
+                  height={120}
+                  interval={0}
+                  tick={{ fontSize: 11 }}
+                />
+                <YAxis
+                  label={{ value: 'Visibility Score', angle: -90, position: 'insideLeft', offset: 10 }}
+                  tick={{ fontSize: 11 }}
+                  domain={[0, 100]}
+                />
                 <Tooltip />
-                <Bar dataKey="score" fill="#8884d8">
+                <Bar dataKey="score" radius={[8, 8, 0, 0]}>
                   {platformChartData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={PLATFORM_COLORS[entry.name] || '#8884d8'} />
                   ))}
@@ -361,15 +372,15 @@ export default function AIVisibility({ reportSlug }: AIVisibilityProps) {
             <CardDescription>Number of citations per platform</CardDescription>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
+            <ResponsiveContainer width="100%" height={400}>
+              <PieChart margin={{ top: 40, right: 40, bottom: 80, left: 40 }}>
                 <Pie
                   data={platformChartData}
                   cx="50%"
-                  cy="50%"
+                  cy="45%"
                   labelLine={false}
-                  label={({ name, citations }) => `${name}: ${citations}`}
-                  outerRadius={80}
+                  label={false}
+                  outerRadius={120}
                   fill="#8884d8"
                   dataKey="citations"
                 >
@@ -377,7 +388,22 @@ export default function AIVisibility({ reportSlug }: AIVisibilityProps) {
                     <Cell key={`cell-${index}`} fill={PLATFORM_COLORS[entry.name] || '#8884d8'} />
                   ))}
                 </Pie>
-                <Tooltip />
+                <Tooltip
+                  formatter={(value, name) => [`${value} citations`, name]}
+                />
+                <Legend
+                  verticalAlign="bottom"
+                  height={60}
+                  iconType="circle"
+                  wrapperStyle={{
+                    paddingTop: '20px',
+                    fontSize: '12px'
+                  }}
+                  formatter={(value, entry) => {
+                    const percent = ((entry.payload.citations / metrics.citationCount) * 100).toFixed(0);
+                    return `${value}: ${percent}%`;
+                  }}
+                />
               </PieChart>
             </ResponsiveContainer>
           </CardContent>
@@ -396,24 +422,35 @@ export default function AIVisibility({ reportSlug }: AIVisibilityProps) {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {metrics.topQueries.slice(0, 5).map((query, index) => (
-                <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                  <div className="flex-1">
-                    <p className="font-medium">{query.query}</p>
-                    <div className="flex gap-2 mt-1">
-                      {query.platforms.map(p => (
-                        <Badge key={p} variant="outline" className="text-xs">
-                          {p}
-                        </Badge>
-                      ))}
+              {metrics.topQueries && metrics.topQueries.length > 0 ? (
+                metrics.topQueries.slice(0, 5).map((query, index) => (
+                  <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                    <div className="flex-1">
+                      <p className="font-medium">{query.query}</p>
+                      <div className="flex gap-2 mt-1 flex-wrap">
+                        {query.platforms && query.platforms.length > 0 ? (
+                          query.platforms.slice(0, 3).map(p => (
+                            <Badge key={p} variant="outline" className="text-xs">
+                              {p.split(' ')[0]}
+                            </Badge>
+                          ))
+                        ) : (
+                          <Badge variant="outline" className="text-xs">Multiple</Badge>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {getStatusBadge(query.status)}
+                      <Badge variant="secondary">{query.frequency}x</Badge>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    {getStatusBadge(query.status)}
-                    <Badge variant="secondary">{query.frequency}x</Badge>
-                  </div>
+                ))
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <Search className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                  <p>No query data available yet. Data will populate after the first analysis.</p>
                 </div>
-              ))}
+              )}
             </div>
           </CardContent>
         </Card>
@@ -427,7 +464,7 @@ export default function AIVisibility({ reportSlug }: AIVisibilityProps) {
             <CardDescription>Share of voice comparison with competitors</CardDescription>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={250}>
+            <ResponsiveContainer width="100%" height={300}>
               <BarChart data={competitorChartData} layout="horizontal">
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis type="number" />
