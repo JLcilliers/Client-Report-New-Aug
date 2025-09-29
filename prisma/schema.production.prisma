@@ -105,6 +105,7 @@ model ClientReport {
   keywords                Keyword[]
   keywordGroups           KeywordGroup[]
   keywordCannibalization  KeywordCannibalization[]
+  aiVisibility            AIVisibilityProfile?
 }
 
 model ReportAccessLog {
@@ -595,4 +596,153 @@ model KeywordCannibalization {
   @@index([keyword])
   @@index([severity])
   @@index([detectedAt])
+}
+// AI Visibility Tracking Models - Add to schema.prisma
+
+model AIVisibilityProfile {
+  id                    String                @id @default(cuid())
+  clientReportId        String                @unique
+  lastUpdated           DateTime              @default(now())
+  overallScore          Float                 @default(0)
+  sentimentScore        Float                 @default(0)
+  shareOfVoice          Float                 @default(0)
+  citationCount         Int                   @default(0)
+  accuracyScore         Float                 @default(0)
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+
+  clientReport          ClientReport          @relation(fields: [clientReportId], references: [id], onDelete: Cascade)
+  platformMetrics       AIPlatformMetric[]
+  citations             AICitation[]
+  queries               AIQueryInsight[]
+  recommendations       AIRecommendation[]
+  trends                AIVisibilityTrend[]
+  competitors           AICompetitorAnalysis[]
+
+  @@index([clientReportId])
+  @@index([overallScore])
+}
+
+model AIPlatformMetric {
+  id                    String                @id @default(cuid())
+  profileId             String
+  platform              String                // google_ai, chatgpt, perplexity, claude, gemini
+  visibilityScore       Float                 @default(0)
+  citationCount         Int                   @default(0)
+  sentimentScore        Float                 @default(0)
+  prominenceScore       Float                 @default(0)
+  lastChecked           DateTime              @default(now())
+  responseData          Json?
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+
+  profile               AIVisibilityProfile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, platform])
+  @@index([profileId])
+  @@index([platform])
+}
+
+model AICitation {
+  id                    String                @id @default(cuid())
+  profileId             String
+  platform              String
+  query                 String
+  responseText          String                @db.Text
+  citationPosition      Int
+  citationContext       String                @db.Text
+  url                   String?
+  sentiment             String                // positive, negative, neutral
+  accuracy              String                // accurate, partial, inaccurate
+  timestamp             DateTime              @default(now())
+
+  profile               AIVisibilityProfile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId, platform])
+  @@index([query])
+  @@index([timestamp])
+}
+
+model AIQueryInsight {
+  id                    String                @id @default(cuid())
+  profileId             String
+  query                 String
+  triggerFrequency      Int                   @default(0)
+  averagePosition       Float                 @default(0)
+  platforms             String[]
+  searchVolume          Int?
+  difficulty            Float?
+  opportunity           String                // high, medium, low
+  status                String                // captured, missed, partial
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+
+  profile               AIVisibilityProfile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, query])
+  @@index([profileId])
+  @@index([opportunity])
+  @@index([status])
+}
+
+model AIRecommendation {
+  id                    String                @id @default(cuid())
+  profileId             String
+  type                  String                // schema, content, entity, technical
+  priority              String                // high, medium, low
+  title                 String
+  description           String                @db.Text
+  impact                String
+  effort                String                // low, medium, high
+  status                String                @default("pending") // pending, in_progress, completed
+  implementationGuide   String?               @db.Text
+  estimatedImpact       Float?
+  createdAt             DateTime              @default(now())
+  completedAt           DateTime?
+
+  profile               AIVisibilityProfile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId, status])
+  @@index([priority])
+  @@index([type])
+}
+
+model AIVisibilityTrend {
+  id                    String                @id @default(cuid())
+  profileId             String
+  date                  DateTime
+  overallScore          Float
+  citationCount         Int
+  sentimentScore        Float
+  shareOfVoice          Float
+  platformBreakdown     Json
+  topQueries            Json
+  competitorComparison  Json?
+  createdAt             DateTime              @default(now())
+
+  profile               AIVisibilityProfile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, date])
+  @@index([profileId, date])
+}
+
+model AICompetitorAnalysis {
+  id                    String                @id @default(cuid())
+  profileId             String
+  competitorDomain      String
+  competitorName        String
+  shareOfVoice          Float
+  citationCount         Int
+  sentimentScore        Float
+  platforms             Json
+  strengthAreas         String[]
+  weaknessAreas         String[]
+  gap                   Float                 // percentage behind/ahead
+  lastAnalyzed          DateTime              @default(now())
+
+  profile               AIVisibilityProfile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, competitorDomain])
+  @@index([profileId])
+  @@index([competitorDomain])
 }
