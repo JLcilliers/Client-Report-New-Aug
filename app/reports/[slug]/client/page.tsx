@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import ClientReportView from '@/components/report/ClientReportView';
+import ClientReportEnhanced from '@/components/report/ClientReportEnhanced';
 import { prisma } from '@/lib/db/prisma';
 
 interface ClientReportPageProps {
@@ -29,5 +29,5 @@ export default async function ClientReportPage({ params }: ClientReportPageProps
     notFound();
   }
 
-  return <ClientReportView report={report} />;
+  return <ClientReportEnhanced report={report} />;
 }
