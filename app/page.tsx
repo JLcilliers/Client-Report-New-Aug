@@ -25,7 +25,9 @@ import {
   ChevronDown,
   ChevronUp,
   AlertCircle,
-  Phone
+  Phone,
+  Calendar,
+  BadgeCheck
 } from "lucide-react"
 
 export default function LandingPage() {
@@ -52,8 +54,8 @@ export default function LandingPage() {
               <Link href="#features" className="text-gray-300 hover:text-white transition-colors">
                 Features
               </Link>
-              <Link href="#how-it-works" className="text-gray-300 hover:text-white transition-colors">
-                How It Works
+              <Link href="#integrations" className="text-gray-300 hover:text-white transition-colors">
+                Integrations
               </Link>
               <Link href="#pricing" className="text-gray-300 hover:text-white transition-colors">
                 Pricing
@@ -117,7 +119,7 @@ export default function LandingPage() {
                 className="bg-gradient-to-r from-[#D4FF00] to-[#A8CC00] text-black font-bold text-lg px-10 h-14 rounded-lg shadow-[0_4px_20px_rgba(212,255,0,0.3)] hover:shadow-[0_6px_30px_rgba(212,255,0,0.5)] hover:-translate-y-1 transition-all duration-300"
               >
                 <Link href="/login">
-                  Start Free 14-Day Trial
+                  Get Started - From $49/month
                 </Link>
               </Button>
               <Button
@@ -134,7 +136,7 @@ export default function LandingPage() {
 
             {/* Micro-copy */}
             <p className="text-sm text-gray-500 mb-12">
-              No credit card required • Cancel anytime • Setup in 60 seconds
+              Setup in 60 seconds • Cancel anytime • Plans start at $49/mo
             </p>
 
             {/* Trust Signals */}
@@ -231,10 +233,10 @@ export default function LandingPage() {
               <Brain className="w-12 h-12 text-[#D4FF00] mb-6 group-hover:scale-110 transition-transform" />
               <h3 className="text-2xl font-bold mb-4">AI-Powered Data Analysis</h3>
               <p className="text-gray-400 mb-6 leading-relaxed">
-                Our AI analyzes patterns across GA4, GSC, Ahrefs, SEMrush, and 40+ sources. Automatically highlights wins, flags issues, and suggests actions.
+                Our AI analyzes patterns across GA4, GSC, and connected platforms. Automatically highlights wins, flags issues, and suggests actions.
               </p>
               <ul className="space-y-2 text-gray-500">
-                <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-[#D4FF00]" /> 50+ data sources connected</li>
+                <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-[#D4FF00]" /> Intelligent insights</li>
                 <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-[#D4FF00]" /> Smart anomaly detection</li>
                 <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-[#D4FF00]" /> Predictive trend analysis</li>
               </ul>
@@ -282,17 +284,17 @@ export default function LandingPage() {
               </ul>
             </div>
 
-            {/* Feature 5: Integrations */}
+            {/* Feature 5: Integrations - UPDATED */}
             <div className="bg-[#1A1A1A]/80 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:border-[#D4FF00] hover:-translate-y-2 transition-all duration-400 group">
               <PuzzleIcon className="w-12 h-12 text-[#D4FF00] mb-6 group-hover:scale-110 transition-transform" />
-              <h3 className="text-2xl font-bold mb-4">Enterprise-Grade Integrations</h3>
+              <h3 className="text-2xl font-bold mb-4">Growing Integration Library</h3>
               <p className="text-gray-400 mb-6 leading-relaxed">
-                Google Analytics 4, Search Console, Ahrefs, SEMrush, Moz, Facebook Ads, Google Ads, and 40+ more with one-click OAuth.
+                Google Analytics 4, Search Console, Google Ads, Facebook Ads, Ahrefs, SEMrush, and more. New platforms added monthly based on user requests.
               </p>
               <ul className="space-y-2 text-gray-500">
                 <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-[#D4FF00]" /> Pre-built integrations</li>
-                <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-[#D4FF00]" /> API access available</li>
-                <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-[#D4FF00]" /> Custom data sources</li>
+                <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-[#D4FF00]" /> One-click OAuth setup</li>
+                <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-[#D4FF00]" /> More integrations shipping monthly</li>
               </ul>
             </div>
 
@@ -309,6 +311,128 @@ export default function LandingPage() {
                 <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-[#D4FF00]" /> Cost per report: $2.16</li>
               </ul>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* INTEGRATIONS SHOWCASE SECTION - NEW */}
+      <section id="integrations" className="py-20 lg:py-32 bg-[#0D0D0D]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold mb-4">
+              Works With Every Tool in Your<br />
+              <span className="text-[#D4FF00]">SEO Arsenal</span>
+            </h2>
+            <p className="text-xl text-gray-400 max-w-3xl mx-auto">
+              Pre-built integrations with the platforms you already use daily
+            </p>
+          </div>
+
+          {/* Analytics & Search */}
+          <div className="mb-12">
+            <h3 className="text-xl font-bold mb-6 text-gray-300">Analytics & Search</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              {['Google Analytics 4', 'Google Search Console', 'Adobe Analytics', 'Matomo'].map((tool) => (
+                <div key={tool} className="bg-[#1A1A1A]/80 backdrop-blur-sm border border-white/10 rounded-xl p-6 text-center hover:border-[#D4FF00] transition-all">
+                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg mx-auto mb-3"></div>
+                  <p className="text-sm font-medium">{tool}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Keyword Tracking */}
+          <div className="mb-12">
+            <h3 className="text-xl font-bold mb-6 text-gray-300">Keyword Tracking</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              {[
+                { name: 'Ahrefs', available: true },
+                { name: 'SEMrush', available: true },
+                { name: 'Moz Pro', available: true },
+                { name: 'Screaming Frog', available: true },
+                { name: 'Majestic', available: true },
+                { name: 'Advanced Rank Tracking', available: false }
+              ].map((tool) => (
+                <div key={tool.name} className={`bg-[#1A1A1A]/80 backdrop-blur-sm border ${tool.available ? 'border-white/10' : 'border-dashed border-gray-700'} rounded-xl p-6 text-center hover:border-[#D4FF00] transition-all ${!tool.available && 'opacity-50'}`}>
+                  <div className={`w-12 h-12 ${tool.available ? 'bg-gradient-to-br from-purple-500 to-purple-600' : 'bg-gray-700'} rounded-lg mx-auto mb-3`}></div>
+                  <p className="text-sm font-medium">{tool.name}</p>
+                  {!tool.available && <span className="text-xs text-gray-500 mt-1 inline-block">Coming Soon</span>}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Paid Advertising */}
+          <div className="mb-12">
+            <h3 className="text-xl font-bold mb-6 text-gray-300">Paid Advertising</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              {['Google Ads', 'Facebook Ads', 'LinkedIn Ads', 'Microsoft Advertising'].map((tool) => (
+                <div key={tool} className="bg-[#1A1A1A]/80 backdrop-blur-sm border border-white/10 rounded-xl p-6 text-center hover:border-[#D4FF00] transition-all">
+                  <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-lg mx-auto mb-3"></div>
+                  <p className="text-sm font-medium">{tool}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Coming Soon */}
+          <div className="text-center mt-12 p-8 bg-[#1A1A1A]/40 rounded-2xl border border-dashed border-gray-700">
+            <p className="text-gray-400 mb-4">
+              Don't see your tool? <Link href="#contact" className="text-[#D4FF00] hover:underline">Request Integration →</Link>
+            </p>
+            <p className="text-sm text-gray-500">We add new integrations every month based on customer requests.</p>
+          </div>
+        </div>
+      </section>
+
+      {/* QUICK WINS SECTION - NEW */}
+      <section className="py-20 lg:py-32 bg-[#0A0A0A]">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-4xl md:text-5xl font-bold text-center mb-4">
+            What You Can Do in Your<br />
+            <span className="text-[#D4FF00]">First Week</span>
+          </h2>
+
+          <div className="mt-12 space-y-4">
+            {[
+              { day: 'Day 1', task: 'Sign up and connect your data sources', time: '15 minutes' },
+              { day: 'Day 2', task: 'Generate your first report, see the magic', time: '3 minutes' },
+              { day: 'Day 3', task: 'Customize with your branding', time: '10 minutes' },
+              { day: 'Day 4', task: 'Send to test client, get feedback', time: '2 minutes' },
+              { day: 'Day 5', task: 'Set up automated monthly delivery', time: '5 minutes' },
+              { day: 'Day 6-7', task: 'Kick back and let AI handle next month\'s reports', time: '0 minutes' }
+            ].map((item, index) => (
+              <div key={index} className="flex items-center space-x-4 p-6 bg-[#1A1A1A]/80 backdrop-blur-sm border border-white/10 rounded-xl hover:border-[#D4FF00] transition-all">
+                <CheckCircle className="w-6 h-6 text-[#D4FF00] flex-shrink-0" />
+                <div className="flex-1">
+                  <span className="font-bold text-[#D4FF00]">{item.day}:</span> {item.task}
+                </div>
+                <span className="text-sm text-gray-500">({item.time})</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-12 p-8 bg-gradient-to-br from-[#D4FF00]/10 to-[#00FF88]/5 rounded-2xl border border-[#D4FF00]/30 text-center">
+            <div className="grid grid-cols-2 gap-8 mb-8">
+              <div>
+                <div className="text-3xl font-bold text-[#D4FF00] mb-2">35 minutes</div>
+                <div className="text-gray-400">Total time invested</div>
+              </div>
+              <div>
+                <div className="text-3xl font-bold text-[#D4FF00] mb-2">40+ hours</div>
+                <div className="text-gray-400">Time saved per month</div>
+              </div>
+            </div>
+
+            <Button
+              size="lg"
+              asChild
+              className="bg-gradient-to-r from-[#D4FF00] to-[#A8CC00] text-black font-bold text-lg px-10 h-14 rounded-lg shadow-[0_4px_20px_rgba(212,255,0,0.3)] hover:shadow-[0_6px_30px_rgba(212,255,0,0.5)] hover:-translate-y-1 transition-all duration-300"
+            >
+              <Link href="/login">
+                Get Started for $49/month
+              </Link>
+            </Button>
           </div>
         </div>
       </section>
@@ -381,7 +505,7 @@ export default function LandingPage() {
               className="bg-gradient-to-r from-[#D4FF00] to-[#A8CC00] text-black font-bold text-lg px-10 h-14 rounded-lg shadow-[0_4px_20px_rgba(212,255,0,0.3)] hover:shadow-[0_6px_30px_rgba(212,255,0,0.5)] hover:-translate-y-1 transition-all duration-300"
             >
               <Link href="/login">
-                Try It Free - See It Work in 60 Seconds
+                Get Started for $49/month
               </Link>
             </Button>
           </div>
@@ -522,9 +646,14 @@ export default function LandingPage() {
 
           <div className="bg-[#1A1A1A]/80 backdrop-blur-sm border border-[#D4FF00]/30 rounded-2xl p-12 mb-8">
             <div className="text-7xl font-bold text-[#D4FF00] mb-4">$49<span className="text-3xl text-gray-400">/month</span></div>
-            <p className="text-xl text-gray-400 mb-8">
-              That's less than your Netflix + Spotify subscriptions.<br />
+            <p className="text-xl text-gray-400 mb-2">
+              That's less than your Netflix + Spotify subscriptions.
+            </p>
+            <p className="text-lg text-gray-500 mb-8">
               Less than 1 billable hour. Less than lunch for your team.
+            </p>
+            <p className="text-sm text-gray-400 mb-8">
+              At $49/month, this pays for itself if it saves you just one hour - and it'll save you 40+.
             </p>
 
             <Button
@@ -533,7 +662,7 @@ export default function LandingPage() {
               className="bg-gradient-to-r from-[#D4FF00] to-[#A8CC00] text-black font-bold text-lg px-10 h-14 rounded-lg shadow-[0_4px_20px_rgba(212,255,0,0.3)] hover:shadow-[0_6px_30px_rgba(212,255,0,0.5)] hover:-translate-y-1 transition-all duration-300"
             >
               <Link href="/login">
-                See All Plans & Start Free Trial
+                See All Plans & Get Started
               </Link>
             </Button>
 
@@ -546,7 +675,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* FAQ SECTION */}
+      {/* FAQ SECTION - UPDATED */}
       <section id="faq" className="py-20 lg:py-32 bg-[#0A0A0A]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-4xl md:text-5xl font-bold text-center mb-16">
@@ -556,12 +685,12 @@ export default function LandingPage() {
           <div className="space-y-4">
             {[
               { q: "Do I need to know code?", a: "Not at all! Search Insights is completely no-code. If you can click a mouse, you can create professional SEO reports." },
-              { q: "Can I cancel anytime?", a: "Yes, absolutely. No contracts, no commitments. Cancel with one click from your dashboard." },
+              { q: "Is there a minimum commitment?", a: "Nope. Month-to-month billing. Cancel anytime with one click. No contracts, no commitments, no hassle. At $49/month, the risk is basically zero." },
               { q: "How long does setup take?", a: "Most agencies are up and running in under 5 minutes. Connect your Google account, add your logo, and you're ready to generate reports." },
               { q: "Do you offer white-label?", a: "Yes! All plans include white-label features. Your clients will only see your branding, never ours." },
-              { q: "What integrations do you support?", a: "We support 50+ integrations including Google Analytics 4, Search Console, Ahrefs, SEMrush, Moz, Google Ads, Facebook Ads, and many more." },
+              { q: "What platforms do you currently support?", a: "We integrate with Google Analytics 4, Google Search Console, all major paid advertising platforms (Google Ads, Facebook Ads, LinkedIn Ads, Microsoft Advertising), and keyword tracking tools like Ahrefs, SEMrush, and Moz. We're constantly adding new integrations - social media analytics and advanced SEO tools coming soon." },
               { q: "Is my data secure?", a: "Absolutely. We use bank-level encryption, are GDPR compliant, and never share your data with third parties." },
-              { q: "Do you offer a free trial?", a: "Yes! Get full access for 14 days, no credit card required. Try every feature risk-free." },
+              { q: "Can I cancel anytime?", a: "Yes, absolutely. No contracts, no commitments. Cancel with one click from your dashboard." },
               { q: "Can I customize the reports?", a: "Yes! Customize colors, fonts, metrics, sections, and more. Save templates for different client types." }
             ].map((faq, index) => (
               <div key={index} className="bg-[#1A1A1A]/80 backdrop-blur-sm border border-white/10 rounded-xl overflow-hidden hover:border-[#D4FF00] transition-all">
@@ -584,6 +713,12 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
+
+          <div className="mt-12 text-center">
+            <Link href="#integrations" className="text-[#D4FF00] hover:underline text-lg">
+              See full integration list →
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -602,14 +737,14 @@ export default function LandingPage() {
             Join 2,847 agencies who've eliminated the SEO reporting headache
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-4">
             <Button
               size="lg"
               asChild
               className="bg-gradient-to-r from-[#D4FF00] to-[#A8CC00] text-black font-bold text-lg px-10 h-14 rounded-lg shadow-[0_4px_20px_rgba(212,255,0,0.3)] hover:shadow-[0_6px_30px_rgba(212,255,0,0.5)] hover:-translate-y-1 transition-all duration-300"
             >
               <Link href="/login">
-                Get Started Now
+                Get Started Today - From $49/mo
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
@@ -624,6 +759,11 @@ export default function LandingPage() {
               </Link>
             </Button>
           </div>
+
+          {/* Micro-copy */}
+          <p className="text-sm text-gray-500 mb-8">
+            Full access. Cancel anytime. Plans for every agency size.
+          </p>
 
           {/* Trust badges */}
           <div className="flex flex-wrap justify-center items-center gap-8 text-sm text-gray-400 pt-8 border-t border-white/10">
@@ -663,7 +803,7 @@ export default function LandingPage() {
               <h4 className="font-semibold mb-4">Product</h4>
               <ul className="space-y-2 text-gray-400">
                 <li><Link href="#features" className="hover:text-[#D4FF00] transition-colors">Features</Link></li>
-                <li><Link href="#how-it-works" className="hover:text-[#D4FF00] transition-colors">How It Works</Link></li>
+                <li><Link href="#integrations" className="hover:text-[#D4FF00] transition-colors">Integrations</Link></li>
                 <li><Link href="#pricing" className="hover:text-[#D4FF00] transition-colors">Pricing</Link></li>
                 <li><Link href="/login" className="hover:text-[#D4FF00] transition-colors">Get Started</Link></li>
               </ul>
