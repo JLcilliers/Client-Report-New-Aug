@@ -58,7 +58,7 @@ export async function POST(
     // Generate executive summary
     const executiveSummary = await aiReportGenerator.generateExecutiveSummary(
       report.clientName,
-      report.websiteUrl || '',
+      report.shareableLink || '',
       {
         ...metrics,
         achievements: insights.achievements,
