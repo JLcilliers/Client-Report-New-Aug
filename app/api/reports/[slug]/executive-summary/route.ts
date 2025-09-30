@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
+import { prisma } from '@/lib/db/prisma';
 import { aiReportGenerator } from '@/lib/ai/report-summary';
 
 export async function POST(

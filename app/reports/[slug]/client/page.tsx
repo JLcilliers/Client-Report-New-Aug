@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import ClientReportView from '@/components/report/ClientReportView';
-import { prisma } from '@/lib/db';
+import { prisma } from '@/lib/db/prisma';
 
 interface ClientReportPageProps {
   params: {
