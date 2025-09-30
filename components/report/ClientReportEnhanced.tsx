@@ -19,7 +19,6 @@ import {
   Zap,
   Award,
   BarChart3,
-  DollarSign,
   Clock,
   FileText,
   AlertCircle,
@@ -212,14 +211,6 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
             avgPosition: 15.8,
           }
         },
-        financial: {
-          monthlySpend: 5000,
-          roi: 3.2,
-          costPerAcquisition: 45.50,
-          revenue: 16000,
-          budget: 6000,
-          budgetUtilized: 83.3
-        },
         competitors: [
           { name: 'Competitor A', shareOfVoice: 35, trend: 'up' },
           { name: 'Competitor B', shareOfVoice: 28, trend: 'down' },
@@ -253,7 +244,7 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
   const generateExecutiveSummary = (data: any) => {
     const summary = `This month delivered strong performance across all key metrics with significant year-over-year growth.
     Website traffic increased by ${((data.analytics.totalSessions - data.analytics.lastMonth.totalSessions) / data.analytics.lastMonth.totalSessions * 100).toFixed(1)}% compared to last month,
-    with organic search driving exceptional results. ROI reached ${data.financial.roi}x, exceeding targets by 20%.`;
+    with organic search driving exceptional results.`;
     setExecutiveSummary(summary);
   };
 
@@ -274,9 +265,8 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
 
   // Calculate metrics
   const overallHealthScore = Math.round(
-    (data.analytics.totalSessions / 50000) * 30 +
-    (data.searchConsole.totalClicks / 15000) * 30 +
-    (data.financial.roi / 5) * 40
+    (data.analytics.totalSessions / 50000) * 50 +
+    (data.searchConsole.totalClicks / 15000) * 50
   );
 
   const momSessionChange = calculateChange(data.analytics.totalSessions, data.analytics.lastMonth.totalSessions);
@@ -418,111 +408,9 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
               </div>
             </div>
 
-            <div className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-gray-600 text-sm">ROI</span>
-                <DollarSign className="w-5 h-5 text-green-500" />
-              </div>
-              <div className="text-3xl font-bold">{data.financial.roi}x</div>
-              <div className="flex items-center gap-1 mt-2">
-                <ArrowUp className="w-4 h-4 text-green-500" />
-                <span className="text-sm text-green-600">20% above target</span>
-              </div>
-              <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t">
-                <div>
-                  <p className="text-xs text-gray-500">Revenue</p>
-                  <p className="text-sm font-semibold">${formatNumber(data.financial.revenue)}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500">Spend</p>
-                  <p className="text-sm font-semibold">${formatNumber(data.financial.monthlySpend)}</p>
-                </div>
-              </div>
-            </div>
           </div>
         </section>
 
-        {/* Financial Performance & Budget Section */}
-        <section className="mb-12">
-          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-            <DollarSign className="w-6 h-6 text-green-600" />
-            Financial Performance & Budget
-          </h2>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <h3 className="text-lg font-semibold mb-4">Budget Utilization</h3>
-              <div className="space-y-4">
-                <div>
-                  <div className="flex justify-between mb-2">
-                    <span className="text-sm text-gray-600">Monthly Budget Used</span>
-                    <span className="text-sm font-semibold">${formatNumber(data.financial.monthlySpend)} / ${formatNumber(data.financial.budget)}</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-3">
-                    <div
-                      className="bg-blue-600 h-3 rounded-full relative"
-                      style={{ width: `${data.financial.budgetUtilized}%` }}
-                    >
-                      <span className="absolute right-2 top-0 text-xs text-white font-semibold leading-3">
-                        {data.financial.budgetUtilized}%
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-3 gap-4 pt-4">
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-green-600">${formatNumber(data.financial.revenue)}</p>
-                    <p className="text-xs text-gray-600">Revenue Generated</p>
-                  </div>
-                  <div className="text-center border-l border-r">
-                    <p className="text-2xl font-bold text-blue-600">{data.financial.roi}x</p>
-                    <p className="text-xs text-gray-600">Return on Investment</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-purple-600">${data.financial.costPerAcquisition}</p>
-                    <p className="text-xs text-gray-600">Cost per Acquisition</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <h3 className="text-lg font-semibold mb-4">Investment Breakdown</h3>
-              <ResponsiveContainer width="100%" height={200}>
-                <PieChart>
-                  <Pie
-                    data={[
-                      { name: 'SEO', value: 35, color: '#3B82F6' },
-                      { name: 'Content', value: 25, color: '#10B981' },
-                      { name: 'Technical', value: 20, color: '#F59E0B' },
-                      { name: 'Link Building', value: 15, color: '#8B5CF6' },
-                      { name: 'Tools', value: 5, color: '#EF4444' }
-                    ]}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={(entry) => `${entry.name}: ${entry.value}%`}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {[
-                      { name: 'SEO', value: 35, color: '#3B82F6' },
-                      { name: 'Content', value: 25, color: '#10B981' },
-                      { name: 'Technical', value: 20, color: '#F59E0B' },
-                      { name: 'Link Building', value: 15, color: '#8B5CF6' },
-                      { name: 'Tools', value: 5, color: '#EF4444' }
-                    ].map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        </section>
 
         {/* Enhanced Metrics Section */}
         <section className="mb-12">
@@ -629,7 +517,6 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
             <PerformanceIndicator value={45234} target={50000} label="Sessions Target" />
             <PerformanceIndicator value={12543} target={15000} label="Organic Clicks Target" />
             <PerformanceIndicator value={1719} target={2000} label="Conversions Target" />
-            <PerformanceIndicator value={16000} target={18000} label="Revenue Target" />
             <PerformanceIndicator value={3.8} target={5} label="Conversion Rate Target (%)" />
             <PerformanceIndicator value={14.2} target={10} label="Avg Position Target" />
           </div>
