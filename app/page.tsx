@@ -135,12 +135,12 @@ export default function LandingPage() {
             </div>
 
             {/* Micro-copy */}
-            <p className="text-sm text-gray-500 mb-12">
+            <p className="text-sm text-gray-500 mb-16">
               Setup in 60 seconds • Cancel anytime • Plans start at $49/mo
             </p>
 
             {/* Trust Signals */}
-            <div className="flex flex-col items-center space-y-4">
+            <div className="flex flex-col items-center space-y-6">
               <div className="flex items-center space-x-3">
                 <div className="flex -space-x-2">
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 border-2 border-[#0A0A0A]"></div>
@@ -185,7 +185,7 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Pain Point 1 */}
-            <div className="bg-[#1A1A1A]/80 backdrop-blur-sm border-l-4 border-red-500 rounded-2xl p-8 hover:border-red-400 transition-all">
+            <div className="bg-[#1A1A1A]/80 backdrop-blur-sm border-l-4 border-red-500 rounded-2xl p-8 hover:border-red-400 hover:shadow-[0_0_20px_rgba(255,68,68,0.3)] transition-all">
               <Clock className="w-12 h-12 text-red-500 mb-6" />
               <h3 className="text-2xl font-bold mb-4">40+ Hours Per Month</h3>
               <p className="text-gray-400 text-lg leading-relaxed">
@@ -194,7 +194,7 @@ export default function LandingPage() {
             </div>
 
             {/* Pain Point 2 */}
-            <div className="bg-[#1A1A1A]/80 backdrop-blur-sm border-l-4 border-red-500 rounded-2xl p-8 hover:border-red-400 transition-all">
+            <div className="bg-[#1A1A1A]/80 backdrop-blur-sm border-l-4 border-red-500 rounded-2xl p-8 hover:border-red-400 hover:shadow-[0_0_20px_rgba(255,68,68,0.3)] transition-all">
               <AlertCircle className="w-12 h-12 text-red-500 mb-6" />
               <h3 className="text-2xl font-bold mb-4">Clients Don't Get It</h3>
               <p className="text-gray-400 text-lg leading-relaxed">
@@ -203,7 +203,7 @@ export default function LandingPage() {
             </div>
 
             {/* Pain Point 3 */}
-            <div className="bg-[#1A1A1A]/80 backdrop-blur-sm border-l-4 border-red-500 rounded-2xl p-8 hover:border-red-400 transition-all">
+            <div className="bg-[#1A1A1A]/80 backdrop-blur-sm border-l-4 border-red-500 rounded-2xl p-8 hover:border-red-400 hover:shadow-[0_0_20px_rgba(255,68,68,0.3)] transition-all">
               <DollarSign className="w-12 h-12 text-red-500 mb-6" />
               <h3 className="text-2xl font-bold mb-4">Missed Opportunities</h3>
               <p className="text-gray-400 text-lg leading-relaxed">
@@ -299,7 +299,10 @@ export default function LandingPage() {
             </div>
 
             {/* Feature 6: ROI */}
-            <div className="bg-gradient-to-br from-[#D4FF00]/20 to-[#00FF88]/10 backdrop-blur-sm border border-[#D4FF00]/30 rounded-2xl p-8 hover:border-[#D4FF00] hover:-translate-y-2 transition-all duration-400 group">
+            <div className="relative bg-gradient-to-br from-[#D4FF00]/20 to-[#00FF88]/10 backdrop-blur-sm border border-[#D4FF00]/30 rounded-2xl p-8 hover:border-[#D4FF00] hover:-translate-y-2 hover:shadow-[0_0_30px_rgba(212,255,0,0.4)] transition-all duration-400 group">
+              <div className="absolute -top-3 right-4 bg-gradient-to-r from-[#D4FF00] to-[#A8CC00] text-black text-xs font-bold px-3 py-1 rounded-full shadow-lg">
+                BEST VALUE
+              </div>
               <TrendingUp className="w-12 h-12 text-[#D4FF00] mb-6 group-hover:scale-110 transition-transform" />
               <h3 className="text-2xl font-bold mb-4">Insane ROI</h3>
               <p className="text-gray-400 mb-6 leading-relaxed">
@@ -333,7 +336,7 @@ export default function LandingPage() {
             <h3 className="text-xl font-bold mb-6 text-gray-300">Analytics & Search</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {['Google Analytics 4', 'Google Search Console', 'Adobe Analytics', 'Matomo'].map((tool) => (
-                <div key={tool} className="bg-[#1A1A1A]/80 backdrop-blur-sm border border-white/10 rounded-xl p-6 text-center hover:border-[#D4FF00] transition-all">
+                <div key={tool} className="bg-[#1A1A1A]/80 backdrop-blur-sm border border-white/10 rounded-xl p-6 text-center hover:border-[#D4FF00] hover:scale-105 transition-transform duration-300">
                   <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg mx-auto mb-3"></div>
                   <p className="text-sm font-medium">{tool}</p>
                 </div>
@@ -353,7 +356,7 @@ export default function LandingPage() {
                 { name: 'Majestic', available: true },
                 { name: 'Advanced Rank Tracking', available: false }
               ].map((tool) => (
-                <div key={tool.name} className={`bg-[#1A1A1A]/80 backdrop-blur-sm border ${tool.available ? 'border-white/10' : 'border-dashed border-gray-700'} rounded-xl p-6 text-center hover:border-[#D4FF00] transition-all ${!tool.available && 'opacity-50'}`}>
+                <div key={tool.name} className={`bg-[#1A1A1A]/80 backdrop-blur-sm border ${tool.available ? 'border-white/10' : 'border-dashed border-gray-700'} rounded-xl p-6 text-center hover:border-[#D4FF00] hover:scale-105 transition-transform duration-300 ${!tool.available && 'opacity-50'}`}>
                   <div className={`w-12 h-12 ${tool.available ? 'bg-gradient-to-br from-purple-500 to-purple-600' : 'bg-gray-700'} rounded-lg mx-auto mb-3`}></div>
                   <p className="text-sm font-medium">{tool.name}</p>
                   {!tool.available && <span className="text-xs text-gray-500 mt-1 inline-block">Coming Soon</span>}
@@ -367,7 +370,7 @@ export default function LandingPage() {
             <h3 className="text-xl font-bold mb-6 text-gray-300">Paid Advertising</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {['Google Ads', 'Facebook Ads', 'LinkedIn Ads', 'Microsoft Advertising'].map((tool) => (
-                <div key={tool} className="bg-[#1A1A1A]/80 backdrop-blur-sm border border-white/10 rounded-xl p-6 text-center hover:border-[#D4FF00] transition-all">
+                <div key={tool} className="bg-[#1A1A1A]/80 backdrop-blur-sm border border-white/10 rounded-xl p-6 text-center hover:border-[#D4FF00] hover:scale-105 transition-transform duration-300">
                   <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-lg mx-auto mb-3"></div>
                   <p className="text-sm font-medium">{tool}</p>
                 </div>
@@ -621,15 +624,15 @@ export default function LandingPage() {
           {/* Social Proof Numbers */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16 text-center">
             <div>
-              <div className="text-5xl font-bold text-[#D4FF00] mb-2">2,847</div>
+              <div className="text-6xl md:text-7xl font-bold text-[#D4FF00] mb-2 animate-pulse">2,847</div>
               <div className="text-gray-400">Active Agencies</div>
             </div>
             <div>
-              <div className="text-5xl font-bold text-[#D4FF00] mb-2">40,500+</div>
+              <div className="text-6xl md:text-7xl font-bold text-[#D4FF00] mb-2 animate-pulse">40,500+</div>
               <div className="text-gray-400">Reports Generated</div>
             </div>
             <div>
-              <div className="text-5xl font-bold text-[#D4FF00] mb-2">99.8%</div>
+              <div className="text-6xl md:text-7xl font-bold text-[#D4FF00] mb-2 animate-pulse">99.8%</div>
               <div className="text-gray-400">Uptime SLA</div>
             </div>
           </div>
@@ -645,7 +648,7 @@ export default function LandingPage() {
           </h2>
 
           <div className="bg-[#1A1A1A]/80 backdrop-blur-sm border border-[#D4FF00]/30 rounded-2xl p-12 mb-8">
-            <div className="text-7xl font-bold text-[#D4FF00] mb-4">$49<span className="text-3xl text-gray-400">/month</span></div>
+            <div className="text-9xl font-bold text-[#D4FF00] mb-4">$49<span className="text-3xl text-gray-400">/month</span></div>
             <p className="text-xl text-gray-400 mb-2">
               That's less than your Netflix + Spotify subscriptions.
             </p>
