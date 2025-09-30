@@ -122,16 +122,6 @@ export default function LandingPage() {
                   Get Started - From $49/month
                 </Link>
               </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                asChild
-                className="border-2 border-white text-white hover:bg-white hover:text-black text-lg px-10 h-14 rounded-lg transition-all duration-300"
-              >
-                <Link href="#demo">
-                  See Live Demo
-                </Link>
-              </Button>
             </div>
 
             {/* Micro-copy */}
@@ -749,16 +739,6 @@ export default function LandingPage() {
               <Link href="/login">
                 Get Started Today - From $49/mo
                 <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              asChild
-              className="border-2 border-gray-700 text-white hover:bg-gray-800 text-lg px-10 h-14 rounded-lg transition-all"
-            >
-              <Link href="#demo">
-                Questions? Book a 15-min demo →
               </Link>
             </Button>
           </div>
