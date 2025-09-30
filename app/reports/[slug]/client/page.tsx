@@ -9,15 +9,21 @@ interface ClientReportPageProps {
 }
 
 export default async function ClientReportPage({ params }: ClientReportPageProps) {
-  const report = await prisma.clientReport.findUnique({
+  // Get report by shareableId (slug)
+  let report = await prisma.clientReport.findUnique({
     where: {
-      slug: params.slug,
-    },
-    include: {
-      gaProperty: true,
-      gscProperty: true,
+      shareableId: params.slug,
     },
   });
+
+  // Fallback to ID if not found by shareableId
+  if (!report) {
+    report = await prisma.clientReport.findUnique({
+      where: {
+        id: params.slug,
+      },
+    });
+  }
 
   if (!report) {
     notFound();

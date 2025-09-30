@@ -49,16 +49,17 @@ export default function ClientReportView({ report }: ClientReportViewProps) {
       setLoading(true);
 
       // Fetch all data in parallel
+      const reportSlug = report.shareableId || report.id;
       const [
         analyticsRes,
         searchConsoleRes,
         keywordsRes,
         pageSpeedRes
       ] = await Promise.all([
-        fetch(`/api/google/analytics?propertyId=${report.gaPropertyId}&startDate=${dateRange.startDate}&endDate=${dateRange.endDate}`),
-        fetch(`/api/google/search-console?propertyId=${report.gscPropertyId}&startDate=${dateRange.startDate}&endDate=${dateRange.endDate}`),
-        fetch(`/api/reports/${report.slug}/keywords`),
-        fetch(`/api/google/pagespeed?url=${report.websiteUrl}`)
+        fetch(`/api/google/analytics?propertyId=${report.ga4PropertyId}&startDate=${dateRange.startDate}&endDate=${dateRange.endDate}`),
+        fetch(`/api/google/search-console?propertyId=${report.searchConsolePropertyId}&startDate=${dateRange.startDate}&endDate=${dateRange.endDate}`),
+        fetch(`/api/reports/${reportSlug}/keywords`),
+        fetch(`/api/google/pagespeed?url=${report.shareableLink}`)
       ]);
 
       const analyticsData = await analyticsRes.json();
@@ -85,7 +86,8 @@ export default function ClientReportView({ report }: ClientReportViewProps) {
   const generateExecutiveSummary = async (analytics: any, searchConsole: any) => {
     try {
       // Call AI endpoint to generate summary
-      const response = await fetch(`/api/reports/${report.slug}/executive-summary`, {
+      const reportSlug = report.shareableId || report.id;
+      const response = await fetch(`/api/reports/${reportSlug}/executive-summary`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

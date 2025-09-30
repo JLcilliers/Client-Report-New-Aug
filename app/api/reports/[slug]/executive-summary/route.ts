@@ -10,10 +10,17 @@ export async function POST(
     const { slug } = params;
     const body = await request.json();
 
-    // Get report details
-    const report = await prisma.clientReport.findUnique({
-      where: { slug },
+    // Get report details - slug is actually the shareableId
+    let report = await prisma.clientReport.findUnique({
+      where: { shareableId: slug },
     });
+
+    // Fallback to ID if not found by shareableId
+    if (!report) {
+      report = await prisma.clientReport.findUnique({
+        where: { id: slug },
+      });
+    }
 
     if (!report) {
       return NextResponse.json(
