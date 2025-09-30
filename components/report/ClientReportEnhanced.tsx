@@ -32,8 +32,7 @@ import {
   Trophy,
   Lightbulb,
   TestTube,
-  Star,
-  ChartBar
+  Star
 } from 'lucide-react';
 import {
   LineChart, Line, AreaChart, Area, BarChart, Bar, PieChart, Pie,
