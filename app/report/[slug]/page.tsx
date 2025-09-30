@@ -7,18 +7,19 @@ import { Button } from "@/components/ui/button"
 import ComprehensiveDashboard from "@/components/report/ComprehensiveDashboard"
 import DataFreshnessIndicator from "@/components/report/DataFreshnessIndicator"
 import KeywordPerformance from "@/components/report/KeywordPerformance"
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  Users, 
-  Eye, 
+import {
+  TrendingUp,
+  TrendingDown,
+  Users,
+  Eye,
   MousePointer,
   Clock,
   Globe,
   BarChart3,
   RefreshCw,
   Calendar,
-  Search
+  Search,
+  FileText
 } from "lucide-react"
 import Link from "next/link"
 
@@ -225,6 +226,18 @@ export default function PublicReportPage() {
 
               {/* Action Buttons - All aligned in one row */}
               <div className="flex items-center gap-2 mt-4">
+                {/* View Client Report Button - Primary action */}
+                <Link href={`/reports/${slug}/client`}>
+                  <Button
+                    variant="default"
+                    size="sm"
+                    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
+                  >
+                    <FileText className="h-4 w-4" />
+                    View Client Report
+                  </Button>
+                </Link>
+
                 <Button
                   onClick={refreshData}
                   disabled={fetchingData}
