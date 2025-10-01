@@ -192,7 +192,7 @@ export default function ActionPlanDetailPage() {
       case 'completed':
         return <CheckCircle className="w-4 h-4 text-green-600" />;
       case 'in_progress':
-        return <Loader2 className="w-4 h-4 text-blue-600 animate-spin" />;
+        return <Loader2 className="w-4 h-4 text-marine animate-spin" />;
       case 'blocked':
         return <XCircle className="w-4 h-4 text-red-600" />;
       default:

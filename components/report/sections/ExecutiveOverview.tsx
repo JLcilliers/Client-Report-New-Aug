@@ -220,7 +220,7 @@ export default function ExecutiveOverview({ data, compareMode, dateRange }: Exec
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <ArrowRight className="h-5 w-5 text-blue-600" />
+            <ArrowRight className="h-5 w-5 text-marine" />
             Strategic Focus Areas
           </CardTitle>
           <CardDescription>
