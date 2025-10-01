@@ -44,7 +44,7 @@ interface ClientReportEnhancedProps {
 }
 
 // Sparkline Component
-const Sparkline = ({ data, color = '#3B82F6' }: { data: number[], color?: string }) => {
+const Sparkline = ({ data, color = '#D4FF00' }: { data: number[], color?: string }) => {
   const max = Math.max(...data);
   const min = Math.min(...data);
   const range = max - min;
@@ -96,7 +96,7 @@ const HealthScore = ({ score }: { score: number }) => {
             stroke="currentColor"
             strokeWidth="8"
             fill="none"
-            className="text-gray-200"
+            className="text-white/10"
           />
           <circle
             cx="48"
@@ -110,14 +110,14 @@ const HealthScore = ({ score }: { score: number }) => {
           />
         </svg>
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-2xl font-bold">{score}</span>
+          <span className="text-2xl font-bold text-white">{score}</span>
         </div>
       </div>
       <div>
         <div className={`inline-block px-3 py-1 rounded-full text-white text-sm font-semibold ${getColor()}`}>
           {getLabel()}
         </div>
-        <p className="text-xs text-gray-600 mt-1">Overall Performance</p>
+        <p className="text-xs text-gray-400 mt-1">Overall Performance</p>
       </div>
     </div>
   );
@@ -129,24 +129,24 @@ const PerformanceIndicator = ({ value, target, label }: { value: number; target:
   const status = percentage >= 100 ? 'success' : percentage >= 75 ? 'warning' : 'danger';
 
   const statusColors = {
-    success: 'text-green-600 bg-green-50',
-    warning: 'text-yellow-600 bg-yellow-50',
-    danger: 'text-red-600 bg-red-50'
+    success: 'text-green-600 bg-green-500/20',
+    warning: 'text-yellow-600 bg-yellow-500/20',
+    danger: 'text-red-600 bg-red-500/20'
   };
 
   return (
-    <div className="p-4 border rounded-lg">
+    <div className="p-4 border border-white/10 rounded-lg bg-[#1A1A1A]">
       <div className="flex justify-between items-center mb-2">
-        <span className="text-sm text-gray-600">{label}</span>
+        <span className="text-sm text-gray-400">{label}</span>
         <span className={`px-2 py-1 rounded text-xs font-semibold ${statusColors[status]}`}>
           {percentage.toFixed(0)}% of target
         </span>
       </div>
       <div className="flex items-baseline gap-2">
-        <span className="text-2xl font-bold">{value.toLocaleString()}</span>
-        <span className="text-sm text-gray-500">/ {target.toLocaleString()}</span>
+        <span className="text-2xl font-bold text-white">{value.toLocaleString()}</span>
+        <span className="text-sm text-gray-400">/ {target.toLocaleString()}</span>
       </div>
-      <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
+      <div className="mt-2 w-full bg-white/10 rounded-full h-2">
         <div
           className={`h-2 rounded-full ${status === 'success' ? 'bg-green-500' : status === 'warning' ? 'bg-yellow-500' : 'bg-red-500'}`}
           style={{ width: `${Math.min(percentage, 100)}%` }}
@@ -254,10 +254,10 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Generating your enhanced report...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#D4FF00] mx-auto mb-4"></div>
+          <p className="text-gray-400">Generating your enhanced report...</p>
         </div>
       </div>
     );
@@ -278,9 +278,9 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
   const clickSparkline = [9000, 9500, 10200, 10800, 11500, 12000, 12543];
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[#0A0A0A]">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-700 text-white">
+      <div className="bg-gradient-to-r from-[#1A1A1A] to-[#0A0A0A] text-white border-b border-white/10">
         <div className="max-w-7xl mx-auto px-6 py-12">
           <div className="flex justify-between items-start">
             <div>
@@ -296,37 +296,37 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Enhanced Executive Summary */}
         <section className="mb-12">
-          <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-8">
-            <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-              <FileText className="w-6 h-6 text-blue-600" />
+          <div className="bg-[#1A1A1A] border border-white/10 rounded-xl p-8 transition-all duration-300 hover:shadow-[0_0_20px_rgba(212,255,0,0.15)]">
+            <h2 className="text-2xl font-bold mb-4 flex items-center gap-2 text-white">
+              <FileText className="w-6 h-6 text-[#D4FF00]" />
               Executive Summary
             </h2>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-              <div className="bg-white rounded-lg p-4 shadow-sm">
+              <div className="bg-[#0A0A0A] border border-white/10 rounded-lg p-4 transition-all duration-300 hover:shadow-[0_0_20px_rgba(212,255,0,0.15)]">
                 <div className="flex items-center gap-2 mb-2">
                   <CheckCircle className="w-5 h-5 text-green-500" />
-                  <span className="font-semibold text-green-700">Top Achievement</span>
+                  <span className="font-semibold text-green-400">Top Achievement</span>
                 </div>
-                <p className="text-sm text-gray-700">Organic traffic increased 23% MoM, exceeding quarterly targets</p>
+                <p className="text-sm text-gray-400">Organic traffic increased 23% MoM, exceeding quarterly targets</p>
               </div>
-              <div className="bg-white rounded-lg p-4 shadow-sm">
+              <div className="bg-[#0A0A0A] border border-white/10 rounded-lg p-4 transition-all duration-300 hover:shadow-[0_0_20px_rgba(212,255,0,0.15)]">
                 <div className="flex items-center gap-2 mb-2">
                   <AlertCircle className="w-5 h-5 text-yellow-500" />
-                  <span className="font-semibold text-yellow-700">Needs Attention</span>
+                  <span className="font-semibold text-yellow-400">Needs Attention</span>
                 </div>
-                <p className="text-sm text-gray-700">Page load speed affecting mobile conversion rates</p>
+                <p className="text-sm text-gray-400">Page load speed affecting mobile conversion rates</p>
               </div>
-              <div className="bg-white rounded-lg p-4 shadow-sm">
+              <div className="bg-[#0A0A0A] border border-white/10 rounded-lg p-4 transition-all duration-300 hover:shadow-[0_0_20px_rgba(212,255,0,0.15)]">
                 <div className="flex items-center gap-2 mb-2">
-                  <Target className="w-5 h-5 text-blue-500" />
-                  <span className="font-semibold text-blue-700">Key Focus</span>
+                  <Target className="w-5 h-5 text-[#D4FF00]" />
+                  <span className="font-semibold text-[#D4FF00]">Key Focus</span>
                 </div>
-                <p className="text-sm text-gray-700">Capitalize on high-performing keywords for Q4 campaigns</p>
+                <p className="text-sm text-gray-400">Capitalize on high-performing keywords for Q4 campaigns</p>
               </div>
             </div>
 
-            <p className="text-gray-700 leading-relaxed">
+            <p className="text-gray-400 leading-relaxed">
               {executiveSummary}
             </p>
           </div>
@@ -334,76 +334,76 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
 
         {/* Enhanced KPI Dashboard with Comparisons */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-            <BarChart3 className="w-6 h-6 text-blue-600" />
+          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2 text-white">
+            <BarChart3 className="w-6 h-6 text-[#D4FF00]" />
             Key Performance Indicators - Comparative Analysis
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
+            <div className="bg-[#1A1A1A] border border-white/10 rounded-lg p-6 hover:shadow-[0_0_20px_rgba(212,255,0,0.15)] transition-all duration-300">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-gray-600 text-sm">Total Sessions</span>
-                <Users className="w-5 h-5 text-blue-500" />
+                <span className="text-gray-400 text-sm">Total Sessions</span>
+                <Users className="w-5 h-5 text-[#D4FF00]" />
               </div>
-              <div className="text-3xl font-bold">{formatNumber(data.analytics.totalSessions)}</div>
-              <Sparkline data={sessionSparkline} color="#3B82F6" />
-              <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t">
+              <div className="text-3xl font-bold text-white">{formatNumber(data.analytics.totalSessions)}</div>
+              <Sparkline data={sessionSparkline} color="#D4FF00" />
+              <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-white/10">
                 <div>
-                  <p className="text-xs text-gray-500">vs Last Month</p>
-                  <p className={`text-sm font-semibold ${momSessionChange > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  <p className="text-xs text-gray-400">vs Last Month</p>
+                  <p className={`text-sm font-semibold ${momSessionChange > 0 ? 'text-green-500' : 'text-red-500'}`}>
                     {formatPercentage(momSessionChange)}
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500">vs Last Year</p>
-                  <p className={`text-sm font-semibold ${yoySessionChange > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  <p className="text-xs text-gray-400">vs Last Year</p>
+                  <p className={`text-sm font-semibold ${yoySessionChange > 0 ? 'text-green-500' : 'text-red-500'}`}>
                     {formatPercentage(yoySessionChange)}
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
+            <div className="bg-[#1A1A1A] border border-white/10 rounded-lg p-6 hover:shadow-[0_0_20px_rgba(212,255,0,0.15)] transition-all duration-300">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-gray-600 text-sm">Organic Clicks</span>
+                <span className="text-gray-400 text-sm">Organic Clicks</span>
                 <Search className="w-5 h-5 text-green-500" />
               </div>
-              <div className="text-3xl font-bold">{formatNumber(data.searchConsole.totalClicks)}</div>
+              <div className="text-3xl font-bold text-white">{formatNumber(data.searchConsole.totalClicks)}</div>
               <Sparkline data={clickSparkline} color="#10B981" />
-              <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t">
+              <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-white/10">
                 <div>
-                  <p className="text-xs text-gray-500">vs Last Month</p>
-                  <p className={`text-sm font-semibold ${momClickChange > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  <p className="text-xs text-gray-400">vs Last Month</p>
+                  <p className={`text-sm font-semibold ${momClickChange > 0 ? 'text-green-500' : 'text-red-500'}`}>
                     {formatPercentage(momClickChange)}
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500">CTR</p>
-                  <p className="text-sm font-semibold">{data.searchConsole.avgCtr.toFixed(2)}%</p>
+                  <p className="text-xs text-gray-400">CTR</p>
+                  <p className="text-sm font-semibold text-white">{data.searchConsole.avgCtr.toFixed(2)}%</p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
+            <div className="bg-[#1A1A1A] border border-white/10 rounded-lg p-6 hover:shadow-[0_0_20px_rgba(212,255,0,0.15)] transition-all duration-300">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-gray-600 text-sm">Conversion Rate</span>
-                <Target className="w-5 h-5 text-purple-500" />
+                <span className="text-gray-400 text-sm">Conversion Rate</span>
+                <Target className="w-5 h-5 text-[#D4FF00]" />
               </div>
-              <div className="text-3xl font-bold">3.8%</div>
+              <div className="text-3xl font-bold text-white">3.8%</div>
               <div className="flex items-center gap-2 mt-2">
-                <div className="flex-1 bg-gray-200 rounded-full h-2">
-                  <div className="bg-purple-500 h-2 rounded-full" style={{ width: '76%' }}></div>
+                <div className="flex-1 bg-white/10 rounded-full h-2">
+                  <div className="bg-[#D4FF00] h-2 rounded-full" style={{ width: '76%' }}></div>
                 </div>
-                <span className="text-xs text-gray-600">Target: 5%</span>
+                <span className="text-xs text-gray-400">Target: 5%</span>
               </div>
-              <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t">
+              <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-white/10">
                 <div>
-                  <p className="text-xs text-gray-500">vs Last Month</p>
-                  <p className="text-sm font-semibold text-green-600">+0.5%</p>
+                  <p className="text-xs text-gray-400">vs Last Month</p>
+                  <p className="text-sm font-semibold text-green-500">+0.5%</p>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500">Conversions</p>
-                  <p className="text-sm font-semibold">1,719</p>
+                  <p className="text-xs text-gray-400">Conversions</p>
+                  <p className="text-sm font-semibold text-white">1,719</p>
                 </div>
               </div>
             </div>
@@ -414,92 +414,92 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
 
         {/* Enhanced Metrics Section */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-            <Activity className="w-6 h-6 text-purple-600" />
+          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2 text-white">
+            <Activity className="w-6 h-6 text-[#D4FF00]" />
             Enhanced Performance Metrics
           </h2>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* User Behavior */}
-            <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <h3 className="font-semibold mb-4 flex items-center gap-2">
-                <Users className="w-5 h-5 text-blue-500" />
+            <div className="bg-[#1A1A1A] border border-white/10 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(212,255,0,0.15)]">
+              <h3 className="font-semibold mb-4 flex items-center gap-2 text-white">
+                <Users className="w-5 h-5 text-[#D4FF00]" />
                 User Behavior
               </h3>
               <div className="space-y-3">
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Pages per Session</span>
-                  <span className="font-semibold">{data.analytics.pagesPerSession}</span>
+                  <span className="text-sm text-gray-400">Pages per Session</span>
+                  <span className="font-semibold text-white">{data.analytics.pagesPerSession}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Avg. Session Duration</span>
-                  <span className="font-semibold">{Math.floor(data.analytics.avgSessionDuration / 60)}:{(data.analytics.avgSessionDuration % 60).toString().padStart(2, '0')}</span>
+                  <span className="text-sm text-gray-400">Avg. Session Duration</span>
+                  <span className="font-semibold text-white">{Math.floor(data.analytics.avgSessionDuration / 60)}:{(data.analytics.avgSessionDuration % 60).toString().padStart(2, '0')}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Bounce Rate</span>
-                  <span className="font-semibold">{data.analytics.bounceRate}%</span>
+                  <span className="text-sm text-gray-400">Bounce Rate</span>
+                  <span className="font-semibold text-white">{data.analytics.bounceRate}%</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Scroll Depth</span>
-                  <span className="font-semibold">73%</span>
+                  <span className="text-sm text-gray-400">Scroll Depth</span>
+                  <span className="font-semibold text-white">73%</span>
                 </div>
               </div>
             </div>
 
             {/* Core Web Vitals */}
-            <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <h3 className="font-semibold mb-4 flex items-center gap-2">
+            <div className="bg-[#1A1A1A] border border-white/10 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(212,255,0,0.15)]">
+              <h3 className="font-semibold mb-4 flex items-center gap-2 text-white">
                 <Gauge className="w-5 h-5 text-green-500" />
                 Core Web Vitals
               </h3>
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">LCP</span>
-                  <span className={`font-semibold ${data.coreWebVitals.lcp < 2.5 ? 'text-green-600' : 'text-yellow-600'}`}>
+                  <span className="text-sm text-gray-400">LCP</span>
+                  <span className={`font-semibold ${data.coreWebVitals.lcp < 2.5 ? 'text-green-500' : 'text-yellow-500'}`}>
                     {data.coreWebVitals.lcp}s
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">FID</span>
-                  <span className={`font-semibold ${data.coreWebVitals.fid < 100 ? 'text-green-600' : 'text-yellow-600'}`}>
+                  <span className="text-sm text-gray-400">FID</span>
+                  <span className={`font-semibold ${data.coreWebVitals.fid < 100 ? 'text-green-500' : 'text-yellow-500'}`}>
                     {data.coreWebVitals.fid}ms
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">CLS</span>
-                  <span className={`font-semibold ${data.coreWebVitals.cls < 0.1 ? 'text-green-600' : 'text-yellow-600'}`}>
+                  <span className="text-sm text-gray-400">CLS</span>
+                  <span className={`font-semibold ${data.coreWebVitals.cls < 0.1 ? 'text-green-500' : 'text-yellow-500'}`}>
                     {data.coreWebVitals.cls}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Performance Score</span>
-                  <span className="font-semibold text-green-600">{data.coreWebVitals.performance}/100</span>
+                  <span className="text-sm text-gray-400">Performance Score</span>
+                  <span className="font-semibold text-green-500">{data.coreWebVitals.performance}/100</span>
                 </div>
               </div>
             </div>
 
             {/* Lead Quality */}
-            <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <h3 className="font-semibold mb-4 flex items-center gap-2">
+            <div className="bg-[#1A1A1A] border border-white/10 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(212,255,0,0.15)]">
+              <h3 className="font-semibold mb-4 flex items-center gap-2 text-white">
                 <Star className="w-5 h-5 text-yellow-500" />
                 Lead Quality Indicators
               </h3>
               <div className="space-y-3">
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Marketing Qualified</span>
-                  <span className="font-semibold">68%</span>
+                  <span className="text-sm text-gray-400">Marketing Qualified</span>
+                  <span className="font-semibold text-white">68%</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Sales Qualified</span>
-                  <span className="font-semibold">42%</span>
+                  <span className="text-sm text-gray-400">Sales Qualified</span>
+                  <span className="font-semibold text-white">42%</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Conversion to Customer</span>
-                  <span className="font-semibold">18%</span>
+                  <span className="text-sm text-gray-400">Conversion to Customer</span>
+                  <span className="font-semibold text-white">18%</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Lead Score Avg</span>
-                  <span className="font-semibold">7.2/10</span>
+                  <span className="text-sm text-gray-400">Lead Score Avg</span>
+                  <span className="font-semibold text-white">7.2/10</span>
                 </div>
               </div>
             </div>
@@ -508,8 +508,8 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
 
         {/* Performance Against Targets */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-            <Target className="w-6 h-6 text-red-600" />
+          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2 text-white">
+            <Target className="w-6 h-6 text-[#D4FF00]" />
             Performance Against Targets
           </h2>
 
@@ -524,52 +524,52 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
 
         {/* Competitive Context */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-            <Trophy className="w-6 h-6 text-yellow-600" />
+          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2 text-white">
+            <Trophy className="w-6 h-6 text-[#D4FF00]" />
             Competitive Landscape
           </h2>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <h3 className="text-lg font-semibold mb-4">Share of Voice</h3>
+            <div className="bg-[#1A1A1A] border border-white/10 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(212,255,0,0.15)]">
+              <h3 className="text-lg font-semibold mb-4 text-white">Share of Voice</h3>
               <ResponsiveContainer width="100%" height={250}>
                 <BarChart data={data.competitors}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="shareOfVoice" fill="#3B82F6">
+                  <CartesianGrid strokeDasharray="3 3" stroke="#2A2A2A" />
+                  <XAxis dataKey="name" stroke="#888" />
+                  <YAxis stroke="#888" />
+                  <Tooltip contentStyle={{ backgroundColor: '#1A1A1A', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' }} />
+                  <Bar dataKey="shareOfVoice" fill="#D4FF00">
                     {data.competitors.map((entry: any, index: number) => (
-                      <Cell key={`cell-${index}`} fill={entry.name === 'Your Brand' ? '#10B981' : '#94A3B8'} />
+                      <Cell key={`cell-${index}`} fill={entry.name === 'Your Brand' ? '#D4FF00' : '#555'} />
                     ))}
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </div>
 
-            <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <h3 className="text-lg font-semibold mb-4">Competitive Opportunities</h3>
+            <div className="bg-[#1A1A1A] border border-white/10 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(212,255,0,0.15)]">
+              <h3 className="text-lg font-semibold mb-4 text-white">Competitive Opportunities</h3>
               <div className="space-y-3">
-                <div className="p-3 bg-green-50 rounded-lg">
+                <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
                   <div className="flex items-center gap-2 mb-1">
-                    <ChevronRight className="w-4 h-4 text-green-600" />
-                    <span className="font-semibold text-green-700">Content Gap</span>
+                    <ChevronRight className="w-4 h-4 text-green-500" />
+                    <span className="font-semibold text-green-400">Content Gap</span>
                   </div>
-                  <p className="text-sm text-gray-700">15 high-value keywords where competitors rank but you don't</p>
+                  <p className="text-sm text-gray-400">15 high-value keywords where competitors rank but you don't</p>
                 </div>
-                <div className="p-3 bg-blue-50 rounded-lg">
+                <div className="p-3 bg-[#D4FF00]/10 border border-[#D4FF00]/20 rounded-lg">
                   <div className="flex items-center gap-2 mb-1">
-                    <ChevronRight className="w-4 h-4 text-blue-600" />
-                    <span className="font-semibold text-blue-700">Link Opportunities</span>
+                    <ChevronRight className="w-4 h-4 text-[#D4FF00]" />
+                    <span className="font-semibold text-[#D4FF00]">Link Opportunities</span>
                   </div>
-                  <p className="text-sm text-gray-700">23 domains linking to competitors but not to you</p>
+                  <p className="text-sm text-gray-400">23 domains linking to competitors but not to you</p>
                 </div>
-                <div className="p-3 bg-purple-50 rounded-lg">
+                <div className="p-3 bg-purple-500/10 border border-purple-500/20 rounded-lg">
                   <div className="flex items-center gap-2 mb-1">
-                    <ChevronRight className="w-4 h-4 text-purple-600" />
-                    <span className="font-semibold text-purple-700">Technical Advantage</span>
+                    <ChevronRight className="w-4 h-4 text-purple-400" />
+                    <span className="font-semibold text-purple-400">Technical Advantage</span>
                   </div>
-                  <p className="text-sm text-gray-700">Your site loads 1.2s faster than industry average</p>
+                  <p className="text-sm text-gray-400">Your site loads 1.2s faster than industry average</p>
                 </div>
               </div>
             </div>
@@ -578,57 +578,57 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
 
         {/* Testing & Optimization Results */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-            <TestTube className="w-6 h-6 text-purple-600" />
+          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2 text-white">
+            <TestTube className="w-6 h-6 text-[#D4FF00]" />
             Testing & Optimization Results
           </h2>
 
-          <div className="bg-white border border-gray-200 rounded-lg p-6">
+          <div className="bg-[#1A1A1A] border border-white/10 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(212,255,0,0.15)]">
             <div className="mb-4">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-lg font-semibold">A/B Tests Completed</span>
-                <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-semibold">
+                <span className="text-lg font-semibold text-white">A/B Tests Completed</span>
+                <span className="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm font-semibold border border-green-500/30">
                   {data.testing.successfulTests}/{data.testing.testsRun} Successful
                 </span>
               </div>
-              <p className="text-sm text-gray-600">Average improvement: +{data.testing.avgImprovement}%</p>
+              <p className="text-sm text-gray-400">Average improvement: +{data.testing.avgImprovement}%</p>
             </div>
 
             <div className="space-y-3">
-              <div className="border-l-4 border-green-500 pl-4 py-2">
+              <div className="border-l-4 border-green-500 pl-4 py-2 bg-green-500/5">
                 <div className="flex justify-between items-center">
                   <div>
-                    <p className="font-semibold">Homepage Hero CTA Test</p>
-                    <p className="text-sm text-gray-600">Button color and copy variation</p>
+                    <p className="font-semibold text-white">Homepage Hero CTA Test</p>
+                    <p className="text-sm text-gray-400">Button color and copy variation</p>
                   </div>
-                  <span className="text-green-600 font-semibold">+23% CTR</span>
+                  <span className="text-green-400 font-semibold">+23% CTR</span>
                 </div>
               </div>
-              <div className="border-l-4 border-green-500 pl-4 py-2">
+              <div className="border-l-4 border-green-500 pl-4 py-2 bg-green-500/5">
                 <div className="flex justify-between items-center">
                   <div>
-                    <p className="font-semibold">Product Page Layout Test</p>
-                    <p className="text-sm text-gray-600">Image placement and size optimization</p>
+                    <p className="font-semibold text-white">Product Page Layout Test</p>
+                    <p className="text-sm text-gray-400">Image placement and size optimization</p>
                   </div>
-                  <span className="text-green-600 font-semibold">+18% Conversion</span>
+                  <span className="text-green-400 font-semibold">+18% Conversion</span>
                 </div>
               </div>
-              <div className="border-l-4 border-yellow-500 pl-4 py-2">
+              <div className="border-l-4 border-yellow-500 pl-4 py-2 bg-yellow-500/5">
                 <div className="flex justify-between items-center">
                   <div>
-                    <p className="font-semibold">Checkout Flow Simplification</p>
-                    <p className="text-sm text-gray-600">Reduced form fields and steps</p>
+                    <p className="font-semibold text-white">Checkout Flow Simplification</p>
+                    <p className="text-sm text-gray-400">Reduced form fields and steps</p>
                   </div>
-                  <span className="text-yellow-600 font-semibold">+5% Completion</span>
+                  <span className="text-yellow-400 font-semibold">+5% Completion</span>
                 </div>
               </div>
-              <div className="border-l-4 border-red-500 pl-4 py-2">
+              <div className="border-l-4 border-red-500 pl-4 py-2 bg-red-500/5">
                 <div className="flex justify-between items-center">
                   <div>
-                    <p className="font-semibold">Pop-up Timing Test</p>
-                    <p className="text-sm text-gray-600">Exit intent vs time-based trigger</p>
+                    <p className="font-semibold text-white">Pop-up Timing Test</p>
+                    <p className="text-sm text-gray-400">Exit intent vs time-based trigger</p>
                   </div>
-                  <span className="text-red-600 font-semibold">-2% Engagement</span>
+                  <span className="text-red-400 font-semibold">-2% Engagement</span>
                 </div>
               </div>
             </div>
@@ -637,18 +637,18 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
 
         {/* Upcoming Opportunities */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-            <Lightbulb className="w-6 h-6 text-yellow-600" />
+          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2 text-white">
+            <Lightbulb className="w-6 h-6 text-[#D4FF00]" />
             Upcoming Opportunities & Market Trends
           </h2>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-6">
+            <div className="bg-[#1A1A1A] border border-[#D4FF00]/20 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(212,255,0,0.15)]">
               <div className="flex items-center gap-2 mb-3">
-                <Calendar className="w-5 h-5 text-blue-600" />
-                <h3 className="font-semibold text-blue-900">Seasonal Opportunities</h3>
+                <Calendar className="w-5 h-5 text-[#D4FF00]" />
+                <h3 className="font-semibold text-white">Seasonal Opportunities</h3>
               </div>
-              <ul className="space-y-2 text-sm text-gray-700">
+              <ul className="space-y-2 text-sm text-gray-400">
                 <li>• Black Friday prep (45 days)</li>
                 <li>• Holiday shopping season</li>
                 <li>• Q4 budget allocation</li>
@@ -656,12 +656,12 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
               </ul>
             </div>
 
-            <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-6">
+            <div className="bg-[#1A1A1A] border border-green-500/20 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(16,185,129,0.15)]">
               <div className="flex items-center gap-2 mb-3">
-                <Trend className="w-5 h-5 text-green-600" />
-                <h3 className="font-semibold text-green-900">Trending Keywords</h3>
+                <Trend className="w-5 h-5 text-green-500" />
+                <h3 className="font-semibold text-white">Trending Keywords</h3>
               </div>
-              <ul className="space-y-2 text-sm text-gray-700">
+              <ul className="space-y-2 text-sm text-gray-400">
                 <li>• "AI-powered" (+380% search volume)</li>
                 <li>• "sustainable" (+120% search volume)</li>
                 <li>• "remote work tools" (+85% search volume)</li>
@@ -669,12 +669,12 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
               </ul>
             </div>
 
-            <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-6">
+            <div className="bg-[#1A1A1A] border border-purple-500/20 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(168,85,247,0.15)]">
               <div className="flex items-center gap-2 mb-3">
-                <Globe className="w-5 h-5 text-purple-600" />
-                <h3 className="font-semibold text-purple-900">Industry Events</h3>
+                <Globe className="w-5 h-5 text-purple-400" />
+                <h3 className="font-semibold text-white">Industry Events</h3>
               </div>
-              <ul className="space-y-2 text-sm text-gray-700">
+              <ul className="space-y-2 text-sm text-gray-400">
                 <li>• Industry Conference (Nov 15-17)</li>
                 <li>• Product launch window</li>
                 <li>• Partner webinar series</li>
@@ -686,88 +686,88 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
 
         {/* Recommendations with Priority Matrix */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-            <Zap className="w-6 h-6 text-blue-600" />
+          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2 text-white">
+            <Zap className="w-6 h-6 text-[#D4FF00]" />
             Strategic Recommendations - Priority Matrix
           </h2>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="space-y-4">
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 transition-all duration-300 hover:shadow-[0_0_20px_rgba(239,68,68,0.15)]">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="font-semibold text-red-700">High Priority - Quick Wins</span>
-                  <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded">Do First</span>
+                  <span className="font-semibold text-red-400">High Priority - Quick Wins</span>
+                  <span className="text-xs bg-red-500/20 text-red-400 px-2 py-1 rounded border border-red-500/30">Do First</span>
                 </div>
-                <ul className="space-y-2 text-sm text-gray-700">
+                <ul className="space-y-2 text-sm text-gray-400">
                   <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-red-500 mt-0.5" />
+                    <CheckCircle className="w-4 h-4 text-red-400 mt-0.5" />
                     <span>Fix mobile page speed issues (2-day effort, +15% conversion impact)</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-red-500 mt-0.5" />
+                    <CheckCircle className="w-4 h-4 text-red-400 mt-0.5" />
                     <span>Optimize top 10 landing pages for Core Web Vitals</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-red-500 mt-0.5" />
+                    <CheckCircle className="w-4 h-4 text-red-400 mt-0.5" />
                     <span>Implement schema markup on product pages</span>
                   </li>
                 </ul>
               </div>
 
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4 transition-all duration-300 hover:shadow-[0_0_20px_rgba(234,179,8,0.15)]">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="font-semibold text-yellow-700">Medium Priority - Strategic</span>
-                  <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded">Plan Next</span>
+                  <span className="font-semibold text-yellow-400">Medium Priority - Strategic</span>
+                  <span className="text-xs bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded border border-yellow-500/30">Plan Next</span>
                 </div>
-                <ul className="space-y-2 text-sm text-gray-700">
+                <ul className="space-y-2 text-sm text-gray-400">
                   <li className="flex items-start gap-2">
-                    <Clock className="w-4 h-4 text-yellow-500 mt-0.5" />
+                    <Clock className="w-4 h-4 text-yellow-400 mt-0.5" />
                     <span>Develop content hub for trending topics</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <Clock className="w-4 h-4 text-yellow-500 mt-0.5" />
+                    <Clock className="w-4 h-4 text-yellow-400 mt-0.5" />
                     <span>Launch competitor gap analysis campaign</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <Clock className="w-4 h-4 text-yellow-500 mt-0.5" />
+                    <Clock className="w-4 h-4 text-yellow-400 mt-0.5" />
                     <span>Expand link building to industry publications</span>
                   </li>
                 </ul>
               </div>
             </div>
 
-            <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <h3 className="font-semibold mb-4">Impact vs Effort Matrix</h3>
-              <div className="relative h-64 bg-gray-50 rounded">
-                <div className="absolute top-0 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">High Impact</div>
-                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">Low Impact</div>
-                <div className="absolute left-0 top-1/2 transform -translate-y-1/2 text-xs text-gray-500 -rotate-90">Low Effort</div>
-                <div className="absolute right-0 top-1/2 transform -translate-y-1/2 text-xs text-gray-500 -rotate-90">High Effort</div>
+            <div className="bg-[#1A1A1A] border border-white/10 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(212,255,0,0.15)]">
+              <h3 className="font-semibold mb-4 text-white">Impact vs Effort Matrix</h3>
+              <div className="relative h-64 bg-[#0A0A0A] border border-white/10 rounded">
+                <div className="absolute top-0 left-1/2 transform -translate-x-1/2 text-xs text-gray-400">High Impact</div>
+                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 text-xs text-gray-400">Low Impact</div>
+                <div className="absolute left-0 top-1/2 transform -translate-y-1/2 text-xs text-gray-400 -rotate-90">Low Effort</div>
+                <div className="absolute right-0 top-1/2 transform -translate-y-1/2 text-xs text-gray-400 -rotate-90">High Effort</div>
 
                 <div className="absolute inset-0 grid grid-cols-2 grid-rows-2">
-                  <div className="border-r border-b border-gray-300 p-2">
-                    <div className="text-xs font-semibold text-green-600">Quick Wins</div>
+                  <div className="border-r border-b border-white/10 p-2">
+                    <div className="text-xs font-semibold text-green-400">Quick Wins</div>
                     <div className="mt-1 space-y-1">
-                      <div className="text-xs bg-green-100 rounded px-1 py-0.5">Speed Fix</div>
-                      <div className="text-xs bg-green-100 rounded px-1 py-0.5">Schema</div>
+                      <div className="text-xs bg-green-500/20 border border-green-500/30 rounded px-1 py-0.5 text-green-400">Speed Fix</div>
+                      <div className="text-xs bg-green-500/20 border border-green-500/30 rounded px-1 py-0.5 text-green-400">Schema</div>
                     </div>
                   </div>
-                  <div className="border-b border-gray-300 p-2">
-                    <div className="text-xs font-semibold text-blue-600">Major Projects</div>
+                  <div className="border-b border-white/10 p-2">
+                    <div className="text-xs font-semibold text-[#D4FF00]">Major Projects</div>
                     <div className="mt-1 space-y-1">
-                      <div className="text-xs bg-blue-100 rounded px-1 py-0.5">Site Redesign</div>
+                      <div className="text-xs bg-[#D4FF00]/20 border border-[#D4FF00]/30 rounded px-1 py-0.5 text-[#D4FF00]">Site Redesign</div>
                     </div>
                   </div>
-                  <div className="border-r border-gray-300 p-2">
-                    <div className="text-xs font-semibold text-gray-600">Fill-ins</div>
+                  <div className="border-r border-white/10 p-2">
+                    <div className="text-xs font-semibold text-gray-400">Fill-ins</div>
                     <div className="mt-1 space-y-1">
-                      <div className="text-xs bg-gray-100 rounded px-1 py-0.5">Meta Updates</div>
+                      <div className="text-xs bg-white/10 border border-white/20 rounded px-1 py-0.5 text-gray-400">Meta Updates</div>
                     </div>
                   </div>
                   <div className="p-2">
-                    <div className="text-xs font-semibold text-yellow-600">Consider Later</div>
+                    <div className="text-xs font-semibold text-yellow-400">Consider Later</div>
                     <div className="mt-1 space-y-1">
-                      <div className="text-xs bg-yellow-100 rounded px-1 py-0.5">New Markets</div>
+                      <div className="text-xs bg-yellow-500/20 border border-yellow-500/30 rounded px-1 py-0.5 text-yellow-400">New Markets</div>
                     </div>
                   </div>
                 </div>
@@ -778,87 +778,87 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
 
         {/* Performance Scorecard */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-            <Shield className="w-6 h-6 text-green-600" />
+          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2 text-white">
+            <Shield className="w-6 h-6 text-[#D4FF00]" />
             Performance Scorecard
           </h2>
 
-          <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+          <div className="bg-[#1A1A1A] border border-white/10 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-[0_0_20px_rgba(212,255,0,0.15)]">
             <table className="w-full">
-              <thead className="bg-gray-50">
+              <thead className="bg-[#0A0A0A] border-b border-white/10">
                 <tr>
-                  <th className="text-left px-6 py-3 text-sm font-semibold text-gray-700">Category</th>
-                  <th className="text-center px-6 py-3 text-sm font-semibold text-gray-700">Score</th>
-                  <th className="text-center px-6 py-3 text-sm font-semibold text-gray-700">Status</th>
-                  <th className="text-center px-6 py-3 text-sm font-semibold text-gray-700">Trend</th>
-                  <th className="text-left px-6 py-3 text-sm font-semibold text-gray-700">Notes</th>
+                  <th className="text-left px-6 py-3 text-sm font-semibold text-gray-400">Category</th>
+                  <th className="text-center px-6 py-3 text-sm font-semibold text-gray-400">Score</th>
+                  <th className="text-center px-6 py-3 text-sm font-semibold text-gray-400">Status</th>
+                  <th className="text-center px-6 py-3 text-sm font-semibold text-gray-400">Trend</th>
+                  <th className="text-left px-6 py-3 text-sm font-semibold text-gray-400">Notes</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
-                <tr className="hover:bg-gray-50">
-                  <td className="px-6 py-4 text-sm text-gray-900">Organic Performance</td>
+              <tbody className="divide-y divide-white/10">
+                <tr className="hover:bg-white/5">
+                  <td className="px-6 py-4 text-sm text-white">Organic Performance</td>
                   <td className="px-6 py-4 text-center">
-                    <span className="text-lg font-bold text-green-600">A</span>
+                    <span className="text-lg font-bold text-green-400">A</span>
                   </td>
                   <td className="px-6 py-4 text-center">
-                    <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">Excellent</span>
+                    <span className="px-2 py-1 bg-green-500/20 text-green-400 rounded-full text-xs font-semibold border border-green-500/30">Excellent</span>
                   </td>
                   <td className="px-6 py-4 text-center">
-                    <ArrowUp className="w-4 h-4 text-green-500 mx-auto" />
+                    <ArrowUp className="w-4 h-4 text-green-400 mx-auto" />
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">23% growth MoM</td>
+                  <td className="px-6 py-4 text-sm text-gray-400">23% growth MoM</td>
                 </tr>
-                <tr className="hover:bg-gray-50">
-                  <td className="px-6 py-4 text-sm text-gray-900">Technical SEO</td>
+                <tr className="hover:bg-white/5">
+                  <td className="px-6 py-4 text-sm text-white">Technical SEO</td>
                   <td className="px-6 py-4 text-center">
-                    <span className="text-lg font-bold text-yellow-600">B</span>
+                    <span className="text-lg font-bold text-yellow-400">B</span>
                   </td>
                   <td className="px-6 py-4 text-center">
-                    <span className="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-semibold">Good</span>
+                    <span className="px-2 py-1 bg-yellow-500/20 text-yellow-400 rounded-full text-xs font-semibold border border-yellow-500/30">Good</span>
                   </td>
                   <td className="px-6 py-4 text-center">
                     <Minus className="w-4 h-4 text-gray-400 mx-auto" />
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">Mobile speed needs improvement</td>
+                  <td className="px-6 py-4 text-sm text-gray-400">Mobile speed needs improvement</td>
                 </tr>
-                <tr className="hover:bg-gray-50">
-                  <td className="px-6 py-4 text-sm text-gray-900">Content Quality</td>
+                <tr className="hover:bg-white/5">
+                  <td className="px-6 py-4 text-sm text-white">Content Quality</td>
                   <td className="px-6 py-4 text-center">
-                    <span className="text-lg font-bold text-green-600">A</span>
+                    <span className="text-lg font-bold text-green-400">A</span>
                   </td>
                   <td className="px-6 py-4 text-center">
-                    <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">Excellent</span>
+                    <span className="px-2 py-1 bg-green-500/20 text-green-400 rounded-full text-xs font-semibold border border-green-500/30">Excellent</span>
                   </td>
                   <td className="px-6 py-4 text-center">
-                    <ArrowUp className="w-4 h-4 text-green-500 mx-auto" />
+                    <ArrowUp className="w-4 h-4 text-green-400 mx-auto" />
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">High engagement metrics</td>
+                  <td className="px-6 py-4 text-sm text-gray-400">High engagement metrics</td>
                 </tr>
-                <tr className="hover:bg-gray-50">
-                  <td className="px-6 py-4 text-sm text-gray-900">User Experience</td>
+                <tr className="hover:bg-white/5">
+                  <td className="px-6 py-4 text-sm text-white">User Experience</td>
                   <td className="px-6 py-4 text-center">
-                    <span className="text-lg font-bold text-yellow-600">B</span>
+                    <span className="text-lg font-bold text-yellow-400">B</span>
                   </td>
                   <td className="px-6 py-4 text-center">
-                    <span className="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-semibold">Good</span>
+                    <span className="px-2 py-1 bg-yellow-500/20 text-yellow-400 rounded-full text-xs font-semibold border border-yellow-500/30">Good</span>
                   </td>
                   <td className="px-6 py-4 text-center">
-                    <ArrowUp className="w-4 h-4 text-green-500 mx-auto" />
+                    <ArrowUp className="w-4 h-4 text-green-400 mx-auto" />
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">Bounce rate improving</td>
+                  <td className="px-6 py-4 text-sm text-gray-400">Bounce rate improving</td>
                 </tr>
-                <tr className="hover:bg-gray-50">
-                  <td className="px-6 py-4 text-sm text-gray-900">Conversion Rate</td>
+                <tr className="hover:bg-white/5">
+                  <td className="px-6 py-4 text-sm text-white">Conversion Rate</td>
                   <td className="px-6 py-4 text-center">
-                    <span className="text-lg font-bold text-orange-600">C</span>
+                    <span className="text-lg font-bold text-orange-400">C</span>
                   </td>
                   <td className="px-6 py-4 text-center">
-                    <span className="px-2 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-semibold">Needs Work</span>
+                    <span className="px-2 py-1 bg-orange-500/20 text-orange-400 rounded-full text-xs font-semibold border border-orange-500/30">Needs Work</span>
                   </td>
                   <td className="px-6 py-4 text-center">
-                    <ArrowDown className="w-4 h-4 text-red-500 mx-auto" />
+                    <ArrowDown className="w-4 h-4 text-red-400 mx-auto" />
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">Below target by 24%</td>
+                  <td className="px-6 py-4 text-sm text-gray-400">Below target by 24%</td>
                 </tr>
               </tbody>
             </table>
@@ -866,23 +866,23 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
         </section>
 
         {/* Footer */}
-        <div className="border-t pt-8 mt-12">
+        <div className="border-t border-white/10 pt-8 mt-12">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 text-center">
             <div>
-              <p className="font-semibold text-gray-700">Next Review Date</p>
-              <p className="text-sm text-gray-600">{format(subMonths(currentDate, -1), 'MMMM dd, yyyy')}</p>
+              <p className="font-semibold text-white">Next Review Date</p>
+              <p className="text-sm text-gray-400">{format(subMonths(currentDate, -1), 'MMMM dd, yyyy')}</p>
             </div>
             <div>
-              <p className="font-semibold text-gray-700">Report Prepared By</p>
-              <p className="text-sm text-gray-600">Your Account Team</p>
+              <p className="font-semibold text-white">Report Prepared By</p>
+              <p className="text-sm text-gray-400">Your Account Team</p>
             </div>
             <div>
-              <p className="font-semibold text-gray-700">Questions?</p>
-              <p className="text-sm text-gray-600">Contact your account manager</p>
+              <p className="font-semibold text-white">Questions?</p>
+              <p className="text-sm text-gray-400">Contact your account manager</p>
             </div>
           </div>
 
-          <p className="text-center text-sm text-gray-500 mt-6">
+          <p className="text-center text-sm text-gray-400 mt-6">
             © {new Date().getFullYear()} - Confidential and Proprietary
           </p>
         </div>
