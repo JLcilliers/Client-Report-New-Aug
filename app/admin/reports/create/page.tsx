@@ -440,13 +440,13 @@ export default function CreateReportPage() {
             {/* Search Console Properties */}
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <Globe className="h-5 w-5 text-blue-600" />
+                <Globe className="h-5 w-5 text-marine" />
                 <Label className="text-base font-medium">Search Console Properties</Label>
                 <span className="text-sm text-gray-500">({searchConsoleProperties.length} available)</span>
                 {searchConsoleProperties.length > 0 && (
                   <button
                     type="button"
-                    className="text-xs text-blue-600 hover:underline ml-auto"
+                    className="text-xs text-marine hover:underline ml-auto"
                     onClick={() => {
                       const allSelected = searchConsoleProperties.every(p => 
                         formData.selectedSearchConsoleProps.includes(p.siteUrl)
@@ -508,13 +508,13 @@ export default function CreateReportPage() {
             {/* Analytics Properties */}
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <BarChart3 className="h-5 w-5 text-purple-600" />
+                <BarChart3 className="h-5 w-5 text-marine" />
                 <Label className="text-base font-medium">Analytics Properties</Label>
                 <span className="text-sm text-gray-500">({analyticsProperties.length} available)</span>
                 {analyticsProperties.length > 0 && (
                   <button
                     type="button"
-                    className="text-xs text-purple-600 hover:underline ml-auto"
+                    className="text-xs text-marine hover:underline ml-auto"
                     onClick={() => {
                       const allSelected = analyticsProperties.every(p => 
                         formData.selectedAnalyticsProps.includes(p.propertyId)

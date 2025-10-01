@@ -481,11 +481,11 @@ export default function ActionableInsights({ reportId, metrics }: InsightProps) 
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Opportunities</p>
-                <p className="text-2xl font-bold text-blue-600">
+                <p className="text-2xl font-bold text-marine">
                   {insights.filter(i => i.type === 'opportunity').length}
                 </p>
               </div>
-              <TrendingUp className="h-8 w-8 text-blue-200" />
+              <TrendingUp className="h-8 w-8 text-glacier" />
             </div>
           </CardContent>
         </Card>
@@ -521,14 +521,14 @@ export default function ActionableInsights({ reportId, metrics }: InsightProps) 
                 <Alert key={idx} className={
                   insight.type === 'critical' ? 'border-red-500 bg-red-50' :
                   insight.type === 'warning' ? 'border-yellow-500 bg-yellow-50' :
-                  'border-blue-500 bg-blue-50'
+                  'border-marine bg-frost'
                 }>
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
                         {insight.type === 'critical' ? <AlertTriangle className="w-4 h-4 text-red-600" /> :
                          insight.type === 'warning' ? <AlertTriangle className="w-4 h-4 text-yellow-600" /> :
-                         <TrendingUp className="w-4 h-4 text-blue-600" />}
+                         <TrendingUp className="w-4 h-4 text-marine" />}
                         <span className="font-semibold">{insight.title}</span>
                         <Badge variant={getImpactColor(insight.impact)}>
                           {insight.impact} impact
@@ -625,7 +625,7 @@ export default function ActionableInsights({ reportId, metrics }: InsightProps) 
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Target className="w-5 h-5 text-blue-600" />
+              <Target className="w-5 h-5 text-marine" />
               Priority Action Items
             </CardTitle>
             <CardDescription>Your personalized roadmap based on current performance</CardDescription>
@@ -634,7 +634,7 @@ export default function ActionableInsights({ reportId, metrics }: InsightProps) 
             <div className="space-y-3">
               {prioritizedTasks.map((task) => (
                 <div key={task.priority} className="flex items-start gap-3 p-3 border rounded-lg">
-                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 font-bold text-sm">
+                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-frost text-marine font-bold text-sm">
                     {task.priority}
                   </div>
                   <div className="flex-1">

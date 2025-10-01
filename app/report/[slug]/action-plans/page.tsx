@@ -80,7 +80,7 @@ export default function ActionPlansPage() {
       case 'completed':
         return 'bg-green-100 text-green-800';
       case 'in_progress':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-glacier text-harbor';
       case 'blocked':
         return 'bg-red-100 text-red-800';
       default:
@@ -90,8 +90,8 @@ export default function ActionPlansPage() {
 
   const getCategoryColor = (category: string) => {
     const colors: Record<string, string> = {
-      seo: 'bg-purple-100 text-purple-800',
-      technical: 'bg-blue-100 text-blue-800',
+      seo: 'bg-frost text-marine',
+      technical: 'bg-glacier text-harbor',
       conversion: 'bg-green-100 text-green-800',
       engagement: 'bg-yellow-100 text-yellow-800',
       traffic: 'bg-orange-100 text-orange-800',
@@ -150,8 +150,8 @@ export default function ActionPlansPage() {
       {/* Stats */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-          <Card 
-            className={`cursor-pointer ${filter === 'all' ? 'ring-2 ring-blue-500' : ''}`}
+          <Card
+            className={`cursor-pointer ${filter === 'all' ? 'ring-2 ring-marine' : ''}`}
             onClick={() => setFilter('all')}
           >
             <CardContent className="p-4">
@@ -170,12 +170,12 @@ export default function ActionPlansPage() {
             </CardContent>
           </Card>
           
-          <Card 
-            className={`cursor-pointer ${filter === 'in_progress' ? 'ring-2 ring-blue-500' : ''}`}
+          <Card
+            className={`cursor-pointer ${filter === 'in_progress' ? 'ring-2 ring-marine' : ''}`}
             onClick={() => setFilter('in_progress')}
           >
             <CardContent className="p-4">
-              <div className="text-2xl font-bold text-blue-600">{stats.inProgress}</div>
+              <div className="text-2xl font-bold text-marine">{stats.inProgress}</div>
               <div className="text-sm text-gray-600">In Progress</div>
             </CardContent>
           </Card>

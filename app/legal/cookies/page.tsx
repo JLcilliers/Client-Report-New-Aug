@@ -7,7 +7,7 @@ export default function CookiePolicy() {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-6">
-          <Link href="/" className="inline-flex items-center text-blue-600 hover:text-blue-800">
+          <Link href="/" className="inline-flex items-center text-marine hover:text-harbor">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Home
           </Link>
@@ -23,9 +23,9 @@ export default function CookiePolicy() {
           </div>
 
           <div className="prose prose-lg max-w-none">
-            <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-8">
-              <p className="text-sm text-blue-800">
-                <strong>Important Notice:</strong> This is a template for informational purposes. 
+            <div className="bg-frost border-l-4 border-glacier p-4 mb-8">
+              <p className="text-sm text-harbor">
+                <strong>Important Notice:</strong> This is a template for informational purposes.
                 Consult with a qualified attorney for legal advice specific to your situation.
               </p>
             </div>

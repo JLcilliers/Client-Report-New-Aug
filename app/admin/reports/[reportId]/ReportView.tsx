@@ -70,7 +70,7 @@ export default function ReportView({ report }: ReportViewProps) {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Globe className="h-5 w-5 text-blue-600" />
+              <Globe className="h-5 w-5 text-marine" />
               Search Console Properties
             </CardTitle>
             <CardDescription>
@@ -96,7 +96,7 @@ export default function ReportView({ report }: ReportViewProps) {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <BarChart3 className="h-5 w-5 text-purple-600" />
+              <BarChart3 className="h-5 w-5 text-marine" />
               Analytics Properties
             </CardTitle>
             <CardDescription>

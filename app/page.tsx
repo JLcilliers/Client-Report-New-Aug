@@ -133,10 +133,10 @@ export default function LandingPage() {
             <div className="flex flex-col items-center space-y-6">
               <div className="flex items-center space-x-3">
                 <div className="flex -space-x-2">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 border-2 border-[#0A0A0A]"></div>
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 border-2 border-[#0A0A0A]"></div>
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-marine to-harbor border-2 border-[#0A0A0A]"></div>
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-marine to-harbor border-2 border-[#0A0A0A]"></div>
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-500 to-pink-600 border-2 border-[#0A0A0A]"></div>
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-500 to-green-600 border-2 border-[#0A0A0A]"></div>
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-glacier to-marine border-2 border-[#0A0A0A]"></div>
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 border-2 border-[#0A0A0A]"></div>
                 </div>
                 <span className="text-gray-400">Trusted by <strong className="text-white">2,847+</strong> SEO professionals</span>
@@ -327,7 +327,7 @@ export default function LandingPage() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {['Google Analytics 4', 'Google Search Console', 'Adobe Analytics', 'Matomo'].map((tool) => (
                 <div key={tool} className="bg-[#1A1A1A]/80 backdrop-blur-sm border border-white/10 rounded-xl p-6 text-center hover:border-[#D4FF00] hover:scale-105 transition-transform duration-300">
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg mx-auto mb-3"></div>
+                  <div className="w-12 h-12 bg-gradient-to-br from-marine to-harbor rounded-lg mx-auto mb-3"></div>
                   <p className="text-sm font-medium">{tool}</p>
                 </div>
               ))}
@@ -347,7 +347,7 @@ export default function LandingPage() {
                 { name: 'Advanced Rank Tracking', available: false }
               ].map((tool) => (
                 <div key={tool.name} className={`bg-[#1A1A1A]/80 backdrop-blur-sm border ${tool.available ? 'border-white/10' : 'border-dashed border-gray-700'} rounded-xl p-6 text-center hover:border-[#D4FF00] hover:scale-105 transition-transform duration-300 ${!tool.available && 'opacity-50'}`}>
-                  <div className={`w-12 h-12 ${tool.available ? 'bg-gradient-to-br from-purple-500 to-purple-600' : 'bg-gray-700'} rounded-lg mx-auto mb-3`}></div>
+                  <div className={`w-12 h-12 ${tool.available ? 'bg-gradient-to-br from-marine to-harbor' : 'bg-gray-700'} rounded-lg mx-auto mb-3`}></div>
                   <p className="text-sm font-medium">{tool.name}</p>
                   {!tool.available && <span className="text-xs text-gray-500 mt-1 inline-block">Coming Soon</span>}
                 </div>
@@ -361,7 +361,7 @@ export default function LandingPage() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {['Google Ads', 'Facebook Ads', 'LinkedIn Ads', 'Microsoft Advertising'].map((tool) => (
                 <div key={tool} className="bg-[#1A1A1A]/80 backdrop-blur-sm border border-white/10 rounded-xl p-6 text-center hover:border-[#D4FF00] hover:scale-105 transition-transform duration-300">
-                  <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-lg mx-auto mb-3"></div>
+                  <div className="w-12 h-12 bg-gradient-to-br from-glacier to-marine rounded-lg mx-auto mb-3"></div>
                   <p className="text-sm font-medium">{tool}</p>
                 </div>
               ))}
@@ -455,9 +455,9 @@ export default function LandingPage() {
                   One-click OAuth with Google Analytics, Search Console, and 50+ SEO tools. No API keys. No developer needed. Takes 90 seconds.
                 </p>
                 <div className="flex justify-center space-x-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600"></div>
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-marine to-harbor"></div>
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-red-500 to-red-600"></div>
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-purple-600"></div>
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-marine to-harbor"></div>
                 </div>
               </div>
             </div>
@@ -517,7 +517,7 @@ export default function LandingPage() {
             {/* Testimonial 1 */}
             <div className="bg-[#1A1A1A]/80 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:border-[#D4FF00] transition-all">
               <div className="flex items-center mb-6">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600"></div>
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-marine to-harbor"></div>
                 <div className="ml-4">
                   <h4 className="font-bold">Marcus Chen</h4>
                   <p className="text-sm text-gray-500">Founder, Velocity SEO</p>
@@ -549,7 +549,7 @@ export default function LandingPage() {
             {/* Testimonial 2 */}
             <div className="bg-[#1A1A1A]/80 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:border-[#D4FF00] transition-all">
               <div className="flex items-center mb-6">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-purple-600"></div>
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-marine to-harbor"></div>
                 <div className="ml-4">
                   <h4 className="font-bold">Sarah Johnson</h4>
                   <p className="text-sm text-gray-500">CEO, Digital Growth Co</p>

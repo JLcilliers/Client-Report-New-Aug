@@ -188,7 +188,7 @@ export default function TestDashboard() {
                         <strong>Error:</strong> {JSON.stringify(result.error)}
                       </div>
                     )}
-                    
+
                     {result.success && result.data && (
                       <div className="mt-2 p-2 bg-green-50 rounded text-sm text-green-700">
                         <strong>Response:</strong>
@@ -224,9 +224,9 @@ export default function TestDashboard() {
               </div>
             </div>
             
-            <div className="mt-4 p-3 bg-blue-50 rounded">
-              <p className="text-sm text-blue-700">
-                <strong>Note:</strong> All endpoints should return either 200 OK or 404 Not Found. 
+            <div className="mt-4 p-3 bg-frost rounded">
+              <p className="text-sm text-harbor">
+                <strong>Note:</strong> All endpoints should return either 200 OK or 404 Not Found.
                 Any 500 errors indicate a problem that needs to be fixed.
               </p>
             </div>

@@ -181,7 +181,7 @@ export default function ConnectionsClient({ initialConnection }: ConnectionsClie
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
                 <div className="border rounded-lg p-4">
                   <div className="flex items-center space-x-3 mb-3">
-                    <Globe className="h-5 w-5 text-blue-600" />
+                    <Globe className="h-5 w-5 text-marine" />
                     <h3 className="font-medium">Search Console Access</h3>
                   </div>
                   <p className="text-sm text-gray-600">You have access to all Search Console properties associated with your Google account</p>
@@ -189,7 +189,7 @@ export default function ConnectionsClient({ initialConnection }: ConnectionsClie
 
                 <div className="border rounded-lg p-4">
                   <div className="flex items-center space-x-3 mb-3">
-                    <BarChart3 className="h-5 w-5 text-purple-600" />
+                    <BarChart3 className="h-5 w-5 text-marine" />
                     <h3 className="font-medium">Analytics 4 Access</h3>
                   </div>
                   <p className="text-sm text-gray-600">You have access to all GA4 properties associated with your Google account</p>

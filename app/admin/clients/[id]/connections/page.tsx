@@ -33,13 +33,13 @@ export default function ClientConnectionsPage() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="bg-frost border border-glacier rounded-lg p-4">
             <div className="flex items-center gap-2 mb-2">
               <CheckCircle className="h-5 w-5 text-green-600" />
               <span className="font-medium">Good News!</span>
             </div>
-            <p className="text-sm text-blue-800 mb-3">
-              Your Google APIs are already connected and working. You have access to 16 Search Console properties 
+            <p className="text-sm text-harbor mb-3">
+              Your Google APIs are already connected and working. You have access to 16 Search Console properties
               and can create reports with real data.
             </p>
             <div className="flex gap-2">

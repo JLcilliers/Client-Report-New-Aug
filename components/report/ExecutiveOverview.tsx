@@ -21,14 +21,14 @@ export default function ExecutiveOverview({ data }: ExecutiveOverviewProps) {
       value: formatNumber(data.totalClicks),
       change: data.clicksChange,
       icon: MousePointerClick,
-      color: "text-blue-600"
+      color: "text-marine"
     },
     {
       title: "Total Impressions",
       value: formatNumber(data.totalImpressions),
       change: data.impressionsChange,
       icon: Eye,
-      color: "text-purple-600"
+      color: "text-marine"
     },
     {
       title: "Average CTR",

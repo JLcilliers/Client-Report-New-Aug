@@ -62,9 +62,9 @@ export default function TestGoogle() {
         {!session ? (
           <div className="bg-white rounded-lg shadow p-6">
             <p className="mb-4">You are not signed in</p>
-            <button 
+            <button
               onClick={() => signIn('google')}
-              className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-md transition-colors"
+              className="bg-marine hover:bg-harbor text-white px-6 py-2 rounded-md transition-colors"
             >
               Sign in with Google
             </button>
@@ -139,9 +139,9 @@ export default function TestGoogle() {
               )}
             </div>
 
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <h3 className="font-semibold text-blue-900 mb-2">API Endpoint Test</h3>
-              <p className="text-sm text-blue-700">
+            <div className="bg-frost border border-glacier rounded-lg p-4">
+              <h3 className="font-semibold text-harbor mb-2">API Endpoint Test</h3>
+              <p className="text-sm text-marine">
                 The /api/google-accounts endpoint is {accounts.length > 0 ? 'working' : 'accessible'}.
                 {accounts.length > 0 && ` Found ${accounts.length} account(s).`}
               </p>

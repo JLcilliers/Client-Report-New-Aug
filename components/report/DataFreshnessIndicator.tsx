@@ -114,7 +114,7 @@ export default function DataFreshnessIndicator({
     if (freshnessInfo.daysBehind <= 3) {
       return <CheckCircle className="h-4 w-4 text-green-500" />;
     }
-    return <Clock className="h-4 w-4 text-blue-500" />;
+    return <Clock className="h-4 w-4 text-marine" />;
   };
 
   const getStatusBadge = () => {
@@ -124,7 +124,7 @@ export default function DataFreshnessIndicator({
     if (freshnessInfo.daysBehind <= 3) {
       return <Badge variant="outline" className="text-green-600">Fresh Data</Badge>;
     }
-    return <Badge variant="outline" className="text-blue-600">Recent Data</Badge>;
+    return <Badge variant="outline" className="text-marine">Recent Data</Badge>;
   };
 
   const formatTimeDifference = (date: Date | null) => {
@@ -226,7 +226,7 @@ export function DataFreshnessCompact({ data }: { data: any }) {
   const getColor = () => {
     if (daysBehind > 4) return 'text-yellow-600';
     if (daysBehind <= 3) return 'text-green-600';
-    return 'text-blue-600';
+    return 'text-marine';
   };
 
   return (

@@ -99,7 +99,7 @@ export default function ContentPerformance({ data }: ContentPerformanceProps) {
       <Card>
         <CardHeader>
           <div className="flex items-center space-x-2">
-            <Users className="h-5 w-5 text-blue-600" />
+            <Users className="h-5 w-5 text-marine" />
             <CardTitle>High Engagement Pages</CardTitle>
           </div>
           <CardDescription>Content with the best user engagement metrics</CardDescription>

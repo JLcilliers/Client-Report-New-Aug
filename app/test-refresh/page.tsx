@@ -102,7 +102,7 @@ export default function TestRefreshPage() {
             className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium transition-all ${
               refreshing || refreshingRef.current
                 ? 'bg-gray-400 cursor-not-allowed text-white'
-                : 'bg-blue-600 hover:bg-blue-700 text-white hover:shadow-md'
+                : 'bg-marine hover:bg-harbor text-white hover:shadow-md'
             }`}
           >
             <RefreshCw className={`w-5 h-5 ${(refreshing || refreshingRef.current) ? 'animate-spin' : ''}`} />

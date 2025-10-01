@@ -564,10 +564,10 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
                   </div>
                   <p className="text-sm text-gray-400">23 domains linking to competitors but not to you</p>
                 </div>
-                <div className="p-3 bg-purple-500/10 border border-purple-500/20 rounded-lg">
+                <div className="p-3 bg-glacier/10 border border-glacier/20 rounded-lg">
                   <div className="flex items-center gap-2 mb-1">
-                    <ChevronRight className="w-4 h-4 text-purple-400" />
-                    <span className="font-semibold text-purple-400">Technical Advantage</span>
+                    <ChevronRight className="w-4 h-4 text-glacier" />
+                    <span className="font-semibold text-glacier">Technical Advantage</span>
                   </div>
                   <p className="text-sm text-gray-400">Your site loads 1.2s faster than industry average</p>
                 </div>
@@ -669,9 +669,9 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
               </ul>
             </div>
 
-            <div className="bg-[#1A1A1A] border border-purple-500/20 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(168,85,247,0.15)]">
+            <div className="bg-[#1A1A1A] border border-marine/20 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(68,110,135,0.15)]">
               <div className="flex items-center gap-2 mb-3">
-                <Globe className="w-5 h-5 text-purple-400" />
+                <Globe className="w-5 h-5 text-marine" />
                 <h3 className="font-semibold text-white">Industry Events</h3>
               </div>
               <ul className="space-y-2 text-sm text-gray-400">

@@ -173,7 +173,7 @@ export default function AIVisibility({ reportSlug }: AIVisibilityProps) {
   if (loading) {
     return (
       <div className="p-8 text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-marine mx-auto mb-4"></div>
         <p className="text-gray-600">Loading AI visibility data...</p>
       </div>
     );
@@ -246,7 +246,7 @@ export default function AIVisibility({ reportSlug }: AIVisibilityProps) {
       <div className="flex justify-between items-center mb-6">
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-2">
-            <Brain className="w-6 h-6 text-purple-600" />
+            <Brain className="w-6 h-6 text-marine" />
             AI Search Visibility Overview
           </h2>
           <p className="text-gray-600 mt-1">
@@ -286,7 +286,7 @@ export default function AIVisibility({ reportSlug }: AIVisibilityProps) {
           <CardContent>
             <div className="flex items-center justify-between">
               <span className="text-3xl font-bold">{metrics.citationCount}</span>
-              <MessageSquare className="w-5 h-5 text-blue-500" />
+              <MessageSquare className="w-5 h-5 text-marine" />
             </div>
           </CardContent>
         </Card>
@@ -325,7 +325,7 @@ export default function AIVisibility({ reportSlug }: AIVisibilityProps) {
           <CardContent>
             <div className="flex items-center justify-between">
               <span className="text-3xl font-bold">{metrics.accuracyScore.toFixed(0)}%</span>
-              <CheckCircle className="w-5 h-5 text-purple-500" />
+              <CheckCircle className="w-5 h-5 text-marine" />
             </div>
           </CardContent>
         </Card>

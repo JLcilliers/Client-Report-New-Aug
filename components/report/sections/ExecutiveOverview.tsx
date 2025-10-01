@@ -84,7 +84,7 @@ export default function ExecutiveOverview({ data, compareMode, dateRange }: Exec
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Target className="h-5 w-5 text-blue-600" />
+              <Target className="h-5 w-5 text-marine" />
               Results Summary
             </CardTitle>
           </CardHeader>
@@ -234,18 +234,18 @@ export default function ExecutiveOverview({ data, compareMode, dateRange }: Exec
               <ul className="space-y-1 text-sm text-gray-600">
                 {positionChange > 1 && (
                   <li className="flex items-start gap-2">
-                    <span className="text-blue-600">•</span>
+                    <span className="text-marine">•</span>
                     Review and optimize declining rankings
                   </li>
                 )}
                 {current.analytics?.summary?.bounceRate > 60 && (
                   <li className="flex items-start gap-2">
-                    <span className="text-blue-600">•</span>
+                    <span className="text-marine">•</span>
                     Improve page load speed and UX
                   </li>
                 )}
                 <li className="flex items-start gap-2">
-                  <span className="text-blue-600">•</span>
+                  <span className="text-marine">•</span>
                   Update meta descriptions for top pages
                 </li>
               </ul>
@@ -255,15 +255,15 @@ export default function ExecutiveOverview({ data, compareMode, dateRange }: Exec
               <h4 className="font-medium text-sm text-gray-700">Short-term (This Month)</h4>
               <ul className="space-y-1 text-sm text-gray-600">
                 <li className="flex items-start gap-2">
-                  <span className="text-blue-600">•</span>
+                  <span className="text-marine">•</span>
                   Create content for high-opportunity keywords
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-blue-600">•</span>
+                  <span className="text-marine">•</span>
                   Build internal links to underperforming pages
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-blue-600">•</span>
+                  <span className="text-marine">•</span>
                   Optimize for featured snippets
                 </li>
               </ul>
@@ -273,15 +273,15 @@ export default function ExecutiveOverview({ data, compareMode, dateRange }: Exec
               <h4 className="font-medium text-sm text-gray-700">Long-term (This Quarter)</h4>
               <ul className="space-y-1 text-sm text-gray-600">
                 <li className="flex items-start gap-2">
-                  <span className="text-blue-600">•</span>
+                  <span className="text-marine">•</span>
                   Develop comprehensive content hub
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-blue-600">•</span>
+                  <span className="text-marine">•</span>
                   Implement structured data markup
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-blue-600">•</span>
+                  <span className="text-marine">•</span>
                   Build high-quality backlinks
                 </li>
               </ul>

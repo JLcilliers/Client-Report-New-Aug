@@ -279,7 +279,7 @@ export default function KeywordPerformance({ data, reportSlug, comparisonPeriod 
                     const isSelected = selectedKeywords.includes(keyword.query)
 
                     return (
-                      <tr key={index} className={`border-b hover:bg-gray-50 ${isSelected ? 'bg-blue-50' : ''}`}>
+                      <tr key={index} className={`border-b hover:bg-gray-50 ${isSelected ? 'bg-frost' : ''}`}>
                         <td className="py-2 px-2">
                           <input
                             type="checkbox"

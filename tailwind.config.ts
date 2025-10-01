@@ -53,16 +53,31 @@ const config: Config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        // New dark theme colors
-        dark: {
-          bg: '#0a0f0a',
-          'bg-secondary': '#1a1f1a',
-          'bg-card': '#1a1f1a',
-          border: '#2a2f2a',
+        // New ocean-inspired color palette
+        glacier: {
+          DEFAULT: '#72a3bf',
+          light: '#8cb5cd',
+          dark: '#5d92b0',
         },
-        neon: {
-          green: '#CCFF00',
-          'green-dark': '#B8E600',
+        harbor: {
+          DEFAULT: '#1d4052',
+          light: '#2a5468',
+          dark: '#16333f',
+        },
+        marine: {
+          DEFAULT: '#446e87',
+          light: '#5a8199',
+          dark: '#365870',
+        },
+        depth: {
+          DEFAULT: '#030f18',
+          light: '#0a1a26',
+          dark: '#010508',
+        },
+        frost: {
+          DEFAULT: '#e0e8e6',
+          light: '#f0f5f4',
+          dark: '#d0d8d6',
         },
       },
       borderRadius: {

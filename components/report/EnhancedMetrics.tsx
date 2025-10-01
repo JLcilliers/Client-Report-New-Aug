@@ -390,7 +390,7 @@ export default function EnhancedMetrics({ reportId, domain, metrics }: EnhancedM
   return (
     <div className="space-y-6">
       {/* Executive Summary */}
-      <Card className="border-l-4 border-l-blue-500">
+      <Card className="border-l-4 border-l-marine">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Activity className="w-5 h-5" />
@@ -422,9 +422,9 @@ export default function EnhancedMetrics({ reportId, domain, metrics }: EnhancedM
                 {trends.clicks < -5 && <li>• Clicks down {Math.abs(trends.clicks).toFixed(1)}%</li>}
               </ul>
             </div>
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <p className="text-sm font-medium text-blue-800">Key Metrics</p>
-              <ul className="text-sm text-blue-700 mt-2 space-y-1">
+            <div className="bg-frost p-4 rounded-lg">
+              <p className="text-sm font-medium text-harbor">Key Metrics</p>
+              <ul className="text-sm text-marine mt-2 space-y-1">
                 <li>• {searchMetrics.totalClicks.toLocaleString()} total clicks</li>
                 <li>• {searchMetrics.totalImpressions.toLocaleString()} impressions</li>
                 <li>• {analyticsMetrics.totalSessions.toLocaleString()} sessions</li>
@@ -447,7 +447,7 @@ export default function EnhancedMetrics({ reportId, domain, metrics }: EnhancedM
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Search className="w-5 h-5 text-blue-600" />
+            <Search className="w-5 h-5 text-marine" />
             Search Performance Metrics
           </CardTitle>
         </CardHeader>
@@ -623,7 +623,7 @@ export default function EnhancedMetrics({ reportId, domain, metrics }: EnhancedM
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Zap className="w-5 h-5 text-purple-600" />
+            <Zap className="w-5 h-5 text-marine" />
             Core Web Vitals
           </CardTitle>
           <CardDescription>Page experience and performance metrics</CardDescription>
@@ -721,7 +721,7 @@ export default function EnhancedMetrics({ reportId, domain, metrics }: EnhancedM
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Lightbulb className="w-5 h-5 text-indigo-600" />
+            <Lightbulb className="w-5 h-5 text-harbor" />
             Key Insights & Recommendations
           </CardTitle>
           <CardDescription>

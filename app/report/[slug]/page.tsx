@@ -177,7 +177,7 @@ export default function PublicReportPage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-marine mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading report...</p>
         </div>
       </div>
@@ -209,7 +209,7 @@ export default function PublicReportPage() {
                   href={report.client.domain} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="ml-2 text-blue-600 hover:text-blue-700"
+                  className="ml-2 text-marine hover:text-harbor"
                 >
                   {report.client.domain}
                 </a>
@@ -231,7 +231,7 @@ export default function PublicReportPage() {
                   <Button
                     variant="default"
                     size="sm"
-                    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
+                    className="flex items-center gap-2 bg-marine hover:bg-harbor"
                   >
                     <FileText className="h-4 w-4" />
                     View Client Report
@@ -364,10 +364,10 @@ export default function PublicReportPage() {
         </div>
         
         {/* SEO Analysis Card */}
-        <Card className="mb-8 border-blue-200 bg-blue-50/50">
+        <Card className="mb-8 border-glacier bg-frost/50">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Search className="h-5 w-5 text-blue-600" />
+              <Search className="h-5 w-5 text-marine" />
               Technical SEO Analysis Available
             </CardTitle>
             <CardDescription>
@@ -415,7 +415,7 @@ export default function PublicReportPage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Globe className="h-5 w-5 text-blue-600" />
+                <Globe className="h-5 w-5 text-marine" />
                 Search Console Properties
               </CardTitle>
               <CardDescription>
@@ -426,7 +426,7 @@ export default function PublicReportPage() {
               {report.search_console_properties?.length > 0 ? (
                 <div className="space-y-2">
                   {report.search_console_properties.map((prop: string) => (
-                    <div key={prop} className="p-3 bg-blue-50 rounded-lg text-sm">
+                    <div key={prop} className="p-3 bg-frost rounded-lg text-sm">
                       {prop.replace('sc-domain:', '')}
                     </div>
                   ))}
@@ -440,7 +440,7 @@ export default function PublicReportPage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5 text-purple-600" />
+                <BarChart3 className="h-5 w-5 text-marine" />
                 Analytics Properties
               </CardTitle>
               <CardDescription>
@@ -451,7 +451,7 @@ export default function PublicReportPage() {
               {report.analytics_properties?.length > 0 ? (
                 <div className="space-y-2">
                   {report.analytics_properties.map((prop: string) => (
-                    <div key={prop} className="p-3 bg-purple-50 rounded-lg text-sm">
+                    <div key={prop} className="p-3 bg-frost rounded-lg text-sm">
                       Property ID: {prop}
                     </div>
                   ))}

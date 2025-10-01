@@ -907,9 +907,9 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
 
   const categorizeSearchIntent = (queries: SearchQuery[]): SearchIntentData => {
     const intents: SearchIntentData = {
-      'Informational': { count: 0, clicks: 0, color: 'bg-blue-500' },
+      'Informational': { count: 0, clicks: 0, color: 'bg-marine' },
       'Navigational': { count: 0, clicks: 0, color: 'bg-green-500' },
-      'Transactional': { count: 0, clicks: 0, color: 'bg-purple-500' },
+      'Transactional': { count: 0, clicks: 0, color: 'bg-marine' },
       'Commercial': { count: 0, clicks: 0, color: 'bg-orange-500' }
     };
 
@@ -1259,7 +1259,7 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
               change: comparisonData?.searchConsole?.clicks?.changePercent || 0,
               changeType: comparisonData?.searchConsole?.clicks?.changePercent > 0 ? 'positive' : comparisonData?.searchConsole?.clicks?.changePercent < 0 ? 'negative' : 'neutral',
               period: `vs ${comparisonPeriod} ago`,
-              icon: <MousePointer className="w-4 h-4 text-blue-500" />
+              icon: <MousePointer className="w-4 h-4 text-marine" />
             })}
             {renderMetricCard({
               title: 'Impressions',
@@ -1267,7 +1267,7 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
               change: comparisonData?.searchConsole?.impressions?.changePercent || 0,
               changeType: comparisonData?.searchConsole?.impressions?.changePercent > 0 ? 'positive' : comparisonData?.searchConsole?.impressions?.changePercent < 0 ? 'negative' : 'neutral',
               period: `vs ${comparisonPeriod} ago`,
-              icon: <Eye className="w-4 h-4 text-purple-500" />
+              icon: <Eye className="w-4 h-4 text-marine" />
             })}
             {renderMetricCard({
               title: 'Total Users',
@@ -1388,7 +1388,7 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
               change: comparisonData?.searchConsole?.impressions?.changePercent || 0,
               changeType: comparisonData?.searchConsole?.impressions?.changePercent > 0 ? 'positive' : comparisonData?.searchConsole?.impressions?.changePercent < 0 ? 'negative' : 'neutral',
               period: `vs ${comparisonPeriod} ago`,
-              icon: <Eye className="w-4 h-4 text-purple-500" />
+              icon: <Eye className="w-4 h-4 text-marine" />
             })}
             {renderMetricCard({
               title: 'Total Clicks',
@@ -1396,7 +1396,7 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
               change: comparisonData?.searchConsole?.clicks?.changePercent || 0,
               changeType: comparisonData?.searchConsole?.clicks?.changePercent > 0 ? 'positive' : comparisonData?.searchConsole?.clicks?.changePercent < 0 ? 'negative' : 'neutral',
               period: `vs ${comparisonPeriod} ago`,
-              icon: <MousePointer className="w-4 h-4 text-blue-500" />
+              icon: <MousePointer className="w-4 h-4 text-marine" />
             })}
             {renderMetricCard({
               title: 'Average CTR',
@@ -1535,7 +1535,7 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Target className="w-5 h-5 text-blue-500" />
+                  <Target className="w-5 h-5 text-marine" />
                   Query Opportunities & Quick Wins
                 </CardTitle>
                 <CardDescription>Striking distance keywords and optimization opportunities (showing {Math.min(20, metrics?.searchConsole?.topQueries?.length || 0)} opportunities)</CardDescription>
@@ -1569,15 +1569,15 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
                       <div key={type} className="space-y-2">
                         <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
                           {type === 'Striking Distance' && <span className="text-green-600">🎯 {type} (Position 11-20)</span>}
-                          {type === 'Near Top 3' && <span className="text-blue-600">🔥 {type} (Position 4-10)</span>}
-                          {type === 'CTR Optimization' && <span className="text-purple-600">💎 {type} (Top 3 Low CTR)</span>}
+                          {type === 'Near Top 3' && <span className="text-marine">🔥 {type} (Position 4-10)</span>}
+                          {type === 'CTR Optimization' && <span className="text-marine">💎 {type} (Top 3 Low CTR)</span>}
                           {type === 'High Volume Low CTR' && <span className="text-orange-600">📊 {type}</span>}
                           {type === 'Page 3 Opportunity' && <span className="text-yellow-600">📈 {type}</span>}
                           {type === 'Zero Click Query' && <span className="text-red-600">⚠️ {type}</span>}
                           <Badge variant="secondary" className="text-xs">{opps.length}</Badge>
                         </h4>
                         {opps.map((opportunity, idx) => (
-                          <div key={idx} className="p-3 border border-blue-100 rounded-lg bg-gradient-to-r from-blue-50/30 to-green-50/30">
+                          <div key={idx} className="p-3 border border-glacier rounded-lg bg-gradient-to-r from-frost/30 to-green-50/30">
                             <div className="flex items-center justify-between mb-2">
                               <span className="text-sm font-medium truncate" title={opportunity.query}>
                                 {opportunity.query.length > 35 ? opportunity.query.substring(0, 35) + '...' : opportunity.query}
@@ -1601,13 +1601,13 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
                               <div>
                                 <p className="text-gray-500">Potential if Optimized</p>
                                 <p className="text-green-600 font-medium">+{formatNumber(opportunity.uplift)} clicks</p>
-                                <p className="text-blue-600 font-medium">
+                                <p className="text-marine font-medium">
                                   {opportunity.clicks > 0
                                     ? `${((opportunity.uplift / opportunity.clicks) * 100).toFixed(0)}% increase`
                                     : `${opportunity.potentialClicks} new clicks`
                                   }
                                 </p>
-                                <p className="text-purple-600 font-medium">Target CTR: {(opportunity.potentialClicks / opportunity.impressions * 100).toFixed(1)}%</p>
+                                <p className="text-marine font-medium">Target CTR: {(opportunity.potentialClicks / opportunity.impressions * 100).toFixed(1)}%</p>
                               </div>
                             </div>
                             {type === 'Striking Distance' && (
@@ -1649,7 +1649,7 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
                       const getColor = (range: string) => {
                         switch (range) {
                           case '1-3': return 'bg-green-500';
-                          case '4-10': return 'bg-blue-500';
+                          case '4-10': return 'bg-marine';
                           case '11-20': return 'bg-yellow-500';
                           case '21-50': return 'bg-orange-500';
                           case '51+': return 'bg-red-500';
@@ -1687,7 +1687,7 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Search className="w-5 h-5 text-purple-500" />
+                  <Search className="w-5 h-5 text-marine" />
                   Search Intent Analysis
                 </CardTitle>
                 <CardDescription>Query categorization by user intent</CardDescription>
@@ -1732,7 +1732,7 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <FileText className="w-5 h-5 text-indigo-500" />
+                  <FileText className="w-5 h-5 text-harbor" />
                   Query Length Performance
                 </CardTitle>
                 <CardDescription>Performance breakdown by query length</CardDescription>
@@ -1998,7 +1998,7 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
               change: comparisonData?.analytics?.sessions?.changePercent || 0,
               changeType: comparisonData?.analytics?.sessions?.changePercent > 0 ? 'positive' : comparisonData?.analytics?.sessions?.changePercent < 0 ? 'negative' : 'neutral',
               period: `vs ${comparisonPeriod} ago`,
-              icon: <Activity className="w-4 h-4 text-blue-500" />
+              icon: <Activity className="w-4 h-4 text-marine" />
             })}
             {renderMetricCard({
               title: 'Engaged Sessions',
@@ -2022,7 +2022,7 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
               change: comparisonData?.analytics?.pageviews?.changePercent || 0,
               changeType: comparisonData?.analytics?.pageviews?.trend === 'up' ? 'positive' : comparisonData?.analytics?.pageviews?.trend === 'down' ? 'negative' : 'neutral',
               period: `vs ${comparisonPeriod} ago`,
-              icon: <Eye className="w-4 h-4 text-purple-500" />
+              icon: <Eye className="w-4 h-4 text-marine" />
             })}
           </div>
 
@@ -2076,7 +2076,7 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
               change: 0,
               changeType: 'neutral',
               period: `vs ${comparisonPeriod} ago`,
-              icon: <Clock className="w-4 h-4 text-blue-500" />
+              icon: <Clock className="w-4 h-4 text-marine" />
             })}
             {renderMetricCard({
               title: 'Events',
@@ -2236,7 +2236,7 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
                     <Card>
                       <CardHeader>
                         <CardTitle className="text-base flex items-center gap-2">
-                          <Zap className="w-4 h-4 text-blue-500" />
+                          <Zap className="w-4 h-4 text-marine" />
                           Core Web Vitals
                         </CardTitle>
                       </CardHeader>
@@ -2405,9 +2405,9 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-sm font-medium capitalize flex items-center gap-2">
                             {category === 'seo' && <Search className="w-4 h-4 text-green-500" />}
-                            {category === 'security' && <Globe className="w-4 h-4 text-purple-500" />}
+                            {category === 'security' && <Globe className="w-4 h-4 text-marine" />}
                             {category === 'accessibility' && <Eye className="w-4 h-4 text-orange-500" />}
-                            {category === 'crawlability' && <Globe className="w-4 h-4 text-blue-500" />}
+                            {category === 'crawlability' && <Globe className="w-4 h-4 text-marine" />}
                             {category}
                           </span>
                           <span className={`text-lg font-bold ${getScoreColor(data.score)}`}>
@@ -2450,7 +2450,7 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
                           <div key={idx} className={`border-l-4 pl-3 py-2 ${
                             rec.priority === 'high' ? 'border-red-500 bg-red-50' : 
                             rec.priority === 'medium' ? 'border-yellow-500 bg-yellow-50' : 
-                            'border-blue-500 bg-blue-50'
+                            'border-marine bg-frost'
                           }`}>
                             <div className="flex items-center justify-between">
                               <p className="text-sm font-medium">{rec.issue}</p>
@@ -2474,7 +2474,7 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
                     <Card>
                       <CardHeader>
                         <CardTitle className="text-base flex items-center gap-2">
-                          <Activity className="w-4 h-4 text-blue-500" />
+                          <Activity className="w-4 h-4 text-marine" />
                           Core Web Vitals
                         </CardTitle>
                       </CardHeader>
@@ -2615,7 +2615,7 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
                     .filter(u => u.type === 'update')
                     .slice(0, 5)
                     .map((update) => (
-                      <div key={update.id} className="border-l-2 border-blue-500 pl-3">
+                      <div key={update.id} className="border-l-2 border-marine pl-3">
                         <p className="text-sm font-medium">{update.title}</p>
                         <p className="text-xs text-gray-600 mt-1">{update.content}</p>
                         <p className="text-xs text-gray-400 mt-1">

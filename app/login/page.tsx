@@ -63,11 +63,11 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-frost to-glacier">
       <div className="w-full max-w-md">
         {/* Back to home link */}
         <div className="mb-6 text-center">
-          <Link href="/" className="text-blue-600 hover:text-blue-800 text-sm">
+          <Link href="/" className="text-marine hover:text-harbor text-sm">
             ← Back to home
           </Link>
         </div>
@@ -135,19 +135,19 @@ export default function LoginPage() {
             <div className="text-center text-sm text-gray-600 mt-6">
               <p>
                 By signing in, you agree to our{" "}
-                <Link href="/legal/terms" className="text-blue-600 hover:text-blue-800">
+                <Link href="/legal/terms" className="text-marine hover:text-harbor">
                   terms of service
                 </Link>{" "}
                 and{" "}
-                <Link href="/legal/privacy" className="text-blue-600 hover:text-blue-800">
+                <Link href="/legal/privacy" className="text-marine hover:text-harbor">
                   privacy policy
                 </Link>
               </p>
             </div>
 
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-6">
-              <h3 className="font-semibold text-blue-900 mb-2">What you get:</h3>
-              <ul className="text-sm text-blue-800 space-y-1">
+            <div className="bg-frost border border-glacier rounded-lg p-4 mt-6">
+              <h3 className="font-semibold text-harbor mb-2">What you get:</h3>
+              <ul className="text-sm text-marine space-y-1">
                 <li>✓ Google Analytics Integration</li>
                 <li>✓ Search Console Data</li>
                 <li>✓ PageSpeed Insights</li>

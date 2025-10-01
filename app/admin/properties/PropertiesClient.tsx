@@ -146,7 +146,7 @@ export default function PropertiesClient({ connection }: PropertiesClientProps) 
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Globe className="h-5 w-5 text-blue-600" />
+                <Globe className="h-5 w-5 text-marine" />
                 Search Console Properties
               </CardTitle>
               <CardDescription>
@@ -173,7 +173,7 @@ export default function PropertiesClient({ connection }: PropertiesClientProps) 
                       key={property.siteUrl}
                       className={`p-3 border rounded-lg cursor-pointer transition-colors ${
                         selectedProperties.has(property.siteUrl)
-                          ? 'bg-blue-50 border-blue-300'
+                          ? 'bg-frost border-glacier'
                           : 'hover:bg-gray-50'
                       }`}
                       onClick={() => togglePropertySelection(property.siteUrl)}
@@ -181,7 +181,7 @@ export default function PropertiesClient({ connection }: PropertiesClientProps) 
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           {selectedProperties.has(property.siteUrl) && (
-                            <CheckCircle className="h-4 w-4 text-blue-600" />
+                            <CheckCircle className="h-4 w-4 text-marine" />
                           )}
                           <div>
                             <p className="font-medium text-sm">{property.siteUrl}</p>
@@ -202,7 +202,7 @@ export default function PropertiesClient({ connection }: PropertiesClientProps) 
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5 text-purple-600" />
+                <BarChart3 className="h-5 w-5 text-marine" />
                 Analytics 4 Properties
               </CardTitle>
               <CardDescription>
@@ -234,7 +234,7 @@ export default function PropertiesClient({ connection }: PropertiesClientProps) 
                           key={property.id}
                           className={`p-3 border rounded-lg cursor-pointer transition-colors ${
                             selectedProperties.has(property.id)
-                              ? 'bg-purple-50 border-purple-300'
+                              ? 'bg-frost border-glacier'
                               : 'hover:bg-gray-50'
                           }`}
                           onClick={() => togglePropertySelection(property.id)}
@@ -242,7 +242,7 @@ export default function PropertiesClient({ connection }: PropertiesClientProps) 
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
                               {selectedProperties.has(property.id) && (
-                                <CheckCircle className="h-4 w-4 text-purple-600" />
+                                <CheckCircle className="h-4 w-4 text-marine" />
                               )}
                               <div>
                                 <p className="font-medium text-sm">{property.displayName}</p>

@@ -15,7 +15,7 @@ export default function Header() {
           {/* Logo/Brand */}
           <div className="flex-shrink-0">
             <Link href="/" className="flex items-center">
-              <div className="text-2xl font-bold text-blue-600">
+              <div className="text-2xl font-bold text-marine">
                 Search Insights Hub
               </div>
             </Link>

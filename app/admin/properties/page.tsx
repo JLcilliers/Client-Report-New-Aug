@@ -188,7 +188,7 @@ export default function PropertiesPage() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Search className="h-5 w-5 text-blue-500" />
+              <Search className="h-5 w-5 text-marine" />
               <CardTitle>Search Console Properties</CardTitle>
             </div>
             <Badge variant="secondary">{allSearchConsoleProperties.length} sites</Badge>
@@ -245,7 +245,7 @@ export default function PropertiesPage() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <BarChart3 className="h-5 w-5 text-purple-500" />
+              <BarChart3 className="h-5 w-5 text-marine" />
               <CardTitle>Google Analytics Properties</CardTitle>
             </div>
             <Badge variant="secondary">{allAnalyticsProperties.length} properties</Badge>

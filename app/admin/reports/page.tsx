@@ -194,13 +194,13 @@ export default function ReportsPage() {
                   <div className="flex items-center gap-4 text-sm">
                     {report.search_console_properties?.length ? (
                       <div className="flex items-center gap-1">
-                        <Search className="w-4 h-4 text-blue-500" />
+                        <Search className="w-4 h-4 text-marine" />
                         <span>{report.search_console_properties.length} SC</span>
                       </div>
                     ) : null}
                     {report.analytics_properties?.length ? (
                       <div className="flex items-center gap-1">
-                        <BarChart3 className="w-4 h-4 text-purple-500" />
+                        <BarChart3 className="w-4 h-4 text-marine" />
                         <span>{report.analytics_properties.length} GA</span>
                       </div>
                     ) : null}
@@ -275,18 +275,18 @@ export default function ReportsPage() {
 
                   {/* Quick Links */}
                   <div className="flex items-center gap-2 text-xs">
-                    <Link 
+                    <Link
                       href={`/admin/reports/${report.id}`}
-                      className="text-blue-600 hover:underline"
+                      className="text-marine hover:underline"
                     >
                       Edit
                     </Link>
                     <span className="text-gray-400">•</span>
-                    <a 
+                    <a
                       href={`${window.location.origin}/report/${report.slug}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline flex items-center gap-1"
+                      className="text-marine hover:underline flex items-center gap-1"
                     >
                       Client View
                       <ExternalLink className="w-3 h-3" />

@@ -444,7 +444,7 @@ export default function GoogleAccountsPage() {
                     <div>
                       <p className="text-gray-500 mb-1">Search Console Properties</p>
                       <div className="flex items-center gap-2">
-                        <Globe className="h-4 w-4 text-blue-600" />
+                        <Globe className="h-4 w-4 text-marine" />
                         <span>{account.search_console_properties?.length || 0} properties</span>
                         {fetchingProperties === account.id && (
                           <RefreshCw className="h-3 w-3 animate-spin" />
@@ -467,7 +467,7 @@ export default function GoogleAccountsPage() {
                     <div>
                       <p className="text-gray-500 mb-1">Analytics Properties</p>
                       <div className="flex items-center gap-2">
-                        <BarChart3 className="h-4 w-4 text-purple-600" />
+                        <BarChart3 className="h-4 w-4 text-marine" />
                         <span>{account.analytics_properties?.length || 0} properties</span>
                         {fetchingProperties === account.id && (
                           <RefreshCw className="h-3 w-3 animate-spin" />
@@ -503,7 +503,7 @@ export default function GoogleAccountsPage() {
         </div>
       )}
 
-      <Card className="bg-blue-50 border-blue-200">
+      <Card className="bg-frost border-glacier">
         <CardHeader>
           <CardTitle className="text-lg">How it works</CardTitle>
         </CardHeader>
