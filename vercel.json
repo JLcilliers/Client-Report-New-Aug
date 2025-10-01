@@ -3,7 +3,8 @@
   "installCommand": "npm ci",
   "framework": "nextjs",
   "env": {
-    "FORCE_REBUILD": "true"
+    "FORCE_REBUILD": "true",
+    "VERCEL_FORCE_NO_BUILD_CACHE": "1"
   },
   "functions": {
     "app/api/cron/daily-update/route.ts": {
