@@ -10,6 +10,12 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Report ID is required' }, { status: 400 });
     }
 
+    // Check if Supabase is configured
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      // Return empty array if Supabase is not configured
+      return NextResponse.json([]);
+    }
+
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -23,10 +29,10 @@ export async function GET(request: NextRequest) {
       .order('created_at', { ascending: false });
 
     if (error) {
-      
+
       // If table doesn't exist, return empty array instead of error
       if (error.code === '42P01') {
-        
+
         return NextResponse.json([]);
       }
       return NextResponse.json({ error: 'Failed to fetch updates' }, { status: 500 });
@@ -34,8 +40,8 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(updates || []);
   } catch (error) {
-    
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    // Return empty array on error instead of 500
+    return NextResponse.json([]);
   }
 }
 
