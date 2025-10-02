@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { PrismaClient } from "@prisma/client"
-
-const prisma = new PrismaClient()
+import { getPrisma } from "@/lib/db/prisma"
 
 export async function GET(
   request: NextRequest,
@@ -9,9 +7,10 @@ export async function GET(
 ) {
   try {
     const { slug } = await params
-    
+    const prisma = getPrisma()
+
     console.log("Looking for report with slug:", slug)
-    
+
     // Get report by shareableId (which is used as the slug)
     let report = await prisma.clientReport.findUnique({
       where: { shareableId: slug },
