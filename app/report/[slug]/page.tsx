@@ -91,23 +91,17 @@ export default function PublicReportPage() {
   }
   
   const fetchReportData = async () => {
-    
-    try {
-      const response = await fetch(`/api/public/report/${slug}/data`)
-      
-      if (response.ok) {
-        const data = await response.json()
-        
-        setReportData(data)
-        // Force a re-render of the dashboard
-        if (!showLegacyView) {
-          
-        }
-      } else {
-        
-      }
-    } catch (error: any) {
-      
+    // Use cachedData from the report that was already fetched
+    if (report?.cachedData) {
+      console.log('📊 Using cached data from report:', report.cachedData)
+      setReportData({
+        search_console: report.cachedData.search_console,
+        analytics: report.cachedData.analytics,
+        keywordPerformance: report.keywordPerformance,
+        last_updated: report.cachedData.fetched_at
+      })
+    } else {
+      console.log('⚠️ No cached data available in report')
     }
   }
 
@@ -126,9 +120,10 @@ export default function PublicReportPage() {
       console.log('Already refreshing or no report, skipping...')
       return
     }
-    
+
     setFetchingData(true)
     try {
+      console.log('🔄 Starting data refresh...')
       // Trigger data fetch from Google APIs using the public refresh endpoint
       const response = await fetch(`/api/public/report/${slug}/refresh`, {
         method: 'POST',
@@ -136,19 +131,21 @@ export default function PublicReportPage() {
           'Content-Type': 'application/json',
         },
       })
-      
+
       if (response.ok) {
         const result = await response.json()
-        
-        // Refetch the report data after update
-        await fetchReportData()
+        console.log('✅ Data refreshed successfully')
+
+        // Refetch the report to get updated cachedData
+        await fetchReport()
+        // fetchReportData will be called by the useEffect when report updates
       } else {
         const error = await response.json()
-        
+        console.error('❌ Refresh failed:', error)
         alert(`Failed to refresh data: ${error.error || 'Unknown error'}`)
       }
     } catch (error: any) {
-      
+      console.error('❌ Refresh error:', error)
       alert('Failed to refresh data. Please try again.')
     } finally {
       setFetchingData(false)

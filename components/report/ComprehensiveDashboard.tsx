@@ -243,31 +243,37 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
   const loadExistingData = async () => {
     console.log('📖 Loading existing data for slug:', reportSlug);
     try {
-      // Fetch the main report data which includes keywords
+      // Fetch the main report data which includes keywords and cachedData
       const reportResponse = await fetch(`/api/public/report/${reportSlug}`);
+      console.log('📖 Report response status:', reportResponse.status);
+
       if (reportResponse.ok) {
         const reportData = await reportResponse.json();
         console.log('📖 Loaded report with keywords:', reportData.keywordPerformance);
         setKeywordData(reportData.keywordPerformance);
-      }
 
-      const dataResponse = await fetch(`/api/public/report/${reportSlug}/data`);
-      console.log('📖 Data response status:', dataResponse.status);
+        // Use cachedData from the report instead of fetching from non-existent /data endpoint
+        if (reportData.cachedData) {
+          console.log('📖 Loaded existing cached data:', reportData.cachedData);
+          const transformedMetrics = transformLegacyData(reportData.cachedData);
+          console.log('📖 Transformed existing data:', transformedMetrics);
+          setMetrics(transformedMetrics);
 
-      if (dataResponse.ok) {
-        const data = await dataResponse.json();
-        console.log('📖 Loaded existing data:', data);
-        const transformedMetrics = transformLegacyData(data);
-        console.log('📖 Transformed existing data:', transformedMetrics);
-        setMetrics(transformedMetrics);
-        
-        // Auto-refresh if data is older than 1 hour
-        const dataAge = data?.fetched_at ? new Date().getTime() - new Date(data.fetched_at).getTime() : Infinity;
-        const oneHour = 60 * 60 * 1000; // 1 hour in milliseconds
-        
-        if (dataAge > oneHour) {
-          console.log('📅 Data is stale, auto-refreshing...');
-          // Small delay to let the UI render first
+          // Auto-refresh if data is older than 1 hour
+          const dataAge = reportData.cachedData?.fetched_at ? new Date().getTime() - new Date(reportData.cachedData.fetched_at).getTime() : Infinity;
+          const oneHour = 60 * 60 * 1000; // 1 hour in milliseconds
+
+          if (dataAge > oneHour) {
+            console.log('📅 Data is stale, auto-refreshing...');
+            // Small delay to let the UI render first
+            setTimeout(() => {
+              if (!refreshing && !refreshingRef.current) {
+                fetchMetrics(comparisonPeriod);
+              }
+            }, 1000);
+          }
+        } else {
+          console.log('⚠️ No cached data in report, attempting refresh...');
           setTimeout(() => {
             if (!refreshing && !refreshingRef.current) {
               fetchMetrics(comparisonPeriod);
@@ -275,10 +281,10 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
           }, 1000);
         }
       } else {
-        const error = await dataResponse.text();
-        console.error('❌ Failed to load existing data:', error);
-        // If no existing data, always try to refresh
-        console.log('🔄 No existing data, attempting refresh...');
+        const error = await reportResponse.text();
+        console.error('❌ Failed to load report:', error);
+        // If no report data, always try to refresh
+        console.log('🔄 No report data, attempting refresh...');
         setTimeout(() => {
           if (!refreshing && !refreshingRef.current) {
             fetchMetrics(comparisonPeriod);
@@ -355,31 +361,35 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
           setMetrics(transformedMetrics);
           setLastRefresh(new Date());
         } else if (refreshResult.success) {
-          // API returned success but no data - fetch it separately
-          // Otherwise fetch the refreshed data
-          console.log('📥 Fetching updated data...');
+          // API returned success but no data - fetch from report endpoint
+          console.log('📥 Fetching updated data from report...');
           const dataController = new AbortController();
           const dataTimeoutId = setTimeout(() => dataController.abort(), 10000);
-          
-          const dataResponse = await fetch(`/api/public/report/${reportSlug}/data`, {
+
+          const reportResponse = await fetch(`/api/public/report/${reportSlug}`, {
             signal: dataController.signal
           });
-          
+
           clearTimeout(dataTimeoutId);
-          console.log('📥 Data response status:', dataResponse.status);
-          
-          if (dataResponse.ok) {
-            const data = await dataResponse.json();
-            console.log('📊 Received data:', data);
-            
-            // Transform the data to match our expected format
-            const transformedMetrics = transformLegacyData(data);
-            console.log('🔄 Transformed metrics:', transformedMetrics);
-            setMetrics(transformedMetrics);
-            setLastRefresh(new Date());
+          console.log('📥 Report response status:', reportResponse.status);
+
+          if (reportResponse.ok) {
+            const reportData = await reportResponse.json();
+            console.log('📊 Received report data:', reportData);
+
+            if (reportData.cachedData) {
+              // Transform the cached data to match our expected format
+              const transformedMetrics = transformLegacyData(reportData.cachedData);
+              console.log('🔄 Transformed metrics:', transformedMetrics);
+              setMetrics(transformedMetrics);
+              setLastRefresh(new Date());
+            } else {
+              console.error('❌ No cached data in report');
+              throw new Error('No cached data available. Please try refreshing again.');
+            }
           } else {
-            const dataError = await dataResponse.text();
-            console.error('❌ Data fetch failed:', dataError);
+            const dataError = await reportResponse.text();
+            console.error('❌ Report fetch failed:', dataError);
             throw new Error('Unable to fetch updated data. Please try again.');
           }
         }

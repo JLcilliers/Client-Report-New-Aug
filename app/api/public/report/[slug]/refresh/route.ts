@@ -399,10 +399,26 @@ export async function POST(
           searchConsoleData.topQueries = topQueries.value.data.rows
             .sort((a: any, b: any) => (b.clicks || 0) - (a.clicks || 0))
             .slice(0, 10)
-            
-          // Calculate average position from queries
-          if (searchConsoleData.topQueries.length > 0) {
-            const totalPosition = searchConsoleData.topQueries.reduce((sum: number, q: any) => 
+
+          // If aggregated metrics are empty, calculate from all queries
+          if (aggregatedMetrics.clicks === 0 && aggregatedMetrics.impressions === 0) {
+            console.log('[Search Console] Aggregating metrics from all queries since overall metrics are empty')
+            const allRows = topQueries.value.data.rows || []
+            aggregatedMetrics.clicks = allRows.reduce((sum: number, q: any) => sum + (q.clicks || 0), 0)
+            aggregatedMetrics.impressions = allRows.reduce((sum: number, q: any) => sum + (q.impressions || 0), 0)
+
+            if (allRows.length > 0) {
+              const totalPosition = allRows.reduce((sum: number, q: any) => sum + (q.position || 0), 0)
+              aggregatedMetrics.position = totalPosition / allRows.length
+
+              // Calculate CTR from aggregated data
+              aggregatedMetrics.ctr = aggregatedMetrics.impressions > 0
+                ? aggregatedMetrics.clicks / aggregatedMetrics.impressions
+                : 0
+            }
+          } else if (searchConsoleData.topQueries.length > 0) {
+            // Just calculate average position from top queries if we already have clicks/impressions
+            const totalPosition = searchConsoleData.topQueries.reduce((sum: number, q: any) =>
               sum + (q.position || 0), 0)
             aggregatedMetrics.position = totalPosition / searchConsoleData.topQueries.length
           }
