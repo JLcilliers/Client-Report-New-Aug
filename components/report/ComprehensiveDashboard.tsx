@@ -163,7 +163,7 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
     fetchedAt?: string;
   } | null>(null);
   const [agencyUpdates, setAgencyUpdates] = useState<any[]>([]);
-  const [comparisonPeriod, setComparisonPeriod] = useState<'week' | 'month' | 'year' | 'last30' | 'last90' | 'monthToDate' | 'yearOverYear'>('week');
+  const [comparisonPeriod, setComparisonPeriod] = useState<'week' | 'month' | 'year' | 'last30' | 'last90' | 'monthToDate' | 'yearOverYear'>('last30');
   const [activeTab, setActiveTab] = useState('overview');
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
   const [seoAuditData, setSeoAuditData] = useState<any>(null);
