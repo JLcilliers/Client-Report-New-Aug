@@ -125,34 +125,61 @@ export async function DELETE(
     // Manually delete all related data in the correct order to avoid foreign key constraints
     // This is a workaround for production database cascade issues
 
+    // Step 1: Delete AI Visibility data (deepest nested first)
     try {
-      // 1. Delete keyword performance history (depends on keywords)
-      await prisma.keywordPerformance.deleteMany({
-        where: {
-          keyword: {
-            clientReportId: params.id
-          }
-        }
+      const aiProfile = await prisma.aIVisibilityProfile.findUnique({
+        where: { clientReportId: params.id }
       });
+
+      if (aiProfile) {
+        // Delete AI-related nested data
+        await prisma.aICompetitorAnalysis.deleteMany({
+          where: { profileId: aiProfile.id }
+        });
+        await prisma.aIVisibilityTrend.deleteMany({
+          where: { profileId: aiProfile.id }
+        });
+        await prisma.aIRecommendation.deleteMany({
+          where: { profileId: aiProfile.id }
+        });
+        await prisma.aIQueryInsight.deleteMany({
+          where: { profileId: aiProfile.id }
+        });
+        await prisma.aICitation.deleteMany({
+          where: { profileId: aiProfile.id }
+        });
+        await prisma.aIPlatformMetric.deleteMany({
+          where: { profileId: aiProfile.id }
+        });
+        // Finally delete the profile itself
+        await prisma.aIVisibilityProfile.delete({
+          where: { id: aiProfile.id }
+        });
+      }
     } catch (e) {
-      console.log('No keyword performance to delete or already deleted');
+      console.log('No AI visibility data to delete or already deleted:', e);
     }
 
+    // Step 2: Delete keyword-related data (deepest nested first)
     try {
-      // 2. Delete keyword variations (depends on keywords)
-      await prisma.keywordVariation.deleteMany({
-        where: {
-          keyword: {
-            clientReportId: params.id
-          }
+      // Get all keywords for this client
+      const keywords = await prisma.keyword.findMany({
+        where: { clientReportId: params.id },
+        include: {
+          alerts: true
         }
       });
-    } catch (e) {
-      console.log('No keyword variations to delete or already deleted');
-    }
 
-    try {
-      // 3. Delete keyword alerts (depends on keywords)
+      // Delete keyword alert history
+      for (const kw of keywords) {
+        for (const alert of kw.alerts) {
+          await prisma.keywordAlertHistory.deleteMany({
+            where: { alertId: alert.id }
+          });
+        }
+      }
+
+      // Delete keyword alerts
       await prisma.keywordAlert.deleteMany({
         where: {
           keyword: {
@@ -160,85 +187,102 @@ export async function DELETE(
           }
         }
       });
-    } catch (e) {
-      console.log('No keyword alerts to delete or already deleted');
-    }
 
-    try {
-      // 4. Delete keywords
+      // Delete competitor keyword rankings
+      await prisma.competitorKeywordRank.deleteMany({
+        where: {
+          keyword: {
+            clientReportId: params.id
+          }
+        }
+      });
+
+      // Delete keyword variations
+      await prisma.keywordVariation.deleteMany({
+        where: {
+          keyword: {
+            clientReportId: params.id
+          }
+        }
+      });
+
+      // Delete keyword performance history
+      await prisma.keywordPerformance.deleteMany({
+        where: {
+          keyword: {
+            clientReportId: params.id
+          }
+        }
+      });
+
+      // Finally delete keywords
       await prisma.keyword.deleteMany({
         where: {
           clientReportId: params.id
         }
       });
     } catch (e) {
-      console.log('No keywords to delete or already deleted');
+      console.log('Error deleting keyword data:', e);
     }
 
+    // Step 3: Delete keyword groups and their performance data
     try {
-      // 5. Delete competitors
-      await prisma.competitor.deleteMany({
-        where: {
-          clientReportId: params.id
-        }
+      const keywordGroups = await prisma.keywordGroup.findMany({
+        where: { clientReportId: params.id }
       });
-    } catch (e) {
-      console.log('No competitors to delete or already deleted');
-    }
 
-    try {
-      // 6. Delete SEO audits
-      await prisma.sEOAudit.deleteMany({
-        where: {
-          clientReportId: params.id
-        }
-      });
-    } catch (e) {
-      console.log('No SEO audits to delete or already deleted');
-    }
+      for (const group of keywordGroups) {
+        await prisma.keywordGroupPerformance.deleteMany({
+          where: { groupId: group.id }
+        });
+      }
 
-    try {
-      // 7. Delete report cache
-      await prisma.reportCache.deleteMany({
-        where: {
-          reportId: params.id
-        }
-      });
-    } catch (e) {
-      console.log('No cache to delete or already deleted');
-    }
-
-    try {
-      // 8. Delete access logs
-      await prisma.reportAccessLog.deleteMany({
-        where: {
-          reportId: params.id
-        }
-      });
-    } catch (e) {
-      console.log('No access logs to delete or already deleted');
-    }
-
-    try {
-      // 9. Delete keyword groups
       await prisma.keywordGroup.deleteMany({
-        where: {
-          clientReportId: params.id
-        }
+        where: { clientReportId: params.id }
       });
     } catch (e) {
-      console.log('No keyword groups to delete or already deleted');
+      console.log('Error deleting keyword groups:', e);
+    }
+
+    // Step 4: Delete other client data
+    try {
+      await prisma.keywordCannibalization.deleteMany({
+        where: { clientReportId: params.id }
+      });
+    } catch (e) {
+      console.log('Error deleting cannibalization data:', e);
     }
 
     try {
-      // 10. Delete keyword cannibalization
-      await prisma.keywordCannibalization.deleteMany({
-        where: {
-          clientReportId: params.id
-        }
+      await prisma.competitor.deleteMany({
+        where: { clientReportId: params.id }
       });
     } catch (e) {
-      console.log('No cannibalization data to delete or already deleted');
+      console.log('Error deleting competitors:', e);
+    }
+
+    try {
+      await prisma.sEOAudit.deleteMany({
+        where: { clientReportId: params.id }
+      });
+    } catch (e) {
+      console.log('Error deleting SEO audits:', e);
+    }
+
+    try {
+      await prisma.reportCache.deleteMany({
+        where: { reportId: params.id }
+      });
+    } catch (e) {
+      console.log('Error deleting cache:', e);
+    }
+
+    try {
+      await prisma.reportAccessLog.deleteMany({
+        where: { reportId: params.id }
+      });
+    } catch (e) {
+      console.log('Error deleting access logs:', e);
     }
 
     // Finally, delete the client report itself

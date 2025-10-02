@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import Link from "next/link"
-import { 
-  Plus, 
-  ExternalLink, 
+import {
+  Plus,
+  ExternalLink,
   Calendar,
   Globe,
   BarChart3,
@@ -18,8 +18,20 @@ import {
   Copy,
   CheckCircle,
   AlertCircle,
-  Clock
+  Clock,
+  Trash2
 } from "lucide-react"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { useToast } from "@/components/ui/use-toast"
 
 interface Report {
   id: string
@@ -50,6 +62,8 @@ export default function ReportsPage() {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [copiedSlug, setCopiedSlug] = useState<string | null>(null)
+  const [deleteReport, setDeleteReport] = useState<Report | null>(null)
+  const { toast } = useToast()
 
   useEffect(() => {
     fetchReports()
@@ -75,6 +89,35 @@ export default function ReportsPage() {
     navigator.clipboard.writeText(url)
     setCopiedSlug(report.slug)
     setTimeout(() => setCopiedSlug(null), 2000)
+  }
+
+  const handleDeleteReport = async () => {
+    if (!deleteReport) return
+
+    try {
+      const response = await fetch(`/api/admin/clients/${deleteReport.id}`, {
+        method: 'DELETE'
+      })
+
+      if (response.ok) {
+        toast({
+          title: "Success",
+          description: "Report deleted successfully",
+        })
+        fetchReports()
+      } else {
+        const errorData = await response.json()
+        throw new Error(errorData.error || errorData.details || "Failed to delete report")
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete report",
+        variant: "destructive",
+      })
+    } finally {
+      setDeleteReport(null)
+    }
   }
 
   const filteredReports = reports.filter(report => 
@@ -271,6 +314,15 @@ export default function ReportsPage() {
                         <Search className="w-4 h-4" />
                       </Button>
                     </Link>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setDeleteReport(report)}
+                      title="Delete report"
+                      className="px-3"
+                    >
+                      <Trash2 className="w-4 h-4 text-red-500" />
+                    </Button>
                   </div>
 
                   {/* Quick Links */}
@@ -298,6 +350,25 @@ export default function ReportsPage() {
           })}
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!deleteReport} onOpenChange={() => setDeleteReport(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete the report "{deleteReport?.report_name || deleteReport?.name}" and all associated data including keywords, analytics, and performance history.
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteReport} className="bg-red-600 hover:bg-red-700">
+              Delete Report
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Summary Stats */}
       {!loading && reports.length > 0 && (
