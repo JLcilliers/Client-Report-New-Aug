@@ -73,12 +73,12 @@ export default function ClientFormWithGoogleAccounts({ onSuccess }: ClientFormPr
         const data = await response.json()
 
         // Separate GA4 and Search Console properties
-        const ga4 = data.analytics || []
-        const sc = data.searchConsole || []
+        const ga4 = data.properties?.analytics || data.analytics || data.ga4 || []
+        const sc = data.properties?.searchConsole || data.searchConsole || data.gsc || []
 
         setGa4Properties(ga4.map((p: any) => ({
-          id: p.id || p.property,
-          name: p.displayName || p.name || p.property,
+          id: p.propertyId || p.id || p.property,
+          name: p.displayName || p.name || p.property || p.propertyId,
           type: 'ga4' as const
         })))
 
