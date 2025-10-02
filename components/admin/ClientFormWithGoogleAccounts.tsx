@@ -10,8 +10,8 @@ import { Loader2 } from "lucide-react"
 
 interface GoogleAccount {
   id: string
-  email: string
-  displayName: string
+  account_email: string
+  account_name: string
 }
 
 interface Property {
@@ -172,7 +172,7 @@ export default function ClientFormWithGoogleAccounts({ onSuccess }: ClientFormPr
             <SelectContent>
               {googleAccounts.map((account) => (
                 <SelectItem key={account.id} value={account.id}>
-                  {account.displayName || account.email}
+                  {account.account_name || account.account_email}
                 </SelectItem>
               ))}
             </SelectContent>
