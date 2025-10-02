@@ -162,12 +162,12 @@ export default function LandingPage() {
       {/* SOCIAL PROOF BAR */}
       <section className="bg-gray-50 py-8 border-y border-white/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="text-center text-gray-700 text-sm mb-4">AS SEEN IN</p>
-          <div className="flex justify-center items-center space-x-12 opacity-70">
-            <span className="text-2xl font-bold">TechCrunch</span>
-            <span className="text-2xl font-bold">Forbes</span>
-            <span className="text-2xl font-bold">Search Engine Journal</span>
-            <span className="text-2xl font-bold">Moz</span>
+          <p className="text-center text-gray-700 text-sm mb-6 font-semibold">AS SEEN IN</p>
+          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12 opacity-80">
+            <img src="https://i.ibb.co/k7myqrW/techcrunch-logo.png" alt="TechCrunch" className="h-8 object-contain grayscale hover:grayscale-0 transition-all" />
+            <img src="https://i.ibb.co/QGfgGv8/Forbes-logo-svg.png" alt="Forbes" className="h-8 object-contain grayscale hover:grayscale-0 transition-all" />
+            <img src="https://i.ibb.co/bMTxkDkm/compact.png" alt="Search Engine Journal" className="h-10 object-contain grayscale hover:grayscale-0 transition-all" />
+            <img src="https://i.ibb.co/wrjjKNm6/Moz-logo.png" alt="Moz" className="h-8 object-contain grayscale hover:grayscale-0 transition-all" />
           </div>
         </div>
       </section>
@@ -341,12 +341,14 @@ export default function LandingPage() {
           <div className="mb-12">
             <h3 className="text-xl font-bold mb-6 text-gray-700">Analytics & Search</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              {['Google Analytics 4', 'Google Search Console'].map((tool) => (
-                <div key={tool} className="bg-gray-50/80 backdrop-blur-sm border border-gray-200 rounded-xl p-6 text-center hover:border-[#72a3bf] hover:scale-105 transition-transform duration-300">
-                  <div className="w-12 h-12 bg-gradient-to-br from-marine to-harbor rounded-lg mx-auto mb-3"></div>
-                  <p className="text-sm font-medium">{tool}</p>
-                </div>
-              ))}
+              <div className="bg-white border border-gray-200 rounded-xl p-6 text-center hover:border-[#72a3bf] hover:shadow-lg hover:scale-105 transition-all duration-300">
+                <img src="https://i.ibb.co/HDwSgZvb/google-analytics.png" alt="Google Analytics 4" className="w-16 h-16 object-contain mx-auto mb-3" />
+                <p className="text-sm font-medium text-gray-900">Google Analytics 4</p>
+              </div>
+              <div className="bg-white border border-gray-200 rounded-xl p-6 text-center hover:border-[#72a3bf] hover:shadow-lg hover:scale-105 transition-all duration-300">
+                <img src="https://i.ibb.co/KpKqBhLn/google-search-console-icon-vector-brandlogos-net-hxtfr-512x512-1.png" alt="Google Search Console" className="w-16 h-16 object-contain mx-auto mb-3" />
+                <p className="text-sm font-medium text-gray-900">Google Search Console</p>
+              </div>
             </div>
           </div>
 
@@ -354,19 +356,29 @@ export default function LandingPage() {
           <div className="mb-12">
             <h3 className="text-xl font-bold mb-6 text-gray-700">Keyword Tracking</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              {[
-                { name: 'Ahrefs', available: true },
-                { name: 'SEMrush', available: true },
-                { name: 'Moz Pro', available: true },
-                { name: 'Screaming Frog', available: true },
-                { name: 'Advanced Rank Tracking', available: false }
-              ].map((tool) => (
-                <div key={tool.name} className={`bg-gray-50/80 backdrop-blur-sm border ${tool.available ? 'border-gray-200' : 'border-dashed border-gray-700'} rounded-xl p-6 text-center hover:border-[#72a3bf] hover:scale-105 transition-transform duration-300 ${!tool.available && 'opacity-50'}`}>
-                  <div className={`w-12 h-12 ${tool.available ? 'bg-gradient-to-br from-marine to-harbor' : 'bg-gray-700'} rounded-lg mx-auto mb-3`}></div>
-                  <p className="text-sm font-medium">{tool.name}</p>
-                  {!tool.available && <span className="text-xs text-gray-500 mt-1 inline-block">Coming Soon</span>}
+              <div className="bg-white border border-gray-200 rounded-xl p-6 text-center hover:border-[#72a3bf] hover:shadow-lg hover:scale-105 transition-all duration-300">
+                <img src="https://i.ibb.co/8Lg7b0TB/channels4-profile.jpg" alt="Ahrefs" className="w-16 h-16 object-contain mx-auto mb-3" />
+                <p className="text-sm font-medium text-gray-900">Ahrefs</p>
+              </div>
+              <div className="bg-white border border-gray-200 rounded-xl p-6 text-center hover:border-[#72a3bf] hover:shadow-lg hover:scale-105 transition-all duration-300">
+                <img src="https://i.ibb.co/0yG2gYSs/images-1.png" alt="SEMrush" className="w-16 h-16 object-contain mx-auto mb-3" />
+                <p className="text-sm font-medium text-gray-900">SEMrush</p>
+              </div>
+              <div className="bg-white border border-gray-200 rounded-xl p-6 text-center hover:border-[#72a3bf] hover:shadow-lg hover:scale-105 transition-all duration-300">
+                <img src="https://i.ibb.co/0yKWLL9j/moz-pro.webp" alt="Moz Pro" className="w-16 h-16 object-contain mx-auto mb-3" />
+                <p className="text-sm font-medium text-gray-900">Moz Pro</p>
+              </div>
+              <div className="bg-white border border-gray-200 rounded-xl p-6 text-center hover:border-[#72a3bf] hover:shadow-lg hover:scale-105 transition-all duration-300">
+                <img src="https://i.ibb.co/7NnmHFJW/unnamed.jpg" alt="Screaming Frog" className="w-16 h-16 object-contain mx-auto mb-3" />
+                <p className="text-sm font-medium text-gray-900">Screaming Frog</p>
+              </div>
+              <div className="bg-gray-50/80 border border-dashed border-gray-300 rounded-xl p-6 text-center opacity-60">
+                <div className="w-16 h-16 bg-gray-200 rounded-lg mx-auto mb-3 flex items-center justify-center">
+                  <Target className="w-8 h-8 text-gray-400" />
                 </div>
-              ))}
+                <p className="text-sm font-medium text-gray-700">Advanced Rank Tracking</p>
+                <span className="text-xs text-gray-500 mt-1 inline-block">Coming Soon</span>
+              </div>
             </div>
           </div>
 
@@ -374,12 +386,18 @@ export default function LandingPage() {
           <div className="mb-12">
             <h3 className="text-xl font-bold mb-6 text-gray-700">Paid Advertising</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              {['Google Ads', 'Facebook Ads', 'LinkedIn Ads'].map((tool) => (
-                <div key={tool} className="bg-gray-50/80 backdrop-blur-sm border border-gray-200 rounded-xl p-6 text-center hover:border-[#72a3bf] hover:scale-105 transition-transform duration-300">
-                  <div className="w-12 h-12 bg-gradient-to-br from-glacier to-marine rounded-lg mx-auto mb-3"></div>
-                  <p className="text-sm font-medium">{tool}</p>
-                </div>
-              ))}
+              <div className="bg-white border border-gray-200 rounded-xl p-6 text-center hover:border-[#72a3bf] hover:shadow-lg hover:scale-105 transition-all duration-300">
+                <img src="https://i.ibb.co/TBvcXvjz/Google-Ad-Words-logo-rectangle.png" alt="Google Ads" className="w-16 h-16 object-contain mx-auto mb-3" />
+                <p className="text-sm font-medium text-gray-900">Google Ads</p>
+              </div>
+              <div className="bg-white border border-gray-200 rounded-xl p-6 text-center hover:border-[#72a3bf] hover:shadow-lg hover:scale-105 transition-all duration-300">
+                <img src="https://i.ibb.co/MDtNrvWg/png-clipart-social-media-computer-icons-facebook-ad-blue-logo-thumbnail.png" alt="Facebook Ads" className="w-16 h-16 object-contain mx-auto mb-3" />
+                <p className="text-sm font-medium text-gray-900">Facebook Ads</p>
+              </div>
+              <div className="bg-white border border-gray-200 rounded-xl p-6 text-center hover:border-[#72a3bf] hover:shadow-lg hover:scale-105 transition-all duration-300">
+                <img src="https://i.ibb.co/h1VMDhh6/Linked-In-Ads-logo-3.webp" alt="LinkedIn Ads" className="w-16 h-16 object-contain mx-auto mb-3" />
+                <p className="text-sm font-medium text-gray-900">LinkedIn Ads</p>
+              </div>
             </div>
           </div>
 
