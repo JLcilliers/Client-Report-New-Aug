@@ -46,7 +46,7 @@ export default function LandingPage() {
             <Link href="/" className="flex items-center">
               <h1 className="text-2xl font-bold">
                 <span className="text-white">Search</span>
-                <span className="text-[#72a3bf]"> Insights</span>
+                <span className="text-[#D4FF00]"> Insights</span>
               </h1>
             </Link>
 
@@ -75,7 +75,7 @@ export default function LandingPage() {
               </Button>
               <Button
                 asChild
-                className="bg-gradient-to-r from-[#72a3bf] to-[#446e87] text-white font-semibold hover:shadow-[0_4px_20px_rgba(114,163,191,0.4)] hover:-translate-y-0.5 transition-all duration-300 rounded-lg px-6"
+                className="bg-gradient-to-r from-[#D4FF00] to-[#A8CC00] text-black font-semibold hover:shadow-[0_4px_20px_rgba(212,255,0,0.4)] hover:-translate-y-0.5 transition-all duration-300 rounded-lg px-6"
               >
                 <Link href="/login">Get Started</Link>
               </Button>
@@ -88,8 +88,8 @@ export default function LandingPage() {
       <section className="relative py-20 lg:py-32 overflow-hidden">
         {/* Background effects */}
         <div className="absolute inset-0 bg-gradient-to-br from-[#0A0A0A] via-[#1A1A1A] to-[#0A0A0A]"></div>
-        <div className="absolute top-20 left-1/4 w-96 h-96 bg-[#72a3bf]/10 rounded-full blur-[120px] animate-pulse"></div>
-        <div className="absolute bottom-20 right-1/4 w-96 h-96 bg-[#446e87]/10 rounded-full blur-[120px] animate-pulse delay-1000"></div>
+        <div className="absolute top-20 left-1/4 w-96 h-96 bg-[#D4FF00]/10 rounded-full blur-[120px] animate-pulse"></div>
+        <div className="absolute bottom-20 right-1/4 w-96 h-96 bg-[#00FF88]/10 rounded-full blur-[120px] animate-pulse delay-1000"></div>
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-5xl mx-auto">
@@ -100,7 +100,7 @@ export default function LandingPage() {
             </h1>
 
             {/* Subheadline */}
-            <h2 className="text-3xl md:text-5xl font-bold mb-8 text-[#72a3bf] leading-tight tracking-tight">
+            <h2 className="text-3xl md:text-5xl font-bold mb-8 text-[#D4FF00] leading-tight tracking-tight">
               AI-Powered Reports in 3 Minutes.<br />
               White-Label. Agency-Ready.
             </h2>
@@ -116,7 +116,7 @@ export default function LandingPage() {
               <Button
                 size="lg"
                 asChild
-                className="bg-gradient-to-r from-[#72a3bf] to-[#446e87] text-white font-bold text-lg px-10 h-14 rounded-lg shadow-[0_4px_20px_rgba(114,163,191,0.3)] hover:shadow-[0_6px_30px_rgba(114,163,191,0.5)] hover:-translate-y-1 transition-all duration-300"
+                className="bg-gradient-to-r from-[#D4FF00] to-[#A8CC00] text-black font-bold text-lg px-10 h-14 rounded-lg shadow-[0_4px_20px_rgba(212,255,0,0.3)] hover:shadow-[0_6px_30px_rgba(212,255,0,0.5)] hover:-translate-y-1 transition-all duration-300"
               >
                 <Link href="/login">
                   Get Started - From $49/month
@@ -143,7 +143,7 @@ export default function LandingPage() {
               </div>
               <div className="flex items-center space-x-2">
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-5 h-5 fill-[#72a3bf] text-[#72a3bf]" />
+                  <Star key={i} className="w-5 h-5 fill-[#D4FF00] text-[#D4FF00]" />
                 ))}
                 <span className="text-gray-400 ml-2">4.9/5 from 890+ reviews</span>
               </div>
@@ -170,7 +170,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-4xl md:text-5xl font-bold text-center mb-16 leading-tight">
             The SEO Reporting Nightmare<br />
-            <span className="text-[#72a3bf]">Every Agency Knows Too Well</span>
+            <span className="text-[#D4FF00]">Every Agency Knows Too Well</span>
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -209,7 +209,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-4 leading-tight">
-              Meet Your <span className="text-[#72a3bf]">AI Reporting Assistant</span><br />
+              Meet Your <span className="text-[#D4FF00]">AI Reporting Assistant</span><br />
               That Works While You Sleep
             </h2>
             <p className="text-xl text-gray-400 max-w-3xl mx-auto">
@@ -219,89 +219,89 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Feature 1: AI-Powered */}
-            <div className="bg-[#1A1A1A]/80 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:border-[#72a3bf] hover:-translate-y-2 transition-all duration-400 group">
-              <Brain className="w-12 h-12 text-[#72a3bf] mb-6 group-hover:scale-110 transition-transform" />
+            <div className="bg-[#1A1A1A]/80 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:border-[#D4FF00] hover:-translate-y-2 transition-all duration-400 group">
+              <Brain className="w-12 h-12 text-[#D4FF00] mb-6 group-hover:scale-110 transition-transform" />
               <h3 className="text-2xl font-bold mb-4">AI-Powered Data Analysis</h3>
               <p className="text-gray-400 mb-6 leading-relaxed">
                 Our AI analyzes patterns across GA4, GSC, and connected platforms. Automatically highlights wins, flags issues, and suggests actions.
               </p>
               <ul className="space-y-2 text-gray-500">
-                <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-[#72a3bf]" /> Intelligent insights</li>
-                <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-[#72a3bf]" /> Smart anomaly detection</li>
-                <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-[#72a3bf]" /> Predictive trend analysis</li>
+                <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-[#D4FF00]" /> Intelligent insights</li>
+                <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-[#D4FF00]" /> Smart anomaly detection</li>
+                <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-[#D4FF00]" /> Predictive trend analysis</li>
               </ul>
             </div>
 
             {/* Feature 2: White-Label */}
-            <div className="bg-[#1A1A1A]/80 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:border-[#72a3bf] hover:-translate-y-2 transition-all duration-400 group">
-              <Paintbrush className="w-12 h-12 text-[#72a3bf] mb-6 group-hover:scale-110 transition-transform" />
+            <div className="bg-[#1A1A1A]/80 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:border-[#D4FF00] hover:-translate-y-2 transition-all duration-400 group">
+              <Paintbrush className="w-12 h-12 text-[#D4FF00] mb-6 group-hover:scale-110 transition-transform" />
               <h3 className="text-2xl font-bold mb-4">White-Label Perfection</h3>
               <p className="text-gray-400 mb-6 leading-relaxed">
                 Upload your logo once. Every report automatically matches your brand colors, fonts, and style. Your clients never see our name.
               </p>
               <ul className="space-y-2 text-gray-500">
-                <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-[#72a3bf]" /> Custom domain URLs</li>
-                <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-[#72a3bf]" /> Branded PDF exports</li>
-                <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-[#72a3bf]" /> Client portal with your logo</li>
+                <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-[#D4FF00]" /> Custom domain URLs</li>
+                <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-[#D4FF00]" /> Branded PDF exports</li>
+                <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-[#D4FF00]" /> Client portal with your logo</li>
               </ul>
             </div>
 
             {/* Feature 3: Fast Generation */}
-            <div className="bg-[#1A1A1A]/80 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:border-[#72a3bf] hover:-translate-y-2 transition-all duration-400 group">
-              <Zap className="w-12 h-12 text-[#72a3bf] mb-6 group-hover:scale-110 transition-transform" />
+            <div className="bg-[#1A1A1A]/80 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:border-[#D4FF00] hover:-translate-y-2 transition-all duration-400 group">
+              <Zap className="w-12 h-12 text-[#D4FF00] mb-6 group-hover:scale-110 transition-transform" />
               <h3 className="text-2xl font-bold mb-4">3-Minute Report Generation</h3>
               <p className="text-gray-400 mb-6 leading-relaxed">
                 Click "Generate." Get coffee. Come back to a 40-page professional report with insights, charts, and action items.
               </p>
               <ul className="space-y-2 text-gray-500">
-                <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-[#72a3bf]" /> Average: 3 min 14 sec</li>
-                <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-[#72a3bf]" /> Unlimited reports</li>
-                <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-[#72a3bf]" /> Automatic scheduling</li>
+                <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-[#D4FF00]" /> Average: 3 min 14 sec</li>
+                <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-[#D4FF00]" /> Unlimited reports</li>
+                <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-[#D4FF00]" /> Automatic scheduling</li>
               </ul>
             </div>
 
             {/* Feature 4: Client-Friendly */}
-            <div className="bg-[#1A1A1A]/80 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:border-[#72a3bf] hover:-translate-y-2 transition-all duration-400 group">
-              <Smile className="w-12 h-12 text-[#72a3bf] mb-6 group-hover:scale-110 transition-transform" />
+            <div className="bg-[#1A1A1A]/80 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:border-[#D4FF00] hover:-translate-y-2 transition-all duration-400 group">
+              <Smile className="w-12 h-12 text-[#D4FF00] mb-6 group-hover:scale-110 transition-transform" />
               <h3 className="text-2xl font-bold mb-4">Client-Friendly Dashboards</h3>
               <p className="text-gray-400 mb-6 leading-relaxed">
                 Interactive dashboards designed for humans, not data scientists. Color-coded metrics, plain-English insights, mobile-optimized.
               </p>
               <ul className="space-y-2 text-gray-500">
-                <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-[#72a3bf]" /> 90%+ client engagement</li>
-                <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-[#72a3bf]" /> Mobile responsive</li>
-                <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-[#72a3bf]" /> Live data updates</li>
+                <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-[#D4FF00]" /> 90%+ client engagement</li>
+                <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-[#D4FF00]" /> Mobile responsive</li>
+                <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-[#D4FF00]" /> Live data updates</li>
               </ul>
             </div>
 
             {/* Feature 5: Integrations - UPDATED */}
-            <div className="bg-[#1A1A1A]/80 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:border-[#72a3bf] hover:-translate-y-2 transition-all duration-400 group">
-              <PuzzleIcon className="w-12 h-12 text-[#72a3bf] mb-6 group-hover:scale-110 transition-transform" />
+            <div className="bg-[#1A1A1A]/80 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:border-[#D4FF00] hover:-translate-y-2 transition-all duration-400 group">
+              <PuzzleIcon className="w-12 h-12 text-[#D4FF00] mb-6 group-hover:scale-110 transition-transform" />
               <h3 className="text-2xl font-bold mb-4">Growing Integration Library</h3>
               <p className="text-gray-400 mb-6 leading-relaxed">
                 Google Analytics 4, Search Console, Google Ads, Facebook Ads, Ahrefs, SEMrush, and more. New platforms added monthly based on user requests.
               </p>
               <ul className="space-y-2 text-gray-500">
-                <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-[#72a3bf]" /> Pre-built integrations</li>
-                <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-[#72a3bf]" /> One-click OAuth setup</li>
-                <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-[#72a3bf]" /> More integrations shipping monthly</li>
+                <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-[#D4FF00]" /> Pre-built integrations</li>
+                <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-[#D4FF00]" /> One-click OAuth setup</li>
+                <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-[#D4FF00]" /> More integrations shipping monthly</li>
               </ul>
             </div>
 
             {/* Feature 6: ROI */}
-            <div className="relative bg-gradient-to-br from-[#72a3bf]/20 to-[#446e87]/10 backdrop-blur-sm border border-[#72a3bf]/30 rounded-2xl p-8 hover:border-[#72a3bf] hover:-translate-y-2 hover:shadow-[0_0_30px_rgba(114,163,191,0.4)] transition-all duration-400 group">
-              <div className="absolute -top-3 right-4 bg-gradient-to-r from-[#72a3bf] to-[#446e87] text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
+            <div className="relative bg-gradient-to-br from-[#D4FF00]/20 to-[#00FF88]/10 backdrop-blur-sm border border-[#D4FF00]/30 rounded-2xl p-8 hover:border-[#D4FF00] hover:-translate-y-2 hover:shadow-[0_0_30px_rgba(212,255,0,0.4)] transition-all duration-400 group">
+              <div className="absolute -top-3 right-4 bg-gradient-to-r from-[#D4FF00] to-[#A8CC00] text-black text-xs font-bold px-3 py-1 rounded-full shadow-lg">
                 BEST VALUE
               </div>
-              <TrendingUp className="w-12 h-12 text-[#72a3bf] mb-6 group-hover:scale-110 transition-transform" />
+              <TrendingUp className="w-12 h-12 text-[#D4FF00] mb-6 group-hover:scale-110 transition-transform" />
               <h3 className="text-2xl font-bold mb-4">Insane ROI</h3>
               <p className="text-gray-400 mb-6 leading-relaxed">
                 Average agency saves 40+ hours/month. That's $4,000-8,000 in recovered billable time at standard agency rates.
               </p>
               <ul className="space-y-2 text-gray-500">
-                <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-[#72a3bf]" /> Average ROI: 2,847%</li>
-                <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-[#72a3bf]" /> Payback: 4.3 days</li>
-                <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-[#72a3bf]" /> Cost per report: $2.16</li>
+                <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-[#D4FF00]" /> Average ROI: 2,847%</li>
+                <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-[#D4FF00]" /> Payback: 4.3 days</li>
+                <li className="flex items-center"><CheckCircle className="w-4 h-4 mr-2 text-[#D4FF00]" /> Cost per report: $2.16</li>
               </ul>
             </div>
           </div>
@@ -314,7 +314,7 @@ export default function LandingPage() {
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-4">
               Works With Every Tool in Your<br />
-              <span className="text-[#72a3bf]">SEO Arsenal</span>
+              <span className="text-[#D4FF00]">SEO Arsenal</span>
             </h2>
             <p className="text-xl text-gray-400 max-w-3xl mx-auto">
               Pre-built integrations with the platforms you already use daily
@@ -326,7 +326,7 @@ export default function LandingPage() {
             <h3 className="text-xl font-bold mb-6 text-gray-300">Analytics & Search</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {['Google Analytics 4', 'Google Search Console', 'Adobe Analytics', 'Matomo'].map((tool) => (
-                <div key={tool} className="bg-[#1A1A1A]/80 backdrop-blur-sm border border-white/10 rounded-xl p-6 text-center hover:border-[#72a3bf] hover:scale-105 transition-transform duration-300">
+                <div key={tool} className="bg-[#1A1A1A]/80 backdrop-blur-sm border border-white/10 rounded-xl p-6 text-center hover:border-[#D4FF00] hover:scale-105 transition-transform duration-300">
                   <div className="w-12 h-12 bg-gradient-to-br from-marine to-harbor rounded-lg mx-auto mb-3"></div>
                   <p className="text-sm font-medium">{tool}</p>
                 </div>
@@ -346,7 +346,7 @@ export default function LandingPage() {
                 { name: 'Majestic', available: true },
                 { name: 'Advanced Rank Tracking', available: false }
               ].map((tool) => (
-                <div key={tool.name} className={`bg-[#1A1A1A]/80 backdrop-blur-sm border ${tool.available ? 'border-white/10' : 'border-dashed border-gray-700'} rounded-xl p-6 text-center hover:border-[#72a3bf] hover:scale-105 transition-transform duration-300 ${!tool.available && 'opacity-50'}`}>
+                <div key={tool.name} className={`bg-[#1A1A1A]/80 backdrop-blur-sm border ${tool.available ? 'border-white/10' : 'border-dashed border-gray-700'} rounded-xl p-6 text-center hover:border-[#D4FF00] hover:scale-105 transition-transform duration-300 ${!tool.available && 'opacity-50'}`}>
                   <div className={`w-12 h-12 ${tool.available ? 'bg-gradient-to-br from-marine to-harbor' : 'bg-gray-700'} rounded-lg mx-auto mb-3`}></div>
                   <p className="text-sm font-medium">{tool.name}</p>
                   {!tool.available && <span className="text-xs text-gray-500 mt-1 inline-block">Coming Soon</span>}
@@ -360,7 +360,7 @@ export default function LandingPage() {
             <h3 className="text-xl font-bold mb-6 text-gray-300">Paid Advertising</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {['Google Ads', 'Facebook Ads', 'LinkedIn Ads', 'Microsoft Advertising'].map((tool) => (
-                <div key={tool} className="bg-[#1A1A1A]/80 backdrop-blur-sm border border-white/10 rounded-xl p-6 text-center hover:border-[#72a3bf] hover:scale-105 transition-transform duration-300">
+                <div key={tool} className="bg-[#1A1A1A]/80 backdrop-blur-sm border border-white/10 rounded-xl p-6 text-center hover:border-[#D4FF00] hover:scale-105 transition-transform duration-300">
                   <div className="w-12 h-12 bg-gradient-to-br from-glacier to-marine rounded-lg mx-auto mb-3"></div>
                   <p className="text-sm font-medium">{tool}</p>
                 </div>
@@ -371,7 +371,7 @@ export default function LandingPage() {
           {/* Coming Soon */}
           <div className="text-center mt-12 p-8 bg-[#1A1A1A]/40 rounded-2xl border border-dashed border-gray-700">
             <p className="text-gray-400 mb-4">
-              Don't see your tool? <Link href="#contact" className="text-[#72a3bf] hover:underline">Request Integration →</Link>
+              Don't see your tool? <Link href="#contact" className="text-[#D4FF00] hover:underline">Request Integration →</Link>
             </p>
             <p className="text-sm text-gray-500">We add new integrations every month based on customer requests.</p>
           </div>
@@ -383,7 +383,7 @@ export default function LandingPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-4xl md:text-5xl font-bold text-center mb-4">
             What You Can Do in Your<br />
-            <span className="text-[#72a3bf]">First Week</span>
+            <span className="text-[#D4FF00]">First Week</span>
           </h2>
 
           <div className="mt-12 space-y-4">
@@ -395,24 +395,24 @@ export default function LandingPage() {
               { day: 'Day 5', task: 'Set up automated monthly delivery', time: '5 minutes' },
               { day: 'Day 6-7', task: 'Kick back and let AI handle next month\'s reports', time: '0 minutes' }
             ].map((item, index) => (
-              <div key={index} className="flex items-center space-x-4 p-6 bg-[#1A1A1A]/80 backdrop-blur-sm border border-white/10 rounded-xl hover:border-[#72a3bf] transition-all">
-                <CheckCircle className="w-6 h-6 text-[#72a3bf] flex-shrink-0" />
+              <div key={index} className="flex items-center space-x-4 p-6 bg-[#1A1A1A]/80 backdrop-blur-sm border border-white/10 rounded-xl hover:border-[#D4FF00] transition-all">
+                <CheckCircle className="w-6 h-6 text-[#D4FF00] flex-shrink-0" />
                 <div className="flex-1">
-                  <span className="font-bold text-[#72a3bf]">{item.day}:</span> {item.task}
+                  <span className="font-bold text-[#D4FF00]">{item.day}:</span> {item.task}
                 </div>
                 <span className="text-sm text-gray-500">({item.time})</span>
               </div>
             ))}
           </div>
 
-          <div className="mt-12 p-8 bg-gradient-to-br from-[#72a3bf]/10 to-[#446e87]/5 rounded-2xl border border-[#72a3bf]/30 text-center">
+          <div className="mt-12 p-8 bg-gradient-to-br from-[#D4FF00]/10 to-[#00FF88]/5 rounded-2xl border border-[#D4FF00]/30 text-center">
             <div className="grid grid-cols-2 gap-8 mb-8">
               <div>
-                <div className="text-3xl font-bold text-[#72a3bf] mb-2">35 minutes</div>
+                <div className="text-3xl font-bold text-[#D4FF00] mb-2">35 minutes</div>
                 <div className="text-gray-400">Total time invested</div>
               </div>
               <div>
-                <div className="text-3xl font-bold text-[#72a3bf] mb-2">40+ hours</div>
+                <div className="text-3xl font-bold text-[#D4FF00] mb-2">40+ hours</div>
                 <div className="text-gray-400">Time saved per month</div>
               </div>
             </div>
@@ -420,7 +420,7 @@ export default function LandingPage() {
             <Button
               size="lg"
               asChild
-              className="bg-gradient-to-r from-[#72a3bf] to-[#446e87] text-white font-bold text-lg px-10 h-14 rounded-lg shadow-[0_4px_20px_rgba(114,163,191,0.3)] hover:shadow-[0_6px_30px_rgba(114,163,191,0.5)] hover:-translate-y-1 transition-all duration-300"
+              className="bg-gradient-to-r from-[#D4FF00] to-[#A8CC00] text-black font-bold text-lg px-10 h-14 rounded-lg shadow-[0_4px_20px_rgba(212,255,0,0.3)] hover:shadow-[0_6px_30px_rgba(212,255,0,0.5)] hover:-translate-y-1 transition-all duration-300"
             >
               <Link href="/login">
                 Get Started for $49/month
@@ -435,21 +435,21 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-4">
-              From <span className="text-[#72a3bf]">Data Chaos</span> to Client Applause<br />
+              From <span className="text-[#D4FF00]">Data Chaos</span> to Client Applause<br />
               in 3 Clicks
             </h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
             {/* Connecting line - desktop only */}
-            <div className="hidden md:block absolute top-20 left-0 right-0 h-0.5 bg-gradient-to-r from-[#72a3bf] via-[#72a3bf] to-[#72a3bf] opacity-30"></div>
+            <div className="hidden md:block absolute top-20 left-0 right-0 h-0.5 bg-gradient-to-r from-[#D4FF00] via-[#D4FF00] to-[#D4FF00] opacity-30"></div>
 
             {/* Step 1 */}
             <div className="relative">
-              <div className="absolute -top-8 left-1/2 -translate-x-1/2 w-16 h-16 bg-gradient-to-br from-[#72a3bf] to-[#446e87] rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-[0_4px_20px_rgba(114,163,191,0.4)] z-10">
+              <div className="absolute -top-8 left-1/2 -translate-x-1/2 w-16 h-16 bg-gradient-to-br from-[#D4FF00] to-[#A8CC00] rounded-full flex items-center justify-center text-black text-2xl font-bold shadow-[0_4px_20px_rgba(212,255,0,0.4)] z-10">
                 01
               </div>
-              <div className="bg-[#1A1A1A]/80 backdrop-blur-sm border border-white/10 rounded-2xl p-8 pt-12 mt-8 hover:border-[#72a3bf] transition-all">
+              <div className="bg-[#1A1A1A]/80 backdrop-blur-sm border border-white/10 rounded-2xl p-8 pt-12 mt-8 hover:border-[#D4FF00] transition-all">
                 <h3 className="text-2xl font-bold mb-4">Connect Your Tools</h3>
                 <p className="text-gray-400 leading-relaxed mb-6">
                   One-click OAuth with Google Analytics, Search Console, and 50+ SEO tools. No API keys. No developer needed. Takes 90 seconds.
@@ -464,10 +464,10 @@ export default function LandingPage() {
 
             {/* Step 2 */}
             <div className="relative">
-              <div className="absolute -top-8 left-1/2 -translate-x-1/2 w-16 h-16 bg-gradient-to-br from-[#72a3bf] to-[#446e87] rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-[0_4px_20px_rgba(114,163,191,0.4)] z-10">
+              <div className="absolute -top-8 left-1/2 -translate-x-1/2 w-16 h-16 bg-gradient-to-br from-[#D4FF00] to-[#A8CC00] rounded-full flex items-center justify-center text-black text-2xl font-bold shadow-[0_4px_20px_rgba(212,255,0,0.4)] z-10">
                 02
               </div>
-              <div className="bg-[#1A1A1A]/80 backdrop-blur-sm border border-white/10 rounded-2xl p-8 pt-12 mt-8 hover:border-[#72a3bf] transition-all">
+              <div className="bg-[#1A1A1A]/80 backdrop-blur-sm border border-white/10 rounded-2xl p-8 pt-12 mt-8 hover:border-[#D4FF00] transition-all">
                 <h3 className="text-2xl font-bold mb-4">Customize Your Template</h3>
                 <p className="text-gray-400 leading-relaxed mb-6">
                   Add your logo, choose your brand colors, select which metrics matter to THIS client. Save as template. Never do it again.
@@ -478,10 +478,10 @@ export default function LandingPage() {
 
             {/* Step 3 */}
             <div className="relative">
-              <div className="absolute -top-8 left-1/2 -translate-x-1/2 w-16 h-16 bg-gradient-to-br from-[#72a3bf] to-[#446e87] rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-[0_4px_20px_rgba(114,163,191,0.4)] z-10">
+              <div className="absolute -top-8 left-1/2 -translate-x-1/2 w-16 h-16 bg-gradient-to-br from-[#D4FF00] to-[#A8CC00] rounded-full flex items-center justify-center text-black text-2xl font-bold shadow-[0_4px_20px_rgba(212,255,0,0.4)] z-10">
                 03
               </div>
-              <div className="bg-[#1A1A1A]/80 backdrop-blur-sm border border-white/10 rounded-2xl p-8 pt-12 mt-8 hover:border-[#72a3bf] transition-all">
+              <div className="bg-[#1A1A1A]/80 backdrop-blur-sm border border-white/10 rounded-2xl p-8 pt-12 mt-8 hover:border-[#D4FF00] transition-all">
                 <h3 className="text-2xl font-bold mb-4">Generate & Deliver</h3>
                 <p className="text-gray-400 leading-relaxed mb-6">
                   Click "Generate Report." AI analyzes everything, creates insights, builds charts, writes summaries. Export as PDF, send live link, or auto-deliver monthly.
@@ -495,7 +495,7 @@ export default function LandingPage() {
             <Button
               size="lg"
               asChild
-              className="bg-gradient-to-r from-[#72a3bf] to-[#446e87] text-white font-bold text-lg px-10 h-14 rounded-lg shadow-[0_4px_20px_rgba(114,163,191,0.3)] hover:shadow-[0_6px_30px_rgba(114,163,191,0.5)] hover:-translate-y-1 transition-all duration-300"
+              className="bg-gradient-to-r from-[#D4FF00] to-[#A8CC00] text-black font-bold text-lg px-10 h-14 rounded-lg shadow-[0_4px_20px_rgba(212,255,0,0.3)] hover:shadow-[0_6px_30px_rgba(212,255,0,0.5)] hover:-translate-y-1 transition-all duration-300"
             >
               <Link href="/login">
                 Get Started for $49/month
@@ -509,13 +509,13 @@ export default function LandingPage() {
       <section id="testimonials" className="py-20 lg:py-32 bg-[#0A0A0A]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-4xl md:text-5xl font-bold text-center mb-4 leading-tight">
-            Real Agencies. <span className="text-[#72a3bf]">Real Results.</span><br />
+            Real Agencies. <span className="text-[#D4FF00]">Real Results.</span><br />
             Real Talk.
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
             {/* Testimonial 1 */}
-            <div className="bg-[#1A1A1A]/80 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:border-[#72a3bf] transition-all">
+            <div className="bg-[#1A1A1A]/80 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:border-[#D4FF00] transition-all">
               <div className="flex items-center mb-6">
                 <div className="w-16 h-16 rounded-full bg-gradient-to-br from-marine to-harbor"></div>
                 <div className="ml-4">
@@ -524,7 +524,7 @@ export default function LandingPage() {
                   <p className="text-xs text-gray-600">42-person agency</p>
                 </div>
               </div>
-              <p className="text-xl font-bold mb-4 text-[#72a3bf]">
+              <p className="text-xl font-bold mb-4 text-[#D4FF00]">
                 "We 3X'd our agency revenue in 6 months"
               </p>
               <p className="text-gray-400 leading-relaxed mb-6">
@@ -533,21 +533,21 @@ export default function LandingPage() {
               <div className="space-y-2 text-sm">
                 <div className="flex items-center justify-between">
                   <span className="text-gray-500">Revenue</span>
-                  <span className="text-[#72a3bf] font-bold">↑ 347%</span>
+                  <span className="text-[#D4FF00] font-bold">↑ 347%</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-gray-500">Reporting Time</span>
-                  <span className="text-[#72a3bf] font-bold">↓ 94%</span>
+                  <span className="text-[#D4FF00] font-bold">↓ 94%</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-gray-500">New Clients</span>
-                  <span className="text-[#72a3bf] font-bold">↑ 12</span>
+                  <span className="text-[#D4FF00] font-bold">↑ 12</span>
                 </div>
               </div>
             </div>
 
             {/* Testimonial 2 */}
-            <div className="bg-[#1A1A1A]/80 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:border-[#72a3bf] transition-all">
+            <div className="bg-[#1A1A1A]/80 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:border-[#D4FF00] transition-all">
               <div className="flex items-center mb-6">
                 <div className="w-16 h-16 rounded-full bg-gradient-to-br from-marine to-harbor"></div>
                 <div className="ml-4">
@@ -556,7 +556,7 @@ export default function LandingPage() {
                   <p className="text-xs text-gray-600">28-person agency</p>
                 </div>
               </div>
-              <p className="text-xl font-bold mb-4 text-[#72a3bf]">
+              <p className="text-xl font-bold mb-4 text-[#D4FF00]">
                 "Client retention went from 65% to 94%"
               </p>
               <p className="text-gray-400 leading-relaxed mb-6">
@@ -565,21 +565,21 @@ export default function LandingPage() {
               <div className="space-y-2 text-sm">
                 <div className="flex items-center justify-between">
                   <span className="text-gray-500">Retention Rate</span>
-                  <span className="text-[#72a3bf] font-bold">↑ 94%</span>
+                  <span className="text-[#D4FF00] font-bold">↑ 94%</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-gray-500">Client Satisfaction</span>
-                  <span className="text-[#72a3bf] font-bold">↑ 89%</span>
+                  <span className="text-[#D4FF00] font-bold">↑ 89%</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-gray-500">Referrals</span>
-                  <span className="text-[#72a3bf] font-bold">↑ 156%</span>
+                  <span className="text-[#D4FF00] font-bold">↑ 156%</span>
                 </div>
               </div>
             </div>
 
             {/* Testimonial 3 */}
-            <div className="bg-[#1A1A1A]/80 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:border-[#72a3bf] transition-all">
+            <div className="bg-[#1A1A1A]/80 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:border-[#D4FF00] transition-all">
               <div className="flex items-center mb-6">
                 <div className="w-16 h-16 rounded-full bg-gradient-to-br from-green-500 to-green-600"></div>
                 <div className="ml-4">
@@ -588,7 +588,7 @@ export default function LandingPage() {
                   <p className="text-xs text-gray-600">Solo consultant → 8 people</p>
                 </div>
               </div>
-              <p className="text-xl font-bold mb-4 text-[#72a3bf]">
+              <p className="text-xl font-bold mb-4 text-[#D4FF00]">
                 "Scaled from solo to 8-person team"
               </p>
               <p className="text-gray-400 leading-relaxed mb-6">
@@ -597,15 +597,15 @@ export default function LandingPage() {
               <div className="space-y-2 text-sm">
                 <div className="flex items-center justify-between">
                   <span className="text-gray-500">Team Size</span>
-                  <span className="text-[#72a3bf] font-bold">1 → 8</span>
+                  <span className="text-[#D4FF00] font-bold">1 → 8</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-gray-500">Client Capacity</span>
-                  <span className="text-[#72a3bf] font-bold">↑ 600%</span>
+                  <span className="text-[#D4FF00] font-bold">↑ 600%</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-gray-500">MRR</span>
-                  <span className="text-[#72a3bf] font-bold">↑ 410%</span>
+                  <span className="text-[#D4FF00] font-bold">↑ 410%</span>
                 </div>
               </div>
             </div>
@@ -614,15 +614,15 @@ export default function LandingPage() {
           {/* Social Proof Numbers */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16 text-center">
             <div>
-              <div className="text-6xl md:text-7xl font-bold text-[#72a3bf] mb-2 animate-pulse">2,847</div>
+              <div className="text-6xl md:text-7xl font-bold text-[#D4FF00] mb-2 animate-pulse">2,847</div>
               <div className="text-gray-400">Active Agencies</div>
             </div>
             <div>
-              <div className="text-6xl md:text-7xl font-bold text-[#72a3bf] mb-2 animate-pulse">40,500+</div>
+              <div className="text-6xl md:text-7xl font-bold text-[#D4FF00] mb-2 animate-pulse">40,500+</div>
               <div className="text-gray-400">Reports Generated</div>
             </div>
             <div>
-              <div className="text-6xl md:text-7xl font-bold text-[#72a3bf] mb-2 animate-pulse">99.8%</div>
+              <div className="text-6xl md:text-7xl font-bold text-[#D4FF00] mb-2 animate-pulse">99.8%</div>
               <div className="text-gray-400">Uptime SLA</div>
             </div>
           </div>
@@ -634,11 +634,11 @@ export default function LandingPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-4xl md:text-5xl font-bold mb-8">
             Pricing That Makes Your<br />
-            <span className="text-[#72a3bf]">Accountant Smile</span>
+            <span className="text-[#D4FF00]">Accountant Smile</span>
           </h2>
 
-          <div className="bg-[#1A1A1A]/80 backdrop-blur-sm border border-[#72a3bf]/30 rounded-2xl p-12 mb-8">
-            <div className="text-9xl font-bold text-[#72a3bf] mb-4">$49<span className="text-3xl text-gray-400">/month</span></div>
+          <div className="bg-[#1A1A1A]/80 backdrop-blur-sm border border-[#D4FF00]/30 rounded-2xl p-12 mb-8">
+            <div className="text-9xl font-bold text-[#D4FF00] mb-4">$49<span className="text-3xl text-gray-400">/month</span></div>
             <p className="text-xl text-gray-400 mb-2">
               That's less than your Netflix + Spotify subscriptions.
             </p>
@@ -652,7 +652,7 @@ export default function LandingPage() {
             <Button
               size="lg"
               asChild
-              className="bg-gradient-to-r from-[#72a3bf] to-[#446e87] text-white font-bold text-lg px-10 h-14 rounded-lg shadow-[0_4px_20px_rgba(114,163,191,0.3)] hover:shadow-[0_6px_30px_rgba(114,163,191,0.5)] hover:-translate-y-1 transition-all duration-300"
+              className="bg-gradient-to-r from-[#D4FF00] to-[#A8CC00] text-black font-bold text-lg px-10 h-14 rounded-lg shadow-[0_4px_20px_rgba(212,255,0,0.3)] hover:shadow-[0_6px_30px_rgba(212,255,0,0.5)] hover:-translate-y-1 transition-all duration-300"
             >
               <Link href="/login">
                 See All Plans & Get Started
@@ -660,7 +660,7 @@ export default function LandingPage() {
             </Button>
 
             <div className="mt-6">
-              <Link href="#pricing" className="text-[#72a3bf] hover:underline">
+              <Link href="#pricing" className="text-[#D4FF00] hover:underline">
                 View detailed pricing breakdown →
               </Link>
             </div>
@@ -672,7 +672,7 @@ export default function LandingPage() {
       <section id="faq" className="py-20 lg:py-32 bg-[#0A0A0A]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-4xl md:text-5xl font-bold text-center mb-16">
-            Questions? <span className="text-[#72a3bf]">We've Got Answers.</span>
+            Questions? <span className="text-[#D4FF00]">We've Got Answers.</span>
           </h2>
 
           <div className="space-y-4">
@@ -686,14 +686,14 @@ export default function LandingPage() {
               { q: "Can I cancel anytime?", a: "Yes, absolutely. No contracts, no commitments. Cancel with one click from your dashboard." },
               { q: "Can I customize the reports?", a: "Yes! Customize colors, fonts, metrics, sections, and more. Save templates for different client types." }
             ].map((faq, index) => (
-              <div key={index} className="bg-[#1A1A1A]/80 backdrop-blur-sm border border-white/10 rounded-xl overflow-hidden hover:border-[#72a3bf] transition-all">
+              <div key={index} className="bg-[#1A1A1A]/80 backdrop-blur-sm border border-white/10 rounded-xl overflow-hidden hover:border-[#D4FF00] transition-all">
                 <button
                   onClick={() => toggleFaq(index)}
                   className="w-full flex items-center justify-between p-6 text-left"
                 >
                   <span className="text-lg font-semibold">{faq.q}</span>
                   {openFaq === index ? (
-                    <ChevronUp className="w-5 h-5 text-[#72a3bf]" />
+                    <ChevronUp className="w-5 h-5 text-[#D4FF00]" />
                   ) : (
                     <ChevronDown className="w-5 h-5 text-gray-400" />
                   )}
@@ -708,7 +708,7 @@ export default function LandingPage() {
           </div>
 
           <div className="mt-12 text-center">
-            <Link href="#integrations" className="text-[#72a3bf] hover:underline text-lg">
+            <Link href="#integrations" className="text-[#D4FF00] hover:underline text-lg">
               See full integration list →
             </Link>
           </div>
@@ -718,12 +718,12 @@ export default function LandingPage() {
       {/* FINAL CTA SECTION */}
       <section className="py-20 lg:py-32 bg-gradient-to-br from-[#0A0A0A] via-[#1A1A1A] to-[#0A0A0A] relative overflow-hidden">
         {/* Background effects */}
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#72a3bf]/10 rounded-full blur-[120px]"></div>
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-[#446e87]/10 rounded-full blur-[120px]"></div>
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#D4FF00]/10 rounded-full blur-[120px]"></div>
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-[#00FF88]/10 rounded-full blur-[120px]"></div>
 
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
-            Ready to <span className="text-[#72a3bf]">Reclaim Your Time</span><br />
+            Ready to <span className="text-[#D4FF00]">Reclaim Your Time</span><br />
             and Impress Your Clients?
           </h2>
           <p className="text-xl text-gray-400 mb-10 max-w-2xl mx-auto">
@@ -734,7 +734,7 @@ export default function LandingPage() {
             <Button
               size="lg"
               asChild
-              className="bg-gradient-to-r from-[#72a3bf] to-[#446e87] text-white font-bold text-lg px-10 h-14 rounded-lg shadow-[0_4px_20px_rgba(114,163,191,0.3)] hover:shadow-[0_6px_30px_rgba(114,163,191,0.5)] hover:-translate-y-1 transition-all duration-300"
+              className="bg-gradient-to-r from-[#D4FF00] to-[#A8CC00] text-black font-bold text-lg px-10 h-14 rounded-lg shadow-[0_4px_20px_rgba(212,255,0,0.3)] hover:shadow-[0_6px_30px_rgba(212,255,0,0.5)] hover:-translate-y-1 transition-all duration-300"
             >
               <Link href="/login">
                 Get Started Today - From $49/mo
@@ -751,15 +751,15 @@ export default function LandingPage() {
           {/* Trust badges */}
           <div className="flex flex-wrap justify-center items-center gap-8 text-sm text-gray-400 pt-8 border-t border-white/10">
             <div className="flex items-center space-x-2">
-              <Shield className="w-5 h-5 text-[#72a3bf]" />
+              <Shield className="w-5 h-5 text-[#D4FF00]" />
               <span>Bank-Level Security</span>
             </div>
             <div className="flex items-center space-x-2">
-              <CheckCircle className="w-5 h-5 text-[#72a3bf]" />
+              <CheckCircle className="w-5 h-5 text-[#D4FF00]" />
               <span>GDPR Compliant</span>
             </div>
             <div className="flex items-center space-x-2">
-              <Phone className="w-5 h-5 text-[#72a3bf]" />
+              <Phone className="w-5 h-5 text-[#D4FF00]" />
               <span>24/7 Support</span>
             </div>
           </div>
@@ -774,7 +774,7 @@ export default function LandingPage() {
             <div className="col-span-1 md:col-span-2">
               <h3 className="text-2xl font-bold mb-4">
                 <span className="text-white">Search</span>
-                <span className="text-[#72a3bf]"> Insights</span>
+                <span className="text-[#D4FF00]"> Insights</span>
               </h3>
               <p className="text-gray-400 max-w-md leading-relaxed">
                 Professional SEO reporting platform that helps agencies and professionals create stunning client reports with automated data collection.
@@ -785,10 +785,10 @@ export default function LandingPage() {
             <div>
               <h4 className="font-semibold mb-4">Product</h4>
               <ul className="space-y-2 text-gray-400">
-                <li><Link href="#features" className="hover:text-[#72a3bf] transition-colors">Features</Link></li>
-                <li><Link href="#integrations" className="hover:text-[#72a3bf] transition-colors">Integrations</Link></li>
-                <li><Link href="#pricing" className="hover:text-[#72a3bf] transition-colors">Pricing</Link></li>
-                <li><Link href="/login" className="hover:text-[#72a3bf] transition-colors">Get Started</Link></li>
+                <li><Link href="#features" className="hover:text-[#D4FF00] transition-colors">Features</Link></li>
+                <li><Link href="#integrations" className="hover:text-[#D4FF00] transition-colors">Integrations</Link></li>
+                <li><Link href="#pricing" className="hover:text-[#D4FF00] transition-colors">Pricing</Link></li>
+                <li><Link href="/login" className="hover:text-[#D4FF00] transition-colors">Get Started</Link></li>
               </ul>
             </div>
 
@@ -796,9 +796,9 @@ export default function LandingPage() {
             <div>
               <h4 className="font-semibold mb-4">Legal</h4>
               <ul className="space-y-2 text-gray-400">
-                <li><Link href="/legal/privacy" className="hover:text-[#72a3bf] transition-colors">Privacy Policy</Link></li>
-                <li><Link href="/legal/terms" className="hover:text-[#72a3bf] transition-colors">Terms of Service</Link></li>
-                <li><Link href="/legal/cookies" className="hover:text-[#72a3bf] transition-colors">Cookie Policy</Link></li>
+                <li><Link href="/legal/privacy" className="hover:text-[#D4FF00] transition-colors">Privacy Policy</Link></li>
+                <li><Link href="/legal/terms" className="hover:text-[#D4FF00] transition-colors">Terms of Service</Link></li>
+                <li><Link href="/legal/cookies" className="hover:text-[#D4FF00] transition-colors">Cookie Policy</Link></li>
               </ul>
             </div>
           </div>
