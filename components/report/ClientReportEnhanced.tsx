@@ -44,7 +44,7 @@ interface ClientReportEnhancedProps {
 }
 
 // Sparkline Component
-const Sparkline = ({ data, color = '#D4FF00' }: { data: number[], color?: string }) => {
+const Sparkline = ({ data, color = '#72a3bf' }: { data: number[], color?: string }) => {
   const max = Math.max(...data);
   const min = Math.min(...data);
   const range = max - min;
@@ -135,7 +135,7 @@ const PerformanceIndicator = ({ value, target, label }: { value: number; target:
   };
 
   return (
-    <div className="p-4 border border-white/10 rounded-lg bg-[#1A1A1A]">
+    <div className="p-4 border border-white/10 rounded-lg bg-[#1d4052]">
       <div className="flex justify-between items-center mb-2">
         <span className="text-sm text-gray-400">{label}</span>
         <span className={`px-2 py-1 rounded text-xs font-semibold ${statusColors[status]}`}>
@@ -254,9 +254,9 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
+      <div className="min-h-screen bg-[#030f18] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#D4FF00] mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#72a3bf] mx-auto mb-4"></div>
           <p className="text-gray-400">Generating your enhanced report...</p>
         </div>
       </div>
@@ -278,9 +278,9 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
   const clickSparkline = [9000, 9500, 10200, 10800, 11500, 12000, 12543];
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A]">
+    <div className="min-h-screen bg-[#030f18]">
       {/* Header */}
-      <div className="bg-gradient-to-r from-[#1A1A1A] to-[#0A0A0A] text-white border-b border-white/10">
+      <div className="bg-gradient-to-r from-[#1d4052] to-[#030f18] text-white border-b border-white/10">
         <div className="max-w-7xl mx-auto px-6 py-12">
           <div className="flex justify-between items-start">
             <div>
@@ -296,31 +296,31 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Enhanced Executive Summary */}
         <section className="mb-12">
-          <div className="bg-[#1A1A1A] border border-white/10 rounded-xl p-8 transition-all duration-300 hover:shadow-[0_0_20px_rgba(212,255,0,0.15)]">
+          <div className="bg-[#1d4052] border border-white/10 rounded-xl p-8 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
             <h2 className="text-2xl font-bold mb-4 flex items-center gap-2 text-white">
-              <FileText className="w-6 h-6 text-[#D4FF00]" />
+              <FileText className="w-6 h-6 text-[#72a3bf]" />
               Executive Summary
             </h2>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-              <div className="bg-[#0A0A0A] border border-white/10 rounded-lg p-4 transition-all duration-300 hover:shadow-[0_0_20px_rgba(212,255,0,0.15)]">
+              <div className="bg-[#030f18] border border-white/10 rounded-lg p-4 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
                 <div className="flex items-center gap-2 mb-2">
                   <CheckCircle className="w-5 h-5 text-green-500" />
                   <span className="font-semibold text-green-400">Top Achievement</span>
                 </div>
                 <p className="text-sm text-gray-400">Organic traffic increased 23% MoM, exceeding quarterly targets</p>
               </div>
-              <div className="bg-[#0A0A0A] border border-white/10 rounded-lg p-4 transition-all duration-300 hover:shadow-[0_0_20px_rgba(212,255,0,0.15)]">
+              <div className="bg-[#030f18] border border-white/10 rounded-lg p-4 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
                 <div className="flex items-center gap-2 mb-2">
                   <AlertCircle className="w-5 h-5 text-yellow-500" />
                   <span className="font-semibold text-yellow-400">Needs Attention</span>
                 </div>
                 <p className="text-sm text-gray-400">Page load speed affecting mobile conversion rates</p>
               </div>
-              <div className="bg-[#0A0A0A] border border-white/10 rounded-lg p-4 transition-all duration-300 hover:shadow-[0_0_20px_rgba(212,255,0,0.15)]">
+              <div className="bg-[#030f18] border border-white/10 rounded-lg p-4 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
                 <div className="flex items-center gap-2 mb-2">
-                  <Target className="w-5 h-5 text-[#D4FF00]" />
-                  <span className="font-semibold text-[#D4FF00]">Key Focus</span>
+                  <Target className="w-5 h-5 text-[#72a3bf]" />
+                  <span className="font-semibold text-[#72a3bf]">Key Focus</span>
                 </div>
                 <p className="text-sm text-gray-400">Capitalize on high-performing keywords for Q4 campaigns</p>
               </div>
@@ -335,18 +335,18 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
         {/* Enhanced KPI Dashboard with Comparisons */}
         <section className="mb-12">
           <h2 className="text-2xl font-bold mb-6 flex items-center gap-2 text-white">
-            <BarChart3 className="w-6 h-6 text-[#D4FF00]" />
+            <BarChart3 className="w-6 h-6 text-[#72a3bf]" />
             Key Performance Indicators - Comparative Analysis
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-[#1A1A1A] border border-white/10 rounded-lg p-6 hover:shadow-[0_0_20px_rgba(212,255,0,0.15)] transition-all duration-300">
+            <div className="bg-[#1d4052] border border-white/10 rounded-lg p-6 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)] transition-all duration-300">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-gray-400 text-sm">Total Sessions</span>
-                <Users className="w-5 h-5 text-[#D4FF00]" />
+                <Users className="w-5 h-5 text-[#72a3bf]" />
               </div>
               <div className="text-3xl font-bold text-white">{formatNumber(data.analytics.totalSessions)}</div>
-              <Sparkline data={sessionSparkline} color="#D4FF00" />
+              <Sparkline data={sessionSparkline} color="#72a3bf" />
               <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-white/10">
                 <div>
                   <p className="text-xs text-gray-400">vs Last Month</p>
@@ -363,7 +363,7 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
               </div>
             </div>
 
-            <div className="bg-[#1A1A1A] border border-white/10 rounded-lg p-6 hover:shadow-[0_0_20px_rgba(212,255,0,0.15)] transition-all duration-300">
+            <div className="bg-[#1d4052] border border-white/10 rounded-lg p-6 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)] transition-all duration-300">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-gray-400 text-sm">Organic Clicks</span>
                 <Search className="w-5 h-5 text-green-500" />
@@ -384,15 +384,15 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
               </div>
             </div>
 
-            <div className="bg-[#1A1A1A] border border-white/10 rounded-lg p-6 hover:shadow-[0_0_20px_rgba(212,255,0,0.15)] transition-all duration-300">
+            <div className="bg-[#1d4052] border border-white/10 rounded-lg p-6 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)] transition-all duration-300">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-gray-400 text-sm">Conversion Rate</span>
-                <Target className="w-5 h-5 text-[#D4FF00]" />
+                <Target className="w-5 h-5 text-[#72a3bf]" />
               </div>
               <div className="text-3xl font-bold text-white">3.8%</div>
               <div className="flex items-center gap-2 mt-2">
                 <div className="flex-1 bg-white/10 rounded-full h-2">
-                  <div className="bg-[#D4FF00] h-2 rounded-full" style={{ width: '76%' }}></div>
+                  <div className="bg-[#72a3bf] h-2 rounded-full" style={{ width: '76%' }}></div>
                 </div>
                 <span className="text-xs text-gray-400">Target: 5%</span>
               </div>
@@ -415,15 +415,15 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
         {/* Enhanced Metrics Section */}
         <section className="mb-12">
           <h2 className="text-2xl font-bold mb-6 flex items-center gap-2 text-white">
-            <Activity className="w-6 h-6 text-[#D4FF00]" />
+            <Activity className="w-6 h-6 text-[#72a3bf]" />
             Enhanced Performance Metrics
           </h2>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* User Behavior */}
-            <div className="bg-[#1A1A1A] border border-white/10 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(212,255,0,0.15)]">
+            <div className="bg-[#1d4052] border border-white/10 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
               <h3 className="font-semibold mb-4 flex items-center gap-2 text-white">
-                <Users className="w-5 h-5 text-[#D4FF00]" />
+                <Users className="w-5 h-5 text-[#72a3bf]" />
                 User Behavior
               </h3>
               <div className="space-y-3">
@@ -447,7 +447,7 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
             </div>
 
             {/* Core Web Vitals */}
-            <div className="bg-[#1A1A1A] border border-white/10 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(212,255,0,0.15)]">
+            <div className="bg-[#1d4052] border border-white/10 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
               <h3 className="font-semibold mb-4 flex items-center gap-2 text-white">
                 <Gauge className="w-5 h-5 text-green-500" />
                 Core Web Vitals
@@ -479,7 +479,7 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
             </div>
 
             {/* Lead Quality */}
-            <div className="bg-[#1A1A1A] border border-white/10 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(212,255,0,0.15)]">
+            <div className="bg-[#1d4052] border border-white/10 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
               <h3 className="font-semibold mb-4 flex items-center gap-2 text-white">
                 <Star className="w-5 h-5 text-yellow-500" />
                 Lead Quality Indicators
@@ -509,7 +509,7 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
         {/* Performance Against Targets */}
         <section className="mb-12">
           <h2 className="text-2xl font-bold mb-6 flex items-center gap-2 text-white">
-            <Target className="w-6 h-6 text-[#D4FF00]" />
+            <Target className="w-6 h-6 text-[#72a3bf]" />
             Performance Against Targets
           </h2>
 
@@ -525,29 +525,29 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
         {/* Competitive Context */}
         <section className="mb-12">
           <h2 className="text-2xl font-bold mb-6 flex items-center gap-2 text-white">
-            <Trophy className="w-6 h-6 text-[#D4FF00]" />
+            <Trophy className="w-6 h-6 text-[#72a3bf]" />
             Competitive Landscape
           </h2>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-[#1A1A1A] border border-white/10 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(212,255,0,0.15)]">
+            <div className="bg-[#1d4052] border border-white/10 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
               <h3 className="text-lg font-semibold mb-4 text-white">Share of Voice</h3>
               <ResponsiveContainer width="100%" height={250}>
                 <BarChart data={data.competitors}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#2A2A2A" />
                   <XAxis dataKey="name" stroke="#888" />
                   <YAxis stroke="#888" />
-                  <Tooltip contentStyle={{ backgroundColor: '#1A1A1A', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' }} />
-                  <Bar dataKey="shareOfVoice" fill="#D4FF00">
+                  <Tooltip contentStyle={{ backgroundColor: '#1d4052', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' }} />
+                  <Bar dataKey="shareOfVoice" fill="#72a3bf">
                     {data.competitors.map((entry: any, index: number) => (
-                      <Cell key={`cell-${index}`} fill={entry.name === 'Your Brand' ? '#D4FF00' : '#555'} />
+                      <Cell key={`cell-${index}`} fill={entry.name === 'Your Brand' ? '#72a3bf' : '#555'} />
                     ))}
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </div>
 
-            <div className="bg-[#1A1A1A] border border-white/10 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(212,255,0,0.15)]">
+            <div className="bg-[#1d4052] border border-white/10 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
               <h3 className="text-lg font-semibold mb-4 text-white">Competitive Opportunities</h3>
               <div className="space-y-3">
                 <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
@@ -557,10 +557,10 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
                   </div>
                   <p className="text-sm text-gray-400">15 high-value keywords where competitors rank but you don't</p>
                 </div>
-                <div className="p-3 bg-[#D4FF00]/10 border border-[#D4FF00]/20 rounded-lg">
+                <div className="p-3 bg-[#72a3bf]/10 border border-[#72a3bf]/20 rounded-lg">
                   <div className="flex items-center gap-2 mb-1">
-                    <ChevronRight className="w-4 h-4 text-[#D4FF00]" />
-                    <span className="font-semibold text-[#D4FF00]">Link Opportunities</span>
+                    <ChevronRight className="w-4 h-4 text-[#72a3bf]" />
+                    <span className="font-semibold text-[#72a3bf]">Link Opportunities</span>
                   </div>
                   <p className="text-sm text-gray-400">23 domains linking to competitors but not to you</p>
                 </div>
@@ -579,11 +579,11 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
         {/* Testing & Optimization Results */}
         <section className="mb-12">
           <h2 className="text-2xl font-bold mb-6 flex items-center gap-2 text-white">
-            <TestTube className="w-6 h-6 text-[#D4FF00]" />
+            <TestTube className="w-6 h-6 text-[#72a3bf]" />
             Testing & Optimization Results
           </h2>
 
-          <div className="bg-[#1A1A1A] border border-white/10 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(212,255,0,0.15)]">
+          <div className="bg-[#1d4052] border border-white/10 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
             <div className="mb-4">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-lg font-semibold text-white">A/B Tests Completed</span>
@@ -638,14 +638,14 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
         {/* Upcoming Opportunities */}
         <section className="mb-12">
           <h2 className="text-2xl font-bold mb-6 flex items-center gap-2 text-white">
-            <Lightbulb className="w-6 h-6 text-[#D4FF00]" />
+            <Lightbulb className="w-6 h-6 text-[#72a3bf]" />
             Upcoming Opportunities & Market Trends
           </h2>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="bg-[#1A1A1A] border border-[#D4FF00]/20 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(212,255,0,0.15)]">
+            <div className="bg-[#1d4052] border border-[#72a3bf]/20 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
               <div className="flex items-center gap-2 mb-3">
-                <Calendar className="w-5 h-5 text-[#D4FF00]" />
+                <Calendar className="w-5 h-5 text-[#72a3bf]" />
                 <h3 className="font-semibold text-white">Seasonal Opportunities</h3>
               </div>
               <ul className="space-y-2 text-sm text-gray-400">
@@ -656,7 +656,7 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
               </ul>
             </div>
 
-            <div className="bg-[#1A1A1A] border border-green-500/20 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(16,185,129,0.15)]">
+            <div className="bg-[#1d4052] border border-green-500/20 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(16,185,129,0.15)]">
               <div className="flex items-center gap-2 mb-3">
                 <Trend className="w-5 h-5 text-green-500" />
                 <h3 className="font-semibold text-white">Trending Keywords</h3>
@@ -669,7 +669,7 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
               </ul>
             </div>
 
-            <div className="bg-[#1A1A1A] border border-marine/20 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(68,110,135,0.15)]">
+            <div className="bg-[#1d4052] border border-marine/20 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(68,110,135,0.15)]">
               <div className="flex items-center gap-2 mb-3">
                 <Globe className="w-5 h-5 text-marine" />
                 <h3 className="font-semibold text-white">Industry Events</h3>
@@ -687,7 +687,7 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
         {/* Recommendations with Priority Matrix */}
         <section className="mb-12">
           <h2 className="text-2xl font-bold mb-6 flex items-center gap-2 text-white">
-            <Zap className="w-6 h-6 text-[#D4FF00]" />
+            <Zap className="w-6 h-6 text-[#72a3bf]" />
             Strategic Recommendations - Priority Matrix
           </h2>
 
@@ -736,9 +736,9 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
               </div>
             </div>
 
-            <div className="bg-[#1A1A1A] border border-white/10 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(212,255,0,0.15)]">
+            <div className="bg-[#1d4052] border border-white/10 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
               <h3 className="font-semibold mb-4 text-white">Impact vs Effort Matrix</h3>
-              <div className="relative h-64 bg-[#0A0A0A] border border-white/10 rounded">
+              <div className="relative h-64 bg-[#030f18] border border-white/10 rounded">
                 <div className="absolute top-0 left-1/2 transform -translate-x-1/2 text-xs text-gray-400">High Impact</div>
                 <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 text-xs text-gray-400">Low Impact</div>
                 <div className="absolute left-0 top-1/2 transform -translate-y-1/2 text-xs text-gray-400 -rotate-90">Low Effort</div>
@@ -753,9 +753,9 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
                     </div>
                   </div>
                   <div className="border-b border-white/10 p-2">
-                    <div className="text-xs font-semibold text-[#D4FF00]">Major Projects</div>
+                    <div className="text-xs font-semibold text-[#72a3bf]">Major Projects</div>
                     <div className="mt-1 space-y-1">
-                      <div className="text-xs bg-[#D4FF00]/20 border border-[#D4FF00]/30 rounded px-1 py-0.5 text-[#D4FF00]">Site Redesign</div>
+                      <div className="text-xs bg-[#72a3bf]/20 border border-[#72a3bf]/30 rounded px-1 py-0.5 text-[#72a3bf]">Site Redesign</div>
                     </div>
                   </div>
                   <div className="border-r border-white/10 p-2">
@@ -779,13 +779,13 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
         {/* Performance Scorecard */}
         <section className="mb-12">
           <h2 className="text-2xl font-bold mb-6 flex items-center gap-2 text-white">
-            <Shield className="w-6 h-6 text-[#D4FF00]" />
+            <Shield className="w-6 h-6 text-[#72a3bf]" />
             Performance Scorecard
           </h2>
 
-          <div className="bg-[#1A1A1A] border border-white/10 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-[0_0_20px_rgba(212,255,0,0.15)]">
+          <div className="bg-[#1d4052] border border-white/10 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
             <table className="w-full">
-              <thead className="bg-[#0A0A0A] border-b border-white/10">
+              <thead className="bg-[#030f18] border-b border-white/10">
                 <tr>
                   <th className="text-left px-6 py-3 text-sm font-semibold text-gray-400">Category</th>
                   <th className="text-center px-6 py-3 text-sm font-semibold text-gray-400">Score</th>
