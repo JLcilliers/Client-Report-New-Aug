@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
     const newReport = await prisma.clientReport.create({
       data: {
         id: reportId,
-        clientName: finalClientId,
+        clientName: clientName || finalClientId,
         reportName: actualReportName,
         googleAccountId: googleAccountId || 'default',
         ga4PropertyId: analyticsProperties?.[0] || '',

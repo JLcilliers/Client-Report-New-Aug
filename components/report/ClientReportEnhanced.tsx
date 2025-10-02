@@ -48,8 +48,8 @@ const Sparkline = ({ data, color = '#72a3bf' }: { data: number[], color?: string
   const max = Math.max(...data);
   const min = Math.min(...data);
   const range = max - min;
-  const height = 30;
-  const width = 80;
+  const height = 50;
+  const width = 120;
 
   const points = data.map((value, index) => {
     const x = (index / (data.length - 1)) * width;
@@ -69,13 +69,33 @@ const Sparkline = ({ data, color = '#72a3bf' }: { data: number[], color?: string
   );
 };
 
-// Health Score Component
+// Health Score Component with enhanced gradient and animation
 const HealthScore = ({ score }: { score: number }) => {
-  const getColor = () => {
-    if (score >= 80) return 'bg-green-500';
-    if (score >= 60) return 'bg-yellow-500';
-    if (score >= 40) return 'bg-orange-500';
-    return 'bg-red-500';
+  const [animatedScore, setAnimatedScore] = useState(0);
+
+  useEffect(() => {
+    const duration = 1500;
+    const steps = 60;
+    const increment = score / steps;
+    let currentStep = 0;
+
+    const timer = setInterval(() => {
+      currentStep++;
+      if (currentStep <= steps) {
+        setAnimatedScore(Math.min(Math.round(currentStep * increment), score));
+      } else {
+        clearInterval(timer);
+      }
+    }, duration / steps);
+
+    return () => clearInterval(timer);
+  }, [score]);
+
+  const getGradientColors = () => {
+    if (score >= 80) return { from: '#10b981', to: '#72a3bf' };
+    if (score >= 60) return { from: '#eab308', to: '#72a3bf' };
+    if (score >= 40) return { from: '#f97316', to: '#72a3bf' };
+    return { from: '#ef4444', to: '#72a3bf' };
   };
 
   const getLabel = () => {
@@ -85,39 +105,59 @@ const HealthScore = ({ score }: { score: number }) => {
     return 'Critical';
   };
 
+  const getLabelColor = () => {
+    if (score >= 80) return 'from-green-500 to-glacier';
+    if (score >= 60) return 'from-yellow-500 to-glacier';
+    if (score >= 40) return 'from-orange-500 to-glacier';
+    return 'from-red-500 to-glacier';
+  };
+
+  const gradientColors = getGradientColors();
+  const circumference = 2 * Math.PI * 60;
+  const dashOffset = circumference - (animatedScore / 100) * circumference;
+
   return (
-    <div className="flex items-center gap-3">
-      <div className="relative w-24 h-24">
-        <svg className="w-24 h-24 transform -rotate-90">
+    <div className="flex items-center gap-4">
+      <div className="relative w-40 h-40">
+        <svg className="w-40 h-40 transform -rotate-90">
           <circle
-            cx="48"
-            cy="48"
-            r="36"
+            cx="80"
+            cy="80"
+            r="60"
             stroke="currentColor"
-            strokeWidth="8"
+            strokeWidth="10"
             fill="none"
             className="text-white/10"
           />
+          <defs>
+            <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor={gradientColors.from} />
+              <stop offset="100%" stopColor={gradientColors.to} />
+            </linearGradient>
+          </defs>
           <circle
-            cx="48"
-            cy="48"
-            r="36"
-            stroke="currentColor"
-            strokeWidth="8"
+            cx="80"
+            cy="80"
+            r="60"
+            stroke="url(#scoreGradient)"
+            strokeWidth="10"
             fill="none"
-            strokeDasharray={`${(score / 100) * 226} 226`}
-            className={`${getColor().replace('bg-', 'text-')} transition-all duration-500`}
+            strokeDasharray={circumference}
+            strokeDashoffset={dashOffset}
+            className="transition-all duration-300 ease-out"
+            strokeLinecap="round"
           />
         </svg>
-        <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-2xl font-bold text-gray-900">{score}</span>
+        <div className="absolute inset-0 flex items-center justify-center flex-col">
+          <span className="text-4xl font-bold text-white">{animatedScore}</span>
+          <span className="text-xs text-white/70 mt-1">out of 100</span>
         </div>
       </div>
       <div>
-        <div className={`inline-block px-3 py-1 rounded-full text-gray-900 text-sm font-semibold ${getColor()}`}>
+        <div className={`inline-block px-4 py-2 rounded-full bg-gradient-to-r ${getLabelColor()} text-white text-base font-bold shadow-lg`}>
           {getLabel()}
         </div>
-        <p className="text-xs text-gray-400 mt-1">Overall Performance</p>
+        <p className="text-sm text-white/90 mt-2">Overall Performance</p>
       </div>
     </div>
   );
@@ -281,12 +321,12 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
     <div className="min-h-screen bg-white">
       {/* Header */}
       <div className="bg-gradient-to-r from-glacier to-marine text-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-6 py-12">
+        <div className="max-w-7xl mx-auto px-6 py-16">
           <div className="flex justify-between items-start">
             <div>
-              <h1 className="text-4xl font-bold mb-2">{report.clientName}</h1>
-              <p className="text-xl opacity-90">Monthly Performance Report</p>
-              <p className="text-lg opacity-80 mt-2">{reportMonth}</p>
+              <h1 className="text-5xl font-bold mb-3">{report.clientName}</h1>
+              <p className="text-2xl opacity-90">Monthly Performance Report</p>
+              <p className="text-lg opacity-80 mt-3">{reportMonth}</p>
             </div>
             <HealthScore score={overallHealthScore} />
           </div>
@@ -303,26 +343,71 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
             </h2>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
-                <div className="flex items-center gap-2 mb-2">
-                  <CheckCircle className="w-5 h-5 text-green-500" />
-                  <span className="font-semibold text-green-400">Top Achievement</span>
+              <div className="bg-gradient-to-br from-green-500/20 to-green-600/10 border-2 border-green-500/30 rounded-lg p-5 transition-all duration-300 hover:shadow-lg hover:scale-105">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 bg-green-500 rounded-lg">
+                    <CheckCircle className="w-6 h-6 text-white" />
+                  </div>
+                  <span className="text-lg font-bold text-green-600">Top Achievement</span>
                 </div>
-                <p className="text-sm text-gray-400">Organic traffic increased 23% MoM, exceeding quarterly targets</p>
+                <ul className="space-y-1.5 text-sm text-gray-700">
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-500 mt-0.5 font-bold">•</span>
+                    <span><strong className="font-semibold">+23% organic traffic</strong> month-over-month</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-500 mt-0.5 font-bold">•</span>
+                    <span><strong className="font-semibold">Exceeded quarterly targets</strong> by 8%</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-500 mt-0.5 font-bold">•</span>
+                    <span>Best performing month in <strong className="font-semibold">6 months</strong></span>
+                  </li>
+                </ul>
               </div>
-              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
-                <div className="flex items-center gap-2 mb-2">
-                  <AlertCircle className="w-5 h-5 text-yellow-500" />
-                  <span className="font-semibold text-yellow-400">Needs Attention</span>
+              <div className="bg-gradient-to-br from-yellow-500/20 to-yellow-600/10 border-2 border-yellow-500/30 rounded-lg p-5 transition-all duration-300 hover:shadow-lg hover:scale-105">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 bg-yellow-500 rounded-lg">
+                    <AlertCircle className="w-6 h-6 text-white" />
+                  </div>
+                  <span className="text-lg font-bold text-yellow-600">Needs Attention</span>
                 </div>
-                <p className="text-sm text-gray-400">Page load speed affecting mobile conversion rates</p>
+                <ul className="space-y-1.5 text-sm text-gray-700">
+                  <li className="flex items-start gap-2">
+                    <span className="text-yellow-500 mt-0.5 font-bold">•</span>
+                    <span><strong className="font-semibold">Page load speed</strong> impacting mobile conversions</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-yellow-500 mt-0.5 font-bold">•</span>
+                    <span><strong className="font-semibold">3.2s LCP</strong> on key landing pages</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-yellow-500 mt-0.5 font-bold">•</span>
+                    <span>Action required: <strong className="font-semibold">Image optimization</strong></span>
+                  </li>
+                </ul>
               </div>
-              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
-                <div className="flex items-center gap-2 mb-2">
-                  <Target className="w-5 h-5 text-[#72a3bf]" />
-                  <span className="font-semibold text-[#72a3bf]">Key Focus</span>
+              <div className="bg-gradient-to-br from-glacier/20 to-marine/10 border-2 border-glacier/30 rounded-lg p-5 transition-all duration-300 hover:shadow-lg hover:scale-105">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 bg-glacier rounded-lg">
+                    <Target className="w-6 h-6 text-white" />
+                  </div>
+                  <span className="text-lg font-bold text-marine">Key Focus</span>
                 </div>
-                <p className="text-sm text-gray-400">Capitalize on high-performing keywords for Q4 campaigns</p>
+                <ul className="space-y-1.5 text-sm text-gray-700">
+                  <li className="flex items-start gap-2">
+                    <span className="text-glacier mt-0.5 font-bold">•</span>
+                    <span><strong className="font-semibold">High-performing keywords</strong> ready for Q4</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-glacier mt-0.5 font-bold">•</span>
+                    <span><strong className="font-semibold">15 content gaps</strong> identified vs competitors</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-glacier mt-0.5 font-bold">•</span>
+                    <span>Opportunity: <strong className="font-semibold">Seasonal campaigns</strong></span>
+                  </li>
+                </ul>
               </div>
             </div>
 
@@ -339,71 +424,117 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
             Key Performance Indicators - Comparative Analysis
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)] transition-all duration-300">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-gray-400 text-sm">Total Sessions</span>
-                <Users className="w-5 h-5 text-[#72a3bf]" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="bg-white border-2 border-gray-200 rounded-xl p-8 hover:shadow-xl hover:border-glacier/50 transition-all duration-300">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-gray-500 text-base font-medium">Total Sessions</span>
+                <div className="p-3 bg-glacier/10 rounded-lg">
+                  <Users className="w-6 h-6 text-glacier" />
+                </div>
               </div>
-              <div className="text-3xl font-bold text-gray-900">{formatNumber(data.analytics.totalSessions)}</div>
+              <div className="text-5xl font-bold text-gray-900 mb-2">{formatNumber(data.analytics.totalSessions)}</div>
               <Sparkline data={sessionSparkline} color="#72a3bf" />
-              <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-gray-200">
+              <div className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t-2 border-gray-100">
                 <div>
-                  <p className="text-xs text-gray-400">vs Last Month</p>
-                  <p className={`text-sm font-semibold ${momSessionChange > 0 ? 'text-green-500' : 'text-red-500'}`}>
-                    {formatPercentage(momSessionChange)}
-                  </p>
+                  <p className="text-xs text-gray-500 mb-1">vs Last Month</p>
+                  <div className="flex items-center gap-1">
+                    {momSessionChange > 0 ? <ArrowUp className="w-4 h-4 text-green-500" /> : <ArrowDown className="w-4 h-4 text-red-500" />}
+                    <p className={`text-lg font-bold ${momSessionChange > 0 ? 'text-green-500' : 'text-red-500'}`}>
+                      {formatPercentage(momSessionChange)}
+                    </p>
+                  </div>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-400">vs Last Year</p>
-                  <p className={`text-sm font-semibold ${yoySessionChange > 0 ? 'text-green-500' : 'text-red-500'}`}>
-                    {formatPercentage(yoySessionChange)}
-                  </p>
+                  <p className="text-xs text-gray-500 mb-1">vs Last Year</p>
+                  <div className="flex items-center gap-1">
+                    {yoySessionChange > 0 ? <ArrowUp className="w-4 h-4 text-green-500" /> : <ArrowDown className="w-4 h-4 text-red-500" />}
+                    <p className={`text-lg font-bold ${yoySessionChange > 0 ? 'text-green-500' : 'text-red-500'}`}>
+                      {formatPercentage(yoySessionChange)}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)] transition-all duration-300">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-gray-400 text-sm">Organic Clicks</span>
-                <Search className="w-5 h-5 text-green-500" />
+            <div className="bg-white border-2 border-gray-200 rounded-xl p-8 hover:shadow-xl hover:border-green-500/50 transition-all duration-300">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-gray-500 text-base font-medium">Organic Clicks</span>
+                <div className="p-3 bg-green-500/10 rounded-lg">
+                  <Search className="w-6 h-6 text-green-500" />
+                </div>
               </div>
-              <div className="text-3xl font-bold text-gray-900">{formatNumber(data.searchConsole.totalClicks)}</div>
+              <div className="text-5xl font-bold text-gray-900 mb-2">{formatNumber(data.searchConsole.totalClicks)}</div>
               <Sparkline data={clickSparkline} color="#10B981" />
-              <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-gray-200">
+              <div className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t-2 border-gray-100">
                 <div>
-                  <p className="text-xs text-gray-400">vs Last Month</p>
-                  <p className={`text-sm font-semibold ${momClickChange > 0 ? 'text-green-500' : 'text-red-500'}`}>
-                    {formatPercentage(momClickChange)}
-                  </p>
+                  <p className="text-xs text-gray-500 mb-1">vs Last Month</p>
+                  <div className="flex items-center gap-1">
+                    {momClickChange > 0 ? <ArrowUp className="w-4 h-4 text-green-500" /> : <ArrowDown className="w-4 h-4 text-red-500" />}
+                    <p className={`text-lg font-bold ${momClickChange > 0 ? 'text-green-500' : 'text-red-500'}`}>
+                      {formatPercentage(momClickChange)}
+                    </p>
+                  </div>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-400">CTR</p>
-                  <p className="text-sm font-semibold text-gray-900">{data.searchConsole.avgCtr.toFixed(2)}%</p>
+                  <p className="text-xs text-gray-500 mb-1">CTR</p>
+                  <p className="text-lg font-bold text-gray-900">{data.searchConsole.avgCtr.toFixed(2)}%</p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)] transition-all duration-300">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-gray-400 text-sm">Conversion Rate</span>
-                <Target className="w-5 h-5 text-[#72a3bf]" />
-              </div>
-              <div className="text-3xl font-bold text-gray-900">3.8%</div>
-              <div className="flex items-center gap-2 mt-2">
-                <div className="flex-1 bg-gray-200 rounded-full h-2">
-                  <div className="bg-[#72a3bf] h-2 rounded-full" style={{ width: '76%' }}></div>
+            <div className="bg-white border-2 border-gray-200 rounded-xl p-8 hover:shadow-xl hover:border-marine/50 transition-all duration-300">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-gray-500 text-base font-medium">Conversion Rate</span>
+                <div className="p-3 bg-marine/10 rounded-lg">
+                  <Target className="w-6 h-6 text-marine" />
                 </div>
-                <span className="text-xs text-gray-400">Target: 5%</span>
               </div>
-              <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-gray-200">
+              <div className="text-5xl font-bold text-gray-900 mb-2">3.8%</div>
+              <div className="flex items-center gap-2 mt-3">
+                <div className="flex-1 bg-gray-200 rounded-full h-3">
+                  <div className="bg-marine h-3 rounded-full transition-all duration-500" style={{ width: '76%' }}></div>
+                </div>
+                <span className="text-xs text-gray-500 font-medium">Target: 5%</span>
+              </div>
+              <div className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t-2 border-gray-100">
                 <div>
-                  <p className="text-xs text-gray-400">vs Last Month</p>
-                  <p className="text-sm font-semibold text-green-500">+0.5%</p>
+                  <p className="text-xs text-gray-500 mb-1">vs Last Month</p>
+                  <div className="flex items-center gap-1">
+                    <ArrowUp className="w-4 h-4 text-green-500" />
+                    <p className="text-lg font-bold text-green-500">+0.5%</p>
+                  </div>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-400">Conversions</p>
-                  <p className="text-sm font-semibold text-gray-900">1,719</p>
+                  <p className="text-xs text-gray-500 mb-1">Conversions</p>
+                  <p className="text-lg font-bold text-gray-900">1,719</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white border-2 border-gray-200 rounded-xl p-8 hover:shadow-xl hover:border-glacier/50 transition-all duration-300">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-gray-500 text-base font-medium">Total Users</span>
+                <div className="p-3 bg-glacier/10 rounded-lg">
+                  <Eye className="w-6 h-6 text-glacier" />
+                </div>
+              </div>
+              <div className="text-5xl font-bold text-gray-900 mb-2">{formatNumber(data.analytics.totalUsers)}</div>
+              <div className="h-[50px] flex items-center">
+                <div className="flex-1 text-sm text-gray-500">Unique visitors this period</div>
+              </div>
+              <div className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t-2 border-gray-100">
+                <div>
+                  <p className="text-xs text-gray-500 mb-1">vs Last Month</p>
+                  <div className="flex items-center gap-1">
+                    <ArrowUp className="w-4 h-4 text-green-500" />
+                    <p className="text-lg font-bold text-green-500">
+                      {formatPercentage(calculateChange(data.analytics.totalUsers, data.analytics.lastMonth.totalUsers))}
+                    </p>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 mb-1">New Users</p>
+                  <p className="text-lg font-bold text-gray-900">62%</p>
                 </div>
               </div>
             </div>
@@ -421,85 +552,127 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* User Behavior */}
-            <div className="bg-white border border-gray-200 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
-              <h3 className="font-semibold mb-4 flex items-center gap-2 text-gray-900">
-                <Users className="w-5 h-5 text-[#72a3bf]" />
-                User Behavior
-              </h3>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-sm text-gray-400">Pages per Session</span>
-                  <span className="font-semibold text-gray-900">{data.analytics.pagesPerSession}</span>
+            <div className="bg-white border border-gray-200 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
+              <div className="bg-glacier/5 px-6 py-4 border-b border-gray-200">
+                <h3 className="font-semibold flex items-center gap-2 text-gray-900">
+                  <Users className="w-5 h-5 text-glacier" />
+                  User Behavior
+                </h3>
+              </div>
+              <div className="divide-y divide-gray-100">
+                <div className="flex justify-between items-center px-6 py-3 hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-glacier/70" />
+                    <span className="text-sm text-gray-600">Pages per Session</span>
+                  </div>
+                  <span className="font-bold text-gray-900">{data.analytics.pagesPerSession}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-gray-400">Avg. Session Duration</span>
-                  <span className="font-semibold text-gray-900">{Math.floor(data.analytics.avgSessionDuration / 60)}:{(data.analytics.avgSessionDuration % 60).toString().padStart(2, '0')}</span>
+                <div className="flex justify-between items-center px-6 py-3 bg-gray-50/50 hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-glacier/70" />
+                    <span className="text-sm text-gray-600">Avg. Session Duration</span>
+                  </div>
+                  <span className="font-bold text-gray-900">{Math.floor(data.analytics.avgSessionDuration / 60)}:{(data.analytics.avgSessionDuration % 60).toString().padStart(2, '0')}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-gray-400">Bounce Rate</span>
-                  <span className="font-semibold text-gray-900">{data.analytics.bounceRate}%</span>
+                <div className="flex justify-between items-center px-6 py-3 hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center gap-2">
+                    <TrendingDown className="w-4 h-4 text-glacier/70" />
+                    <span className="text-sm text-gray-600">Bounce Rate</span>
+                  </div>
+                  <span className="font-bold text-gray-900">{data.analytics.bounceRate}%</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-gray-400">Scroll Depth</span>
-                  <span className="font-semibold text-gray-900">73%</span>
+                <div className="flex justify-between items-center px-6 py-3 bg-gray-50/50 hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center gap-2">
+                    <ArrowDown className="w-4 h-4 text-glacier/70" />
+                    <span className="text-sm text-gray-600">Scroll Depth</span>
+                  </div>
+                  <span className="font-bold text-gray-900">73%</span>
                 </div>
               </div>
             </div>
 
             {/* Core Web Vitals */}
-            <div className="bg-white border border-gray-200 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
-              <h3 className="font-semibold mb-4 flex items-center gap-2 text-gray-900">
-                <Gauge className="w-5 h-5 text-green-500" />
-                Core Web Vitals
-              </h3>
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-400">LCP</span>
-                  <span className={`font-semibold ${data.coreWebVitals.lcp < 2.5 ? 'text-green-500' : 'text-yellow-500'}`}>
+            <div className="bg-white border border-gray-200 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
+              <div className="bg-green-500/5 px-6 py-4 border-b border-gray-200">
+                <h3 className="font-semibold flex items-center gap-2 text-gray-900">
+                  <Gauge className="w-5 h-5 text-green-500" />
+                  Core Web Vitals
+                </h3>
+              </div>
+              <div className="divide-y divide-gray-100">
+                <div className="flex justify-between items-center px-6 py-3 hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center gap-2">
+                    <Zap className="w-4 h-4 text-green-500/70" />
+                    <span className="text-sm text-gray-600">LCP</span>
+                  </div>
+                  <span className={`font-bold ${data.coreWebVitals.lcp < 2.5 ? 'text-green-500' : 'text-yellow-500'}`}>
                     {data.coreWebVitals.lcp}s
                   </span>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-400">FID</span>
-                  <span className={`font-semibold ${data.coreWebVitals.fid < 100 ? 'text-green-500' : 'text-yellow-500'}`}>
+                <div className="flex justify-between items-center px-6 py-3 bg-gray-50/50 hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center gap-2">
+                    <Activity className="w-4 h-4 text-green-500/70" />
+                    <span className="text-sm text-gray-600">FID</span>
+                  </div>
+                  <span className={`font-bold ${data.coreWebVitals.fid < 100 ? 'text-green-500' : 'text-yellow-500'}`}>
                     {data.coreWebVitals.fid}ms
                   </span>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-400">CLS</span>
-                  <span className={`font-semibold ${data.coreWebVitals.cls < 0.1 ? 'text-green-500' : 'text-yellow-500'}`}>
+                <div className="flex justify-between items-center px-6 py-3 hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center gap-2">
+                    <Target className="w-4 h-4 text-green-500/70" />
+                    <span className="text-sm text-gray-600">CLS</span>
+                  </div>
+                  <span className={`font-bold ${data.coreWebVitals.cls < 0.1 ? 'text-green-500' : 'text-yellow-500'}`}>
                     {data.coreWebVitals.cls}
                   </span>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-400">Performance Score</span>
-                  <span className="font-semibold text-green-500">{data.coreWebVitals.performance}/100</span>
+                <div className="flex justify-between items-center px-6 py-3 bg-gray-50/50 hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center gap-2">
+                    <Award className="w-4 h-4 text-green-500/70" />
+                    <span className="text-sm text-gray-600">Performance Score</span>
+                  </div>
+                  <span className="font-bold text-green-500">{data.coreWebVitals.performance}/100</span>
                 </div>
               </div>
             </div>
 
             {/* Lead Quality */}
-            <div className="bg-white border border-gray-200 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
-              <h3 className="font-semibold mb-4 flex items-center gap-2 text-gray-900">
-                <Star className="w-5 h-5 text-yellow-500" />
-                Lead Quality Indicators
-              </h3>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-sm text-gray-400">Marketing Qualified</span>
-                  <span className="font-semibold text-gray-900">68%</span>
+            <div className="bg-white border border-gray-200 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
+              <div className="bg-yellow-500/5 px-6 py-4 border-b border-gray-200">
+                <h3 className="font-semibold flex items-center gap-2 text-gray-900">
+                  <Star className="w-5 h-5 text-yellow-500" />
+                  Lead Quality Indicators
+                </h3>
+              </div>
+              <div className="divide-y divide-gray-100">
+                <div className="flex justify-between items-center px-6 py-3 hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-yellow-500/70" />
+                    <span className="text-sm text-gray-600">Marketing Qualified</span>
+                  </div>
+                  <span className="font-bold text-gray-900">68%</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-gray-400">Sales Qualified</span>
-                  <span className="font-semibold text-gray-900">42%</span>
+                <div className="flex justify-between items-center px-6 py-3 bg-gray-50/50 hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center gap-2">
+                    <Trophy className="w-4 h-4 text-yellow-500/70" />
+                    <span className="text-sm text-gray-600">Sales Qualified</span>
+                  </div>
+                  <span className="font-bold text-gray-900">42%</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-gray-400">Conversion to Customer</span>
-                  <span className="font-semibold text-gray-900">18%</span>
+                <div className="flex justify-between items-center px-6 py-3 hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4 text-yellow-500/70" />
+                    <span className="text-sm text-gray-600">Conversion to Customer</span>
+                  </div>
+                  <span className="font-bold text-gray-900">18%</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-gray-400">Lead Score Avg</span>
-                  <span className="font-semibold text-gray-900">7.2/10</span>
+                <div className="flex justify-between items-center px-6 py-3 bg-gray-50/50 hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center gap-2">
+                    <Star className="w-4 h-4 text-yellow-500/70" />
+                    <span className="text-sm text-gray-600">Lead Score Avg</span>
+                  </div>
+                  <span className="font-bold text-gray-900">7.2/10</span>
                 </div>
               </div>
             </div>

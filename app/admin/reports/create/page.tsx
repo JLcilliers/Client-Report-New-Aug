@@ -241,6 +241,7 @@ export default function CreateReportPage() {
       }
       
       const clientId = clientData.client?.id || clientData.id
+      const clientName = clientData.client?.name || formData.newClientName
 
       // Create the report with Google account association
       const reportResponse = await fetch('/api/reports/create', {
@@ -248,6 +249,7 @@ export default function CreateReportPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           clientId,
+          clientName,
           name: formData.reportName,
           description: formData.reportDescription,
           googleAccountId: selectedGoogleAccount,
