@@ -45,22 +45,22 @@ export default function LandingPage() {
           <div className="flex justify-between items-center h-[70px]">
             <Link href="/" className="flex items-center">
               <h1 className="text-2xl font-bold">
-                <span className="text-white">Search</span>
+                <span className="text-gray-900">Search</span>
                 <span className="text-[#72a3bf]"> Insights</span>
               </h1>
             </Link>
 
             <nav className="hidden md:flex items-center space-x-8 text-[15px] font-medium">
-              <Link href="#features" className="text-gray-300 hover:text-white transition-colors">
+              <Link href="#features" className="text-gray-700 hover:text-gray-900 transition-colors">
                 Features
               </Link>
-              <Link href="#integrations" className="text-gray-300 hover:text-white transition-colors">
+              <Link href="#integrations" className="text-gray-700 hover:text-gray-900 transition-colors">
                 Integrations
               </Link>
-              <Link href="#pricing" className="text-gray-300 hover:text-white transition-colors">
+              <Link href="#pricing" className="text-gray-700 hover:text-gray-900 transition-colors">
                 Pricing
               </Link>
-              <Link href="#faq" className="text-gray-300 hover:text-white transition-colors">
+              <Link href="#faq" className="text-gray-700 hover:text-gray-900 transition-colors">
                 Resources
               </Link>
             </nav>
@@ -94,19 +94,19 @@ export default function LandingPage() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-5xl mx-auto">
             {/* Main Headline */}
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight tracking-tight">
+            <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight tracking-tight text-white">
               Stop Spending 40+ Hours on<br />
               <span className="text-white">Client SEO Reports</span>
             </h1>
 
             {/* Subheadline */}
-            <h2 className="text-3xl md:text-5xl font-bold mb-8 text-[#72a3bf] leading-tight tracking-tight">
+            <h2 className="text-3xl md:text-5xl font-bold mb-8 text-gray-200 leading-tight tracking-tight">
               AI-Powered Reports in 3 Minutes.<br />
               White-Label. Agency-Ready.
             </h2>
 
             {/* Supporting Copy */}
-            <p className="text-xl text-gray-400 mb-10 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-xl text-gray-300 mb-10 max-w-3xl mx-auto leading-relaxed">
               Transform weeks of manual reporting into minutes. Our AI analyzes Google Analytics, Search Console,
               and 50+ data sources to create stunning, branded SEO reports your clients will actually read.
             </p>
@@ -125,7 +125,7 @@ export default function LandingPage() {
             </div>
 
             {/* Micro-copy */}
-            <p className="text-sm text-gray-500 mb-16">
+            <p className="text-sm text-gray-300 mb-16">
               Setup in 60 seconds • Cancel anytime • Plans start at $49/mo
             </p>
 
@@ -155,8 +155,8 @@ export default function LandingPage() {
       {/* SOCIAL PROOF BAR */}
       <section className="bg-gray-50 py-8 border-y border-white/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="text-center text-gray-500 text-sm mb-4">AS SEEN IN</p>
-          <div className="flex justify-center items-center space-x-12 opacity-30">
+          <p className="text-center text-gray-700 text-sm mb-4">AS SEEN IN</p>
+          <div className="flex justify-center items-center space-x-12 opacity-70">
             <span className="text-2xl font-bold">TechCrunch</span>
             <span className="text-2xl font-bold">Forbes</span>
             <span className="text-2xl font-bold">Search Engine Journal</span>
@@ -726,7 +726,7 @@ export default function LandingPage() {
             Ready to <span className="text-[#72a3bf]">Reclaim Your Time</span><br />
             and Impress Your Clients?
           </h2>
-          <p className="text-xl text-gray-400 mb-10 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-300 mb-10 max-w-2xl mx-auto">
             Join 2,847 agencies who've eliminated the SEO reporting headache
           </p>
 
