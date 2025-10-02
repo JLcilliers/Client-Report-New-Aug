@@ -1,7 +1,8 @@
 // API endpoint for AI visibility data
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { aiVisibilityService } from '@/lib/ai-visibility/ai-visibility-service';
+import { aiReadinessService } from '@/lib/ai-visibility/ai-readiness-service';
+import { cookies } from 'next/headers';
 
 const prisma = new PrismaClient();
 
@@ -36,8 +37,8 @@ export async function GET(
       );
     }
 
-    // Get formatted AI visibility metrics
-    const metrics = await aiVisibilityService.getFormattedMetrics(report.id);
+    // Get formatted AI readiness metrics (uses cached data if available)
+    const metrics = await aiReadinessService.getFormattedMetrics(report.id);
 
     return NextResponse.json({
       success: true,
@@ -46,9 +47,9 @@ export async function GET(
       lastUpdated: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('AI Visibility GET Error:', error);
+    console.error('AI Readiness GET Error:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch AI visibility data' },
+      { error: 'Failed to fetch AI readiness data' },
       { status: 500 }
     );
   }
@@ -61,7 +62,7 @@ export async function POST(
   try {
     const { slug } = params;
     const body = await req.json();
-    const { domain, keywords, competitors, forceRefresh } = body;
+    const { forceRefresh } = body;
 
     // Get the report
     const report = await prisma.clientReport.findFirst({
@@ -74,7 +75,7 @@ export async function POST(
       include: {
         competitors: true,
         keywords: {
-          take: keywords ? 0 : 10,
+          take: 10,
           orderBy: { searchVolume: 'desc' },
         },
       },
@@ -98,22 +99,31 @@ export async function POST(
       (new Date().getTime() - profile.lastUpdated.getTime()) > 24 * 60 * 60 * 1000;
 
     if (shouldUpdate) {
-      // Use provided data or fetch from report
-      const targetDomain = domain || extractDomain(report.searchConsolePropertyId);
-      const targetKeywords = keywords || report.keywords.map(k => k.keyword);
-      const targetCompetitors = competitors || report.competitors.map(c => c.domain);
+      // Get Google OAuth tokens from cookies
+      const cookieStore = cookies();
+      const accessToken = cookieStore.get('google_access_token')?.value;
+      const refreshToken = cookieStore.get('google_refresh_token')?.value;
 
-      // Update AI visibility data
-      await aiVisibilityService.updateVisibilityData(
+      const tokens = (accessToken && refreshToken) ? {
+        accessToken,
+        refreshToken,
+      } : undefined;
+
+      // Extract domain from Search Console property
+      const domain = extractDomain(report.searchConsolePropertyId);
+
+      // Calculate AI readiness using real Google API data
+      await aiReadinessService.calculateAIReadiness(
         report.id,
-        targetDomain,
-        targetKeywords,
-        targetCompetitors
+        report.searchConsolePropertyId,
+        report.ga4PropertyId,
+        domain,
+        tokens
       );
     }
 
     // Get updated metrics
-    const metrics = await aiVisibilityService.getFormattedMetrics(report.id);
+    const metrics = await aiReadinessService.getFormattedMetrics(report.id);
 
     return NextResponse.json({
       success: true,
@@ -122,9 +132,9 @@ export async function POST(
       lastUpdated: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('AI Visibility POST Error:', error);
+    console.error('AI Readiness POST Error:', error);
     return NextResponse.json(
-      { error: 'Failed to update AI visibility data' },
+      { error: 'Failed to update AI readiness data',  details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }

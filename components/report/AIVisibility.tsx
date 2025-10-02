@@ -193,12 +193,13 @@ export default function AIVisibility({ reportSlug }: AIVisibilityProps) {
     );
   }
 
-  if (!metrics || metrics.citationCount === 0) {
+  if (!metrics || metrics.overallScore === 0) {
     return (
       <Alert className="m-4">
         <Info className="h-4 w-4" />
         <AlertDescription>
-          No AI visibility data available yet. Click the button below to generate your first AI visibility report. This will analyze how your brand appears across AI platforms like ChatGPT, Claude, and Google AI.
+          No AI readiness analysis available yet. Click the button below to analyze your content using real data from Google Search Console, Analytics, and PageSpeed Insights.
+          This will evaluate how well your content is optimized for AI citations and provide actionable recommendations.
           <Button
             onClick={handleRefresh}
             className="ml-4"
@@ -208,12 +209,12 @@ export default function AIVisibility({ reportSlug }: AIVisibilityProps) {
             {refreshing ? (
               <>
                 <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                Generating Report...
+                Analyzing...
               </>
             ) : (
               <>
                 <Sparkles className="w-4 h-4 mr-2" />
-                Generate AI Visibility Report
+                Analyze AI Readiness
               </>
             )}
           </Button>
@@ -247,10 +248,10 @@ export default function AIVisibility({ reportSlug }: AIVisibilityProps) {
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-2">
             <Brain className="w-6 h-6 text-marine" />
-            AI Search Visibility Overview
+            AI Readiness Score
           </h2>
           <p className="text-gray-600 mt-1">
-            Track how your brand appears across AI-powered search platforms
+            Real metrics from Google showing how ready your content is for AI citations
           </p>
         </div>
         <Button
@@ -259,7 +260,7 @@ export default function AIVisibility({ reportSlug }: AIVisibilityProps) {
           className="flex items-center gap-2"
         >
           <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
-          {refreshing ? 'Updating...' : 'Refresh Data'}
+          {refreshing ? 'Analyzing...' : 'Refresh Analysis'}
         </Button>
       </div>
 
@@ -281,7 +282,7 @@ export default function AIVisibility({ reportSlug }: AIVisibilityProps) {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Citations</CardDescription>
+            <CardDescription>Snippet Opportunities</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
@@ -293,7 +294,7 @@ export default function AIVisibility({ reportSlug }: AIVisibilityProps) {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Share of Voice</CardDescription>
+            <CardDescription>Question Coverage</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
@@ -305,7 +306,7 @@ export default function AIVisibility({ reportSlug }: AIVisibilityProps) {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Sentiment</CardDescription>
+            <CardDescription>Content Engagement</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
@@ -320,7 +321,7 @@ export default function AIVisibility({ reportSlug }: AIVisibilityProps) {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Accuracy</CardDescription>
+            <CardDescription>Schema Quality</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
@@ -335,8 +336,8 @@ export default function AIVisibility({ reportSlug }: AIVisibilityProps) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Platform Visibility Scores</CardTitle>
-            <CardDescription>Your visibility across different AI platforms</CardDescription>
+            <CardTitle>AI Readiness Components</CardTitle>
+            <CardDescription>Individual scores for key AI-optimization factors</CardDescription>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={450}>
@@ -371,8 +372,8 @@ export default function AIVisibility({ reportSlug }: AIVisibilityProps) {
 
         <Card>
           <CardHeader>
-            <CardTitle>Citation Distribution</CardTitle>
-            <CardDescription>Number of citations per platform</CardDescription>
+            <CardTitle>Score Distribution</CardTitle>
+            <CardDescription>Breakdown of readiness factors</CardDescription>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={450}>
@@ -430,9 +431,9 @@ export default function AIVisibility({ reportSlug }: AIVisibilityProps) {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Search className="w-5 h-5" />
-              Top AI-Triggering Queries
+              Question Queries
             </CardTitle>
-            <CardDescription>Queries where your brand appears in AI responses</CardDescription>
+            <CardDescription>Real questions from Search Console (AI systems prioritize Q&A content)</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
@@ -618,9 +619,9 @@ export default function AIVisibility({ reportSlug }: AIVisibilityProps) {
       <Alert>
         <Sparkles className="h-4 w-4" />
         <AlertDescription>
-          <strong>AI Visibility Tip:</strong> AI-driven traffic typically converts at 10-40% compared to 1-2% for traditional SEO.
-          Focus on improving your visibility in AI responses to capture high-intent users.
-          Engage on Reddit and forums to boost citations by up to 35%.
+          <strong>About AI Readiness:</strong> This score analyzes real data from your Google Search Console, Analytics, and PageSpeed Insights.
+          It measures how well your content is structured for AI citations. Higher scores indicate better positioning for AI-powered search visibility.
+          Focus on schema markup, question-answering content, and featured snippets to improve your score.
         </AlertDescription>
       </Alert>
     </div>
