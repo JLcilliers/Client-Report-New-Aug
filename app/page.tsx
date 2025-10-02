@@ -40,27 +40,30 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-white text-gray-900 font-sans">
       {/* NAVIGATION BAR */}
-      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-lg">
+      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-[0_2px_20px_rgba(0,0,0,0.08)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-[70px]">
-            <Link href="/" className="flex items-center">
-              <h1 className="text-2xl font-bold">
+          <div className="flex justify-between items-center h-[75px]">
+            <Link href="/" className="flex items-center space-x-2 group">
+              <div className="bg-gradient-to-br from-[#72a3bf] to-[#446e87] p-2 rounded-lg group-hover:shadow-lg transition-all duration-300">
+                <Search className="w-5 h-5 text-white" />
+              </div>
+              <h1 className="text-2xl font-bold tracking-tight">
                 <span className="text-gray-900">Search</span>
                 <span className="text-[#72a3bf]"> Insights</span>
               </h1>
             </Link>
 
-            <nav className="hidden md:flex items-center space-x-8 text-[15px] font-medium">
-              <Link href="#features" className="text-gray-700 hover:text-gray-900 transition-colors">
+            <nav className="hidden md:flex items-center space-x-2 text-[15px] font-medium">
+              <Link href="#features" className="text-gray-700 hover:text-gray-900 hover:bg-gray-50 px-4 py-2 rounded-lg transition-all duration-200">
                 Features
               </Link>
-              <Link href="#integrations" className="text-gray-700 hover:text-gray-900 transition-colors">
+              <Link href="#integrations" className="text-gray-700 hover:text-gray-900 hover:bg-gray-50 px-4 py-2 rounded-lg transition-all duration-200">
                 Integrations
               </Link>
-              <Link href="#pricing" className="text-gray-700 hover:text-gray-900 transition-colors">
+              <Link href="#pricing" className="text-gray-700 hover:text-gray-900 hover:bg-gray-50 px-4 py-2 rounded-lg transition-all duration-200">
                 Pricing
               </Link>
-              <Link href="#faq" className="text-gray-700 hover:text-gray-900 transition-colors">
+              <Link href="#faq" className="text-gray-700 hover:text-gray-900 hover:bg-gray-50 px-4 py-2 rounded-lg transition-all duration-200">
                 Resources
               </Link>
             </nav>
@@ -94,15 +97,15 @@ export default function LandingPage() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-5xl mx-auto">
             {/* Main Headline */}
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight tracking-tight text-white">
+            <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold mb-8 leading-[1.1] tracking-tight text-white">
               Stop Spending 40+ Hours on<br />
-              <span className="text-white">Client SEO Reports</span>
+              <span className="bg-gradient-to-r from-[#72a3bf] to-[#8cb5cd] bg-clip-text text-transparent">Client SEO Reports</span>
             </h1>
 
             {/* Subheadline */}
-            <h2 className="text-3xl md:text-5xl font-bold mb-8 text-gray-200 leading-tight tracking-tight">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold mb-8 text-gray-100 leading-tight tracking-tight">
               AI-Powered Reports in 3 Minutes.<br />
-              White-Label. Agency-Ready.
+              <span className="text-gray-200">White-Label. Agency-Ready.</span>
             </h2>
 
             {/* Supporting Copy */}
@@ -116,11 +119,20 @@ export default function LandingPage() {
               <Button
                 size="lg"
                 asChild
-                className="bg-gradient-to-r from-[#72a3bf] to-[#446e87] text-gray-900 font-bold text-lg px-10 h-14 rounded-lg shadow-[0_4px_20px_rgba(114,163,191,0.3)] hover:shadow-[0_6px_30px_rgba(114,163,191,0.5)] hover:-translate-y-1 transition-all duration-300"
+                className="bg-gradient-to-r from-[#72a3bf] to-[#446e87] text-white font-bold text-lg px-10 h-14 rounded-lg shadow-[0_4px_20px_rgba(114,163,191,0.4)] hover:shadow-[0_6px_30px_rgba(114,163,191,0.6)] hover:-translate-y-1 transition-all duration-300"
               >
                 <Link href="/login">
                   Get Started - From $49/month
+                  <ArrowRight className="ml-2 w-5 h-5" />
                 </Link>
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="bg-white/10 backdrop-blur-sm text-white border-2 border-white/30 font-semibold text-lg px-10 h-14 rounded-lg hover:bg-white/20 hover:border-white/40 transition-all duration-300"
+              >
+                <PlayCircle className="mr-2 w-5 h-5" />
+                Watch Demo
               </Button>
             </div>
 
@@ -130,22 +142,26 @@ export default function LandingPage() {
             </p>
 
             {/* Trust Signals */}
-            <div className="flex flex-col items-center space-y-6">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-8 sm:gap-12">
               <div className="flex items-center space-x-3">
-                <div className="flex -space-x-2">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-marine to-harbor border-2 border-depth"></div>
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-marine to-harbor border-2 border-depth"></div>
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-500 to-pink-600 border-2 border-depth"></div>
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-glacier to-marine border-2 border-depth"></div>
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 border-2 border-depth"></div>
+                <div className="flex -space-x-3">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#72a3bf] to-[#446e87] border-3 border-[#030f18] flex items-center justify-center">
+                    <Users className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#446e87] to-[#1d4052] border-3 border-[#030f18] flex items-center justify-center">
+                    <CheckCircle className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#1d4052] to-[#030f18] border-3 border-[#030f18] flex items-center justify-center">
+                    <BadgeCheck className="w-6 h-6 text-[#72a3bf]" />
+                  </div>
                 </div>
-                <span className="text-gray-400">Trusted by <strong className="text-white">2,847+</strong> SEO professionals</span>
+                <span className="text-gray-300 text-sm sm:text-base">Trusted by <strong className="text-white font-bold">2,847+</strong> agencies</span>
               </div>
               <div className="flex items-center space-x-2">
                 {[...Array(5)].map((_, i) => (
                   <Star key={i} className="w-5 h-5 fill-[#72a3bf] text-[#72a3bf]" />
                 ))}
-                <span className="text-gray-400 ml-2">4.9/5 from 890+ reviews</span>
+                <span className="text-gray-300 ml-2 text-sm sm:text-base">4.9/5 (890+ reviews)</span>
               </div>
             </div>
           </div>
@@ -166,37 +182,46 @@ export default function LandingPage() {
       </section>
 
       {/* PROBLEM/AGITATION SECTION */}
-      <section id="problem" className="py-20 lg:py-32 bg-white">
+      <section id="problem" className="py-20 lg:py-32 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-4xl md:text-5xl font-bold text-center mb-16 leading-tight">
+          <h2 className="text-4xl md:text-5xl font-bold text-center mb-6 leading-tight">
             The SEO Reporting Nightmare<br />
-            <span className="text-[#72a3bf]">Every Agency Knows Too Well</span>
+            <span className="text-[#446e87]">Every Agency Knows Too Well</span>
           </h2>
+          <p className="text-xl text-gray-600 text-center max-w-3xl mx-auto mb-16">
+            Sound familiar? You're not alone.
+          </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {/* Pain Point 1 */}
-            <div className="bg-gray-50/80 backdrop-blur-sm border-l-4 border-red-500 rounded-2xl p-8 hover:border-red-400 hover:shadow-[0_0_20px_rgba(255,68,68,0.3)] transition-all">
-              <Clock className="w-12 h-12 text-red-500 mb-6" />
-              <h3 className="text-2xl font-bold mb-4">40+ Hours Per Month</h3>
-              <p className="text-gray-400 text-lg leading-relaxed">
+            <div className="bg-white border-2 border-[#446e87]/20 rounded-2xl p-8 hover:border-[#446e87] hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+              <div className="bg-gradient-to-br from-[#446e87]/10 to-[#72a3bf]/10 w-16 h-16 rounded-xl flex items-center justify-center mb-6">
+                <Clock className="w-8 h-8 text-[#446e87]" />
+              </div>
+              <h3 className="text-2xl font-bold mb-4 text-gray-900">40+ Hours Per Month</h3>
+              <p className="text-gray-600 text-base leading-relaxed">
                 Manually pulling data from 6+ platforms, copy-pasting into spreadsheets, fixing broken formulas at 11 PM.
               </p>
             </div>
 
             {/* Pain Point 2 */}
-            <div className="bg-gray-50/80 backdrop-blur-sm border-l-4 border-red-500 rounded-2xl p-8 hover:border-red-400 hover:shadow-[0_0_20px_rgba(255,68,68,0.3)] transition-all">
-              <AlertCircle className="w-12 h-12 text-red-500 mb-6" />
-              <h3 className="text-2xl font-bold mb-4">Clients Don't Get It</h3>
-              <p className="text-gray-400 text-lg leading-relaxed">
+            <div className="bg-white border-2 border-[#446e87]/20 rounded-2xl p-8 hover:border-[#446e87] hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+              <div className="bg-gradient-to-br from-[#446e87]/10 to-[#72a3bf]/10 w-16 h-16 rounded-xl flex items-center justify-center mb-6">
+                <AlertCircle className="w-8 h-8 text-[#446e87]" />
+              </div>
+              <h3 className="text-2xl font-bold mb-4 text-gray-900">Clients Don't Get It</h3>
+              <p className="text-gray-600 text-base leading-relaxed">
                 Generic spreadsheets that look like tax returns. Clients glaze over and question your value every month.
               </p>
             </div>
 
             {/* Pain Point 3 */}
-            <div className="bg-gray-50/80 backdrop-blur-sm border-l-4 border-red-500 rounded-2xl p-8 hover:border-red-400 hover:shadow-[0_0_20px_rgba(255,68,68,0.3)] transition-all">
-              <DollarSign className="w-12 h-12 text-red-500 mb-6" />
-              <h3 className="text-2xl font-bold mb-4">Missed Opportunities</h3>
-              <p className="text-gray-400 text-lg leading-relaxed">
+            <div className="bg-white border-2 border-[#446e87]/20 rounded-2xl p-8 hover:border-[#446e87] hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+              <div className="bg-gradient-to-br from-[#446e87]/10 to-[#72a3bf]/10 w-16 h-16 rounded-xl flex items-center justify-center mb-6">
+                <DollarSign className="w-8 h-8 text-[#446e87]" />
+              </div>
+              <h3 className="text-2xl font-bold mb-4 text-gray-900">Missed Opportunities</h3>
+              <p className="text-gray-600 text-base leading-relaxed">
                 While you're formatting cells, competitors are closing deals. Your expertise is buried in busywork.
               </p>
             </div>
@@ -208,12 +233,12 @@ export default function LandingPage() {
       <section id="features" className="py-20 lg:py-32 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4 leading-tight">
-              Meet Your <span className="text-[#72a3bf]">AI Reporting Assistant</span><br />
-              That Works While You Sleep
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
+              Your <span className="bg-gradient-to-r from-[#72a3bf] to-[#446e87] bg-clip-text text-transparent">AI Sidekick</span> for<br />
+              Effortless SEO Reporting
             </h2>
-            <p className="text-xl text-gray-400 max-w-3xl mx-auto">
-              One-click reports that make you look like the SEO genius you are
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+              One-click reports that make you look like the SEO genius you are. While you sleep, your AI assistant works.
             </p>
           </div>
 
@@ -222,7 +247,7 @@ export default function LandingPage() {
             <div className="bg-gray-50/80 backdrop-blur-sm border border-gray-200 rounded-2xl p-8 hover:border-[#72a3bf] hover:-translate-y-2 transition-all duration-400 group">
               <Brain className="w-12 h-12 text-[#72a3bf] mb-6 group-hover:scale-110 transition-transform" />
               <h3 className="text-2xl font-bold mb-4">AI-Powered Data Analysis</h3>
-              <p className="text-gray-400 mb-6 leading-relaxed">
+              <p className="text-gray-600 mb-6 leading-relaxed">
                 Our AI analyzes patterns across GA4, GSC, and connected platforms. Automatically highlights wins, flags issues, and suggests actions.
               </p>
               <ul className="space-y-2 text-gray-500">
@@ -236,7 +261,7 @@ export default function LandingPage() {
             <div className="bg-gray-50/80 backdrop-blur-sm border border-gray-200 rounded-2xl p-8 hover:border-[#72a3bf] hover:-translate-y-2 transition-all duration-400 group">
               <Paintbrush className="w-12 h-12 text-[#72a3bf] mb-6 group-hover:scale-110 transition-transform" />
               <h3 className="text-2xl font-bold mb-4">White-Label Perfection</h3>
-              <p className="text-gray-400 mb-6 leading-relaxed">
+              <p className="text-gray-600 mb-6 leading-relaxed">
                 Upload your logo once. Every report automatically matches your brand colors, fonts, and style. Your clients never see our name.
               </p>
               <ul className="space-y-2 text-gray-500">
@@ -250,7 +275,7 @@ export default function LandingPage() {
             <div className="bg-gray-50/80 backdrop-blur-sm border border-gray-200 rounded-2xl p-8 hover:border-[#72a3bf] hover:-translate-y-2 transition-all duration-400 group">
               <Zap className="w-12 h-12 text-[#72a3bf] mb-6 group-hover:scale-110 transition-transform" />
               <h3 className="text-2xl font-bold mb-4">3-Minute Report Generation</h3>
-              <p className="text-gray-400 mb-6 leading-relaxed">
+              <p className="text-gray-600 mb-6 leading-relaxed">
                 Click "Generate." Get coffee. Come back to a 40-page professional report with insights, charts, and action items.
               </p>
               <ul className="space-y-2 text-gray-500">
@@ -264,7 +289,7 @@ export default function LandingPage() {
             <div className="bg-gray-50/80 backdrop-blur-sm border border-gray-200 rounded-2xl p-8 hover:border-[#72a3bf] hover:-translate-y-2 transition-all duration-400 group">
               <Smile className="w-12 h-12 text-[#72a3bf] mb-6 group-hover:scale-110 transition-transform" />
               <h3 className="text-2xl font-bold mb-4">Client-Friendly Dashboards</h3>
-              <p className="text-gray-400 mb-6 leading-relaxed">
+              <p className="text-gray-600 mb-6 leading-relaxed">
                 Interactive dashboards designed for humans, not data scientists. Color-coded metrics, plain-English insights, mobile-optimized.
               </p>
               <ul className="space-y-2 text-gray-500">
@@ -278,7 +303,7 @@ export default function LandingPage() {
             <div className="bg-gray-50/80 backdrop-blur-sm border border-gray-200 rounded-2xl p-8 hover:border-[#72a3bf] hover:-translate-y-2 transition-all duration-400 group">
               <PuzzleIcon className="w-12 h-12 text-[#72a3bf] mb-6 group-hover:scale-110 transition-transform" />
               <h3 className="text-2xl font-bold mb-4">Growing Integration Library</h3>
-              <p className="text-gray-400 mb-6 leading-relaxed">
+              <p className="text-gray-600 mb-6 leading-relaxed">
                 Google Analytics 4, Search Console, Google Ads, Facebook Ads, Ahrefs, SEMrush, and more. New platforms added monthly based on user requests.
               </p>
               <ul className="space-y-2 text-gray-500">
@@ -295,7 +320,7 @@ export default function LandingPage() {
               </div>
               <TrendingUp className="w-12 h-12 text-[#72a3bf] mb-6 group-hover:scale-110 transition-transform" />
               <h3 className="text-2xl font-bold mb-4">Insane ROI</h3>
-              <p className="text-gray-400 mb-6 leading-relaxed">
+              <p className="text-gray-600 mb-6 leading-relaxed">
                 Average agency saves 40+ hours/month. That's $4,000-8,000 in recovered billable time at standard agency rates.
               </p>
               <ul className="space-y-2 text-gray-500">
@@ -316,14 +341,14 @@ export default function LandingPage() {
               Works With Every Tool in Your<br />
               <span className="text-[#72a3bf]">SEO Arsenal</span>
             </h2>
-            <p className="text-xl text-gray-400 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               Pre-built integrations with the platforms you already use daily
             </p>
           </div>
 
           {/* Analytics & Search */}
           <div className="mb-12">
-            <h3 className="text-xl font-bold mb-6 text-gray-300">Analytics & Search</h3>
+            <h3 className="text-xl font-bold mb-6 text-gray-700">Analytics & Search</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {['Google Analytics 4', 'Google Search Console', 'Adobe Analytics', 'Matomo'].map((tool) => (
                 <div key={tool} className="bg-gray-50/80 backdrop-blur-sm border border-gray-200 rounded-xl p-6 text-center hover:border-[#72a3bf] hover:scale-105 transition-transform duration-300">
@@ -336,7 +361,7 @@ export default function LandingPage() {
 
           {/* Keyword Tracking */}
           <div className="mb-12">
-            <h3 className="text-xl font-bold mb-6 text-gray-300">Keyword Tracking</h3>
+            <h3 className="text-xl font-bold mb-6 text-gray-700">Keyword Tracking</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {[
                 { name: 'Ahrefs', available: true },
@@ -357,7 +382,7 @@ export default function LandingPage() {
 
           {/* Paid Advertising */}
           <div className="mb-12">
-            <h3 className="text-xl font-bold mb-6 text-gray-300">Paid Advertising</h3>
+            <h3 className="text-xl font-bold mb-6 text-gray-700">Paid Advertising</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {['Google Ads', 'Facebook Ads', 'LinkedIn Ads', 'Microsoft Advertising'].map((tool) => (
                 <div key={tool} className="bg-gray-50/80 backdrop-blur-sm border border-gray-200 rounded-xl p-6 text-center hover:border-[#72a3bf] hover:scale-105 transition-transform duration-300">
@@ -409,11 +434,11 @@ export default function LandingPage() {
             <div className="grid grid-cols-2 gap-8 mb-8">
               <div>
                 <div className="text-3xl font-bold text-[#72a3bf] mb-2">35 minutes</div>
-                <div className="text-gray-400">Total time invested</div>
+                <div className="text-gray-600">Total time invested</div>
               </div>
               <div>
                 <div className="text-3xl font-bold text-[#72a3bf] mb-2">40+ hours</div>
-                <div className="text-gray-400">Time saved per month</div>
+                <div className="text-gray-600">Time saved per month</div>
               </div>
             </div>
 
@@ -451,7 +476,7 @@ export default function LandingPage() {
               </div>
               <div className="bg-gray-50/80 backdrop-blur-sm border border-gray-200 rounded-2xl p-8 pt-12 mt-8 hover:border-[#72a3bf] transition-all">
                 <h3 className="text-2xl font-bold mb-4">Connect Your Tools</h3>
-                <p className="text-gray-400 leading-relaxed mb-6">
+                <p className="text-gray-600 leading-relaxed mb-6">
                   One-click OAuth with Google Analytics, Search Console, and 50+ SEO tools. No API keys. No developer needed. Takes 90 seconds.
                 </p>
                 <div className="flex justify-center space-x-3">
@@ -469,7 +494,7 @@ export default function LandingPage() {
               </div>
               <div className="bg-gray-50/80 backdrop-blur-sm border border-gray-200 rounded-2xl p-8 pt-12 mt-8 hover:border-[#72a3bf] transition-all">
                 <h3 className="text-2xl font-bold mb-4">Customize Your Template</h3>
-                <p className="text-gray-400 leading-relaxed mb-6">
+                <p className="text-gray-600 leading-relaxed mb-6">
                   Add your logo, choose your brand colors, select which metrics matter to THIS client. Save as template. Never do it again.
                 </p>
                 <div className="text-sm text-gray-500">Before → After: Generic vs Branded</div>
@@ -483,7 +508,7 @@ export default function LandingPage() {
               </div>
               <div className="bg-gray-50/80 backdrop-blur-sm border border-gray-200 rounded-2xl p-8 pt-12 mt-8 hover:border-[#72a3bf] transition-all">
                 <h3 className="text-2xl font-bold mb-4">Generate & Deliver</h3>
-                <p className="text-gray-400 leading-relaxed mb-6">
+                <p className="text-gray-600 leading-relaxed mb-6">
                   Click "Generate Report." AI analyzes everything, creates insights, builds charts, writes summaries. Export as PDF, send live link, or auto-deliver monthly.
                 </p>
                 <div className="text-sm text-gray-500">✨ Magic happens here</div>
@@ -527,7 +552,7 @@ export default function LandingPage() {
               <p className="text-xl font-bold mb-4 text-[#72a3bf]">
                 "We 3X'd our agency revenue in 6 months"
               </p>
-              <p className="text-gray-400 leading-relaxed mb-6">
+              <p className="text-gray-600 leading-relaxed mb-6">
                 Before Search Insights, I spent 50+ hours/month on reports. Now it's 3 hours. I reinvested that time into client strategy and closed 12 new retainers this quarter.
               </p>
               <div className="space-y-2 text-sm">
@@ -559,7 +584,7 @@ export default function LandingPage() {
               <p className="text-xl font-bold mb-4 text-[#72a3bf]">
                 "Client retention went from 65% to 94%"
               </p>
-              <p className="text-gray-400 leading-relaxed mb-6">
+              <p className="text-gray-600 leading-relaxed mb-6">
                 Our clients love the interactive dashboards. They actually understand their metrics now. We haven't lost a client in 8 months since switching.
               </p>
               <div className="space-y-2 text-sm">
@@ -591,7 +616,7 @@ export default function LandingPage() {
               <p className="text-xl font-bold mb-4 text-[#72a3bf]">
                 "Scaled from solo to 8-person team"
               </p>
-              <p className="text-gray-400 leading-relaxed mb-6">
+              <p className="text-gray-600 leading-relaxed mb-6">
                 I was stuck doing reports instead of growing. Search Insights freed up my time to hire, train, and scale. Best investment I've ever made.
               </p>
               <div className="space-y-2 text-sm">
@@ -615,15 +640,15 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16 text-center">
             <div>
               <div className="text-6xl md:text-7xl font-bold text-[#72a3bf] mb-2 animate-pulse">2,847</div>
-              <div className="text-gray-400">Active Agencies</div>
+              <div className="text-gray-600">Active Agencies</div>
             </div>
             <div>
               <div className="text-6xl md:text-7xl font-bold text-[#72a3bf] mb-2 animate-pulse">40,500+</div>
-              <div className="text-gray-400">Reports Generated</div>
+              <div className="text-gray-600">Reports Generated</div>
             </div>
             <div>
               <div className="text-6xl md:text-7xl font-bold text-[#72a3bf] mb-2 animate-pulse">99.8%</div>
-              <div className="text-gray-400">Uptime SLA</div>
+              <div className="text-gray-600">Uptime SLA</div>
             </div>
           </div>
         </div>
@@ -638,7 +663,7 @@ export default function LandingPage() {
           </h2>
 
           <div className="bg-gray-50/80 backdrop-blur-sm border border-[#72a3bf]/30 rounded-2xl p-12 mb-8">
-            <div className="text-9xl font-bold text-[#72a3bf] mb-4">$49<span className="text-3xl text-gray-400">/month</span></div>
+            <div className="text-9xl font-bold text-[#72a3bf] mb-4">$49<span className="text-3xl text-gray-600">/month</span></div>
             <p className="text-xl text-gray-400 mb-2">
               That's less than your Netflix + Spotify subscriptions.
             </p>
@@ -700,7 +725,7 @@ export default function LandingPage() {
                 </button>
                 {openFaq === index && (
                   <div className="px-6 pb-6">
-                    <p className="text-gray-400 leading-relaxed">{faq.a}</p>
+                    <p className="text-gray-600 leading-relaxed">{faq.a}</p>
                   </div>
                 )}
               </div>
@@ -784,7 +809,7 @@ export default function LandingPage() {
             {/* Links */}
             <div>
               <h4 className="font-semibold mb-4">Product</h4>
-              <ul className="space-y-2 text-gray-400">
+              <ul className="space-y-2 text-gray-600">
                 <li><Link href="#features" className="hover:text-[#72a3bf] transition-colors">Features</Link></li>
                 <li><Link href="#integrations" className="hover:text-[#72a3bf] transition-colors">Integrations</Link></li>
                 <li><Link href="#pricing" className="hover:text-[#72a3bf] transition-colors">Pricing</Link></li>
@@ -795,7 +820,7 @@ export default function LandingPage() {
             {/* Legal */}
             <div>
               <h4 className="font-semibold mb-4">Legal</h4>
-              <ul className="space-y-2 text-gray-400">
+              <ul className="space-y-2 text-gray-600">
                 <li><Link href="/legal/privacy" className="hover:text-[#72a3bf] transition-colors">Privacy Policy</Link></li>
                 <li><Link href="/legal/terms" className="hover:text-[#72a3bf] transition-colors">Terms of Service</Link></li>
                 <li><Link href="/legal/cookies" className="hover:text-[#72a3bf] transition-colors">Cookie Policy</Link></li>
