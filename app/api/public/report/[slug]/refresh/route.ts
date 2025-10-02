@@ -60,10 +60,10 @@ export async function POST(
     const prisma = getPrisma()
     
     // Get optional date range from request body (non-blocking)
-    let dateRange = 'week' // default value
+    let dateRange = 'last30' // default value (changed from 'week' due to Google's 2-3 day data delay)
     try {
       const body = await request.json().catch(() => ({}))
-      dateRange = body.dateRange || 'week'
+      dateRange = body.dateRange || 'last30'
     } catch (e) {
       // Body is optional, use default
     }
