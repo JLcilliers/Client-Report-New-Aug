@@ -391,7 +391,7 @@ export default function LandingPage() {
                 <p className="text-sm font-medium text-gray-900">Google Ads</p>
               </div>
               <div className="bg-white border border-gray-200 rounded-xl p-6 text-center hover:border-[#72a3bf] hover:shadow-lg hover:scale-105 transition-all duration-300">
-                <img src="https://i.ibb.co/MDtNrvWg/png-clipart-social-media-computer-icons-facebook-ad-blue-logo-thumbnail.png" alt="Facebook Ads" className="w-16 h-16 object-contain mx-auto mb-3" />
+                <img src="https://i.ibb.co/zWkcff8H/Logo-de-Facebook.png" alt="Facebook Ads" className="w-16 h-16 object-contain mx-auto mb-3" />
                 <p className="text-sm font-medium text-gray-900">Facebook Ads</p>
               </div>
               <div className="bg-white border border-gray-200 rounded-xl p-6 text-center hover:border-[#72a3bf] hover:shadow-lg hover:scale-105 transition-all duration-300">
