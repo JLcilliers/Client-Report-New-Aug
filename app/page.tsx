@@ -38,9 +38,9 @@ export default function LandingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#030f18] text-white font-sans">
+    <div className="min-h-screen bg-white text-gray-900 font-sans">
       {/* NAVIGATION BAR */}
-      <header className="sticky top-0 z-50 bg-depth/95 backdrop-blur-md border-b border-white/10 shadow-lg">
+      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-[70px]">
             <Link href="/" className="flex items-center">
@@ -69,13 +69,13 @@ export default function LandingPage() {
               <Button
                 variant="ghost"
                 asChild
-                className="text-white hover:bg-white/10 hidden md:inline-flex"
+                className="text-gray-700 hover:bg-gray-100 hidden md:inline-flex"
               >
                 <Link href="/login">Sign In</Link>
               </Button>
               <Button
                 asChild
-                className="bg-gradient-to-r from-[#72a3bf] to-[#446e87] text-white font-semibold hover:shadow-[0_4px_20px_rgba(114,163,191,0.4)] hover:-translate-y-0.5 transition-all duration-300 rounded-lg px-6"
+                className="bg-gradient-to-r from-[#72a3bf] to-[#446e87] text-gray-900 font-semibold hover:shadow-[0_4px_20px_rgba(114,163,191,0.4)] hover:-translate-y-0.5 transition-all duration-300 rounded-lg px-6"
               >
                 <Link href="/login">Get Started</Link>
               </Button>
@@ -116,7 +116,7 @@ export default function LandingPage() {
               <Button
                 size="lg"
                 asChild
-                className="bg-gradient-to-r from-[#72a3bf] to-[#446e87] text-white font-bold text-lg px-10 h-14 rounded-lg shadow-[0_4px_20px_rgba(114,163,191,0.3)] hover:shadow-[0_6px_30px_rgba(114,163,191,0.5)] hover:-translate-y-1 transition-all duration-300"
+                className="bg-gradient-to-r from-[#72a3bf] to-[#446e87] text-gray-900 font-bold text-lg px-10 h-14 rounded-lg shadow-[0_4px_20px_rgba(114,163,191,0.3)] hover:shadow-[0_6px_30px_rgba(114,163,191,0.5)] hover:-translate-y-1 transition-all duration-300"
               >
                 <Link href="/login">
                   Get Started - From $49/month
@@ -153,7 +153,7 @@ export default function LandingPage() {
       </section>
 
       {/* SOCIAL PROOF BAR */}
-      <section className="bg-[#1d4052] py-8 border-y border-white/5">
+      <section className="bg-gray-50 py-8 border-y border-white/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="text-center text-gray-500 text-sm mb-4">AS SEEN IN</p>
           <div className="flex justify-center items-center space-x-12 opacity-30">
@@ -166,7 +166,7 @@ export default function LandingPage() {
       </section>
 
       {/* PROBLEM/AGITATION SECTION */}
-      <section id="problem" className="py-20 lg:py-32 bg-[#030f18]">
+      <section id="problem" className="py-20 lg:py-32 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-4xl md:text-5xl font-bold text-center mb-16 leading-tight">
             The SEO Reporting Nightmare<br />
@@ -175,7 +175,7 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Pain Point 1 */}
-            <div className="bg-[#1d4052]/80 backdrop-blur-sm border-l-4 border-red-500 rounded-2xl p-8 hover:border-red-400 hover:shadow-[0_0_20px_rgba(255,68,68,0.3)] transition-all">
+            <div className="bg-gray-50/80 backdrop-blur-sm border-l-4 border-red-500 rounded-2xl p-8 hover:border-red-400 hover:shadow-[0_0_20px_rgba(255,68,68,0.3)] transition-all">
               <Clock className="w-12 h-12 text-red-500 mb-6" />
               <h3 className="text-2xl font-bold mb-4">40+ Hours Per Month</h3>
               <p className="text-gray-400 text-lg leading-relaxed">
@@ -184,7 +184,7 @@ export default function LandingPage() {
             </div>
 
             {/* Pain Point 2 */}
-            <div className="bg-[#1d4052]/80 backdrop-blur-sm border-l-4 border-red-500 rounded-2xl p-8 hover:border-red-400 hover:shadow-[0_0_20px_rgba(255,68,68,0.3)] transition-all">
+            <div className="bg-gray-50/80 backdrop-blur-sm border-l-4 border-red-500 rounded-2xl p-8 hover:border-red-400 hover:shadow-[0_0_20px_rgba(255,68,68,0.3)] transition-all">
               <AlertCircle className="w-12 h-12 text-red-500 mb-6" />
               <h3 className="text-2xl font-bold mb-4">Clients Don't Get It</h3>
               <p className="text-gray-400 text-lg leading-relaxed">
@@ -193,7 +193,7 @@ export default function LandingPage() {
             </div>
 
             {/* Pain Point 3 */}
-            <div className="bg-[#1d4052]/80 backdrop-blur-sm border-l-4 border-red-500 rounded-2xl p-8 hover:border-red-400 hover:shadow-[0_0_20px_rgba(255,68,68,0.3)] transition-all">
+            <div className="bg-gray-50/80 backdrop-blur-sm border-l-4 border-red-500 rounded-2xl p-8 hover:border-red-400 hover:shadow-[0_0_20px_rgba(255,68,68,0.3)] transition-all">
               <DollarSign className="w-12 h-12 text-red-500 mb-6" />
               <h3 className="text-2xl font-bold mb-4">Missed Opportunities</h3>
               <p className="text-gray-400 text-lg leading-relaxed">
@@ -205,7 +205,7 @@ export default function LandingPage() {
       </section>
 
       {/* SOLUTION/TRANSFORMATION SECTION */}
-      <section id="features" className="py-20 lg:py-32 bg-[#030f18]">
+      <section id="features" className="py-20 lg:py-32 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-4 leading-tight">
@@ -219,7 +219,7 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Feature 1: AI-Powered */}
-            <div className="bg-[#1d4052]/80 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:border-[#72a3bf] hover:-translate-y-2 transition-all duration-400 group">
+            <div className="bg-gray-50/80 backdrop-blur-sm border border-gray-200 rounded-2xl p-8 hover:border-[#72a3bf] hover:-translate-y-2 transition-all duration-400 group">
               <Brain className="w-12 h-12 text-[#72a3bf] mb-6 group-hover:scale-110 transition-transform" />
               <h3 className="text-2xl font-bold mb-4">AI-Powered Data Analysis</h3>
               <p className="text-gray-400 mb-6 leading-relaxed">
@@ -233,7 +233,7 @@ export default function LandingPage() {
             </div>
 
             {/* Feature 2: White-Label */}
-            <div className="bg-[#1d4052]/80 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:border-[#72a3bf] hover:-translate-y-2 transition-all duration-400 group">
+            <div className="bg-gray-50/80 backdrop-blur-sm border border-gray-200 rounded-2xl p-8 hover:border-[#72a3bf] hover:-translate-y-2 transition-all duration-400 group">
               <Paintbrush className="w-12 h-12 text-[#72a3bf] mb-6 group-hover:scale-110 transition-transform" />
               <h3 className="text-2xl font-bold mb-4">White-Label Perfection</h3>
               <p className="text-gray-400 mb-6 leading-relaxed">
@@ -247,7 +247,7 @@ export default function LandingPage() {
             </div>
 
             {/* Feature 3: Fast Generation */}
-            <div className="bg-[#1d4052]/80 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:border-[#72a3bf] hover:-translate-y-2 transition-all duration-400 group">
+            <div className="bg-gray-50/80 backdrop-blur-sm border border-gray-200 rounded-2xl p-8 hover:border-[#72a3bf] hover:-translate-y-2 transition-all duration-400 group">
               <Zap className="w-12 h-12 text-[#72a3bf] mb-6 group-hover:scale-110 transition-transform" />
               <h3 className="text-2xl font-bold mb-4">3-Minute Report Generation</h3>
               <p className="text-gray-400 mb-6 leading-relaxed">
@@ -261,7 +261,7 @@ export default function LandingPage() {
             </div>
 
             {/* Feature 4: Client-Friendly */}
-            <div className="bg-[#1d4052]/80 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:border-[#72a3bf] hover:-translate-y-2 transition-all duration-400 group">
+            <div className="bg-gray-50/80 backdrop-blur-sm border border-gray-200 rounded-2xl p-8 hover:border-[#72a3bf] hover:-translate-y-2 transition-all duration-400 group">
               <Smile className="w-12 h-12 text-[#72a3bf] mb-6 group-hover:scale-110 transition-transform" />
               <h3 className="text-2xl font-bold mb-4">Client-Friendly Dashboards</h3>
               <p className="text-gray-400 mb-6 leading-relaxed">
@@ -275,7 +275,7 @@ export default function LandingPage() {
             </div>
 
             {/* Feature 5: Integrations - UPDATED */}
-            <div className="bg-[#1d4052]/80 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:border-[#72a3bf] hover:-translate-y-2 transition-all duration-400 group">
+            <div className="bg-gray-50/80 backdrop-blur-sm border border-gray-200 rounded-2xl p-8 hover:border-[#72a3bf] hover:-translate-y-2 transition-all duration-400 group">
               <PuzzleIcon className="w-12 h-12 text-[#72a3bf] mb-6 group-hover:scale-110 transition-transform" />
               <h3 className="text-2xl font-bold mb-4">Growing Integration Library</h3>
               <p className="text-gray-400 mb-6 leading-relaxed">
@@ -290,7 +290,7 @@ export default function LandingPage() {
 
             {/* Feature 6: ROI */}
             <div className="relative bg-gradient-to-br from-[#72a3bf]/20 to-[#446e87]/10 backdrop-blur-sm border border-[#72a3bf]/30 rounded-2xl p-8 hover:border-[#72a3bf] hover:-translate-y-2 hover:shadow-[0_0_30px_rgba(114,163,191,0.4)] transition-all duration-400 group">
-              <div className="absolute -top-3 right-4 bg-gradient-to-r from-[#72a3bf] to-[#446e87] text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
+              <div className="absolute -top-3 right-4 bg-gradient-to-r from-[#72a3bf] to-[#446e87] text-gray-900 text-xs font-bold px-3 py-1 rounded-full shadow-lg">
                 BEST VALUE
               </div>
               <TrendingUp className="w-12 h-12 text-[#72a3bf] mb-6 group-hover:scale-110 transition-transform" />
@@ -309,7 +309,7 @@ export default function LandingPage() {
       </section>
 
       {/* INTEGRATIONS SHOWCASE SECTION - NEW */}
-      <section id="integrations" className="py-20 lg:py-32 bg-[#030f18]">
+      <section id="integrations" className="py-20 lg:py-32 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-4">
@@ -326,7 +326,7 @@ export default function LandingPage() {
             <h3 className="text-xl font-bold mb-6 text-gray-300">Analytics & Search</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {['Google Analytics 4', 'Google Search Console', 'Adobe Analytics', 'Matomo'].map((tool) => (
-                <div key={tool} className="bg-[#1d4052]/80 backdrop-blur-sm border border-white/10 rounded-xl p-6 text-center hover:border-[#72a3bf] hover:scale-105 transition-transform duration-300">
+                <div key={tool} className="bg-gray-50/80 backdrop-blur-sm border border-gray-200 rounded-xl p-6 text-center hover:border-[#72a3bf] hover:scale-105 transition-transform duration-300">
                   <div className="w-12 h-12 bg-gradient-to-br from-marine to-harbor rounded-lg mx-auto mb-3"></div>
                   <p className="text-sm font-medium">{tool}</p>
                 </div>
@@ -346,7 +346,7 @@ export default function LandingPage() {
                 { name: 'Majestic', available: true },
                 { name: 'Advanced Rank Tracking', available: false }
               ].map((tool) => (
-                <div key={tool.name} className={`bg-[#1d4052]/80 backdrop-blur-sm border ${tool.available ? 'border-white/10' : 'border-dashed border-gray-700'} rounded-xl p-6 text-center hover:border-[#72a3bf] hover:scale-105 transition-transform duration-300 ${!tool.available && 'opacity-50'}`}>
+                <div key={tool.name} className={`bg-gray-50/80 backdrop-blur-sm border ${tool.available ? 'border-gray-200' : 'border-dashed border-gray-700'} rounded-xl p-6 text-center hover:border-[#72a3bf] hover:scale-105 transition-transform duration-300 ${!tool.available && 'opacity-50'}`}>
                   <div className={`w-12 h-12 ${tool.available ? 'bg-gradient-to-br from-marine to-harbor' : 'bg-gray-700'} rounded-lg mx-auto mb-3`}></div>
                   <p className="text-sm font-medium">{tool.name}</p>
                   {!tool.available && <span className="text-xs text-gray-500 mt-1 inline-block">Coming Soon</span>}
@@ -360,7 +360,7 @@ export default function LandingPage() {
             <h3 className="text-xl font-bold mb-6 text-gray-300">Paid Advertising</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {['Google Ads', 'Facebook Ads', 'LinkedIn Ads', 'Microsoft Advertising'].map((tool) => (
-                <div key={tool} className="bg-[#1d4052]/80 backdrop-blur-sm border border-white/10 rounded-xl p-6 text-center hover:border-[#72a3bf] hover:scale-105 transition-transform duration-300">
+                <div key={tool} className="bg-gray-50/80 backdrop-blur-sm border border-gray-200 rounded-xl p-6 text-center hover:border-[#72a3bf] hover:scale-105 transition-transform duration-300">
                   <div className="w-12 h-12 bg-gradient-to-br from-glacier to-marine rounded-lg mx-auto mb-3"></div>
                   <p className="text-sm font-medium">{tool}</p>
                 </div>
@@ -369,7 +369,7 @@ export default function LandingPage() {
           </div>
 
           {/* Coming Soon */}
-          <div className="text-center mt-12 p-8 bg-[#1d4052]/40 rounded-2xl border border-dashed border-gray-700">
+          <div className="text-center mt-12 p-8 bg-gray-50/40 rounded-2xl border border-dashed border-gray-700">
             <p className="text-gray-400 mb-4">
               Don't see your tool? <Link href="#contact" className="text-[#72a3bf] hover:underline">Request Integration →</Link>
             </p>
@@ -379,7 +379,7 @@ export default function LandingPage() {
       </section>
 
       {/* QUICK WINS SECTION - NEW */}
-      <section className="py-20 lg:py-32 bg-[#030f18]">
+      <section className="py-20 lg:py-32 bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-4xl md:text-5xl font-bold text-center mb-4">
             What You Can Do in Your<br />
@@ -395,7 +395,7 @@ export default function LandingPage() {
               { day: 'Day 5', task: 'Set up automated monthly delivery', time: '5 minutes' },
               { day: 'Day 6-7', task: 'Kick back and let AI handle next month\'s reports', time: '0 minutes' }
             ].map((item, index) => (
-              <div key={index} className="flex items-center space-x-4 p-6 bg-[#1d4052]/80 backdrop-blur-sm border border-white/10 rounded-xl hover:border-[#72a3bf] transition-all">
+              <div key={index} className="flex items-center space-x-4 p-6 bg-gray-50/80 backdrop-blur-sm border border-gray-200 rounded-xl hover:border-[#72a3bf] transition-all">
                 <CheckCircle className="w-6 h-6 text-[#72a3bf] flex-shrink-0" />
                 <div className="flex-1">
                   <span className="font-bold text-[#72a3bf]">{item.day}:</span> {item.task}
@@ -420,7 +420,7 @@ export default function LandingPage() {
             <Button
               size="lg"
               asChild
-              className="bg-gradient-to-r from-[#72a3bf] to-[#446e87] text-white font-bold text-lg px-10 h-14 rounded-lg shadow-[0_4px_20px_rgba(114,163,191,0.3)] hover:shadow-[0_6px_30px_rgba(114,163,191,0.5)] hover:-translate-y-1 transition-all duration-300"
+              className="bg-gradient-to-r from-[#72a3bf] to-[#446e87] text-gray-900 font-bold text-lg px-10 h-14 rounded-lg shadow-[0_4px_20px_rgba(114,163,191,0.3)] hover:shadow-[0_6px_30px_rgba(114,163,191,0.5)] hover:-translate-y-1 transition-all duration-300"
             >
               <Link href="/login">
                 Get Started for $49/month
@@ -431,7 +431,7 @@ export default function LandingPage() {
       </section>
 
       {/* HOW IT WORKS */}
-      <section id="how-it-works" className="py-20 lg:py-32 bg-[#030f18]">
+      <section id="how-it-works" className="py-20 lg:py-32 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-4">
@@ -446,10 +446,10 @@ export default function LandingPage() {
 
             {/* Step 1 */}
             <div className="relative">
-              <div className="absolute -top-8 left-1/2 -translate-x-1/2 w-16 h-16 bg-gradient-to-br from-[#72a3bf] to-[#446e87] rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-[0_4px_20px_rgba(114,163,191,0.4)] z-10">
+              <div className="absolute -top-8 left-1/2 -translate-x-1/2 w-16 h-16 bg-gradient-to-br from-[#72a3bf] to-[#446e87] rounded-full flex items-center justify-center text-gray-900 text-2xl font-bold shadow-[0_4px_20px_rgba(114,163,191,0.4)] z-10">
                 01
               </div>
-              <div className="bg-[#1d4052]/80 backdrop-blur-sm border border-white/10 rounded-2xl p-8 pt-12 mt-8 hover:border-[#72a3bf] transition-all">
+              <div className="bg-gray-50/80 backdrop-blur-sm border border-gray-200 rounded-2xl p-8 pt-12 mt-8 hover:border-[#72a3bf] transition-all">
                 <h3 className="text-2xl font-bold mb-4">Connect Your Tools</h3>
                 <p className="text-gray-400 leading-relaxed mb-6">
                   One-click OAuth with Google Analytics, Search Console, and 50+ SEO tools. No API keys. No developer needed. Takes 90 seconds.
@@ -464,10 +464,10 @@ export default function LandingPage() {
 
             {/* Step 2 */}
             <div className="relative">
-              <div className="absolute -top-8 left-1/2 -translate-x-1/2 w-16 h-16 bg-gradient-to-br from-[#72a3bf] to-[#446e87] rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-[0_4px_20px_rgba(114,163,191,0.4)] z-10">
+              <div className="absolute -top-8 left-1/2 -translate-x-1/2 w-16 h-16 bg-gradient-to-br from-[#72a3bf] to-[#446e87] rounded-full flex items-center justify-center text-gray-900 text-2xl font-bold shadow-[0_4px_20px_rgba(114,163,191,0.4)] z-10">
                 02
               </div>
-              <div className="bg-[#1d4052]/80 backdrop-blur-sm border border-white/10 rounded-2xl p-8 pt-12 mt-8 hover:border-[#72a3bf] transition-all">
+              <div className="bg-gray-50/80 backdrop-blur-sm border border-gray-200 rounded-2xl p-8 pt-12 mt-8 hover:border-[#72a3bf] transition-all">
                 <h3 className="text-2xl font-bold mb-4">Customize Your Template</h3>
                 <p className="text-gray-400 leading-relaxed mb-6">
                   Add your logo, choose your brand colors, select which metrics matter to THIS client. Save as template. Never do it again.
@@ -478,10 +478,10 @@ export default function LandingPage() {
 
             {/* Step 3 */}
             <div className="relative">
-              <div className="absolute -top-8 left-1/2 -translate-x-1/2 w-16 h-16 bg-gradient-to-br from-[#72a3bf] to-[#446e87] rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-[0_4px_20px_rgba(114,163,191,0.4)] z-10">
+              <div className="absolute -top-8 left-1/2 -translate-x-1/2 w-16 h-16 bg-gradient-to-br from-[#72a3bf] to-[#446e87] rounded-full flex items-center justify-center text-gray-900 text-2xl font-bold shadow-[0_4px_20px_rgba(114,163,191,0.4)] z-10">
                 03
               </div>
-              <div className="bg-[#1d4052]/80 backdrop-blur-sm border border-white/10 rounded-2xl p-8 pt-12 mt-8 hover:border-[#72a3bf] transition-all">
+              <div className="bg-gray-50/80 backdrop-blur-sm border border-gray-200 rounded-2xl p-8 pt-12 mt-8 hover:border-[#72a3bf] transition-all">
                 <h3 className="text-2xl font-bold mb-4">Generate & Deliver</h3>
                 <p className="text-gray-400 leading-relaxed mb-6">
                   Click "Generate Report." AI analyzes everything, creates insights, builds charts, writes summaries. Export as PDF, send live link, or auto-deliver monthly.
@@ -495,7 +495,7 @@ export default function LandingPage() {
             <Button
               size="lg"
               asChild
-              className="bg-gradient-to-r from-[#72a3bf] to-[#446e87] text-white font-bold text-lg px-10 h-14 rounded-lg shadow-[0_4px_20px_rgba(114,163,191,0.3)] hover:shadow-[0_6px_30px_rgba(114,163,191,0.5)] hover:-translate-y-1 transition-all duration-300"
+              className="bg-gradient-to-r from-[#72a3bf] to-[#446e87] text-gray-900 font-bold text-lg px-10 h-14 rounded-lg shadow-[0_4px_20px_rgba(114,163,191,0.3)] hover:shadow-[0_6px_30px_rgba(114,163,191,0.5)] hover:-translate-y-1 transition-all duration-300"
             >
               <Link href="/login">
                 Get Started for $49/month
@@ -506,7 +506,7 @@ export default function LandingPage() {
       </section>
 
       {/* TESTIMONIALS/RESULTS SECTION */}
-      <section id="testimonials" className="py-20 lg:py-32 bg-[#030f18]">
+      <section id="testimonials" className="py-20 lg:py-32 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-4xl md:text-5xl font-bold text-center mb-4 leading-tight">
             Real Agencies. <span className="text-[#72a3bf]">Real Results.</span><br />
@@ -515,7 +515,7 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
             {/* Testimonial 1 */}
-            <div className="bg-[#1d4052]/80 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:border-[#72a3bf] transition-all">
+            <div className="bg-gray-50/80 backdrop-blur-sm border border-gray-200 rounded-2xl p-8 hover:border-[#72a3bf] transition-all">
               <div className="flex items-center mb-6">
                 <div className="w-16 h-16 rounded-full bg-gradient-to-br from-marine to-harbor"></div>
                 <div className="ml-4">
@@ -547,7 +547,7 @@ export default function LandingPage() {
             </div>
 
             {/* Testimonial 2 */}
-            <div className="bg-[#1d4052]/80 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:border-[#72a3bf] transition-all">
+            <div className="bg-gray-50/80 backdrop-blur-sm border border-gray-200 rounded-2xl p-8 hover:border-[#72a3bf] transition-all">
               <div className="flex items-center mb-6">
                 <div className="w-16 h-16 rounded-full bg-gradient-to-br from-marine to-harbor"></div>
                 <div className="ml-4">
@@ -579,7 +579,7 @@ export default function LandingPage() {
             </div>
 
             {/* Testimonial 3 */}
-            <div className="bg-[#1d4052]/80 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:border-[#72a3bf] transition-all">
+            <div className="bg-gray-50/80 backdrop-blur-sm border border-gray-200 rounded-2xl p-8 hover:border-[#72a3bf] transition-all">
               <div className="flex items-center mb-6">
                 <div className="w-16 h-16 rounded-full bg-gradient-to-br from-green-500 to-green-600"></div>
                 <div className="ml-4">
@@ -630,14 +630,14 @@ export default function LandingPage() {
       </section>
 
       {/* PRICING TEASER */}
-      <section id="pricing" className="py-20 lg:py-32 bg-[#030f18]">
+      <section id="pricing" className="py-20 lg:py-32 bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-4xl md:text-5xl font-bold mb-8">
             Pricing That Makes Your<br />
             <span className="text-[#72a3bf]">Accountant Smile</span>
           </h2>
 
-          <div className="bg-[#1d4052]/80 backdrop-blur-sm border border-[#72a3bf]/30 rounded-2xl p-12 mb-8">
+          <div className="bg-gray-50/80 backdrop-blur-sm border border-[#72a3bf]/30 rounded-2xl p-12 mb-8">
             <div className="text-9xl font-bold text-[#72a3bf] mb-4">$49<span className="text-3xl text-gray-400">/month</span></div>
             <p className="text-xl text-gray-400 mb-2">
               That's less than your Netflix + Spotify subscriptions.
@@ -652,7 +652,7 @@ export default function LandingPage() {
             <Button
               size="lg"
               asChild
-              className="bg-gradient-to-r from-[#72a3bf] to-[#446e87] text-white font-bold text-lg px-10 h-14 rounded-lg shadow-[0_4px_20px_rgba(114,163,191,0.3)] hover:shadow-[0_6px_30px_rgba(114,163,191,0.5)] hover:-translate-y-1 transition-all duration-300"
+              className="bg-gradient-to-r from-[#72a3bf] to-[#446e87] text-gray-900 font-bold text-lg px-10 h-14 rounded-lg shadow-[0_4px_20px_rgba(114,163,191,0.3)] hover:shadow-[0_6px_30px_rgba(114,163,191,0.5)] hover:-translate-y-1 transition-all duration-300"
             >
               <Link href="/login">
                 See All Plans & Get Started
@@ -669,7 +669,7 @@ export default function LandingPage() {
       </section>
 
       {/* FAQ SECTION - UPDATED */}
-      <section id="faq" className="py-20 lg:py-32 bg-[#030f18]">
+      <section id="faq" className="py-20 lg:py-32 bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-4xl md:text-5xl font-bold text-center mb-16">
             Questions? <span className="text-[#72a3bf]">We've Got Answers.</span>
@@ -686,7 +686,7 @@ export default function LandingPage() {
               { q: "Can I cancel anytime?", a: "Yes, absolutely. No contracts, no commitments. Cancel with one click from your dashboard." },
               { q: "Can I customize the reports?", a: "Yes! Customize colors, fonts, metrics, sections, and more. Save templates for different client types." }
             ].map((faq, index) => (
-              <div key={index} className="bg-[#1d4052]/80 backdrop-blur-sm border border-white/10 rounded-xl overflow-hidden hover:border-[#72a3bf] transition-all">
+              <div key={index} className="bg-gray-50/80 backdrop-blur-sm border border-gray-200 rounded-xl overflow-hidden hover:border-[#72a3bf] transition-all">
                 <button
                   onClick={() => toggleFaq(index)}
                   className="w-full flex items-center justify-between p-6 text-left"
@@ -734,7 +734,7 @@ export default function LandingPage() {
             <Button
               size="lg"
               asChild
-              className="bg-gradient-to-r from-[#72a3bf] to-[#446e87] text-white font-bold text-lg px-10 h-14 rounded-lg shadow-[0_4px_20px_rgba(114,163,191,0.3)] hover:shadow-[0_6px_30px_rgba(114,163,191,0.5)] hover:-translate-y-1 transition-all duration-300"
+              className="bg-gradient-to-r from-[#72a3bf] to-[#446e87] text-gray-900 font-bold text-lg px-10 h-14 rounded-lg shadow-[0_4px_20px_rgba(114,163,191,0.3)] hover:shadow-[0_6px_30px_rgba(114,163,191,0.5)] hover:-translate-y-1 transition-all duration-300"
             >
               <Link href="/login">
                 Get Started Today - From $49/mo
@@ -749,7 +749,7 @@ export default function LandingPage() {
           </p>
 
           {/* Trust badges */}
-          <div className="flex flex-wrap justify-center items-center gap-8 text-sm text-gray-400 pt-8 border-t border-white/10">
+          <div className="flex flex-wrap justify-center items-center gap-8 text-sm text-gray-400 pt-8 border-t border-gray-200">
             <div className="flex items-center space-x-2">
               <Shield className="w-5 h-5 text-[#72a3bf]" />
               <span>Bank-Level Security</span>
@@ -767,7 +767,7 @@ export default function LandingPage() {
       </section>
 
       {/* FOOTER */}
-      <footer className="border-t border-white/10 bg-[#030f18] py-12">
+      <footer className="border-t border-gray-200 bg-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             {/* Brand */}
@@ -803,7 +803,7 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <div className="border-t border-white/10 mt-12 pt-8 text-center text-gray-400 text-sm">
+          <div className="border-t border-gray-200 mt-12 pt-8 text-center text-gray-400 text-sm">
             <p>&copy; {new Date().getFullYear()} Search Insights Hub. All rights reserved.</p>
           </div>
         </div>

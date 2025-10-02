@@ -110,11 +110,11 @@ const HealthScore = ({ score }: { score: number }) => {
           />
         </svg>
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-2xl font-bold text-white">{score}</span>
+          <span className="text-2xl font-bold text-gray-900">{score}</span>
         </div>
       </div>
       <div>
-        <div className={`inline-block px-3 py-1 rounded-full text-white text-sm font-semibold ${getColor()}`}>
+        <div className={`inline-block px-3 py-1 rounded-full text-gray-900 text-sm font-semibold ${getColor()}`}>
           {getLabel()}
         </div>
         <p className="text-xs text-gray-400 mt-1">Overall Performance</p>
@@ -135,7 +135,7 @@ const PerformanceIndicator = ({ value, target, label }: { value: number; target:
   };
 
   return (
-    <div className="p-4 border border-white/10 rounded-lg bg-[#1d4052]">
+    <div className="p-4 border border-gray-200 rounded-lg bg-white">
       <div className="flex justify-between items-center mb-2">
         <span className="text-sm text-gray-400">{label}</span>
         <span className={`px-2 py-1 rounded text-xs font-semibold ${statusColors[status]}`}>
@@ -143,10 +143,10 @@ const PerformanceIndicator = ({ value, target, label }: { value: number; target:
         </span>
       </div>
       <div className="flex items-baseline gap-2">
-        <span className="text-2xl font-bold text-white">{value.toLocaleString()}</span>
+        <span className="text-2xl font-bold text-gray-900">{value.toLocaleString()}</span>
         <span className="text-sm text-gray-400">/ {target.toLocaleString()}</span>
       </div>
-      <div className="mt-2 w-full bg-white/10 rounded-full h-2">
+      <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
         <div
           className={`h-2 rounded-full ${status === 'success' ? 'bg-green-500' : status === 'warning' ? 'bg-yellow-500' : 'bg-red-500'}`}
           style={{ width: `${Math.min(percentage, 100)}%` }}
@@ -254,7 +254,7 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#030f18] flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#72a3bf] mx-auto mb-4"></div>
           <p className="text-gray-400">Generating your enhanced report...</p>
@@ -278,9 +278,9 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
   const clickSparkline = [9000, 9500, 10200, 10800, 11500, 12000, 12543];
 
   return (
-    <div className="min-h-screen bg-[#030f18]">
+    <div className="min-h-screen bg-white">
       {/* Header */}
-      <div className="bg-gradient-to-r from-[#1d4052] to-[#030f18] text-white border-b border-white/10">
+      <div className="bg-gradient-to-r from-glacier to-marine text-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 py-12">
           <div className="flex justify-between items-start">
             <div>
@@ -296,28 +296,28 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Enhanced Executive Summary */}
         <section className="mb-12">
-          <div className="bg-[#1d4052] border border-white/10 rounded-xl p-8 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
-            <h2 className="text-2xl font-bold mb-4 flex items-center gap-2 text-white">
+          <div className="bg-white border border-gray-200 rounded-xl p-8 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
+            <h2 className="text-2xl font-bold mb-4 flex items-center gap-2 text-gray-900">
               <FileText className="w-6 h-6 text-[#72a3bf]" />
               Executive Summary
             </h2>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-              <div className="bg-[#030f18] border border-white/10 rounded-lg p-4 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
                 <div className="flex items-center gap-2 mb-2">
                   <CheckCircle className="w-5 h-5 text-green-500" />
                   <span className="font-semibold text-green-400">Top Achievement</span>
                 </div>
                 <p className="text-sm text-gray-400">Organic traffic increased 23% MoM, exceeding quarterly targets</p>
               </div>
-              <div className="bg-[#030f18] border border-white/10 rounded-lg p-4 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
                 <div className="flex items-center gap-2 mb-2">
                   <AlertCircle className="w-5 h-5 text-yellow-500" />
                   <span className="font-semibold text-yellow-400">Needs Attention</span>
                 </div>
                 <p className="text-sm text-gray-400">Page load speed affecting mobile conversion rates</p>
               </div>
-              <div className="bg-[#030f18] border border-white/10 rounded-lg p-4 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
                 <div className="flex items-center gap-2 mb-2">
                   <Target className="w-5 h-5 text-[#72a3bf]" />
                   <span className="font-semibold text-[#72a3bf]">Key Focus</span>
@@ -334,20 +334,20 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
 
         {/* Enhanced KPI Dashboard with Comparisons */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2 text-white">
+          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2 text-gray-900">
             <BarChart3 className="w-6 h-6 text-[#72a3bf]" />
             Key Performance Indicators - Comparative Analysis
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-[#1d4052] border border-white/10 rounded-lg p-6 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)] transition-all duration-300">
+            <div className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)] transition-all duration-300">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-gray-400 text-sm">Total Sessions</span>
                 <Users className="w-5 h-5 text-[#72a3bf]" />
               </div>
-              <div className="text-3xl font-bold text-white">{formatNumber(data.analytics.totalSessions)}</div>
+              <div className="text-3xl font-bold text-gray-900">{formatNumber(data.analytics.totalSessions)}</div>
               <Sparkline data={sessionSparkline} color="#72a3bf" />
-              <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-white/10">
+              <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-gray-200">
                 <div>
                   <p className="text-xs text-gray-400">vs Last Month</p>
                   <p className={`text-sm font-semibold ${momSessionChange > 0 ? 'text-green-500' : 'text-red-500'}`}>
@@ -363,14 +363,14 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
               </div>
             </div>
 
-            <div className="bg-[#1d4052] border border-white/10 rounded-lg p-6 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)] transition-all duration-300">
+            <div className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)] transition-all duration-300">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-gray-400 text-sm">Organic Clicks</span>
                 <Search className="w-5 h-5 text-green-500" />
               </div>
-              <div className="text-3xl font-bold text-white">{formatNumber(data.searchConsole.totalClicks)}</div>
+              <div className="text-3xl font-bold text-gray-900">{formatNumber(data.searchConsole.totalClicks)}</div>
               <Sparkline data={clickSparkline} color="#10B981" />
-              <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-white/10">
+              <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-gray-200">
                 <div>
                   <p className="text-xs text-gray-400">vs Last Month</p>
                   <p className={`text-sm font-semibold ${momClickChange > 0 ? 'text-green-500' : 'text-red-500'}`}>
@@ -379,31 +379,31 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
                 </div>
                 <div>
                   <p className="text-xs text-gray-400">CTR</p>
-                  <p className="text-sm font-semibold text-white">{data.searchConsole.avgCtr.toFixed(2)}%</p>
+                  <p className="text-sm font-semibold text-gray-900">{data.searchConsole.avgCtr.toFixed(2)}%</p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-[#1d4052] border border-white/10 rounded-lg p-6 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)] transition-all duration-300">
+            <div className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)] transition-all duration-300">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-gray-400 text-sm">Conversion Rate</span>
                 <Target className="w-5 h-5 text-[#72a3bf]" />
               </div>
-              <div className="text-3xl font-bold text-white">3.8%</div>
+              <div className="text-3xl font-bold text-gray-900">3.8%</div>
               <div className="flex items-center gap-2 mt-2">
-                <div className="flex-1 bg-white/10 rounded-full h-2">
+                <div className="flex-1 bg-gray-200 rounded-full h-2">
                   <div className="bg-[#72a3bf] h-2 rounded-full" style={{ width: '76%' }}></div>
                 </div>
                 <span className="text-xs text-gray-400">Target: 5%</span>
               </div>
-              <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-white/10">
+              <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-gray-200">
                 <div>
                   <p className="text-xs text-gray-400">vs Last Month</p>
                   <p className="text-sm font-semibold text-green-500">+0.5%</p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-400">Conversions</p>
-                  <p className="text-sm font-semibold text-white">1,719</p>
+                  <p className="text-sm font-semibold text-gray-900">1,719</p>
                 </div>
               </div>
             </div>
@@ -414,41 +414,41 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
 
         {/* Enhanced Metrics Section */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2 text-white">
+          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2 text-gray-900">
             <Activity className="w-6 h-6 text-[#72a3bf]" />
             Enhanced Performance Metrics
           </h2>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* User Behavior */}
-            <div className="bg-[#1d4052] border border-white/10 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
-              <h3 className="font-semibold mb-4 flex items-center gap-2 text-white">
+            <div className="bg-white border border-gray-200 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
+              <h3 className="font-semibold mb-4 flex items-center gap-2 text-gray-900">
                 <Users className="w-5 h-5 text-[#72a3bf]" />
                 User Behavior
               </h3>
               <div className="space-y-3">
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-400">Pages per Session</span>
-                  <span className="font-semibold text-white">{data.analytics.pagesPerSession}</span>
+                  <span className="font-semibold text-gray-900">{data.analytics.pagesPerSession}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-400">Avg. Session Duration</span>
-                  <span className="font-semibold text-white">{Math.floor(data.analytics.avgSessionDuration / 60)}:{(data.analytics.avgSessionDuration % 60).toString().padStart(2, '0')}</span>
+                  <span className="font-semibold text-gray-900">{Math.floor(data.analytics.avgSessionDuration / 60)}:{(data.analytics.avgSessionDuration % 60).toString().padStart(2, '0')}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-400">Bounce Rate</span>
-                  <span className="font-semibold text-white">{data.analytics.bounceRate}%</span>
+                  <span className="font-semibold text-gray-900">{data.analytics.bounceRate}%</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-400">Scroll Depth</span>
-                  <span className="font-semibold text-white">73%</span>
+                  <span className="font-semibold text-gray-900">73%</span>
                 </div>
               </div>
             </div>
 
             {/* Core Web Vitals */}
-            <div className="bg-[#1d4052] border border-white/10 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
-              <h3 className="font-semibold mb-4 flex items-center gap-2 text-white">
+            <div className="bg-white border border-gray-200 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
+              <h3 className="font-semibold mb-4 flex items-center gap-2 text-gray-900">
                 <Gauge className="w-5 h-5 text-green-500" />
                 Core Web Vitals
               </h3>
@@ -479,27 +479,27 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
             </div>
 
             {/* Lead Quality */}
-            <div className="bg-[#1d4052] border border-white/10 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
-              <h3 className="font-semibold mb-4 flex items-center gap-2 text-white">
+            <div className="bg-white border border-gray-200 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
+              <h3 className="font-semibold mb-4 flex items-center gap-2 text-gray-900">
                 <Star className="w-5 h-5 text-yellow-500" />
                 Lead Quality Indicators
               </h3>
               <div className="space-y-3">
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-400">Marketing Qualified</span>
-                  <span className="font-semibold text-white">68%</span>
+                  <span className="font-semibold text-gray-900">68%</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-400">Sales Qualified</span>
-                  <span className="font-semibold text-white">42%</span>
+                  <span className="font-semibold text-gray-900">42%</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-400">Conversion to Customer</span>
-                  <span className="font-semibold text-white">18%</span>
+                  <span className="font-semibold text-gray-900">18%</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-400">Lead Score Avg</span>
-                  <span className="font-semibold text-white">7.2/10</span>
+                  <span className="font-semibold text-gray-900">7.2/10</span>
                 </div>
               </div>
             </div>
@@ -508,7 +508,7 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
 
         {/* Performance Against Targets */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2 text-white">
+          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2 text-gray-900">
             <Target className="w-6 h-6 text-[#72a3bf]" />
             Performance Against Targets
           </h2>
@@ -524,14 +524,14 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
 
         {/* Competitive Context */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2 text-white">
+          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2 text-gray-900">
             <Trophy className="w-6 h-6 text-[#72a3bf]" />
             Competitive Landscape
           </h2>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-[#1d4052] border border-white/10 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
-              <h3 className="text-lg font-semibold mb-4 text-white">Share of Voice</h3>
+            <div className="bg-white border border-gray-200 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
+              <h3 className="text-lg font-semibold mb-4 text-gray-900">Share of Voice</h3>
               <ResponsiveContainer width="100%" height={250}>
                 <BarChart data={data.competitors}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#2A2A2A" />
@@ -547,8 +547,8 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
               </ResponsiveContainer>
             </div>
 
-            <div className="bg-[#1d4052] border border-white/10 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
-              <h3 className="text-lg font-semibold mb-4 text-white">Competitive Opportunities</h3>
+            <div className="bg-white border border-gray-200 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
+              <h3 className="text-lg font-semibold mb-4 text-gray-900">Competitive Opportunities</h3>
               <div className="space-y-3">
                 <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
                   <div className="flex items-center gap-2 mb-1">
@@ -578,15 +578,15 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
 
         {/* Testing & Optimization Results */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2 text-white">
+          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2 text-gray-900">
             <TestTube className="w-6 h-6 text-[#72a3bf]" />
             Testing & Optimization Results
           </h2>
 
-          <div className="bg-[#1d4052] border border-white/10 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
+          <div className="bg-white border border-gray-200 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
             <div className="mb-4">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-lg font-semibold text-white">A/B Tests Completed</span>
+                <span className="text-lg font-semibold text-gray-900">A/B Tests Completed</span>
                 <span className="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm font-semibold border border-green-500/30">
                   {data.testing.successfulTests}/{data.testing.testsRun} Successful
                 </span>
@@ -598,7 +598,7 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
               <div className="border-l-4 border-green-500 pl-4 py-2 bg-green-500/5">
                 <div className="flex justify-between items-center">
                   <div>
-                    <p className="font-semibold text-white">Homepage Hero CTA Test</p>
+                    <p className="font-semibold text-gray-900">Homepage Hero CTA Test</p>
                     <p className="text-sm text-gray-400">Button color and copy variation</p>
                   </div>
                   <span className="text-green-400 font-semibold">+23% CTR</span>
@@ -607,7 +607,7 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
               <div className="border-l-4 border-green-500 pl-4 py-2 bg-green-500/5">
                 <div className="flex justify-between items-center">
                   <div>
-                    <p className="font-semibold text-white">Product Page Layout Test</p>
+                    <p className="font-semibold text-gray-900">Product Page Layout Test</p>
                     <p className="text-sm text-gray-400">Image placement and size optimization</p>
                   </div>
                   <span className="text-green-400 font-semibold">+18% Conversion</span>
@@ -616,7 +616,7 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
               <div className="border-l-4 border-yellow-500 pl-4 py-2 bg-yellow-500/5">
                 <div className="flex justify-between items-center">
                   <div>
-                    <p className="font-semibold text-white">Checkout Flow Simplification</p>
+                    <p className="font-semibold text-gray-900">Checkout Flow Simplification</p>
                     <p className="text-sm text-gray-400">Reduced form fields and steps</p>
                   </div>
                   <span className="text-yellow-400 font-semibold">+5% Completion</span>
@@ -625,7 +625,7 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
               <div className="border-l-4 border-red-500 pl-4 py-2 bg-red-500/5">
                 <div className="flex justify-between items-center">
                   <div>
-                    <p className="font-semibold text-white">Pop-up Timing Test</p>
+                    <p className="font-semibold text-gray-900">Pop-up Timing Test</p>
                     <p className="text-sm text-gray-400">Exit intent vs time-based trigger</p>
                   </div>
                   <span className="text-red-400 font-semibold">-2% Engagement</span>
@@ -637,16 +637,16 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
 
         {/* Upcoming Opportunities */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2 text-white">
+          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2 text-gray-900">
             <Lightbulb className="w-6 h-6 text-[#72a3bf]" />
             Upcoming Opportunities & Market Trends
           </h2>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="bg-[#1d4052] border border-[#72a3bf]/20 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
+            <div className="bg-white border border-[#72a3bf]/20 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
               <div className="flex items-center gap-2 mb-3">
                 <Calendar className="w-5 h-5 text-[#72a3bf]" />
-                <h3 className="font-semibold text-white">Seasonal Opportunities</h3>
+                <h3 className="font-semibold text-gray-900">Seasonal Opportunities</h3>
               </div>
               <ul className="space-y-2 text-sm text-gray-400">
                 <li>• Black Friday prep (45 days)</li>
@@ -656,10 +656,10 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
               </ul>
             </div>
 
-            <div className="bg-[#1d4052] border border-green-500/20 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(16,185,129,0.15)]">
+            <div className="bg-white border border-green-500/20 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(16,185,129,0.15)]">
               <div className="flex items-center gap-2 mb-3">
                 <Trend className="w-5 h-5 text-green-500" />
-                <h3 className="font-semibold text-white">Trending Keywords</h3>
+                <h3 className="font-semibold text-gray-900">Trending Keywords</h3>
               </div>
               <ul className="space-y-2 text-sm text-gray-400">
                 <li>• "AI-powered" (+380% search volume)</li>
@@ -669,10 +669,10 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
               </ul>
             </div>
 
-            <div className="bg-[#1d4052] border border-marine/20 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(68,110,135,0.15)]">
+            <div className="bg-white border border-marine/20 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(68,110,135,0.15)]">
               <div className="flex items-center gap-2 mb-3">
                 <Globe className="w-5 h-5 text-marine" />
-                <h3 className="font-semibold text-white">Industry Events</h3>
+                <h3 className="font-semibold text-gray-900">Industry Events</h3>
               </div>
               <ul className="space-y-2 text-sm text-gray-400">
                 <li>• Industry Conference (Nov 15-17)</li>
@@ -686,7 +686,7 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
 
         {/* Recommendations with Priority Matrix */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2 text-white">
+          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2 text-gray-900">
             <Zap className="w-6 h-6 text-[#72a3bf]" />
             Strategic Recommendations - Priority Matrix
           </h2>
@@ -736,32 +736,32 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
               </div>
             </div>
 
-            <div className="bg-[#1d4052] border border-white/10 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
-              <h3 className="font-semibold mb-4 text-white">Impact vs Effort Matrix</h3>
-              <div className="relative h-64 bg-[#030f18] border border-white/10 rounded">
+            <div className="bg-white border border-gray-200 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
+              <h3 className="font-semibold mb-4 text-gray-900">Impact vs Effort Matrix</h3>
+              <div className="relative h-64 bg-gray-50 border border-gray-200 rounded">
                 <div className="absolute top-0 left-1/2 transform -translate-x-1/2 text-xs text-gray-400">High Impact</div>
                 <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 text-xs text-gray-400">Low Impact</div>
                 <div className="absolute left-0 top-1/2 transform -translate-y-1/2 text-xs text-gray-400 -rotate-90">Low Effort</div>
                 <div className="absolute right-0 top-1/2 transform -translate-y-1/2 text-xs text-gray-400 -rotate-90">High Effort</div>
 
                 <div className="absolute inset-0 grid grid-cols-2 grid-rows-2">
-                  <div className="border-r border-b border-white/10 p-2">
+                  <div className="border-r border-b border-gray-200 p-2">
                     <div className="text-xs font-semibold text-green-400">Quick Wins</div>
                     <div className="mt-1 space-y-1">
                       <div className="text-xs bg-green-500/20 border border-green-500/30 rounded px-1 py-0.5 text-green-400">Speed Fix</div>
                       <div className="text-xs bg-green-500/20 border border-green-500/30 rounded px-1 py-0.5 text-green-400">Schema</div>
                     </div>
                   </div>
-                  <div className="border-b border-white/10 p-2">
+                  <div className="border-b border-gray-200 p-2">
                     <div className="text-xs font-semibold text-[#72a3bf]">Major Projects</div>
                     <div className="mt-1 space-y-1">
                       <div className="text-xs bg-[#72a3bf]/20 border border-[#72a3bf]/30 rounded px-1 py-0.5 text-[#72a3bf]">Site Redesign</div>
                     </div>
                   </div>
-                  <div className="border-r border-white/10 p-2">
+                  <div className="border-r border-gray-200 p-2">
                     <div className="text-xs font-semibold text-gray-400">Fill-ins</div>
                     <div className="mt-1 space-y-1">
-                      <div className="text-xs bg-white/10 border border-white/20 rounded px-1 py-0.5 text-gray-400">Meta Updates</div>
+                      <div className="text-xs bg-gray-200 border border-gray-300 rounded px-1 py-0.5 text-gray-400">Meta Updates</div>
                     </div>
                   </div>
                   <div className="p-2">
@@ -778,14 +778,14 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
 
         {/* Performance Scorecard */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2 text-white">
+          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2 text-gray-900">
             <Shield className="w-6 h-6 text-[#72a3bf]" />
             Performance Scorecard
           </h2>
 
-          <div className="bg-[#1d4052] border border-white/10 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
+          <div className="bg-white border border-gray-200 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
             <table className="w-full">
-              <thead className="bg-[#030f18] border-b border-white/10">
+              <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
                   <th className="text-left px-6 py-3 text-sm font-semibold text-gray-400">Category</th>
                   <th className="text-center px-6 py-3 text-sm font-semibold text-gray-400">Score</th>
@@ -794,9 +794,9 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
                   <th className="text-left px-6 py-3 text-sm font-semibold text-gray-400">Notes</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/10">
-                <tr className="hover:bg-white/5">
-                  <td className="px-6 py-4 text-sm text-white">Organic Performance</td>
+              <tbody className="divide-y divide-gray-200">
+                <tr className="hover:bg-gray-50">
+                  <td className="px-6 py-4 text-sm text-gray-900">Organic Performance</td>
                   <td className="px-6 py-4 text-center">
                     <span className="text-lg font-bold text-green-400">A</span>
                   </td>
@@ -808,8 +808,8 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-400">23% growth MoM</td>
                 </tr>
-                <tr className="hover:bg-white/5">
-                  <td className="px-6 py-4 text-sm text-white">Technical SEO</td>
+                <tr className="hover:bg-gray-50">
+                  <td className="px-6 py-4 text-sm text-gray-900">Technical SEO</td>
                   <td className="px-6 py-4 text-center">
                     <span className="text-lg font-bold text-yellow-400">B</span>
                   </td>
@@ -821,8 +821,8 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-400">Mobile speed needs improvement</td>
                 </tr>
-                <tr className="hover:bg-white/5">
-                  <td className="px-6 py-4 text-sm text-white">Content Quality</td>
+                <tr className="hover:bg-gray-50">
+                  <td className="px-6 py-4 text-sm text-gray-900">Content Quality</td>
                   <td className="px-6 py-4 text-center">
                     <span className="text-lg font-bold text-green-400">A</span>
                   </td>
@@ -834,8 +834,8 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-400">High engagement metrics</td>
                 </tr>
-                <tr className="hover:bg-white/5">
-                  <td className="px-6 py-4 text-sm text-white">User Experience</td>
+                <tr className="hover:bg-gray-50">
+                  <td className="px-6 py-4 text-sm text-gray-900">User Experience</td>
                   <td className="px-6 py-4 text-center">
                     <span className="text-lg font-bold text-yellow-400">B</span>
                   </td>
@@ -847,8 +847,8 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-400">Bounce rate improving</td>
                 </tr>
-                <tr className="hover:bg-white/5">
-                  <td className="px-6 py-4 text-sm text-white">Conversion Rate</td>
+                <tr className="hover:bg-gray-50">
+                  <td className="px-6 py-4 text-sm text-gray-900">Conversion Rate</td>
                   <td className="px-6 py-4 text-center">
                     <span className="text-lg font-bold text-orange-400">C</span>
                   </td>
@@ -866,18 +866,18 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
         </section>
 
         {/* Footer */}
-        <div className="border-t border-white/10 pt-8 mt-12">
+        <div className="border-t border-gray-200 pt-8 mt-12">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 text-center">
             <div>
-              <p className="font-semibold text-white">Next Review Date</p>
+              <p className="font-semibold text-gray-900">Next Review Date</p>
               <p className="text-sm text-gray-400">{format(subMonths(currentDate, -1), 'MMMM dd, yyyy')}</p>
             </div>
             <div>
-              <p className="font-semibold text-white">Report Prepared By</p>
+              <p className="font-semibold text-gray-900">Report Prepared By</p>
               <p className="text-sm text-gray-400">Your Account Team</p>
             </div>
             <div>
-              <p className="font-semibold text-white">Questions?</p>
+              <p className="font-semibold text-gray-900">Questions?</p>
               <p className="text-sm text-gray-400">Contact your account manager</p>
             </div>
           </div>
