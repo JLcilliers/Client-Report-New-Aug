@@ -341,7 +341,7 @@ export default function LandingPage() {
           <div className="mb-12">
             <h3 className="text-xl font-bold mb-6 text-gray-700">Analytics & Search</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              {['Google Analytics 4', 'Google Search Console', 'Adobe Analytics', 'Matomo'].map((tool) => (
+              {['Google Analytics 4', 'Google Search Console'].map((tool) => (
                 <div key={tool} className="bg-gray-50/80 backdrop-blur-sm border border-gray-200 rounded-xl p-6 text-center hover:border-[#72a3bf] hover:scale-105 transition-transform duration-300">
                   <div className="w-12 h-12 bg-gradient-to-br from-marine to-harbor rounded-lg mx-auto mb-3"></div>
                   <p className="text-sm font-medium">{tool}</p>
@@ -359,7 +359,6 @@ export default function LandingPage() {
                 { name: 'SEMrush', available: true },
                 { name: 'Moz Pro', available: true },
                 { name: 'Screaming Frog', available: true },
-                { name: 'Majestic', available: true },
                 { name: 'Advanced Rank Tracking', available: false }
               ].map((tool) => (
                 <div key={tool.name} className={`bg-gray-50/80 backdrop-blur-sm border ${tool.available ? 'border-gray-200' : 'border-dashed border-gray-700'} rounded-xl p-6 text-center hover:border-[#72a3bf] hover:scale-105 transition-transform duration-300 ${!tool.available && 'opacity-50'}`}>
@@ -375,7 +374,7 @@ export default function LandingPage() {
           <div className="mb-12">
             <h3 className="text-xl font-bold mb-6 text-gray-700">Paid Advertising</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              {['Google Ads', 'Facebook Ads', 'LinkedIn Ads', 'Microsoft Advertising'].map((tool) => (
+              {['Google Ads', 'Facebook Ads', 'LinkedIn Ads'].map((tool) => (
                 <div key={tool} className="bg-gray-50/80 backdrop-blur-sm border border-gray-200 rounded-xl p-6 text-center hover:border-[#72a3bf] hover:scale-105 transition-transform duration-300">
                   <div className="w-12 h-12 bg-gradient-to-br from-glacier to-marine rounded-lg mx-auto mb-3"></div>
                   <p className="text-sm font-medium">{tool}</p>
