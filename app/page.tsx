@@ -20,7 +20,6 @@ import {
   Smile,
   PuzzleIcon,
   DollarSign,
-  PlayCircle,
   Star,
   ChevronDown,
   ChevronUp,
@@ -114,8 +113,8 @@ export default function LandingPage() {
               and 50+ data sources to create stunning, branded SEO reports your clients will actually read.
             </p>
 
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-4">
+            {/* CTA Button */}
+            <div className="flex justify-center mb-4">
               <Button
                 size="lg"
                 asChild
@@ -125,14 +124,6 @@ export default function LandingPage() {
                   Get Started - From $49/month
                   <ArrowRight className="ml-2 w-5 h-5" />
                 </Link>
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="bg-white/10 backdrop-blur-sm text-white border-2 border-white/30 font-semibold text-lg px-10 h-14 rounded-lg hover:bg-white/20 hover:border-white/40 transition-all duration-300"
-              >
-                <PlayCircle className="mr-2 w-5 h-5" />
-                Watch Demo
               </Button>
             </div>
 
