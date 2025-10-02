@@ -1176,7 +1176,7 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
                 variant={comparisonPeriod === 'week' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setComparisonPeriod('week')}
-                title="Last 7 days vs previous 7 days"
+                title="Last 7 days vs previous 7 days (Note: May show zero due to Google's 2-3 day data delay)"
               >
                 Week
               </Button>
