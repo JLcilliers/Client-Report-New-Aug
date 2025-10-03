@@ -186,9 +186,10 @@ export async function POST(
       case 'week':
         // Last 7 days from adjusted end date
         startDate.setDate(endDate.getDate() - 7)
-        // Previous 7 days for comparison (from adjusted end date)
-        previousEndDate.setDate(endDate.getDate() - 7)
-        previousStartDate.setDate(endDate.getDate() - 14)
+        // Previous 7 days for comparison: ends where current period starts
+        previousEndDate = new Date(startDate)
+        previousStartDate = new Date(startDate)
+        previousStartDate.setDate(previousStartDate.getDate() - 7)
         break
         
       case 'month': {
@@ -234,17 +235,19 @@ export async function POST(
       case 'last30':
         // Last 30 days from adjusted end date
         startDate.setDate(endDate.getDate() - 30)
-        // Previous 30 days
-        previousEndDate.setDate(endDate.getDate() - 30)
-        previousStartDate.setDate(endDate.getDate() - 60)
+        // Previous 30 days: ends where current period starts
+        previousEndDate = new Date(startDate)
+        previousStartDate = new Date(startDate)
+        previousStartDate.setDate(previousStartDate.getDate() - 30)
         break
         
       case 'last90':
         // Last 90 days from adjusted end date
         startDate.setDate(endDate.getDate() - 90)
-        // Previous 90 days
-        previousEndDate.setDate(endDate.getDate() - 90)
-        previousStartDate.setDate(endDate.getDate() - 180)
+        // Previous 90 days: ends where current period starts
+        previousEndDate = new Date(startDate)
+        previousStartDate = new Date(startDate)
+        previousStartDate.setDate(previousStartDate.getDate() - 90)
         break
         
       case 'monthToDate':
@@ -268,8 +271,10 @@ export async function POST(
       default:
         // Default to last 7 days from adjusted end date
         startDate.setDate(endDate.getDate() - 7)
-        previousEndDate.setDate(endDate.getDate() - 7)
-        previousStartDate.setDate(endDate.getDate() - 14)
+        // Previous 7 days: ends where current period starts
+        previousEndDate = new Date(startDate)
+        previousStartDate = new Date(startDate)
+        previousStartDate.setDate(previousStartDate.getDate() - 7)
     }
     
     console.log(`Fetching data for ${dateRange || 'month'}: ${startDate.toISOString()} to ${endDate.toISOString()}`)
@@ -950,12 +955,17 @@ export async function POST(
 
     console.log('[Comparison] Calculated comparisons for', comparisonKey, ':', JSON.stringify(comparisons, null, 2))
 
-    // Combine all data
+    // Combine all data including raw previous period data
     const combinedData = {
       search_console: searchConsoleData,
       analytics: analyticsResult,
       pagespeed: pageSpeedData,
       comparisons: comparisons,
+      // Add raw previous period data for accurate frontend calculations
+      previous_period: {
+        search_console: previousSearchConsoleData,
+        analytics: previousAnalyticsData
+      },
       fetched_at: new Date().toISOString(),
       date_range: {
         type: dateRange,

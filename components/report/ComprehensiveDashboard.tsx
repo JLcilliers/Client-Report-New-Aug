@@ -549,23 +549,11 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
     const searchConsole = data.search_console || {};
     const analytics = data.analytics || {};
     const comparisons = data.comparisons || {};
+    const previousPeriod = data.previous_period || {};
 
-    // Extract comparison percentages from the API data
-    const getComparisonValue = (comparisonData: any, metric: string) => {
-      return comparisonData?.[metric]?.changePercent || 0;
-    };
-
-    // Calculate previous period values based on current values and change percentages
-    const calculatePreviousValue = (current: number, changePercent: number) => {
-      if (changePercent === 0) return current;
-      // If changePercent is positive, previous = current / (1 + changePercent/100)
-      // If changePercent is negative, previous = current / (1 + changePercent/100)
-      return current / (1 + changePercent / 100);
-    };
-
-    // Get the appropriate comparison based on what's available
-    const monthComparison = comparisons.monthOverMonth || comparisons.weekOverWeek || {};
-    const yearComparison = comparisons.yearOverYear || {};
+    console.log('📊 Transform Data - Current SC:', searchConsole.summary);
+    console.log('📊 Transform Data - Previous Period:', previousPeriod);
+    console.log('📊 Transform Data - Comparisons:', comparisons);
 
     // Current values
     const currentSearchConsole = {
@@ -585,41 +573,28 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
       avgSessionDuration: analytics.summary?.avgSessionDuration || 0
     };
 
-    // Calculate previous period values using comparison data
+    // Use actual previous period data from API (more accurate than reverse-calculating)
     const previousSearchConsole = {
-      clicks: calculatePreviousValue(currentSearchConsole.clicks, getComparisonValue(monthComparison.searchConsole, 'clicks')),
-      impressions: calculatePreviousValue(currentSearchConsole.impressions, getComparisonValue(monthComparison.searchConsole, 'impressions')),
-      ctr: calculatePreviousValue(currentSearchConsole.ctr, getComparisonValue(monthComparison.searchConsole, 'ctr')),
-      position: currentSearchConsole.position - (getComparisonValue(monthComparison.searchConsole, 'position') || 0)
+      clicks: previousPeriod.search_console?.clicks || 0,
+      impressions: previousPeriod.search_console?.impressions || 0,
+      ctr: previousPeriod.search_console?.ctr || 0,
+      position: previousPeriod.search_console?.position || 0
     };
 
     const previousAnalytics = {
-      sessions: calculatePreviousValue(currentAnalytics.sessions, getComparisonValue(monthComparison.analytics, 'sessions')),
-      users: calculatePreviousValue(currentAnalytics.users, getComparisonValue(monthComparison.analytics, 'users')),
-      newUsers: calculatePreviousValue(currentAnalytics.newUsers, getComparisonValue(monthComparison.analytics, 'newUsers')),
-      pageviews: calculatePreviousValue(currentAnalytics.pageviews, getComparisonValue(monthComparison.analytics, 'pageviews')),
-      events: calculatePreviousValue(currentAnalytics.events, getComparisonValue(monthComparison.analytics, 'events')),
-      bounceRate: currentAnalytics.bounceRate,
-      avgSessionDuration: currentAnalytics.avgSessionDuration
+      sessions: previousPeriod.analytics?.sessions || 0,
+      users: previousPeriod.analytics?.users || 0,
+      newUsers: previousPeriod.analytics?.newUsers || 0,
+      pageviews: previousPeriod.analytics?.pageviews || 0,
+      events: previousPeriod.analytics?.events || 0,
+      bounceRate: previousPeriod.analytics?.bounceRate || 0,
+      avgSessionDuration: previousPeriod.analytics?.avgSessionDuration || 0
     };
 
-    // Calculate year-ago values using year-over-year comparison data
-    const yearAgoSearchConsole = {
-      clicks: calculatePreviousValue(currentSearchConsole.clicks, getComparisonValue(yearComparison.searchConsole, 'clicks')),
-      impressions: calculatePreviousValue(currentSearchConsole.impressions, getComparisonValue(yearComparison.searchConsole, 'impressions')),
-      ctr: calculatePreviousValue(currentSearchConsole.ctr, getComparisonValue(yearComparison.searchConsole, 'ctr')),
-      position: currentSearchConsole.position - (getComparisonValue(yearComparison.searchConsole, 'position') || 0)
-    };
-
-    const yearAgoAnalytics = {
-      sessions: calculatePreviousValue(currentAnalytics.sessions, getComparisonValue(yearComparison.analytics, 'sessions')),
-      users: calculatePreviousValue(currentAnalytics.users, getComparisonValue(yearComparison.analytics, 'users')),
-      newUsers: calculatePreviousValue(currentAnalytics.newUsers, getComparisonValue(yearComparison.analytics, 'newUsers')),
-      pageviews: calculatePreviousValue(currentAnalytics.pageviews, getComparisonValue(yearComparison.analytics, 'pageviews')),
-      events: calculatePreviousValue(currentAnalytics.events, getComparisonValue(yearComparison.analytics, 'events')),
-      bounceRate: currentAnalytics.bounceRate,
-      avgSessionDuration: currentAnalytics.avgSessionDuration
-    };
+    // For year-over-year, use the same previous period data
+    // (API will fetch year-ago data when yearOverYear mode is selected)
+    const yearAgoSearchConsole = previousSearchConsole;
+    const yearAgoAnalytics = previousAnalytics;
 
     return {
       fetchedAt: data.fetched_at || new Date().toISOString(),
