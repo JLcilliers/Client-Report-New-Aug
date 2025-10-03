@@ -1081,10 +1081,9 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
 
   const getComparisonData = () => {
     if (!metrics) return null;
-    
-    const period = comparisonPeriod === 'week' ? 'weekOverWeek' : 
-                  comparisonPeriod === 'month' ? 'monthOverMonth' : 'yearOverYear';
-    
+
+    const period = comparisonPeriod === 'month' ? 'monthOverMonth' : 'yearOverYear';
+
     return metrics.comparisons?.[period];
   };
 
