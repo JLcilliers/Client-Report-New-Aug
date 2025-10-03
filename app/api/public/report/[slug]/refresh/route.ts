@@ -917,23 +917,38 @@ export async function POST(
       }
     }
     
-    // Calculate comparisons
-    const comparisons = {
-      weekOverWeek: {
-        searchConsole: calculateSearchConsoleComparisons(searchConsoleData.summary, previousSearchConsoleData),
-        analytics: calculateAnalyticsComparisons(analyticsResult.summary, previousAnalyticsData)
-      },
-      monthOverMonth: {
-        searchConsole: calculateSearchConsoleComparisons(searchConsoleData.summary, previousSearchConsoleData),
-        analytics: calculateAnalyticsComparisons(analyticsResult.summary, previousAnalyticsData)
-      },
-      yearOverYear: {
-        searchConsole: calculateSearchConsoleComparisons(searchConsoleData.summary, previousSearchConsoleData),
-        analytics: calculateAnalyticsComparisons(analyticsResult.summary, previousAnalyticsData)
-      }
+    // Calculate comparisons - map the dateRange to the correct comparison type
+    const comparisonData = {
+      searchConsole: calculateSearchConsoleComparisons(searchConsoleData.summary, previousSearchConsoleData),
+      analytics: calculateAnalyticsComparisons(analyticsResult.summary, previousAnalyticsData)
     }
 
-    console.log('[Comparison] Calculated comparisons:', JSON.stringify(comparisons, null, 2))
+    // Map dateRange to the correct comparison key for frontend compatibility
+    let comparisonKey: string
+    switch(dateRange) {
+      case 'week':
+        comparisonKey = 'weekOverWeek'
+        break
+      case 'month':
+        comparisonKey = 'monthOverMonth'
+        break
+      case 'year':
+      case 'yearOverYear':
+        comparisonKey = 'yearOverYear'
+        break
+      case 'last30':
+      case 'last90':
+      case 'monthToDate':
+      default:
+        comparisonKey = 'monthOverMonth' // Default to month-over-month for 30d, 90d, MTD
+        break
+    }
+
+    const comparisons = {
+      [comparisonKey]: comparisonData
+    }
+
+    console.log('[Comparison] Calculated comparisons for', comparisonKey, ':', JSON.stringify(comparisons, null, 2))
 
     // Combine all data
     const combinedData = {
