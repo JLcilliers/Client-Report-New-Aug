@@ -163,7 +163,7 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
     fetchedAt?: string;
   } | null>(null);
   const [agencyUpdates, setAgencyUpdates] = useState<any[]>([]);
-  const [comparisonPeriod, setComparisonPeriod] = useState<'week' | 'month' | 'year' | 'last30' | 'last90' | 'monthToDate' | 'yearOverYear'>('last30');
+  const [comparisonPeriod, setComparisonPeriod] = useState<'month' | 'year' | 'last30' | 'last90' | 'monthToDate' | 'yearOverYear'>('last30');
   const [activeTab, setActiveTab] = useState('overview');
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
   const [seoAuditData, setSeoAuditData] = useState<any>(null);
@@ -198,10 +198,8 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
     const currentMonth = today.getMonth();
     const currentYear = today.getFullYear();
     const currentDate = today.getDate();
-    
+
     switch(period) {
-      case 'week':
-        return 'Last 7 days vs previous 7 days';
       case 'month': {
         // Get last completed month
         const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1;
@@ -1193,14 +1191,6 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
         <div className="flex items-center gap-4">
           <div className="flex flex-col gap-1">
             <div className="flex gap-2">
-              <Button
-                variant={comparisonPeriod === 'week' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setComparisonPeriod('week')}
-                title="Last 7 days vs previous 7 days (Note: May show zero due to Google's 2-3 day data delay)"
-              >
-                Week
-              </Button>
               <Button
                 variant={comparisonPeriod === 'month' ? 'default' : 'outline'}
                 size="sm"
