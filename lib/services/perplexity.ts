@@ -38,15 +38,21 @@ interface CitationResult {
 }
 
 export class PerplexityService {
-  private apiKey: string
+  private apiKey: string | undefined
   private baseUrl = 'https://api.perplexity.ai'
 
   constructor() {
-    const key = process.env.PERPLEXITY_API_KEY
-    if (!key) {
+    this.apiKey = process.env.PERPLEXITY_API_KEY
+  }
+
+  /**
+   * Ensure API key is configured before making requests
+   */
+  private ensureApiKey(): string {
+    if (!this.apiKey) {
       throw new Error('PERPLEXITY_API_KEY is not configured')
     }
-    this.apiKey = key
+    return this.apiKey
   }
 
   /**
@@ -54,10 +60,12 @@ export class PerplexityService {
    */
   async query(searchQuery: string): Promise<PerplexityResponse> {
     try {
+      const apiKey = this.ensureApiKey()
+
       const response = await fetch(`${this.baseUrl}/chat/completions`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
+          'Authorization': `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
