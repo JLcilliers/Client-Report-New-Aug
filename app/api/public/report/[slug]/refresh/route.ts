@@ -954,6 +954,10 @@ export async function POST(
     }
 
     console.log('[Comparison] Calculated comparisons for', comparisonKey, ':', JSON.stringify(comparisons, null, 2))
+    console.log('[Data Summary] Current SC Clicks:', searchConsoleData.summary?.clicks || 0)
+    console.log('[Data Summary] Current Analytics Sessions:', analyticsResult.summary?.sessions || 0)
+    console.log('[Data Summary] Previous SC Clicks:', previousSearchConsoleData?.clicks || 0)
+    console.log('[Data Summary] Previous Analytics Sessions:', previousAnalyticsData?.sessions || 0)
 
     // Combine all data including raw previous period data
     const combinedData = {

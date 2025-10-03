@@ -1135,6 +1135,52 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
 
   return (
     <div className="space-y-6">
+      {/* Data Diagnostic Alert */}
+      {metrics && (
+        (() => {
+          const scClicks = metrics?.searchConsole?.current?.clicks || 0;
+          const analyticsUsers = metrics?.analytics?.current?.users || 0;
+          const hasZeroData = scClicks === 0 && analyticsUsers === 0;
+
+          if (hasZeroData && !loading && !refreshing) {
+            return (
+              <Card className="border-amber-300 bg-amber-50">
+                <CardContent className="pt-6">
+                  <div className="flex items-start gap-3">
+                    <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5" />
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-amber-900">No Data Available</h3>
+                      <p className="text-sm text-amber-800 mt-1">
+                        No metrics data is currently available for this report. This could mean:
+                      </p>
+                      <ul className="text-sm text-amber-800 mt-2 space-y-1 list-disc list-inside">
+                        <li>The report was just created and hasn't fetched data yet</li>
+                        <li>The selected time period has no data (try a different period)</li>
+                        <li>Google Analytics/Search Console properties may be misconfigured</li>
+                        <li>Data may be delayed (Google has a 2-3 day delay for Search Console)</li>
+                      </ul>
+                      <Button
+                        onClick={() => fetchMetrics(comparisonPeriod)}
+                        className="mt-3"
+                        size="sm"
+                        variant="outline"
+                      >
+                        <RefreshCw className="w-4 h-4 mr-2" />
+                        Try Refreshing Data
+                      </Button>
+                      <p className="text-xs text-amber-700 mt-2">
+                        Check browser console (F12) for detailed error messages.
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          }
+          return null;
+        })()
+      )}
+
       {/* Header with Controls */}
       <div className="flex items-center justify-between">
         <div>
