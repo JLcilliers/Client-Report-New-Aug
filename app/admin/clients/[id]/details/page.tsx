@@ -27,6 +27,7 @@ import {
   FileText
 } from 'lucide-react';
 import Link from 'next/link';
+import AICitationChecker from '@/components/ai-visibility/AICitationChecker';
 
 interface ClientData {
   id: string;
@@ -327,11 +328,12 @@ export default function ClientDetailsPage() {
 
       {/* Main Content Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="keywords">Keywords</TabsTrigger>
           <TabsTrigger value="competitors">Competitors</TabsTrigger>
           <TabsTrigger value="reports">Reports</TabsTrigger>
+          <TabsTrigger value="ai-visibility">AI Visibility</TabsTrigger>
         </TabsList>
 
         {/* Overview Tab */}
@@ -617,6 +619,11 @@ export default function ClientDetailsPage() {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* AI Visibility Tab */}
+        <TabsContent value="ai-visibility" className="space-y-6">
+          <AICitationChecker clientReportId={clientId} clientName={client.clientName} />
         </TabsContent>
       </Tabs>
     </div>
