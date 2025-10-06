@@ -27,7 +27,7 @@
     "prisma:reset": "prisma migrate reset",
     "production:scan": "node automation/production-scanner.js",
     "production:prepare": "npm run production:scan && npm run build",
-    "build:production": "cp prisma/schema.production.prisma prisma/schema.prisma && prisma generate && next build"
+    "build:production": "cp prisma/schema.production.prisma prisma/schema.prisma && npx prisma generate && npx prisma migrate deploy && npx next build"
   },
   "dependencies": {
     "@composio/mcp": "^1.0.9",
