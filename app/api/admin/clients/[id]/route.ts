@@ -38,8 +38,8 @@ export async function GET(
       id: report.id,
       clientName: report.clientName,
       domain: report.searchConsolePropertyId?.replace('sc-domain:', '').replace('https://', ''),
-      industry: null, // Add industry field to schema if needed
-      contactEmail: null, // Add email field to schema if needed
+      industry: report.industry,
+      contactEmail: report.contactEmail,
       reports: [{
         id: report.id,
         reportName: report.reportName,
@@ -85,9 +85,8 @@ export async function PATCH(
       data: {
         clientName: clientName,
         searchConsolePropertyId: domain ? `sc-domain:${domain.replace('https://', '').replace('http://', '')}` : undefined,
-        // Add these fields to schema if needed:
-        // industry,
-        // contactEmail
+        industry: industry,
+        contactEmail: contactEmail
       }
     });
 
