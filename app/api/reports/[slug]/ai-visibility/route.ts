@@ -1,7 +1,7 @@
 // API endpoint for AI visibility data
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { aiReadinessService } from '@/lib/ai-visibility/ai-readiness-service';
+import { aiVisibilityService } from '@/lib/ai-visibility/ai-visibility-service';
 import { cookies } from 'next/headers';
 
 const prisma = new PrismaClient();
@@ -37,8 +37,8 @@ export async function GET(
       );
     }
 
-    // Get formatted AI readiness metrics (uses cached data if available)
-    const metrics = await aiReadinessService.getFormattedMetrics(report.id);
+    // Get formatted AI visibility metrics (uses cached data if available)
+    const metrics = await aiVisibilityService.getFormattedMetrics(report.id);
 
     return NextResponse.json({
       success: true,
@@ -47,9 +47,9 @@ export async function GET(
       lastUpdated: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('AI Readiness GET Error:', error);
+    console.error('AI Visibility GET Error:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch AI readiness data' },
+      { error: 'Failed to fetch AI visibility data' },
       { status: 500 }
     );
   }
@@ -99,31 +99,24 @@ export async function POST(
       (new Date().getTime() - profile.lastUpdated.getTime()) > 24 * 60 * 60 * 1000;
 
     if (shouldUpdate) {
-      // Get Google OAuth tokens from cookies
-      const cookieStore = cookies();
-      const accessToken = cookieStore.get('google_access_token')?.value;
-      const refreshToken = cookieStore.get('google_refresh_token')?.value;
-
-      const tokens = (accessToken && refreshToken) ? {
-        accessToken,
-        refreshToken,
-      } : undefined;
-
       // Extract domain from Search Console property
       const domain = extractDomain(report.searchConsolePropertyId);
 
-      // Calculate AI readiness using real Google API data
-      await aiReadinessService.calculateAIReadiness(
+      // Get keywords and competitors for AI visibility tracking
+      const keywords = report.keywords.map(k => k.keyword);
+      const competitors = report.competitors.map(c => c.domain);
+
+      // Update AI visibility data across all platforms
+      await aiVisibilityService.updateVisibilityData(
         report.id,
-        report.searchConsolePropertyId,
-        report.ga4PropertyId,
         domain,
-        tokens
+        keywords,
+        competitors
       );
     }
 
     // Get updated metrics
-    const metrics = await aiReadinessService.getFormattedMetrics(report.id);
+    const metrics = await aiVisibilityService.getFormattedMetrics(report.id);
 
     return NextResponse.json({
       success: true,
@@ -132,9 +125,9 @@ export async function POST(
       lastUpdated: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('AI Readiness POST Error:', error);
+    console.error('AI Visibility POST Error:', error);
     return NextResponse.json(
-      { error: 'Failed to update AI readiness data',  details: error instanceof Error ? error.message : 'Unknown error' },
+      { error: 'Failed to update AI visibility data',  details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }
