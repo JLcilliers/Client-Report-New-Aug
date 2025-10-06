@@ -90,6 +90,8 @@ model ClientReport {
   googleAccountId         String
   ga4PropertyId           String
   searchConsolePropertyId String
+  industry                String?
+  contactEmail            String?
   shareableLink           String            @unique
   shareableId             String            @unique
   isActive                Boolean           @default(true)
