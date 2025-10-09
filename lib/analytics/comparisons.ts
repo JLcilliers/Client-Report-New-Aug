@@ -2,6 +2,8 @@
  * Calculate period-over-period comparisons for metrics
  */
 
+import { calculateCTR } from '@/lib/utils/metric-calculations';
+
 export interface ComparisonMetrics {
   current: number
   previous: number
@@ -117,12 +119,13 @@ export function aggregateMetricsForPeriod(
   })
   
   if (metricsType === 'searchConsole') {
+    const totalClicks = filtered.reduce((sum, item) => sum + (item.clicks || 0), 0);
+    const totalImpressions = filtered.reduce((sum, item) => sum + (item.impressions || 0), 0);
+
     return {
-      clicks: filtered.reduce((sum, item) => sum + (item.clicks || 0), 0),
-      impressions: filtered.reduce((sum, item) => sum + (item.impressions || 0), 0),
-      ctr: filtered.length > 0 
-        ? filtered.reduce((sum, item) => sum + (item.ctr || 0), 0) / filtered.length 
-        : 0,
+      clicks: totalClicks,
+      impressions: totalImpressions,
+      ctr: calculateCTR(totalClicks, totalImpressions), // FIXED: Calculate from totals, not average of CTRs
       position: filtered.length > 0
         ? filtered.reduce((sum, item) => sum + (item.position || 0), 0) / filtered.length
         : 0

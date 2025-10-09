@@ -25,6 +25,7 @@ import {
   Radar
 } from 'recharts';
 import { TrendingUp, BarChart3, PieChart as PieIcon, Activity } from 'lucide-react';
+import { calculateCTR, calculateAveragePosition } from '@/lib/utils/metric-calculations';
 
 interface VisualizationProps {
   searchData: any;
@@ -67,17 +68,17 @@ export default function DataVisualizations({ searchData, analyticsData, competit
     const totals = searchData.byDate.reduce((acc: any, item: any) => {
       acc.clicks += item.clicks || 0;
       acc.impressions += item.impressions || 0;
-      acc.ctrSum += item.ctr || 0;
-      acc.positionSum += item.position || 0;
-      acc.count += 1;
+      if (item.position > 0) {
+        acc.positions.push(item.position);
+      }
       return acc;
-    }, { clicks: 0, impressions: 0, ctrSum: 0, positionSum: 0, count: 0 });
+    }, { clicks: 0, impressions: 0, positions: [] });
 
     return {
       totalClicks: totals.clicks,
       totalImpressions: totals.impressions,
-      avgCTR: totals.count > 0 ? totals.ctrSum / totals.count : 0,
-      avgPosition: totals.count > 0 ? totals.positionSum / totals.count : 0
+      avgCTR: calculateCTR(totals.clicks, totals.impressions), // FIXED: Calculate from totals, not average
+      avgPosition: calculateAveragePosition(totals.positions) // FIXED: Proper position averaging
     };
   };
 

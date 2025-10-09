@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { google } from 'googleapis';
 import { createClient } from '@supabase/supabase-js';
-import { 
-  validateAnalyticsResponse, 
+import {
+  validateAnalyticsResponse,
   validateSearchConsoleResponse,
   normalizeSearchConsoleMetrics,
   extractAnalyticsMetric,
@@ -10,6 +10,7 @@ import {
   calculateSafePercentageChange,
   checkApiQuotaError
 } from '@/lib/utils/api-validation';
+import { calculatePositionChange, calculateCTR } from '@/lib/utils/metric-calculations';
 
 // Initialize Google APIs
 const searchconsole = google.searchconsole('v1');
@@ -450,7 +451,7 @@ function extractTopQueries(rows: any[], limit = 10) {
     .map(data => ({
       ...data,
       position: data.count > 0 ? data.position / data.count : 0,
-      ctr: data.impressions > 0 ? data.clicks / data.impressions : 0
+      ctr: calculateCTR(data.clicks, data.impressions) // Fixed: using centralized CTR calculation
     }))
     .sort((a, b) => b.clicks - a.clicks)
     .slice(0, limit);
@@ -485,7 +486,7 @@ function extractTopPages(rows: any[], limit = 10) {
     .map(data => ({
       ...data,
       position: data.count > 0 ? data.position / data.count : 0,
-      ctr: data.impressions > 0 ? data.clicks / data.impressions : 0
+      ctr: calculateCTR(data.clicks, data.impressions) // Fixed: using centralized CTR calculation
     }))
     .sort((a, b) => b.clicks - a.clicks)
     .slice(0, limit);
@@ -497,19 +498,19 @@ function calculateTrends(current: any, prevWeek: any, prevMonth: any, yearAgo: a
       clicks: calculateChange(current.clicks, prevWeek.clicks),
       impressions: calculateChange(current.impressions, prevWeek.impressions),
       ctr: calculateChange(current.ctr, prevWeek.ctr),
-      position: calculateChange(prevWeek.position, current.position) // Inverted for position
+      position: calculatePositionChange(current.position, prevWeek.position) // Fixed: using proper position change calculation
     },
     monthOverMonth: {
       clicks: calculateChange(current.clicks, prevMonth.clicks),
       impressions: calculateChange(current.impressions, prevMonth.impressions),
       ctr: calculateChange(current.ctr, prevMonth.ctr),
-      position: calculateChange(prevMonth.position, current.position)
+      position: calculatePositionChange(current.position, prevMonth.position) // Fixed
     },
     yearOverYear: {
       clicks: calculateChange(current.clicks, yearAgo.clicks),
       impressions: calculateChange(current.impressions, yearAgo.impressions),
       ctr: calculateChange(current.ctr, yearAgo.ctr),
-      position: calculateChange(yearAgo.position, current.position)
+      position: calculatePositionChange(current.position, yearAgo.position) // Fixed
     }
   };
 }
