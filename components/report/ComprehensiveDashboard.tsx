@@ -2562,7 +2562,7 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
 
         {/* Enhanced Metrics Tab */}
         <TabsContent value="metrics" className="space-y-6">
-          <EnhancedMetrics reportId={reportId} domain={reportSlug} metrics={metrics} />
+          <EnhancedMetrics reportId={reportId} domain={reportSlug} metrics={metrics} coreWebVitals={seoAuditData?.coreWebVitals} />
         </TabsContent>
 
         {/* Data Visualizations Tab */}

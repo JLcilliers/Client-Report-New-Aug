@@ -44,17 +44,83 @@ interface EnhancedMetricsProps {
   reportId: string;
   domain: string;
   metrics?: any;
+  coreWebVitals?: {
+    mobile?: {
+      LCP?: { value: number; displayValue: string };
+      INP?: { value: number; displayValue: string };
+      CLS?: { value: number; displayValue: string };
+      FCP?: { value: number; displayValue: string };
+      TTFB?: { value: number; displayValue: string };
+    };
+    desktop?: {
+      LCP?: { value: number; displayValue: string };
+      INP?: { value: number; displayValue: string };
+      CLS?: { value: number; displayValue: string };
+      FCP?: { value: number; displayValue: string };
+      TTFB?: { value: number; displayValue: string };
+    };
+    grade?: 'good' | 'needs-improvement' | 'poor';
+  };
 }
 
-export default function EnhancedMetrics({ reportId, domain, metrics }: EnhancedMetricsProps) {
-  // Core Web Vitals data (could be fetched from PageSpeed API)
+export default function EnhancedMetrics({ reportId, domain, metrics, coreWebVitals: coreWebVitalsData }: EnhancedMetricsProps) {
+  // Helper function to determine score from value
+  const getScoreFromValue = (metric: string, value: number): 'good' | 'needs-improvement' | 'poor' => {
+    const thresholds: Record<string, { good: number; needsImprovement: number }> = {
+      lcp: { good: 2500, needsImprovement: 4000 },
+      fid: { good: 100, needsImprovement: 300 },
+      cls: { good: 0.1, needsImprovement: 0.25 },
+      inp: { good: 200, needsImprovement: 500 },
+      ttfb: { good: 800, needsImprovement: 1800 },
+      fcp: { good: 1800, needsImprovement: 3000 }
+    };
+
+    const threshold = thresholds[metric];
+    if (!threshold) return 'good';
+
+    if (value <= threshold.good) return 'good';
+    if (value <= threshold.needsImprovement) return 'needs-improvement';
+    return 'poor';
+  };
+
+  // Extract real Core Web Vitals from props, with fallback to hardcoded values
+  const mobileMetrics = coreWebVitalsData?.mobile;
+  const desktopMetrics = coreWebVitalsData?.desktop;
+
+  // Use mobile metrics if available, otherwise desktop, otherwise fallback
+  const sourceMetrics = mobileMetrics || desktopMetrics;
+
   const coreWebVitals = {
-    lcp: { value: 2.5, score: 'good', benchmark: 2.5 },
-    fid: { value: 95, score: 'good', benchmark: 100 },
-    cls: { value: 0.08, score: 'good', benchmark: 0.1 },
-    inp: { value: 200, score: 'needs-improvement', benchmark: 200 },
-    ttfb: { value: 0.8, score: 'good', benchmark: 0.8 },
-    fcp: { value: 1.8, score: 'good', benchmark: 1.8 }
+    lcp: {
+      value: sourceMetrics?.LCP?.value ? sourceMetrics.LCP.value / 1000 : 2.5,
+      score: sourceMetrics?.LCP?.value ? getScoreFromValue('lcp', sourceMetrics.LCP.value) : 'good',
+      benchmark: 2.5
+    },
+    fid: {
+      value: 95, // FID is deprecated, keep fallback
+      score: 'good' as const,
+      benchmark: 100
+    },
+    cls: {
+      value: sourceMetrics?.CLS?.value || 0.08,
+      score: sourceMetrics?.CLS?.value ? getScoreFromValue('cls', sourceMetrics.CLS.value) : 'good',
+      benchmark: 0.1
+    },
+    inp: {
+      value: sourceMetrics?.INP?.value || 200,
+      score: sourceMetrics?.INP?.value ? getScoreFromValue('inp', sourceMetrics.INP.value) : 'needs-improvement',
+      benchmark: 200
+    },
+    ttfb: {
+      value: sourceMetrics?.TTFB?.value ? sourceMetrics.TTFB.value / 1000 : 0.8,
+      score: sourceMetrics?.TTFB?.value ? getScoreFromValue('ttfb', sourceMetrics.TTFB.value) : 'good',
+      benchmark: 0.8
+    },
+    fcp: {
+      value: sourceMetrics?.FCP?.value ? sourceMetrics.FCP.value / 1000 : 1.8,
+      score: sourceMetrics?.FCP?.value ? getScoreFromValue('fcp', sourceMetrics.FCP.value) : 'good',
+      benchmark: 1.8
+    }
   };
 
   // Calculate key metrics from actual data
