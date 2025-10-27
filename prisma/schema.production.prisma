@@ -50,6 +50,7 @@ model User {
   clientReports  ClientReport[]
   googleTokens   GoogleTokens[]
   googleAccounts GoogleAccount[]
+  aiBrands       AIBrand[]
 }
 
 model VerificationToken {
@@ -747,4 +748,183 @@ model AICompetitorAnalysis {
   @@unique([profileId, competitorDomain])
   @@index([profileId])
   @@index([competitorDomain])
+}
+
+// ============================================
+// STANDALONE AI BRAND VISIBILITY SYSTEM
+// ============================================
+
+// Independent AI Brand tracking (not tied to ClientReport)
+model AIBrand {
+  id                String              @id @default(cuid())
+  brandName         String              // Primary brand name
+  alternateName     String[]            // Brand variations
+  domain            String?             // Optional website
+  industry          String              // Industry category
+  description       String?             @db.Text
+  logoUrl           String?
+
+  // Status
+  isActive          Boolean             @default(true)
+  trackingStatus    String              @default("active") // active, paused, archived
+
+  // Relations
+  keywords          AIBrandKeyword[]
+  competitors       AIBrandCompetitor[]
+  mentions          AIBrandMention[]
+  scores            AIBrandScore[]
+
+  // Ownership
+  userId            String
+  user              User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  @@index([userId])
+  @@index([brandName])
+  @@index([trackingStatus])
+}
+
+// Keywords/Prompts to test for AI brand visibility
+model AIBrandKeyword {
+  id                String              @id @default(cuid())
+  brandId           String
+  brand             AIBrand             @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  prompt            String              @db.Text // The actual query
+  category          String              // informational, commercial, comparison, navigational
+  priority          String              @default("medium") // high, medium, low
+
+  // Metrics
+  avgPosition       Float?
+  mentionRate       Float?              // % of platforms where brand appears
+  lastTested        DateTime?
+
+  // Status
+  isActive          Boolean             @default(true)
+
+  // Relations
+  mentions          AIBrandMention[]
+
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  @@index([brandId])
+  @@index([category])
+  @@index([isActive])
+}
+
+// Competitor brands to track
+model AIBrandCompetitor {
+  id                String              @id @default(cuid())
+  brandId           String
+  brand             AIBrand             @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  competitorName    String
+  domain            String?
+  notes             String?             @db.Text
+
+  // Metrics
+  shareOfVoice      Float?
+  avgPosition       Float?
+  mentionCount      Int                 @default(0)
+
+  // Relations
+  mentions          AIBrandMention[]
+
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  @@unique([brandId, competitorName])
+  @@index([brandId])
+  @@index([competitorName])
+}
+
+// Individual AI platform responses and mentions
+model AIBrandMention {
+  id                String              @id @default(cuid())
+  brandId           String
+  brand             AIBrand             @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  keywordId         String?
+  keyword           AIBrandKeyword?     @relation(fields: [keywordId], references: [id], onDelete: SetNull)
+
+  // Platform & Query
+  platform          String              // chatgpt, claude, gemini, perplexity, google_ai, copilot, grok
+  prompt            String              @db.Text
+
+  // Response Details
+  response          String              @db.Text // Full AI response
+  brandMentioned    Boolean             @default(false)
+  position          Int?                // 1-based ranking if in list (null if not mentioned)
+
+  // Citation Info
+  isCited           Boolean             @default(false) // Has website link?
+  citationUrl       String?
+  citationType      String?             // direct, indirect, referenced
+
+  // Analysis
+  sentiment         String              // positive, neutral, negative
+  sentimentScore    Int                 // 0-100
+  context           String?             @db.Text // Surrounding text
+
+  // Competitors in same response
+  competitorsFound  Json?               // Array of competitor names mentioned
+  competitorId      String?
+  competitor        AIBrandCompetitor?  @relation(fields: [competitorId], references: [id], onDelete: SetNull)
+
+  // Metadata
+  testDuration      Int?                // ms to get response
+  modelVersion      String?             // e.g., "gpt-4", "claude-3-opus"
+
+  testedAt          DateTime            @default(now())
+  createdAt         DateTime            @default(now())
+
+  @@index([brandId])
+  @@index([keywordId])
+  @@index([platform])
+  @@index([testedAt])
+  @@index([brandMentioned])
+}
+
+// Aggregated visibility scores (daily/weekly snapshots)
+model AIBrandScore {
+  id                String              @id @default(cuid())
+  brandId           String
+  brand             AIBrand             @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  // Scope
+  platform          String              // "overall", "chatgpt", "claude", "gemini", etc.
+  period            String              @default("daily") // daily, weekly, monthly
+  date              DateTime            // Date of snapshot
+
+  // Core Metrics (0-100 scores)
+  overallScore      Float               @default(0)
+  visibilityRate    Float               @default(0) // % of prompts where mentioned
+  avgPosition       Float               @default(0) // Average ranking position (1-10)
+  citationRate      Float               @default(0) // % of mentions with links
+  shareOfVoice      Float               @default(0) // % vs competitors
+  sentimentScore    Float               @default(0) // Weighted average sentiment
+
+  // Counts
+  totalTests        Int                 @default(0) // Prompts tested
+  totalMentions     Int                 @default(0) // Times mentioned
+  citedMentions     Int                 @default(0) // Mentions with links
+
+  // Competitor Context
+  competitorCount   Int                 @default(0) // Competitors in responses
+
+  // Performance vs Previous Period
+  scoreChange       Float?              // Change in overall score
+  visibilityChange  Float?              // Change in visibility rate
+  positionChange    Float?              // Change in avg position
+
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  @@unique([brandId, platform, period, date])
+  @@index([brandId])
+  @@index([platform])
+  @@index([date])
 }
