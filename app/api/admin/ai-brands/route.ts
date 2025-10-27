@@ -1,10 +1,57 @@
 import { NextRequest, NextResponse } from "next/server"
+import { cookies } from "next/headers"
 import { prisma } from "@/lib/db/prisma"
+
+// Helper function to get user from session
+async function getUserFromSession() {
+  const cookieStore = cookies()
+  const sessionToken = cookieStore.get('session_token')
+  const userEmail = cookieStore.get('google_user_email')
+
+  if (sessionToken) {
+    const session = await prisma.session.findFirst({
+      where: {
+        sessionToken: sessionToken.value,
+        expires: { gte: new Date() }
+      },
+      include: {
+        user: true
+      }
+    })
+
+    if (session) {
+      return session.user
+    }
+  }
+
+  // Fallback: try to find user by email from cookie
+  if (userEmail) {
+    const user = await prisma.user.findUnique({
+      where: { email: userEmail.value }
+    })
+    if (user) {
+      return user
+    }
+  }
+
+  return null
+}
 
 // GET /api/admin/ai-brands - Fetch all AI brands with latest scores
 export async function GET(request: NextRequest) {
   try {
+    const user = await getUserFromSession()
+    if (!user) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      )
+    }
+
     const brands = await prisma.aIBrand.findMany({
+      where: {
+        userId: user.id
+      },
       orderBy: {
         createdAt: 'desc'
       },
@@ -80,6 +127,14 @@ export async function GET(request: NextRequest) {
 // POST /api/admin/ai-brands - Create new AI brand
 export async function POST(request: NextRequest) {
   try {
+    const user = await getUserFromSession()
+    if (!user) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      )
+    }
+
     const body = await request.json()
     const {
       brandName,
@@ -87,14 +142,13 @@ export async function POST(request: NextRequest) {
       domain,
       industry,
       description,
-      logoUrl,
-      userId
+      logoUrl
     } = body
 
     // Validate required fields
-    if (!brandName || !industry || !userId) {
+    if (!brandName || !industry) {
       return NextResponse.json(
-        { error: "Missing required fields: brandName, industry, userId" },
+        { error: "Missing required fields: brandName, industry" },
         { status: 400 }
       )
     }
@@ -108,7 +162,7 @@ export async function POST(request: NextRequest) {
         industry,
         description,
         logoUrl,
-        userId,
+        userId: user.id,
         trackingStatus: 'active',
         isActive: true
       },
@@ -131,7 +185,7 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     console.error('[AI Brands API] Create Error:', error)
     return NextResponse.json(
-      { error: "Failed to create AI brand" },
+      { error: "Failed to create AI brand", details: error.message },
       { status: 500 }
     )
   }

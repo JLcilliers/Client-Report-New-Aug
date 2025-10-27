@@ -168,8 +168,7 @@ export default function NewAIBrandWizard() {
           alternateNames: formData.alternateNames,
           domain: formData.domain,
           industry: formData.industry,
-          description: formData.description,
-          userId: "temp-user-id" // TODO: Get from session
+          description: formData.description
         })
       })
 
