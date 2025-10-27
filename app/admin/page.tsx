@@ -46,9 +46,10 @@ export default function AdminDashboard() {
       const response = await fetch("/api/admin/reports")
       if (response.ok) {
         const data = await response.json()
+        const reports = data.reports || [] // Extract reports array from response object
         // Group reports by client to show connected clients
         const clientsMap = new Map()
-        data.forEach((report: any) => {
+        reports.forEach((report: any) => {
           if (!clientsMap.has(report.client_name)) {
             clientsMap.set(report.client_name, {
               name: report.client_name,
@@ -77,7 +78,8 @@ export default function AdminDashboard() {
       // Fetch reports to get stats
       const response = await fetch("/api/admin/reports")
       if (response.ok) {
-        const reports = await response.json()
+        const data = await response.json()
+        const reports = data.reports || [] // Extract reports array from response object
         // Count unique clients from reports
         const uniqueClients = new Set(reports.map((r: any) => r.client_name)).size
         
@@ -108,7 +110,8 @@ export default function AdminDashboard() {
       const response = await fetch("/api/admin/reports")
       if (response.ok) {
         const data = await response.json()
-        setReports(data.slice(0, 5)) // Get only 5 most recent
+        const reports = data.reports || [] // Extract reports array from response object
+        setReports(reports.slice(0, 5)) // Get only 5 most recent
       }
     } catch (error) {
       
