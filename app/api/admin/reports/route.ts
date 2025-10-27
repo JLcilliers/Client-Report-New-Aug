@@ -24,6 +24,7 @@ export async function GET(request: NextRequest) {
       slug: report.shareableId,
       name: report.reportName,
       report_name: report.reportName,
+      clientName: report.clientName,  // Add this format for AI Visibility page
       client_name: report.clientName,
       domain: report.searchConsolePropertyId || '',
       created_at: report.createdAt.toISOString(),
@@ -38,7 +39,7 @@ export async function GET(request: NextRequest) {
       user_email: report.user?.email
     }));
 
-    return NextResponse.json(transformedReports);
+    return NextResponse.json({ reports: transformedReports });
   } catch (error: any) {
     console.error('[Reports API] Error:', error);
     return NextResponse.json(
