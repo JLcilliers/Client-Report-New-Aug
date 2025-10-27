@@ -94,7 +94,7 @@ export default function AdminLayout({
     { name: "Google Accounts", href: "/admin/google-accounts", icon: Link2 },
     { name: "Properties", href: "/admin/properties", icon: Database },
     { name: "Reports", href: "/admin/reports", icon: FileText },
-    { name: "AI Visibility", href: "/admin/ai-visibility", icon: Brain },
+    { name: "AI Brands", href: "/admin/ai-brands", icon: Brain },
     { name: "Settings", href: "/admin/settings", icon: Settings },
   ]
 

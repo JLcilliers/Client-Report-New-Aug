@@ -14,6 +14,9 @@ export default async function ClientReportPage({ params }: ClientReportPageProps
     where: {
       shareableId: params.slug,
     },
+    include: {
+      cache: true,
+    },
   });
 
   // Fallback to ID if not found by shareableId
@@ -21,6 +24,9 @@ export default async function ClientReportPage({ params }: ClientReportPageProps
     report = await prisma.clientReport.findUnique({
       where: {
         id: params.slug,
+      },
+      include: {
+        cache: true,
       },
     });
   }

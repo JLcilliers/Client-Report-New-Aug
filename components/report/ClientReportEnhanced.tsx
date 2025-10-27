@@ -1,12 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { format, subDays, startOfMonth, endOfMonth, subMonths, subYears } from 'date-fns';
+import { format, subDays, startOfMonth, endOfMonth, subMonths, subYears, parseISO } from 'date-fns';
 import {
   TrendingUp,
   TrendingDown,
   Users,
   Eye,
+  MousePointerClick,
   Target,
   Calendar,
   CheckCircle,
@@ -38,10 +39,7 @@ import {
   Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis
 } from 'recharts';
-
-interface ClientReportEnhancedProps {
-  report: any;
-}
+import { ClientReport, ReportCache } from '@prisma/client';
 
 // Sparkline Component
 const Sparkline = ({ data, color = '#72a3bf' }: { data: number[], color?: string }) => {
@@ -196,870 +194,550 @@ const PerformanceIndicator = ({ value, target, label }: { value: number; target:
   );
 };
 
-export default function ClientReportEnhanced({ report }: ClientReportEnhancedProps) {
-  const [data, setData] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [executiveSummary, setExecutiveSummary] = useState('');
-  const currentDate = new Date();
-  const reportMonth = format(currentDate, 'MMMM yyyy');
-  const dateRange = {
-    startDate: format(startOfMonth(currentDate), 'yyyy-MM-dd'),
-    endDate: format(endOfMonth(currentDate), 'yyyy-MM-dd'),
-  };
+// Formatting utility functions
+const formatNumber = (value: number, decimals: number = 0): string => {
+  if (!value && value !== 0) return '0';
+  return value.toFixed(decimals).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+};
 
-  // Calculate comparative periods
-  const lastMonth = subMonths(currentDate, 1);
-  const lastYear = subYears(currentDate, 1);
+const formatPercentage = (value: number, decimals: number = 1, convertFromDecimal: boolean = false): string => {
+  if (!value && value !== 0) return decimals === 2 ? '0.00%' : '0.0%';
+  const displayValue = convertFromDecimal ? value * 100 : value;
+  return `${displayValue.toFixed(decimals)}%`;
+};
+
+const formatDuration = (seconds: number): string => {
+  if (!seconds && seconds !== 0) return '0:00';
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
+};
+
+const formatMetric = (value: number, unit: string, decimals: number = 1): string => {
+  if (!value && value !== 0) return `0${unit}`;
+  if (unit === 'ms') return `${Math.round(value)}${unit}`;
+  if (unit === '' && decimals === 3) return value.toFixed(3);
+  return `${value.toFixed(decimals)}${unit}`;
+};
+
+const formatPercentageChange = (current: number, previous: number, absolute = false): string => {
+  if (!previous || previous === 0) return '0.0%';
+  if (!current && current !== 0) return '0.0%';
+  let change = ((current - previous) / previous * 100);
+  if (absolute) change = Math.abs(change);
+  return `${change.toFixed(1)}%`;
+};
+
+// Helper functions for default data structures
+const getDefaultAnalytics = () => ({
+  summary: {
+    users: 0,
+    sessions: 0,
+    pageviews: 0,
+    bounceRate: 0,
+    avgSessionDuration: 0,
+    newUsers: 0
+  },
+  trafficSources: [],
+  topPages: [],
+  dailyData: [],
+  lastMonth: {
+    totalUsers: 0,
+    totalPageviews: 0
+  }
+});
+
+const getDefaultSearchConsole = () => ({
+  summary: {
+    clicks: 0,
+    impressions: 0,
+    ctr: 0,
+    position: 0
+  },
+  topQueries: [],
+  topPages: [],
+  byDate: [],
+  lastMonth: {
+    totalClicks: 0,
+    totalImpressions: 0,
+    avgCtr: 0,
+    avgPosition: 0
+  }
+});
+
+const getDefaultPagespeed = () => ({
+  performanceScore: 0,
+  metrics: {
+    fcp: 0,
+    lcp: 0,
+    cls: 0,
+    tti: 0,
+    tbt: 0,
+    si: 0
+  }
+});
+
+interface ClientReportEnhancedProps {
+  report: ClientReport & {
+    cache?: ReportCache[]
+  }
+}
+
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8']
+
+export default function ClientReportEnhanced({ report }: ClientReportEnhancedProps) {
+  const [data, setData] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    fetchAllReportData();
-  }, []);
-
-  const fetchAllReportData = async () => {
-    try {
-      setLoading(true);
-
-      // Simulated data fetch (replace with actual API calls)
-      const mockData = {
-        analytics: {
-          totalSessions: 45234,
-          totalUsers: 28456,
-          totalPageviews: 123456,
-          bounceRate: 42.3,
-          avgSessionDuration: 165,
-          pagesPerSession: 2.7,
-          lastMonth: {
-            totalSessions: 38500,
-            totalUsers: 24200,
-            totalPageviews: 105000,
-          },
-          lastYear: {
-            totalSessions: 32000,
-            totalUsers: 20100,
-            totalPageviews: 87000,
-          }
-        },
-        searchConsole: {
-          totalClicks: 12543,
-          totalImpressions: 234567,
-          avgCtr: 5.35,
-          avgPosition: 14.2,
-          lastMonth: {
-            totalClicks: 10200,
-            totalImpressions: 198000,
-            avgCtr: 5.15,
-            avgPosition: 15.8,
-          }
-        },
-        competitors: [
-          { name: 'Competitor A', shareOfVoice: 35, trend: 'up' },
-          { name: 'Competitor B', shareOfVoice: 28, trend: 'down' },
-          { name: 'Your Brand', shareOfVoice: 22, trend: 'up' },
-          { name: 'Competitor C', shareOfVoice: 15, trend: 'stable' }
-        ],
-        coreWebVitals: {
-          lcp: 2.1,
-          fid: 85,
-          cls: 0.05,
-          performance: 92
-        },
-        testing: {
-          testsRun: 4,
-          successfulTests: 3,
-          avgImprovement: 15.5
+    async function fetchData() {
+      try {
+        setLoading(true)
+        
+        // Fetch data from the public API route
+        const response = await fetch(`/api/public/report/${report.shareableId || report.id}/data`)
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch report data')
         }
-      };
+        
+        const result = await response.json()
+        setData(result)
+      } catch (err) {
+        console.error('Error fetching report data:', err)
+        setError(err instanceof Error ? err.message : 'Failed to load report data')
+      } finally {
+        setLoading(false)
+      }
+    }
 
-      setData(mockData);
+    fetchData()
+  }, [report.shareableId, report.id])
 
-      // Generate executive summary
-      generateExecutiveSummary(mockData);
-    } catch (error) {
-      console.error('Error fetching report data:', error);
-    } finally {
-      setLoading(false);
+  // Helper functions for formatting
+  const formatNumber = (num: number): string => {
+    if (!num && num !== 0) return '0';
+    return new Intl.NumberFormat('en-US').format(num);
+  };
+
+  const formatPercentage = (value: number, decimals: number = 1, convertFromDecimal: boolean = false): string => {
+    if (!value && value !== 0) return decimals === 2 ? '0.00%' : '0.0%';
+    const displayValue = convertFromDecimal ? value * 100 : value;
+    return `${displayValue.toFixed(decimals)}%`;
+  };
+
+  const formatDuration = (seconds: number): string => {
+    if (!seconds) return '0s';
+    const minutes = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return minutes > 0 ? `${minutes}m ${secs}s` : `${secs}s`;
+  };
+
+  const formatDate = (dateString: string): string => {
+    try {
+      const date = parseISO(dateString);
+      return format(date, 'MMM d, yyyy');
+    } catch {
+      return dateString;
     }
   };
 
-  const generateExecutiveSummary = (data: any) => {
-    const summary = `This month delivered strong performance across all key metrics with significant year-over-year growth.
-    Website traffic increased by ${((data.analytics.totalSessions - data.analytics.lastMonth.totalSessions) / data.analytics.lastMonth.totalSessions * 100).toFixed(1)}% compared to last month,
-    with organic search driving exceptional results.`;
-    setExecutiveSummary(summary);
-  };
-
-  const formatNumber = (num: number) => new Intl.NumberFormat('en-US').format(Math.round(num));
-  const formatPercentage = (num: number) => `${num > 0 ? '+' : ''}${num.toFixed(1)}%`;
-  const calculateChange = (current: number, previous: number) => ((current - previous) / previous * 100);
-
   if (loading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#72a3bf] mx-auto mb-4"></div>
-          <p className="text-gray-400">Generating your enhanced report...</p>
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 text-lg">Loading report data...</p>
         </div>
       </div>
-    );
+    )
   }
 
-  // Calculate metrics
-  const overallHealthScore = Math.round(
-    (data.analytics.totalSessions / 50000) * 50 +
-    (data.searchConsole.totalClicks / 15000) * 50
-  );
-
-  const momSessionChange = calculateChange(data.analytics.totalSessions, data.analytics.lastMonth.totalSessions);
-  const yoySessionChange = calculateChange(data.analytics.totalSessions, data.analytics.lastYear.totalSessions);
-  const momClickChange = calculateChange(data.searchConsole.totalClicks, data.searchConsole.lastMonth.totalClicks);
-
-  // Sample sparkline data
-  const sessionSparkline = [32000, 35000, 38500, 37000, 39000, 42000, 45234];
-  const clickSparkline = [9000, 9500, 10200, 10800, 11500, 12000, 12543];
+  if (error || !data) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50">
+        <div className="text-center max-w-md">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-4">
+            <h2 className="text-red-800 font-semibold text-xl mb-2">Error Loading Report</h2>
+            <p className="text-red-600">{error || 'Unable to load report data'}</p>
+          </div>
+          <p className="text-gray-600">Please contact support if this issue persists.</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {/* Header */}
-      <div className="bg-gradient-to-r from-glacier to-marine text-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-6 py-16">
-          <div className="flex justify-between items-start">
-            <div>
-              <h1 className="text-5xl font-bold mb-3">{report.clientName}</h1>
-              <p className="text-2xl opacity-90">Monthly Performance Report</p>
-              <p className="text-lg opacity-80 mt-3">{reportMonth}</p>
-            </div>
-            <HealthScore score={overallHealthScore} />
+      <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-purple-700 text-white py-16 px-4 shadow-xl">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-between mb-6">
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
+              {report.clientName} - Performance Report
+            </h1>
           </div>
+          <p className="text-blue-100 text-lg max-w-3xl">
+            Comprehensive analytics and insights for your website performance
+          </p>
+          {data.last_updated && (
+            <p className="text-blue-200 text-sm mt-4">
+              Last updated: {formatDate(data.last_updated)}
+            </p>
+          )}
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Enhanced Executive Summary */}
-        <section className="mb-12">
-          <div className="bg-white border border-gray-200 rounded-xl p-8 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
-            <h2 className="text-2xl font-bold mb-4 flex items-center gap-2 text-gray-900">
-              <FileText className="w-6 h-6 text-[#72a3bf]" />
-              Executive Summary
-            </h2>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-              <div className="bg-gradient-to-br from-green-500/20 to-green-600/10 border-2 border-green-500/30 rounded-lg p-5 transition-all duration-300 hover:shadow-lg hover:scale-105">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="p-2 bg-green-500 rounded-lg">
-                    <CheckCircle className="w-6 h-6 text-white" />
-                  </div>
-                  <span className="text-lg font-bold text-green-600">Top Achievement</span>
-                </div>
-                <ul className="space-y-1.5 text-sm text-gray-700">
-                  <li className="flex items-start gap-2">
-                    <span className="text-green-500 mt-0.5 font-bold">•</span>
-                    <span><strong className="font-semibold">+23% organic traffic</strong> month-over-month</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-green-500 mt-0.5 font-bold">•</span>
-                    <span><strong className="font-semibold">Exceeded quarterly targets</strong> by 8%</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-green-500 mt-0.5 font-bold">•</span>
-                    <span>Best performing month in <strong className="font-semibold">6 months</strong></span>
-                  </li>
-                </ul>
-              </div>
-              <div className="bg-gradient-to-br from-yellow-500/20 to-yellow-600/10 border-2 border-yellow-500/30 rounded-lg p-5 transition-all duration-300 hover:shadow-lg hover:scale-105">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="p-2 bg-yellow-500 rounded-lg">
-                    <AlertCircle className="w-6 h-6 text-white" />
-                  </div>
-                  <span className="text-lg font-bold text-yellow-600">Needs Attention</span>
-                </div>
-                <ul className="space-y-1.5 text-sm text-gray-700">
-                  <li className="flex items-start gap-2">
-                    <span className="text-yellow-500 mt-0.5 font-bold">•</span>
-                    <span><strong className="font-semibold">Page load speed</strong> impacting mobile conversions</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-yellow-500 mt-0.5 font-bold">•</span>
-                    <span><strong className="font-semibold">3.2s LCP</strong> on key landing pages</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-yellow-500 mt-0.5 font-bold">•</span>
-                    <span>Action required: <strong className="font-semibold">Image optimization</strong></span>
-                  </li>
-                </ul>
-              </div>
-              <div className="bg-gradient-to-br from-glacier/20 to-marine/10 border-2 border-glacier/30 rounded-lg p-5 transition-all duration-300 hover:shadow-lg hover:scale-105">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="p-2 bg-glacier rounded-lg">
-                    <Target className="w-6 h-6 text-white" />
-                  </div>
-                  <span className="text-lg font-bold text-marine">Key Focus</span>
-                </div>
-                <ul className="space-y-1.5 text-sm text-gray-700">
-                  <li className="flex items-start gap-2">
-                    <span className="text-glacier mt-0.5 font-bold">•</span>
-                    <span><strong className="font-semibold">High-performing keywords</strong> ready for Q4</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-glacier mt-0.5 font-bold">•</span>
-                    <span><strong className="font-semibold">15 content gaps</strong> identified vs competitors</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-glacier mt-0.5 font-bold">•</span>
-                    <span>Opportunity: <strong className="font-semibold">Seasonal campaigns</strong></span>
-                  </li>
-                </ul>
-              </div>
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Key Metrics Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {/* Search Console Metrics */}
+          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-medium text-gray-600">Total Clicks</h3>
+              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+              </svg>
             </div>
-
-            <p className="text-gray-400 leading-relaxed">
-              {executiveSummary}
-            </p>
+            <p className="text-3xl font-bold text-gray-900">{formatNumber(data.search_console?.summary?.clicks || 0)}</p>
+            <p className="text-xs text-gray-500 mt-1">From search results</p>
           </div>
-        </section>
 
-        {/* Enhanced KPI Dashboard with Comparisons */}
-        <section className="mb-12">
-          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2 text-gray-900">
-            <BarChart3 className="w-6 h-6 text-[#72a3bf]" />
-            Key Performance Indicators - Comparative Analysis
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="bg-white border-2 border-gray-200 rounded-xl p-8 hover:shadow-xl hover:border-glacier/50 transition-all duration-300">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-gray-500 text-base font-medium">Total Sessions</span>
-                <div className="p-3 bg-glacier/10 rounded-lg">
-                  <Users className="w-6 h-6 text-glacier" />
-                </div>
-              </div>
-              <div className="text-5xl font-bold text-gray-900 mb-2">{formatNumber(data.analytics.totalSessions)}</div>
-              <Sparkline data={sessionSparkline} color="#72a3bf" />
-              <div className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t-2 border-gray-100">
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">vs Last Month</p>
-                  <div className="flex items-center gap-1">
-                    {momSessionChange > 0 ? <ArrowUp className="w-4 h-4 text-green-500" /> : <ArrowDown className="w-4 h-4 text-red-500" />}
-                    <p className={`text-lg font-bold ${momSessionChange > 0 ? 'text-green-500' : 'text-red-500'}`}>
-                      {formatPercentage(momSessionChange)}
-                    </p>
-                  </div>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">vs Last Year</p>
-                  <div className="flex items-center gap-1">
-                    {yoySessionChange > 0 ? <ArrowUp className="w-4 h-4 text-green-500" /> : <ArrowDown className="w-4 h-4 text-red-500" />}
-                    <p className={`text-lg font-bold ${yoySessionChange > 0 ? 'text-green-500' : 'text-red-500'}`}>
-                      {formatPercentage(yoySessionChange)}
-                    </p>
-                  </div>
-                </div>
-              </div>
+          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-medium text-gray-600">Impressions</h3>
+              <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
             </div>
-
-            <div className="bg-white border-2 border-gray-200 rounded-xl p-8 hover:shadow-xl hover:border-green-500/50 transition-all duration-300">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-gray-500 text-base font-medium">Organic Clicks</span>
-                <div className="p-3 bg-green-500/10 rounded-lg">
-                  <Search className="w-6 h-6 text-green-500" />
-                </div>
-              </div>
-              <div className="text-5xl font-bold text-gray-900 mb-2">{formatNumber(data.searchConsole.totalClicks)}</div>
-              <Sparkline data={clickSparkline} color="#10B981" />
-              <div className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t-2 border-gray-100">
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">vs Last Month</p>
-                  <div className="flex items-center gap-1">
-                    {momClickChange > 0 ? <ArrowUp className="w-4 h-4 text-green-500" /> : <ArrowDown className="w-4 h-4 text-red-500" />}
-                    <p className={`text-lg font-bold ${momClickChange > 0 ? 'text-green-500' : 'text-red-500'}`}>
-                      {formatPercentage(momClickChange)}
-                    </p>
-                  </div>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">CTR</p>
-                  <p className="text-lg font-bold text-gray-900">{data.searchConsole.avgCtr.toFixed(2)}%</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white border-2 border-gray-200 rounded-xl p-8 hover:shadow-xl hover:border-marine/50 transition-all duration-300">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-gray-500 text-base font-medium">Conversion Rate</span>
-                <div className="p-3 bg-marine/10 rounded-lg">
-                  <Target className="w-6 h-6 text-marine" />
-                </div>
-              </div>
-              <div className="text-5xl font-bold text-gray-900 mb-2">3.8%</div>
-              <div className="flex items-center gap-2 mt-3">
-                <div className="flex-1 bg-gray-200 rounded-full h-3">
-                  <div className="bg-marine h-3 rounded-full transition-all duration-500" style={{ width: '76%' }}></div>
-                </div>
-                <span className="text-xs text-gray-500 font-medium">Target: 5%</span>
-              </div>
-              <div className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t-2 border-gray-100">
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">vs Last Month</p>
-                  <div className="flex items-center gap-1">
-                    <ArrowUp className="w-4 h-4 text-green-500" />
-                    <p className="text-lg font-bold text-green-500">+0.5%</p>
-                  </div>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">Conversions</p>
-                  <p className="text-lg font-bold text-gray-900">1,719</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white border-2 border-gray-200 rounded-xl p-8 hover:shadow-xl hover:border-glacier/50 transition-all duration-300">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-gray-500 text-base font-medium">Total Users</span>
-                <div className="p-3 bg-glacier/10 rounded-lg">
-                  <Eye className="w-6 h-6 text-glacier" />
-                </div>
-              </div>
-              <div className="text-5xl font-bold text-gray-900 mb-2">{formatNumber(data.analytics.totalUsers)}</div>
-              <div className="h-[50px] flex items-center">
-                <div className="flex-1 text-sm text-gray-500">Unique visitors this period</div>
-              </div>
-              <div className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t-2 border-gray-100">
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">vs Last Month</p>
-                  <div className="flex items-center gap-1">
-                    <ArrowUp className="w-4 h-4 text-green-500" />
-                    <p className="text-lg font-bold text-green-500">
-                      {formatPercentage(calculateChange(data.analytics.totalUsers, data.analytics.lastMonth.totalUsers))}
-                    </p>
-                  </div>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">New Users</p>
-                  <p className="text-lg font-bold text-gray-900">62%</p>
-                </div>
-              </div>
-            </div>
-
+            <p className="text-3xl font-bold text-gray-900">{formatNumber(data.search_console?.summary?.impressions || 0)}</p>
+            <p className="text-xs text-gray-500 mt-1">Times shown in search</p>
           </div>
-        </section>
 
-
-        {/* Enhanced Metrics Section */}
-        <section className="mb-12">
-          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2 text-gray-900">
-            <Activity className="w-6 h-6 text-[#72a3bf]" />
-            Enhanced Performance Metrics
-          </h2>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* User Behavior */}
-            <div className="bg-white border border-gray-200 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
-              <div className="bg-glacier/5 px-6 py-4 border-b border-gray-200">
-                <h3 className="font-semibold flex items-center gap-2 text-gray-900">
-                  <Users className="w-5 h-5 text-glacier" />
-                  User Behavior
-                </h3>
-              </div>
-              <div className="divide-y divide-gray-100">
-                <div className="flex justify-between items-center px-6 py-3 hover:bg-gray-50 transition-colors">
-                  <div className="flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-glacier/70" />
-                    <span className="text-sm text-gray-600">Pages per Session</span>
-                  </div>
-                  <span className="font-bold text-gray-900">{data.analytics.pagesPerSession}</span>
-                </div>
-                <div className="flex justify-between items-center px-6 py-3 bg-gray-50/50 hover:bg-gray-50 transition-colors">
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-glacier/70" />
-                    <span className="text-sm text-gray-600">Avg. Session Duration</span>
-                  </div>
-                  <span className="font-bold text-gray-900">{Math.floor(data.analytics.avgSessionDuration / 60)}:{(data.analytics.avgSessionDuration % 60).toString().padStart(2, '0')}</span>
-                </div>
-                <div className="flex justify-between items-center px-6 py-3 hover:bg-gray-50 transition-colors">
-                  <div className="flex items-center gap-2">
-                    <TrendingDown className="w-4 h-4 text-glacier/70" />
-                    <span className="text-sm text-gray-600">Bounce Rate</span>
-                  </div>
-                  <span className="font-bold text-gray-900">{data.analytics.bounceRate}%</span>
-                </div>
-                <div className="flex justify-between items-center px-6 py-3 bg-gray-50/50 hover:bg-gray-50 transition-colors">
-                  <div className="flex items-center gap-2">
-                    <ArrowDown className="w-4 h-4 text-glacier/70" />
-                    <span className="text-sm text-gray-600">Scroll Depth</span>
-                  </div>
-                  <span className="font-bold text-gray-900">73%</span>
-                </div>
-              </div>
+          {/* Analytics Metrics */}
+          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-medium text-gray-600">Users</h3>
+              <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
             </div>
-
-            {/* Core Web Vitals */}
-            <div className="bg-white border border-gray-200 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
-              <div className="bg-green-500/5 px-6 py-4 border-b border-gray-200">
-                <h3 className="font-semibold flex items-center gap-2 text-gray-900">
-                  <Gauge className="w-5 h-5 text-green-500" />
-                  Core Web Vitals
-                </h3>
-              </div>
-              <div className="divide-y divide-gray-100">
-                <div className="flex justify-between items-center px-6 py-3 hover:bg-gray-50 transition-colors">
-                  <div className="flex items-center gap-2">
-                    <Zap className="w-4 h-4 text-green-500/70" />
-                    <span className="text-sm text-gray-600">LCP</span>
-                  </div>
-                  <span className={`font-bold ${data.coreWebVitals.lcp < 2.5 ? 'text-green-500' : 'text-yellow-500'}`}>
-                    {data.coreWebVitals.lcp}s
-                  </span>
-                </div>
-                <div className="flex justify-between items-center px-6 py-3 bg-gray-50/50 hover:bg-gray-50 transition-colors">
-                  <div className="flex items-center gap-2">
-                    <Activity className="w-4 h-4 text-green-500/70" />
-                    <span className="text-sm text-gray-600">FID</span>
-                  </div>
-                  <span className={`font-bold ${data.coreWebVitals.fid < 100 ? 'text-green-500' : 'text-yellow-500'}`}>
-                    {data.coreWebVitals.fid}ms
-                  </span>
-                </div>
-                <div className="flex justify-between items-center px-6 py-3 hover:bg-gray-50 transition-colors">
-                  <div className="flex items-center gap-2">
-                    <Target className="w-4 h-4 text-green-500/70" />
-                    <span className="text-sm text-gray-600">CLS</span>
-                  </div>
-                  <span className={`font-bold ${data.coreWebVitals.cls < 0.1 ? 'text-green-500' : 'text-yellow-500'}`}>
-                    {data.coreWebVitals.cls}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center px-6 py-3 bg-gray-50/50 hover:bg-gray-50 transition-colors">
-                  <div className="flex items-center gap-2">
-                    <Award className="w-4 h-4 text-green-500/70" />
-                    <span className="text-sm text-gray-600">Performance Score</span>
-                  </div>
-                  <span className="font-bold text-green-500">{data.coreWebVitals.performance}/100</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Lead Quality */}
-            <div className="bg-white border border-gray-200 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
-              <div className="bg-yellow-500/5 px-6 py-4 border-b border-gray-200">
-                <h3 className="font-semibold flex items-center gap-2 text-gray-900">
-                  <Star className="w-5 h-5 text-yellow-500" />
-                  Lead Quality Indicators
-                </h3>
-              </div>
-              <div className="divide-y divide-gray-100">
-                <div className="flex justify-between items-center px-6 py-3 hover:bg-gray-50 transition-colors">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-yellow-500/70" />
-                    <span className="text-sm text-gray-600">Marketing Qualified</span>
-                  </div>
-                  <span className="font-bold text-gray-900">68%</span>
-                </div>
-                <div className="flex justify-between items-center px-6 py-3 bg-gray-50/50 hover:bg-gray-50 transition-colors">
-                  <div className="flex items-center gap-2">
-                    <Trophy className="w-4 h-4 text-yellow-500/70" />
-                    <span className="text-sm text-gray-600">Sales Qualified</span>
-                  </div>
-                  <span className="font-bold text-gray-900">42%</span>
-                </div>
-                <div className="flex justify-between items-center px-6 py-3 hover:bg-gray-50 transition-colors">
-                  <div className="flex items-center gap-2">
-                    <Users className="w-4 h-4 text-yellow-500/70" />
-                    <span className="text-sm text-gray-600">Conversion to Customer</span>
-                  </div>
-                  <span className="font-bold text-gray-900">18%</span>
-                </div>
-                <div className="flex justify-between items-center px-6 py-3 bg-gray-50/50 hover:bg-gray-50 transition-colors">
-                  <div className="flex items-center gap-2">
-                    <Star className="w-4 h-4 text-yellow-500/70" />
-                    <span className="text-sm text-gray-600">Lead Score Avg</span>
-                  </div>
-                  <span className="font-bold text-gray-900">7.2/10</span>
-                </div>
-              </div>
-            </div>
+            <p className="text-3xl font-bold text-gray-900">{formatNumber(data.analytics?.summary?.users || 0)}</p>
+            <p className="text-xs text-gray-500 mt-1">Unique visitors</p>
           </div>
-        </section>
 
-        {/* Performance Against Targets */}
-        <section className="mb-12">
-          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2 text-gray-900">
-            <Target className="w-6 h-6 text-[#72a3bf]" />
-            Performance Against Targets
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <PerformanceIndicator value={45234} target={50000} label="Sessions Target" />
-            <PerformanceIndicator value={12543} target={15000} label="Organic Clicks Target" />
-            <PerformanceIndicator value={1719} target={2000} label="Conversions Target" />
-            <PerformanceIndicator value={3.8} target={5} label="Conversion Rate Target (%)" />
-            <PerformanceIndicator value={14.2} target={10} label="Avg Position Target" />
+          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-medium text-gray-600">Pageviews</h3>
+              <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <p className="text-3xl font-bold text-gray-900">{formatNumber(data.analytics?.summary?.pageviews || 0)}</p>
+            <p className="text-xs text-gray-500 mt-1">Total page views</p>
           </div>
-        </section>
+        </div>
 
-        {/* Competitive Context */}
-        <section className="mb-12">
-          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2 text-gray-900">
-            <Trophy className="w-6 h-6 text-[#72a3bf]" />
-            Competitive Landscape
-          </h2>
+        {/* Additional Metrics Row */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-medium text-gray-600">Click-Through Rate</h3>
+            </div>
+            <p className="text-3xl font-bold text-gray-900">{formatPercentage(data.search_console?.summary?.ctr || 0, 2, true)}</p>
+            <p className="text-xs text-gray-500 mt-1">Search result CTR</p>
+          </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-white border border-gray-200 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
-              <h3 className="text-lg font-semibold mb-4 text-gray-900">Share of Voice</h3>
-              <ResponsiveContainer width="100%" height={250}>
-                <BarChart data={data.competitors}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#2A2A2A" />
-                  <XAxis dataKey="name" stroke="#888" />
-                  <YAxis stroke="#888" />
-                  <Tooltip contentStyle={{ backgroundColor: '#1d4052', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' }} />
-                  <Bar dataKey="shareOfVoice" fill="#72a3bf">
-                    {data.competitors.map((entry: any, index: number) => (
-                      <Cell key={`cell-${index}`} fill={entry.name === 'Your Brand' ? '#72a3bf' : '#555'} />
+          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-medium text-gray-600">Avg. Position</h3>
+            </div>
+            <p className="text-3xl font-bold text-gray-900">{(data.search_console?.summary?.position || 0).toFixed(1)}</p>
+            <p className="text-xs text-gray-500 mt-1">In search results</p>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-medium text-gray-600">Bounce Rate</h3>
+            </div>
+            <p className="text-3xl font-bold text-gray-900">{formatPercentage(data.analytics?.summary?.bounceRate || 0)}</p>
+            <p className="text-xs text-gray-500 mt-1">Visitor bounce rate</p>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-medium text-gray-600">Avg. Session</h3>
+            </div>
+            <p className="text-3xl font-bold text-gray-900">{formatDuration(data.analytics?.summary?.avgSessionDuration || 0)}</p>
+            <p className="text-xs text-gray-500 mt-1">Session duration</p>
+          </div>
+        </div>
+
+        {/* Charts Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {/* Traffic Sources Chart */}
+          {data.analytics?.trafficSources && data.analytics.trafficSources.length > 0 && (
+            <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
+              <h3 className="font-semibold text-lg mb-4 text-gray-900">Traffic Sources</h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={data.analytics.trafficSources}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={(entry) => `${entry.source}: ${entry.percentage.toFixed(1)}%`}
+                    outerRadius={100}
+                    fill="#8884d8"
+                    dataKey="sessions"
+                  >
+                    {data.analytics.trafficSources.map((entry: any, index: number) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
-                  </Bar>
-                </BarChart>
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
               </ResponsiveContainer>
             </div>
+          )}
 
-            <div className="bg-white border border-gray-200 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
-              <h3 className="text-lg font-semibold mb-4 text-gray-900">Competitive Opportunities</h3>
-              <div className="space-y-3">
-                <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
-                  <div className="flex items-center gap-2 mb-1">
-                    <ChevronRight className="w-4 h-4 text-green-500" />
-                    <span className="font-semibold text-green-400">Content Gap</span>
-                  </div>
-                  <p className="text-sm text-gray-400">15 high-value keywords where competitors rank but you don't</p>
-                </div>
-                <div className="p-3 bg-[#72a3bf]/10 border border-[#72a3bf]/20 rounded-lg">
-                  <div className="flex items-center gap-2 mb-1">
-                    <ChevronRight className="w-4 h-4 text-[#72a3bf]" />
-                    <span className="font-semibold text-[#72a3bf]">Link Opportunities</span>
-                  </div>
-                  <p className="text-sm text-gray-400">23 domains linking to competitors but not to you</p>
-                </div>
-                <div className="p-3 bg-glacier/10 border border-glacier/20 rounded-lg">
-                  <div className="flex items-center gap-2 mb-1">
-                    <ChevronRight className="w-4 h-4 text-glacier" />
-                    <span className="font-semibold text-glacier">Technical Advantage</span>
-                  </div>
-                  <p className="text-sm text-gray-400">Your site loads 1.2s faster than industry average</p>
-                </div>
-              </div>
+          {/* Search Console Performance Chart */}
+          {data.search_console?.byDate && data.search_console.byDate.length > 0 && (
+            <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
+              <h3 className="font-semibold text-lg mb-4 text-gray-900">Search Performance Trend</h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={data.search_console.byDate}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis
+                    dataKey="keys[0]"
+                    tickFormatter={(value) => {
+                      try {
+                        return format(parseISO(value), 'MMM d')
+                      } catch {
+                        return value
+                      }
+                    }}
+                  />
+                  <YAxis />
+                  <Tooltip
+                    labelFormatter={(value) => {
+                      try {
+                        return format(parseISO(value), 'MMM d, yyyy')
+                      } catch {
+                        return value
+                      }
+                    }}
+                  />
+                  <Legend />
+                  <Line type="monotone" dataKey="clicks" stroke="#0088FE" name="Clicks" />
+                  <Line type="monotone" dataKey="impressions" stroke="#00C49F" name="Impressions" />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+        </div>
+
+        {/* Top Pages from Analytics */}
+        {data.analytics?.topPages && data.analytics.topPages.length > 0 && (
+          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 mb-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
+            <h3 className="font-semibold text-lg mb-4 text-gray-900">Top Pages by Traffic</h3>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-200">
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Page</th>
+                    <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Sessions</th>
+                    <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Users</th>
+                    <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Bounce Rate</th>
+                    <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Avg. Duration</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.analytics.topPages.slice(0, 10).map((page: any, index: number) => (
+                    <tr key={index} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                      <td className="py-3 px-4 text-sm text-gray-900 max-w-md truncate">{page.page}</td>
+                      <td className="py-3 px-4 text-sm text-right text-gray-700">{formatNumber(page.sessions)}</td>
+                      <td className="py-3 px-4 text-sm text-right text-gray-700">{formatNumber(page.users)}</td>
+                      <td className="py-3 px-4 text-sm text-right text-gray-700">{formatPercentage(page.bounceRate)}</td>
+                      <td className="py-3 px-4 text-sm text-right text-gray-700">{formatDuration(page.avgSessionDuration)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
-        </section>
+        )}
 
-        {/* Testing & Optimization Results */}
-        <section className="mb-12">
-          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2 text-gray-900">
-            <TestTube className="w-6 h-6 text-[#72a3bf]" />
-            Testing & Optimization Results
-          </h2>
-
-          <div className="bg-white border border-gray-200 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
-            <div className="mb-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-lg font-semibold text-gray-900">A/B Tests Completed</span>
-                <span className="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm font-semibold border border-green-500/30">
-                  {data.testing.successfulTests}/{data.testing.testsRun} Successful
-                </span>
-              </div>
-              <p className="text-sm text-gray-400">Average improvement: +{data.testing.avgImprovement}%</p>
-            </div>
-
-            <div className="space-y-3">
-              <div className="border-l-4 border-green-500 pl-4 py-2 bg-green-500/5">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <p className="font-semibold text-gray-900">Homepage Hero CTA Test</p>
-                    <p className="text-sm text-gray-400">Button color and copy variation</p>
-                  </div>
-                  <span className="text-green-400 font-semibold">+23% CTR</span>
-                </div>
-              </div>
-              <div className="border-l-4 border-green-500 pl-4 py-2 bg-green-500/5">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <p className="font-semibold text-gray-900">Product Page Layout Test</p>
-                    <p className="text-sm text-gray-400">Image placement and size optimization</p>
-                  </div>
-                  <span className="text-green-400 font-semibold">+18% Conversion</span>
-                </div>
-              </div>
-              <div className="border-l-4 border-yellow-500 pl-4 py-2 bg-yellow-500/5">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <p className="font-semibold text-gray-900">Checkout Flow Simplification</p>
-                    <p className="text-sm text-gray-400">Reduced form fields and steps</p>
-                  </div>
-                  <span className="text-yellow-400 font-semibold">+5% Completion</span>
-                </div>
-              </div>
-              <div className="border-l-4 border-red-500 pl-4 py-2 bg-red-500/5">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <p className="font-semibold text-gray-900">Pop-up Timing Test</p>
-                    <p className="text-sm text-gray-400">Exit intent vs time-based trigger</p>
-                  </div>
-                  <span className="text-red-400 font-semibold">-2% Engagement</span>
-                </div>
-              </div>
+        {/* Top Queries */}
+        {data.search_console?.topQueries && data.search_console.topQueries.length > 0 && (
+          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 mb-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
+            <h3 className="font-semibold text-lg mb-4 text-gray-900">Top Search Queries</h3>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-200">
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Query</th>
+                    <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Clicks</th>
+                    <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Impressions</th>
+                    <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">CTR</th>
+                    <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Position</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.search_console.topQueries.slice(0, 10).map((query: any, index: number) => (
+                    <tr key={index} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                      <td className="py-3 px-4 text-sm text-gray-900">{query.keys?.[0] || query.query}</td>
+                      <td className="py-3 px-4 text-sm text-right text-gray-700">{formatNumber(query.clicks)}</td>
+                      <td className="py-3 px-4 text-sm text-right text-gray-700">{formatNumber(query.impressions)}</td>
+                      <td className="py-3 px-4 text-sm text-right text-gray-700">{formatPercentage(query.ctr || 0, 1, true)}</td>
+                      <td className="py-3 px-4 text-sm text-right text-gray-700">{(query.position || 0).toFixed(1)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
-        </section>
+        )}
 
-        {/* Upcoming Opportunities */}
-        <section className="mb-12">
-          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2 text-gray-900">
-            <Lightbulb className="w-6 h-6 text-[#72a3bf]" />
-            Upcoming Opportunities & Market Trends
-          </h2>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="bg-white border border-[#72a3bf]/20 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
-              <div className="flex items-center gap-2 mb-3">
-                <Calendar className="w-5 h-5 text-[#72a3bf]" />
-                <h3 className="font-semibold text-gray-900">Seasonal Opportunities</h3>
-              </div>
-              <ul className="space-y-2 text-sm text-gray-400">
-                <li>• Black Friday prep (45 days)</li>
-                <li>• Holiday shopping season</li>
-                <li>• Q4 budget allocation</li>
-                <li>• Year-end reporting prep</li>
-              </ul>
-            </div>
-
-            <div className="bg-white border border-green-500/20 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(16,185,129,0.15)]">
-              <div className="flex items-center gap-2 mb-3">
-                <Trend className="w-5 h-5 text-green-500" />
-                <h3 className="font-semibold text-gray-900">Trending Keywords</h3>
-              </div>
-              <ul className="space-y-2 text-sm text-gray-400">
-                <li>• "AI-powered" (+380% search volume)</li>
-                <li>• "sustainable" (+120% search volume)</li>
-                <li>• "remote work tools" (+85% search volume)</li>
-                <li>• "automation software" (+65% search volume)</li>
-              </ul>
-            </div>
-
-            <div className="bg-white border border-marine/20 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(68,110,135,0.15)]">
-              <div className="flex items-center gap-2 mb-3">
-                <Globe className="w-5 h-5 text-marine" />
-                <h3 className="font-semibold text-gray-900">Industry Events</h3>
-              </div>
-              <ul className="space-y-2 text-sm text-gray-400">
-                <li>• Industry Conference (Nov 15-17)</li>
-                <li>• Product launch window</li>
-                <li>• Partner webinar series</li>
-                <li>• Awards submission deadline</li>
-              </ul>
+        {/* Top Pages from Search Console */}
+        {data.search_console?.topPages && data.search_console.topPages.length > 0 && (
+          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
+            <h3 className="font-semibold text-lg mb-4 text-gray-900">Top Pages in Search Results</h3>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-200">
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Page</th>
+                    <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Clicks</th>
+                    <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Impressions</th>
+                    <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">CTR</th>
+                    <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Position</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.search_console.topPages.slice(0, 10).map((page: any, index: number) => (
+                    <tr key={index} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                      <td className="py-3 px-4 text-sm text-gray-900 max-w-md truncate">{page.keys?.[0] || page.page}</td>
+                      <td className="py-3 px-4 text-sm text-right text-gray-700">{formatNumber(page.clicks)}</td>
+                      <td className="py-3 px-4 text-sm text-right text-gray-700">{formatNumber(page.impressions)}</td>
+                      <td className="py-3 px-4 text-sm text-right text-gray-700">{formatPercentage(page.ctr || 0, 1, true)}</td>
+                      <td className="py-3 px-4 text-sm text-right text-gray-700">{(page.position || 0).toFixed(1)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
-        </section>
+        )}
 
-        {/* Recommendations with Priority Matrix */}
-        <section className="mb-12">
-          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2 text-gray-900">
-            <Zap className="w-6 h-6 text-[#72a3bf]" />
-            Strategic Recommendations - Priority Matrix
-          </h2>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 transition-all duration-300 hover:shadow-[0_0_20px_rgba(239,68,68,0.15)]">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-semibold text-red-400">High Priority - Quick Wins</span>
-                  <span className="text-xs bg-red-500/20 text-red-400 px-2 py-1 rounded border border-red-500/30">Do First</span>
-                </div>
-                <ul className="space-y-2 text-sm text-gray-400">
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-red-400 mt-0.5" />
-                    <span>Fix mobile page speed issues (2-day effort, +15% conversion impact)</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-red-400 mt-0.5" />
-                    <span>Optimize top 10 landing pages for Core Web Vitals</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-red-400 mt-0.5" />
-                    <span>Implement schema markup on product pages</span>
-                  </li>
-                </ul>
+        {/* Core Web Vitals */}
+        {data.pagespeed && (
+          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 mt-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
+            <h3 className="font-semibold text-lg mb-4 text-gray-900">Core Web Vitals</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* LCP */}
+              <div className="text-center p-4 bg-gray-50 rounded-lg">
+                <p className="text-sm text-gray-600 mb-2">Largest Contentful Paint</p>
+                <p className="text-3xl font-bold text-gray-900">
+                {data.pagespeed?.mobile?.coreWebVitals?.LCP || 'N/A'}
+                </p>
+                <p className="text-xs text-gray-500 mt-1">
+                  {(() => {
+                    const lcpValue = data.pagespeed?.mobile?.coreWebVitals?.LCP;
+                    if (!lcpValue || lcpValue === 'N/A') return '—';
+                    const lcp = parseFloat(lcpValue) * 1000; // Convert seconds to milliseconds
+                    return lcp <= 2500 ? '✓ Good' : lcp <= 4000 ? '⚠ Needs Improvement' : '✗ Poor';
+                  })()}
+                </p>
               </div>
 
-              <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4 transition-all duration-300 hover:shadow-[0_0_20px_rgba(234,179,8,0.15)]">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-semibold text-yellow-400">Medium Priority - Strategic</span>
-                  <span className="text-xs bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded border border-yellow-500/30">Plan Next</span>
-                </div>
-                <ul className="space-y-2 text-sm text-gray-400">
-                  <li className="flex items-start gap-2">
-                    <Clock className="w-4 h-4 text-yellow-400 mt-0.5" />
-                    <span>Develop content hub for trending topics</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Clock className="w-4 h-4 text-yellow-400 mt-0.5" />
-                    <span>Launch competitor gap analysis campaign</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Clock className="w-4 h-4 text-yellow-400 mt-0.5" />
-                    <span>Expand link building to industry publications</span>
-                  </li>
-                </ul>
+              {/* FID */}
+              <div className="text-center p-4 bg-gray-50 rounded-lg">
+                <p className="text-sm text-gray-600 mb-2">First Input Delay</p>
+                <p className="text-3xl font-bold text-gray-900">
+                  {data.pagespeed?.mobile?.coreWebVitals?.FID || 'N/A'}
+                </p>
+                <p className="text-xs text-gray-500 mt-1">
+                {(() => {
+                 const fidValue = data.pagespeed?.mobile?.coreWebVitals?.FID;
+                    if (!fidValue || fidValue === 'N/A') return '—';
+                  const fid = parseFloat(fidValue);
+                  return fid <= 100 ? '✓ Good' : fid <= 300 ? '⚠ Needs Improvement' : '✗ Poor';
+                })()}
+              </p>
+              </div>
+
+              {/* CLS */}
+              <div className="text-center p-4 bg-gray-50 rounded-lg">
+                <p className="text-sm text-gray-600 mb-2">Cumulative Layout Shift</p>
+                <p className="text-3xl font-bold text-gray-900">
+                  {data.pagespeed?.mobile?.coreWebVitals?.CLS || 'N/A'}
+                </p>
+                <p className="text-xs text-gray-500 mt-1">
+                  {(() => {
+                    const clsValue = data.pagespeed?.mobile?.coreWebVitals?.CLS;
+                    if (!clsValue || clsValue === 'N/A') return '—';
+                    const cls = parseFloat(clsValue);
+                    return cls <= 0.1 ? '✓ Good' : cls <= 0.25 ? '⚠ Needs Improvement' : '✗ Poor';
+                  })()}
+                </p>
               </div>
             </div>
 
-            <div className="bg-white border border-gray-200 rounded-lg p-6 transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
-              <h3 className="font-semibold mb-4 text-gray-900">Impact vs Effort Matrix</h3>
-              <div className="relative h-64 bg-gray-50 border border-gray-200 rounded">
-                <div className="absolute top-0 left-1/2 transform -translate-x-1/2 text-xs text-gray-400">High Impact</div>
-                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 text-xs text-gray-400">Low Impact</div>
-                <div className="absolute left-0 top-1/2 transform -translate-y-1/2 text-xs text-gray-400 -rotate-90">Low Effort</div>
-                <div className="absolute right-0 top-1/2 transform -translate-y-1/2 text-xs text-gray-400 -rotate-90">High Effort</div>
-
-                <div className="absolute inset-0 grid grid-cols-2 grid-rows-2">
-                  <div className="border-r border-b border-gray-200 p-2">
-                    <div className="text-xs font-semibold text-green-400">Quick Wins</div>
-                    <div className="mt-1 space-y-1">
-                      <div className="text-xs bg-green-500/20 border border-green-500/30 rounded px-1 py-0.5 text-green-400">Speed Fix</div>
-                      <div className="text-xs bg-green-500/20 border border-green-500/30 rounded px-1 py-0.5 text-green-400">Schema</div>
-                    </div>
-                  </div>
-                  <div className="border-b border-gray-200 p-2">
-                    <div className="text-xs font-semibold text-[#72a3bf]">Major Projects</div>
-                    <div className="mt-1 space-y-1">
-                      <div className="text-xs bg-[#72a3bf]/20 border border-[#72a3bf]/30 rounded px-1 py-0.5 text-[#72a3bf]">Site Redesign</div>
-                    </div>
-                  </div>
-                  <div className="border-r border-gray-200 p-2">
-                    <div className="text-xs font-semibold text-gray-400">Fill-ins</div>
-                    <div className="mt-1 space-y-1">
-                      <div className="text-xs bg-gray-200 border border-gray-300 rounded px-1 py-0.5 text-gray-400">Meta Updates</div>
-                    </div>
-                  </div>
-                  <div className="p-2">
-                    <div className="text-xs font-semibold text-yellow-400">Consider Later</div>
-                    <div className="mt-1 space-y-1">
-                      <div className="text-xs bg-yellow-500/20 border border-yellow-500/30 rounded px-1 py-0.5 text-yellow-400">New Markets</div>
-                    </div>
+            {/* Performance Score */}
+            {data.pagespeed?.mobile?.lighthouse?.performance !== undefined && (
+              <div className="mt-6 text-center">
+                <p className="text-sm text-gray-600 mb-2">Performance Score</p>
+                <div className="relative w-32 h-32 mx-auto">
+                  <svg className="transform -rotate-90 w-32 h-32">
+                    <circle
+                      cx="64"
+                      cy="64"
+                      r="56"
+                      stroke="#e5e7eb"
+                      strokeWidth="8"
+                      fill="none"
+                    />
+                    <circle
+                      cx="64"
+                      cy="64"
+                      r="56"
+                      stroke={data.pagespeed?.mobile?.lighthouse?.performance >= 90 ? '#10b981' : 
+                             data.pagespeed?.mobile?.lighthouse?.performance >= 50 ? '#f59e0b' : '#ef4444'}
+                      strokeWidth="8"
+                      fill="none"
+                      strokeDasharray={`${(data.pagespeed?.mobile?.lighthouse?.performance / 100) * 351.86} 351.86`}
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-3xl font-bold text-gray-900">
+                      {Math.round(data.pagespeed?.mobile?.lighthouse?.performance)}
+                    </span>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
-        </section>
+        )}
+      </div>
 
-        {/* Performance Scorecard */}
-        <section className="mb-12">
-          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2 text-gray-900">
-            <Shield className="w-6 h-6 text-[#72a3bf]" />
-            Performance Scorecard
-          </h2>
-
-          <div className="bg-white border border-gray-200 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-[0_0_20px_rgba(114,163,191,0.15)]">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="text-left px-6 py-3 text-sm font-semibold text-gray-400">Category</th>
-                  <th className="text-center px-6 py-3 text-sm font-semibold text-gray-400">Score</th>
-                  <th className="text-center px-6 py-3 text-sm font-semibold text-gray-400">Status</th>
-                  <th className="text-center px-6 py-3 text-sm font-semibold text-gray-400">Trend</th>
-                  <th className="text-left px-6 py-3 text-sm font-semibold text-gray-400">Notes</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                <tr className="hover:bg-gray-50">
-                  <td className="px-6 py-4 text-sm text-gray-900">Organic Performance</td>
-                  <td className="px-6 py-4 text-center">
-                    <span className="text-lg font-bold text-green-400">A</span>
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    <span className="px-2 py-1 bg-green-500/20 text-green-400 rounded-full text-xs font-semibold border border-green-500/30">Excellent</span>
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    <ArrowUp className="w-4 h-4 text-green-400 mx-auto" />
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-400">23% growth MoM</td>
-                </tr>
-                <tr className="hover:bg-gray-50">
-                  <td className="px-6 py-4 text-sm text-gray-900">Technical SEO</td>
-                  <td className="px-6 py-4 text-center">
-                    <span className="text-lg font-bold text-yellow-400">B</span>
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    <span className="px-2 py-1 bg-yellow-500/20 text-yellow-400 rounded-full text-xs font-semibold border border-yellow-500/30">Good</span>
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    <Minus className="w-4 h-4 text-gray-400 mx-auto" />
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-400">Mobile speed needs improvement</td>
-                </tr>
-                <tr className="hover:bg-gray-50">
-                  <td className="px-6 py-4 text-sm text-gray-900">Content Quality</td>
-                  <td className="px-6 py-4 text-center">
-                    <span className="text-lg font-bold text-green-400">A</span>
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    <span className="px-2 py-1 bg-green-500/20 text-green-400 rounded-full text-xs font-semibold border border-green-500/30">Excellent</span>
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    <ArrowUp className="w-4 h-4 text-green-400 mx-auto" />
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-400">High engagement metrics</td>
-                </tr>
-                <tr className="hover:bg-gray-50">
-                  <td className="px-6 py-4 text-sm text-gray-900">User Experience</td>
-                  <td className="px-6 py-4 text-center">
-                    <span className="text-lg font-bold text-yellow-400">B</span>
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    <span className="px-2 py-1 bg-yellow-500/20 text-yellow-400 rounded-full text-xs font-semibold border border-yellow-500/30">Good</span>
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    <ArrowUp className="w-4 h-4 text-green-400 mx-auto" />
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-400">Bounce rate improving</td>
-                </tr>
-                <tr className="hover:bg-gray-50">
-                  <td className="px-6 py-4 text-sm text-gray-900">Conversion Rate</td>
-                  <td className="px-6 py-4 text-center">
-                    <span className="text-lg font-bold text-orange-400">C</span>
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    <span className="px-2 py-1 bg-orange-500/20 text-orange-400 rounded-full text-xs font-semibold border border-orange-500/30">Needs Work</span>
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    <ArrowDown className="w-4 h-4 text-red-400 mx-auto" />
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-400">Below target by 24%</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        {/* Footer */}
-        <div className="border-t border-gray-200 pt-8 mt-12">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 text-center">
-            <div>
-              <p className="font-semibold text-gray-900">Next Review Date</p>
-              <p className="text-sm text-gray-400">{format(subMonths(currentDate, -1), 'MMMM dd, yyyy')}</p>
-            </div>
-            <div>
-              <p className="font-semibold text-gray-900">Report Prepared By</p>
-              <p className="text-sm text-gray-400">Your Account Team</p>
-            </div>
-            <div>
-              <p className="font-semibold text-gray-900">Questions?</p>
-              <p className="text-sm text-gray-400">Contact your account manager</p>
-            </div>
-          </div>
-
-          <p className="text-center text-sm text-gray-400 mt-6">
-            © {new Date().getFullYear()} - Confidential and Proprietary
+      {/* Footer */}
+      <div className="bg-white border-t border-gray-200 py-8 px-4 mt-12">
+        <div className="max-w-7xl mx-auto text-center">
+          <p className="text-gray-600 text-sm">
+            Report generated by Search Insights Hub
           </p>
+          {data.date_range && (
+            <p className="text-gray-500 text-xs mt-2">
+              Data period: {formatDate(data.date_range.start)} - {formatDate(data.date_range.end)}
+            </p>
+          )}
         </div>
       </div>
     </div>
-  );
+  )
 }
