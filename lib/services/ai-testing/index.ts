@@ -169,7 +169,7 @@ export function calculatePlatformScores(results: PlatformTestResult[]) {
   // Calculate scores for each platform
   const platformScores = []
 
-  for (const [platform, platformResults] of platformGroups) {
+  for (const [platform, platformResults] of Array.from(platformGroups.entries())) {
     const totalTests = platformResults.length
     const totalMentions = platformResults.filter(r => r.brandMentioned).length
     const citedMentions = platformResults.filter(r => r.cited).length
