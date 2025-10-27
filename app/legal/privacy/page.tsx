@@ -18,7 +18,7 @@ export default function PrivacyPolicy() {
             <h1 className="text-4xl font-bold text-gray-900 mb-4">Privacy Policy</h1>
             <p className="text-lg text-gray-600">Search Insights Hub</p>
             <p className="text-sm text-gray-500 mt-2">
-              <strong>Last Updated:</strong> September 7, 2025
+              <strong>Last Updated:</strong> October 27, 2024
             </p>
           </div>
 
@@ -86,6 +86,113 @@ export default function PrivacyPolicy() {
                 <li>To detect, prevent, and address technical issues and security threats</li>
                 <li>To comply with legal obligations and enforce our Terms of Service</li>
                 <li>To send you marketing communications (with your consent where required)</li>
+              </ul>
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">3.5 Google User Data - Sharing, Transfer, and Disclosure</h2>
+
+              <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-4">
+                <p className="text-sm text-blue-800 font-semibold mb-2">
+                  Important Information About Your Google Data
+                </p>
+                <p className="text-sm text-blue-800">
+                  Search Insights Hub's use and transfer of information received from Google APIs adheres to the{' '}
+                  <a href="https://developers.google.com/terms/api-services-user-data-policy"
+                     className="underline hover:text-blue-900"
+                     target="_blank"
+                     rel="noopener noreferrer">
+                    Google API Services User Data Policy
+                  </a>, including the Limited Use requirements.
+                </p>
+              </div>
+
+              <h3 className="text-xl font-semibold text-gray-800 mb-3">What Google Data We Access</h3>
+              <p className="mb-4">
+                When you connect your Google account to Search Insights Hub, we request read-only access to:
+              </p>
+              <ul className="list-disc pl-6 mb-4 space-y-2">
+                <li><strong>Google Analytics Data:</strong> Website traffic, user behavior, conversion metrics, and performance data from your Analytics properties</li>
+                <li><strong>Google Search Console Data:</strong> Search performance, keyword rankings, indexing status, and technical SEO information</li>
+                <li><strong>Basic Profile Information:</strong> Your email address and profile name for authentication purposes</li>
+              </ul>
+
+              <h3 className="text-xl font-semibold text-gray-800 mb-3">How We Use Your Google Data</h3>
+              <p className="mb-4">
+                We use your Google data exclusively for the following purposes:
+              </p>
+              <ul className="list-disc pl-6 mb-4 space-y-2">
+                <li>Generating automated SEO reports and analytics dashboards within your account</li>
+                <li>Displaying your website performance metrics and search visibility data</li>
+                <li>Creating client reports that you specifically request through our platform</li>
+                <li>Providing you with insights and recommendations based on your SEO data</li>
+              </ul>
+
+              <h3 className="text-xl font-semibold text-gray-800 mb-3">Data Sharing and Third-Party Access</h3>
+              <p className="mb-4 font-semibold text-gray-900">
+                We do NOT share, sell, rent, or disclose your Google user data to any third parties for their marketing purposes.
+              </p>
+              <p className="mb-4">
+                Your Google data is kept strictly confidential and is only accessible to:
+              </p>
+              <ul className="list-disc pl-6 mb-4 space-y-2">
+                <li><strong>You:</strong> Through your authenticated account on our platform</li>
+                <li><strong>Your authorized team members:</strong> If you explicitly grant them access within our platform</li>
+                <li><strong>Our technical infrastructure:</strong> Only for the purpose of processing and displaying your data (see Data Transfer section below)</li>
+              </ul>
+
+              <h3 className="text-xl font-semibold text-gray-800 mb-3">Data Transfer and Storage</h3>
+              <p className="mb-4">
+                Your Google user data is transferred and stored as follows:
+              </p>
+              <ul className="list-disc pl-6 mb-4 space-y-2">
+                <li><strong>Infrastructure Provider:</strong> Vercel (serverless deployment platform) and Supabase (PostgreSQL database)</li>
+                <li><strong>Data Location:</strong> United States (AWS/Vercel infrastructure)</li>
+                <li><strong>Transfer Method:</strong> All data transfers occur over encrypted HTTPS connections</li>
+                <li><strong>Storage Duration:</strong> Your Google Analytics and Search Console data is cached temporarily to generate reports. We do not permanently store your raw Google data beyond what is necessary for report generation and display</li>
+                <li><strong>Access Tokens:</strong> Your Google OAuth tokens are stored securely with encryption and are only used to access your data when you explicitly request it through our platform</li>
+              </ul>
+
+              <h3 className="text-xl font-semibold text-gray-800 mb-3">Data Disclosure</h3>
+              <p className="mb-4">
+                We will only disclose your Google user data in the following limited circumstances:
+              </p>
+              <ul className="list-disc pl-6 mb-4 space-y-2">
+                <li><strong>With Your Explicit Consent:</strong> When you specifically authorize us to share your data</li>
+                <li><strong>Legal Requirements:</strong> When required by law, court order, or government regulation</li>
+                <li><strong>Protection of Rights:</strong> To protect our legal rights, prevent fraud, or ensure platform security</li>
+              </ul>
+              <p className="mb-4">
+                <strong>We will never sell your Google user data to third parties under any circumstances.</strong>
+              </p>
+
+              <h3 className="text-xl font-semibold text-gray-800 mb-3">Your Control Over Google Data</h3>
+              <p className="mb-4">
+                You maintain full control over your Google data:
+              </p>
+              <ul className="list-disc pl-6 mb-4 space-y-2">
+                <li><strong>Revoke Access:</strong> You can disconnect your Google account at any time through our platform settings or through your{' '}
+                  <a href="https://myaccount.google.com/permissions"
+                     className="text-marine hover:text-harbor underline"
+                     target="_blank"
+                     rel="noopener noreferrer">
+                    Google Account Permissions
+                  </a>
+                </li>
+                <li><strong>Data Deletion:</strong> When you disconnect your Google account, we will delete your cached Google data within 30 days</li>
+                <li><strong>Limited Scope:</strong> We only request read-only access to your data - we cannot modify or delete anything in your Google Analytics or Search Console accounts</li>
+              </ul>
+
+              <h3 className="text-xl font-semibold text-gray-800 mb-3">Data Security Measures</h3>
+              <p className="mb-4">
+                We implement industry-standard security measures to protect your Google user data:
+              </p>
+              <ul className="list-disc pl-6 mb-4 space-y-2">
+                <li>OAuth 2.0 authentication with secure token storage</li>
+                <li>Encrypted data transmission (HTTPS/TLS)</li>
+                <li>Secure database encryption at rest</li>
+                <li>Regular security audits and monitoring</li>
+                <li>Restricted access to Google data by our technical systems only</li>
               </ul>
             </section>
 
