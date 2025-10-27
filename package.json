@@ -30,6 +30,7 @@
     "build:production": "cp prisma/schema.production.prisma prisma/schema.prisma && npx prisma generate && npx prisma migrate deploy && npx next build"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.67.0",
     "@composio/mcp": "^1.0.9",
     "@modelcontextprotocol/sdk": "^1.17.5",
     "@mozilla/readability": "^0.6.0",
@@ -67,6 +68,7 @@
     "next": "14.2.3",
     "next-auth": "^4.24.7",
     "node-cron": "^3.0.3",
+    "openai": "^6.7.0",
     "react": "^18",
     "react-dom": "^18",
     "recharts": "^2.15.4",

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { cookies } from "next/headers"
 import { prisma } from "@/lib/db/prisma"
+import { runVisibilityTests, calculatePlatformScores } from "@/lib/services/ai-testing"
 
 // Helper function to get user from session
 async function getUserFromSession() {
@@ -37,7 +38,7 @@ async function getUserFromSession() {
   return null
 }
 
-// POST /api/admin/ai-brands/[brandId]/test - Trigger visibility test
+// POST /api/admin/ai-brands/[brandId]/test - Trigger REAL visibility test
 export async function POST(
   request: NextRequest,
   { params }: { params: { brandId: string } }
@@ -53,7 +54,7 @@ export async function POST(
 
     const { brandId } = params
 
-    // Verify brand belongs to user
+    // Verify brand belongs to user and fetch all necessary data
     const brand = await prisma.aIBrand.findFirst({
       where: {
         id: brandId,
@@ -64,7 +65,8 @@ export async function POST(
           where: {
             isActive: true
           }
-        }
+        },
+        competitors: true
       }
     })
 
@@ -83,79 +85,70 @@ export async function POST(
       )
     }
 
-    // TODO: Implement actual visibility testing engine
-    // For now, create mock data to demonstrate the dashboard functionality
+    console.log(`[AI Test] Starting visibility test for ${brand.brandName}`)
+    console.log(`[AI Test] Testing ${brand.keywords.length} keywords across AI platforms`)
 
-    // Create mock mentions for demonstration
-    const platforms = ['chatgpt', 'claude', 'gemini', 'perplexity', 'google_ai']
-    const currentDate = new Date()
+    // Determine which platforms to test
+    // For now, test all available platforms
+    const platforms = ['chatgpt', 'claude', 'perplexity', 'gemini']
 
-    // Create a few mock mentions for each platform
-    for (const platform of platforms) {
-      const mentionCount = Math.floor(Math.random() * 3) + 1 // 1-3 mentions per platform
-
-      for (let i = 0; i < mentionCount; i++) {
-        const keyword = brand.keywords[Math.floor(Math.random() * brand.keywords.length)]
-        const isMentioned = Math.random() > 0.3 // 70% chance of being mentioned
-        const sentiment = Math.random() > 0.5 ? 'positive' : Math.random() > 0.5 ? 'neutral' : 'negative'
-        const sentimentScore = sentiment === 'positive' ? Math.floor(Math.random() * 30) + 70 :
-                               sentiment === 'neutral' ? Math.floor(Math.random() * 40) + 40 :
-                               Math.floor(Math.random() * 40) + 10
-
-        await prisma.aIBrandMention.create({
-          data: {
-            brandId: brand.id,
-            keywordId: keyword.id,
-            platform: platform,
-            prompt: keyword.prompt,
-            response: `Mock AI response mentioning ${brand.brandName}...`,
-            brandMentioned: isMentioned,
-            position: isMentioned ? Math.floor(Math.random() * 5) + 1 : null,
-            isCited: isMentioned && Math.random() > 0.5,
-            citationUrl: isMentioned && Math.random() > 0.5 ? brand.domain : null,
-            sentiment: sentiment,
-            sentimentScore: sentimentScore,
-            testedAt: currentDate
-          }
-        })
-      }
-    }
-
-    // Calculate and store scores
-    const mentions = await prisma.aIBrandMention.findMany({
-      where: {
-        brandId: brand.id,
-        testedAt: {
-          gte: new Date(currentDate.getTime() - 24 * 60 * 60 * 1000) // Last 24 hours
-        }
-      }
+    // Run REAL AI visibility tests
+    const testResults = await runVisibilityTests({
+      brandId: brand.id,
+      brandName: brand.brandName,
+      alternateNames: brand.alternateName,
+      domain: brand.domain,
+      keywords: brand.keywords.map(k => ({
+        id: k.id,
+        prompt: k.prompt,
+        category: k.category
+      })),
+      competitors: brand.competitors.map(c => ({
+        id: c.id,
+        competitorName: c.competitorName,
+        domain: c.domain
+      })),
+      platforms
     })
 
-    // Calculate overall metrics
-    const totalTests = mentions.length
-    const totalMentions = mentions.filter(m => m.brandMentioned).length
-    const citedMentions = mentions.filter(m => m.isCited).length
-    const visibilityRate = totalTests > 0 ? (totalMentions / totalTests) * 100 : 0
-    const citationRate = totalMentions > 0 ? (citedMentions / totalMentions) * 100 : 0
+    console.log(`[AI Test] Completed ${testResults.results.length} tests`)
+    console.log(`[AI Test] Brand mentioned in ${testResults.summary.totalMentions} responses`)
 
-    const mentionedWithPosition = mentions.filter(m => m.brandMentioned && m.position !== null)
-    const avgPosition = mentionedWithPosition.length > 0
-      ? mentionedWithPosition.reduce((sum, m) => sum + (m.position || 0), 0) / mentionedWithPosition.length
+    const currentDate = new Date()
+
+    // Store mention records in database
+    for (const result of testResults.results) {
+      await prisma.aIBrandMention.create({
+        data: {
+          brandId: brand.id,
+          keywordId: brand.keywords.find(k => k.prompt === result.prompt)?.id,
+          platform: result.platform,
+          prompt: result.prompt,
+          response: result.response,
+          brandMentioned: result.brandMentioned,
+          position: result.position,
+          isCited: result.cited,
+          citationUrl: result.citationUrls.length > 0 ? result.citationUrls[0] : null,
+          sentiment: result.sentiment,
+          sentimentScore: result.sentimentScore,
+          context: result.snippet,
+          competitorsFound: result.competitorsMentioned,
+          testDuration: result.testDuration,
+          modelVersion: result.modelVersion,
+          testedAt: currentDate
+        }
+      })
+    }
+
+    // Calculate and store overall score
+    const overallScore = testResults.summary.averageVisibilityScore
+    const visibilityRate = testResults.summary.totalTests > 0
+      ? (testResults.summary.totalMentions / testResults.summary.totalTests) * 100
       : 0
+    const avgPosition = testResults.summary.averagePosition
+    const citationRate = testResults.summary.citationRate
+    const avgSentiment = testResults.summary.averageSentiment
 
-    const avgSentiment = mentions.length > 0
-      ? mentions.reduce((sum, m) => sum + m.sentimentScore, 0) / mentions.length
-      : 50
-
-    // Calculate overall score (weighted average)
-    const overallScore = (
-      visibilityRate * 0.35 +
-      (avgPosition > 0 ? (6 - avgPosition) * 20 : 0) * 0.25 +
-      citationRate * 0.20 +
-      avgSentiment * 0.20
-    )
-
-    // Create overall score record
     await prisma.aIBrandScore.upsert({
       where: {
         brandId_platform_period_date: {
@@ -172,9 +165,9 @@ export async function POST(
         citationRate: citationRate,
         shareOfVoice: 0, // TODO: Calculate when we have competitor data
         sentimentScore: avgSentiment,
-        totalTests: totalTests,
-        totalMentions: totalMentions,
-        citedMentions: citedMentions,
+        totalTests: testResults.summary.totalTests,
+        totalMentions: testResults.summary.totalMentions,
+        citedMentions: Math.round((citationRate / 100) * testResults.summary.totalMentions),
         updatedAt: currentDate
       },
       create: {
@@ -188,87 +181,70 @@ export async function POST(
         citationRate: citationRate,
         shareOfVoice: 0,
         sentimentScore: avgSentiment,
-        totalTests: totalTests,
-        totalMentions: totalMentions,
-        citedMentions: citedMentions
+        totalTests: testResults.summary.totalTests,
+        totalMentions: testResults.summary.totalMentions,
+        citedMentions: Math.round((citationRate / 100) * testResults.summary.totalMentions)
       }
     })
 
-    // Create platform-specific scores
-    for (const platform of platforms) {
-      const platformMentions = mentions.filter(m => m.platform === platform)
-      const platformTests = platformMentions.length
-      const platformMentionCount = platformMentions.filter(m => m.brandMentioned).length
-      const platformCitations = platformMentions.filter(m => m.isCited).length
+    // Calculate and store platform-specific scores
+    const platformScores = calculatePlatformScores(testResults.results)
 
-      const platformVisibility = platformTests > 0 ? (platformMentionCount / platformTests) * 100 : 0
-      const platformCitationRate = platformMentionCount > 0 ? (platformCitations / platformMentionCount) * 100 : 0
-
-      const platformMentionedWithPos = platformMentions.filter(m => m.brandMentioned && m.position !== null)
-      const platformAvgPos = platformMentionedWithPos.length > 0
-        ? platformMentionedWithPos.reduce((sum, m) => sum + (m.position || 0), 0) / platformMentionedWithPos.length
-        : 0
-
-      const platformSentiment = platformMentions.length > 0
-        ? platformMentions.reduce((sum, m) => sum + m.sentimentScore, 0) / platformMentions.length
-        : 50
-
-      const platformScore = (
-        platformVisibility * 0.35 +
-        (platformAvgPos > 0 ? (6 - platformAvgPos) * 20 : 0) * 0.25 +
-        platformCitationRate * 0.20 +
-        platformSentiment * 0.20
-      )
-
-      if (platformTests > 0) {
-        await prisma.aIBrandScore.upsert({
-          where: {
-            brandId_platform_period_date: {
-              brandId: brand.id,
-              platform: platform,
-              period: 'daily',
-              date: new Date(currentDate.toISOString().split('T')[0])
-            }
-          },
-          update: {
-            overallScore: platformScore,
-            visibilityRate: platformVisibility,
-            avgPosition: platformAvgPos,
-            citationRate: platformCitationRate,
-            shareOfVoice: 0,
-            sentimentScore: platformSentiment,
-            totalTests: platformTests,
-            totalMentions: platformMentionCount,
-            citedMentions: platformCitations,
-            updatedAt: currentDate
-          },
-          create: {
+    for (const platformScore of platformScores) {
+      await prisma.aIBrandScore.upsert({
+        where: {
+          brandId_platform_period_date: {
             brandId: brand.id,
-            platform: platform,
+            platform: platformScore.platform,
             period: 'daily',
-            date: new Date(currentDate.toISOString().split('T')[0]),
-            overallScore: platformScore,
-            visibilityRate: platformVisibility,
-            avgPosition: platformAvgPos,
-            citationRate: platformCitationRate,
-            shareOfVoice: 0,
-            sentimentScore: platformSentiment,
-            totalTests: platformTests,
-            totalMentions: platformMentionCount,
-            citedMentions: platformCitations
+            date: new Date(currentDate.toISOString().split('T')[0])
           }
-        })
-      }
+        },
+        update: {
+          overallScore: platformScore.overallScore,
+          visibilityRate: platformScore.visibilityRate,
+          avgPosition: platformScore.avgPosition,
+          citationRate: platformScore.citationRate,
+          shareOfVoice: 0,
+          sentimentScore: platformScore.sentimentScore,
+          totalTests: platformScore.totalTests,
+          totalMentions: platformScore.totalMentions,
+          citedMentions: platformScore.citedMentions,
+          updatedAt: currentDate
+        },
+        create: {
+          brandId: brand.id,
+          platform: platformScore.platform,
+          period: 'daily',
+          date: new Date(currentDate.toISOString().split('T')[0]),
+          overallScore: platformScore.overallScore,
+          visibilityRate: platformScore.visibilityRate,
+          avgPosition: platformScore.avgPosition,
+          citationRate: platformScore.citationRate,
+          shareOfVoice: 0,
+          sentimentScore: platformScore.sentimentScore,
+          totalTests: platformScore.totalTests,
+          totalMentions: platformScore.totalMentions,
+          citedMentions: platformScore.citedMentions
+        }
+      })
     }
+
+    console.log(`[AI Test] Successfully stored results in database`)
 
     return NextResponse.json({
       success: true,
       message: "Visibility test completed",
       results: {
-        totalTests: totalTests,
-        totalMentions: totalMentions,
+        totalTests: testResults.summary.totalTests,
+        totalMentions: testResults.summary.totalMentions,
         visibilityRate: visibilityRate,
-        overallScore: overallScore
+        overallScore: overallScore,
+        platformResults: platformScores.map(ps => ({
+          platform: ps.platform,
+          score: ps.overallScore,
+          mentions: ps.totalMentions
+        }))
       }
     })
   } catch (error: any) {
