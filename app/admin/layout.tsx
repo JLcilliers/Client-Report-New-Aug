@@ -12,7 +12,8 @@ import {
   FileText,
   BarChart3,
   Link2,
-  Database
+  Database,
+  Brain
 } from "lucide-react"
 import { cn } from "@/lib/utils/cn"
 
@@ -93,6 +94,7 @@ export default function AdminLayout({
     { name: "Google Accounts", href: "/admin/google-accounts", icon: Link2 },
     { name: "Properties", href: "/admin/properties", icon: Database },
     { name: "Reports", href: "/admin/reports", icon: FileText },
+    { name: "AI Visibility", href: "/admin/ai-visibility", icon: Brain },
     { name: "Settings", href: "/admin/settings", icon: Settings },
   ]
 
