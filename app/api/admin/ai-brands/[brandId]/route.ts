@@ -111,6 +111,7 @@ export async function GET(
     const transformedBrand = {
       id: brand.id,
       brandName: brand.brandName,
+      alternateName: brand.alternateName,
       domain: brand.domain,
       industry: brand.industry,
       trackingStatus: brand.trackingStatus,
@@ -229,7 +230,7 @@ export async function PATCH(
       where: { id: brandId },
       data: {
         brandName: body.brandName,
-        alternateName: body.alternateNames,
+        alternateName: body.alternateName,
         domain: body.domain,
         industry: body.industry,
         description: body.description,
