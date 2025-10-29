@@ -8,19 +8,19 @@
  */
 export function validateAnalyticsResponse(response: any): boolean {
   if (!response || typeof response !== 'object') {
-    console.error('Invalid Analytics API response: not an object');
+    
     return false;
   }
 
   // Check for error response
   if (response.error) {
-    console.error('Analytics API error:', response.error);
+    
     return false;
   }
 
   // Validate expected structure
   if (response.rows && !Array.isArray(response.rows)) {
-    console.error('Invalid Analytics API response: rows is not an array');
+    
     return false;
   }
 
@@ -32,19 +32,19 @@ export function validateAnalyticsResponse(response: any): boolean {
  */
 export function validateSearchConsoleResponse(response: any): boolean {
   if (!response || typeof response !== 'object') {
-    console.error('Invalid Search Console API response: not an object');
+    
     return false;
   }
 
   // Check for error response
   if (response.error) {
-    console.error('Search Console API error:', response.error);
+    
     return false;
   }
 
   // Validate expected structure
   if (response.rows && !Array.isArray(response.rows)) {
-    console.error('Invalid Search Console API response: rows is not an array');
+    
     return false;
   }
 
@@ -72,7 +72,7 @@ export function extractAnalyticsMetric(
     const value = parseFloat(metric.value);
     return isFinite(value) ? value : defaultValue;
   } catch (error) {
-    console.error(`Error extracting metric at index ${metricIndex}:`, error);
+    
     return defaultValue;
   }
 }
@@ -97,7 +97,7 @@ export function extractAnalyticsDimension(
 
     return String(dimension.value);
   } catch (error) {
-    console.error(`Error extracting dimension at index ${dimensionIndex}:`, error);
+    
     return defaultValue;
   }
 }
@@ -186,17 +186,17 @@ export function calculateSafePercentageChange(
  */
 export function validatePageSpeedResponse(response: any): boolean {
   if (!response || typeof response !== 'object') {
-    console.error('Invalid PageSpeed API response: not an object');
+    
     return false;
   }
 
   if (response.error) {
-    console.error('PageSpeed API error:', response.error);
+    
     return false;
   }
 
   if (!response.lighthouseResult) {
-    console.error('Invalid PageSpeed API response: missing lighthouseResult');
+    
     return false;
   }
 
@@ -224,7 +224,7 @@ export function extractPageSpeedScore(
     // Score is 0-1, convert to 0-100
     return Math.round(score * 100);
   } catch (error) {
-    console.error(`Error extracting PageSpeed score for ${category}:`, error);
+    
     return defaultScore;
   }
 }

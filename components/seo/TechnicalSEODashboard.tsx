@@ -50,28 +50,28 @@ export default function TechnicalSEODashboard({ reportId, domain, onDataUpdate }
   const loadExistingAuditData = async () => {
     if (!reportId) return;
     
-    console.log('🔍 Loading existing audit data for report:', reportId);
+    
     try {
       const response = await fetch(`/api/reports/get-seo-data?reportId=${reportId}&dataType=technical_seo`);
       if (response.ok) {
         const result = await response.json();
         if (result.data) {
-          console.log('📊 Found existing audit data:', result.data);
+          
           setAuditData(result.data);
         }
       }
     } catch (error) {
-      console.error('Error loading existing audit data:', error);
+      
     }
   };
 
   const runAudit = async () => {
     setLoading(true);
     setError(null);
-    console.log('🚀 Starting SEO audit for domain:', domain);
+    
     
     try {
-      console.log('📡 Calling technical audit API...');
+      
       const response = await fetch('/api/seo/technical-audit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -82,16 +82,16 @@ export default function TechnicalSEODashboard({ reportId, domain, onDataUpdate }
         })
       });
 
-      console.log('📡 Audit response status:', response.status);
+      
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('❌ Audit failed:', errorText);
+        
         throw new Error(`Failed to run audit: ${errorText}`);
       }
 
       const data = await response.json();
-      console.log('✅ Audit completed successfully:', data);
+      
       setAuditData(data);
       
       if (onDataUpdate) {
@@ -100,15 +100,15 @@ export default function TechnicalSEODashboard({ reportId, domain, onDataUpdate }
 
       // Save to database if reportId exists
       if (reportId) {
-        console.log('💾 Saving audit data to database...');
+        
         await saveAuditData(reportId, data);
       }
     } catch (err: any) {
-      console.error('💥 Audit error:', err);
+      
       setError(err.message);
     } finally {
       setLoading(false);
-      console.log('🏁 Audit process completed');
+      
     }
   };
 
@@ -124,7 +124,7 @@ export default function TechnicalSEODashboard({ reportId, domain, onDataUpdate }
         })
       });
     } catch (err) {
-      console.error('Failed to save audit data:', err);
+      
     }
   };
 
@@ -497,7 +497,7 @@ function ToolCard({ title, endpoint, domain, icon }: any) {
       const result = await response.json();
       setData(result);
     } catch (err) {
-      console.error(`Failed to run ${title}:`, err);
+      
     } finally {
       setLoading(false);
     }

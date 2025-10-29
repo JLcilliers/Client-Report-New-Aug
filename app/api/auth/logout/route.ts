@@ -19,8 +19,7 @@ export async function POST(request: NextRequest) {
         })
       } catch (dbError) {
         // Session might not exist in DB, continue with cookie cleanup
-        console.log('Session not found in database, continuing with logout')
-      }
+        }
     }
     
     // Create response
@@ -52,8 +51,6 @@ export async function POST(request: NextRequest) {
     return response
     
   } catch (error: any) {
-    console.error('Logout error:', error)
-    
     // Even if there's an error, try to clear cookies
     const response = NextResponse.json({
       success: false,

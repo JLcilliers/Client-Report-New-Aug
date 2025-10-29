@@ -125,10 +125,10 @@ export default function KeywordPerformance({ data, reportSlug, comparisonPeriod 
       if (response.ok) {
         window.location.reload();
       } else {
-        console.error('Refresh failed');
+        
       }
     } catch (error) {
-      console.error('Refresh error:', error);
+      
     } finally {
       setIsRefreshing(false);
     }
@@ -193,11 +193,12 @@ export default function KeywordPerformance({ data, reportSlug, comparisonPeriod 
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
-                placeholder="Search keywords..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
+              placeholder="Search keywords..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+                aria-label="Search keywords"
+          />
             </div>
             
             <div className="flex space-x-2">
@@ -241,17 +242,18 @@ export default function KeywordPerformance({ data, reportSlug, comparisonPeriod 
                 <tr className="border-b">
                   <th className="text-left py-2 px-2 w-8">
                     <input
-                      type="checkbox"
-                      className="rounded border-gray-300"
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setSelectedKeywords(filteredKeywords.slice(0, 5).map(k => k.query));
-                        } else {
-                          setSelectedKeywords([]);
-                        }
-                      }}
+                    type="checkbox"
+                    className="rounded border-gray-300"
+                    aria-label="Select all keywords for comparison"
+                    onChange={(e) => {
+                    if (e.target.checked) {
+                      setSelectedKeywords(filteredKeywords.slice(0, 5).map(k => k.query));
+                    } else {
+                      setSelectedKeywords([]);
+                      }
+                    }}
                       checked={selectedKeywords.length > 0 && selectedKeywords.length === Math.min(filteredKeywords.length, 5)}
-                    />
+              />
                   </th>
                   <th className="text-left py-2 px-4">Keyword</th>
                   <th className="text-right py-2 px-4">Impressions</th>
@@ -282,12 +284,13 @@ export default function KeywordPerformance({ data, reportSlug, comparisonPeriod 
                       <tr key={index} className={`border-b hover:bg-gray-50 ${isSelected ? 'bg-frost' : ''}`}>
                         <td className="py-2 px-2">
                           <input
-                            type="checkbox"
-                            className="rounded border-gray-300"
-                            checked={isSelected}
-                            onChange={() => toggleKeywordSelection(keyword.query)}
+                          type="checkbox"
+                          className="rounded border-gray-300"
+                          aria-label={`Select ${keyword.query} for comparison`}
+                          checked={isSelected}
+                          onChange={() => toggleKeywordSelection(keyword.query)}
                             disabled={!isSelected && selectedKeywords.length >= 5}
-                          />
+              />
                         </td>
                         <td className="py-2 px-4">
                           <div>

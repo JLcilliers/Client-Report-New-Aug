@@ -4,8 +4,6 @@ import { prisma } from '@/lib/db/prisma'
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
-  console.log('\n========== Property Storage Verification START ==========')
-  
   try {
     // Get all client reports to check how properties are stored
     const reports = await prisma.clientReport.findMany({
@@ -24,8 +22,6 @@ export async function GET(request: NextRequest) {
       }
     })
     
-    console.log(`[Property Storage] Found ${reports.length} reports`)
-    
     const analysis = reports.map(report => {
       const ga4Analysis = {
         raw: report.ga4PropertyId,
@@ -42,14 +38,6 @@ export async function GET(request: NextRequest) {
         isEmpty: !report.searchConsolePropertyId || report.searchConsolePropertyId === '',
         isUrl: report.searchConsolePropertyId?.startsWith('http') || report.searchConsolePropertyId?.startsWith('sc-domain:')
       }
-      
-      console.log(`[Property Storage] Report: ${report.reportName}`)
-      console.log(`  - GA4 Property: ${ga4Analysis.raw}`)
-      console.log(`    - Has 'properties/' prefix: ${ga4Analysis.hasPropertiesPrefix}`)
-      console.log(`    - Is numeric only: ${ga4Analysis.isNumericOnly}`)
-      console.log(`    - Expected format for API: ${ga4Analysis.expectedFormat}`)
-      console.log(`  - Search Console: ${scAnalysis.raw}`)
-      console.log(`    - Is valid URL/domain: ${scAnalysis.isUrl}`)
       
       return {
         id: report.id,
@@ -71,13 +59,6 @@ export async function GET(request: NextRequest) {
       ga4NumericOnly: analysis.filter(r => r.ga4Property.isNumericOnly).length
     }
     
-    console.log('\n[Property Storage] Summary:')
-    console.log(`  - Total reports: ${reports.length}`)
-    console.log(`  - Reports without GA4 property: ${issues.reportsWithoutGA4}`)
-    console.log(`  - Reports without Search Console: ${issues.reportsWithoutSC}`)
-    console.log(`  - GA4 properties without 'properties/' prefix: ${issues.ga4WithWrongFormat}`)
-    console.log(`  - GA4 properties that are numeric only: ${issues.ga4NumericOnly}`)
-    
     // Recommendation
     let recommendation = ''
     if (issues.ga4WithWrongFormat > 0) {
@@ -91,9 +72,6 @@ export async function GET(request: NextRequest) {
       recommendation = 'All GA4 properties are stored in the correct format with the "properties/" prefix.'
     }
     
-    console.log('\n[Property Storage] Recommendation:', recommendation)
-    console.log('========== Property Storage Verification END ==========\n')
-    
     return NextResponse.json({
       success: true,
       totalReports: reports.length,
@@ -103,8 +81,6 @@ export async function GET(request: NextRequest) {
     })
     
   } catch (error: any) {
-    console.error('[Property Storage] Error:', error)
-    console.error('========== Property Storage Verification END (ERROR) ==========\n')
     
     return NextResponse.json({
       error: "Failed to verify property storage",

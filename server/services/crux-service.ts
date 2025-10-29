@@ -59,7 +59,7 @@ export class CrUXService {
   private constructor() {
     this.apiKey = process.env.GOOGLE_CRUX_API_KEY || process.env.GOOGLE_PSI_API_KEY || '';
     if (!this.apiKey) {
-      console.warn('⚠️ CrUX API key not configured. Set GOOGLE_CRUX_API_KEY');
+      
     }
   }
   
@@ -92,7 +92,6 @@ export class CrUXService {
     // Check cache first
     const cached = await this.getCachedData(url, formFactor);
     if (cached && new Date(cached.expiresAt) > new Date()) {
-      console.log(`📦 Using cached CrUX data for ${url} (${formFactor})`);
       return {
         ...cached.data,
         fromCache: true
@@ -100,7 +99,7 @@ export class CrUXService {
     }
     
     if (!this.apiKey) {
-      console.warn('CrUX API key not configured');
+      
       return cached?.data || null;
     }
     
@@ -111,7 +110,7 @@ export class CrUXService {
       // Fall back to origin-level if page-level not available
       if (!data && url) {
         const origin = new URL(url).origin;
-        console.log(`📊 Falling back to origin-level data for ${origin}`);
+        
         data = await this.queryCrUXAPI({ origin }, formFactor);
       }
       
@@ -125,7 +124,7 @@ export class CrUXService {
       return cached?.data || null;
       
     } catch (error: any) {
-      console.error(`❌ CrUX API error for ${url}:`, error.message);
+      
       
       // Return cached data if available
       return cached?.data || null;
@@ -153,7 +152,6 @@ export class CrUXService {
       ]
     };
     
-    console.log(`🔍 Querying CrUX for ${key.url || key.origin} (${formFactor})`);
     
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT_MS);
@@ -174,7 +172,7 @@ export class CrUXService {
       
       if (data.error) {
         if (data.error.code === 404) {
-          console.log('No CrUX data available for this URL/origin');
+          
           return null;
         }
         throw new Error(data.error.message);
@@ -315,7 +313,7 @@ export class CrUXService {
         expiresAt
       };
     } catch (error) {
-      console.error('Cache retrieval error:', error);
+      
       return null;
     }
   }
@@ -341,9 +339,8 @@ export class CrUXService {
           collectedAt: new Date()
         }
       });
-      console.log(`💾 Cached CrUX data for ${url} (${formFactor})`);
     } catch (error) {
-      console.error('Cache storage error:', error);
+      
     }
   }
 }

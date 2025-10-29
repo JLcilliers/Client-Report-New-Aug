@@ -24,7 +24,7 @@ export class PageSpeedService {
   private constructor() {
     this.apiKey = process.env.GOOGLE_PSI_API_KEY || process.env.PAGESPEED_API_KEY || '';
     if (!this.apiKey) {
-      console.warn('⚠️ PageSpeed API key not configured. Set GOOGLE_PSI_API_KEY or PAGESPEED_API_KEY');
+      
     }
   }
   
@@ -42,7 +42,6 @@ export class PageSpeedService {
     // Check cache first
     const cached = await this.getCachedData(url, strategy);
     if (cached && cached.expiresAt > new Date()) {
-      console.log(`📦 Using cached PSI data for ${url} (${strategy})`);
       return {
         ...cached.data,
         fromCache: true,
@@ -73,7 +72,7 @@ export class PageSpeedService {
         timestamp: new Date()
       };
     } catch (error: any) {
-      console.error(`❌ PSI API error for ${url}:`, error.message);
+      
       
       // Return cached data if available
       if (cached) {
@@ -111,7 +110,6 @@ export class PageSpeedService {
     const categories = ['performance', 'accessibility', 'best-practices', 'seo'];
     categories.forEach(cat => endpoint.searchParams.set('category', cat));
     
-    console.log(`🔍 Fetching PSI data for ${url} (${strategy})`);
     
     // Fetch with timeout
     const controller = new AbortController();
@@ -236,7 +234,7 @@ export class PageSpeedService {
         expiresAt
       };
     } catch (error) {
-      console.error('Cache retrieval error:', error);
+      
       return null;
     }
   }
@@ -255,9 +253,8 @@ export class PageSpeedService {
           collectedAt: new Date()
         }
       });
-      console.log(`💾 Cached PSI data for ${url} (${strategy})`);
     } catch (error) {
-      console.error('Cache storage error:', error);
+      
     }
   }
   

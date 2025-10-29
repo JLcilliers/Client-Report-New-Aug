@@ -64,7 +64,6 @@ export default function ClientListPrisma() {
         throw new Error("Failed to fetch clients")
       }
     } catch (error: any) {
-      console.error("Error fetching clients:", error)
       toast({
         title: "Error",
         description: error.message || "Failed to fetch clients",
@@ -100,11 +99,9 @@ export default function ClientListPrisma() {
         fetchClients()
       } else {
         const errorData = await response.json()
-        console.error("Delete error response:", errorData)
         throw new Error(errorData.error || errorData.details || "Failed to delete client")
       }
     } catch (error: any) {
-      console.error("Error deleting client:", error)
       toast({
         title: "Error",
         description: error.message || "Failed to delete client",

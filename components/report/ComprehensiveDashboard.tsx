@@ -172,18 +172,18 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
   const [competitors, setCompetitors] = useState<any[]>([]);
 
   useEffect(() => {
-    console.log('📊 ComprehensiveDashboard mounted/updated - reportId:', reportId, 'slug:', reportSlug);
+    
     fetchAllData();
   }, [reportId]);
 
   // Only refresh when comparison period changes AND we have existing data
   // This prevents infinite loops and unnecessary API calls
   useEffect(() => {
-    console.log('📅 Comparison period changed to:', comparisonPeriod);
+    
     // Only refresh if we have metrics and we're not currently refreshing
     // and this isn't the initial load
     if (metrics && !refreshing && !loading) {
-      console.log('🔄 Refreshing data for new period:', comparisonPeriod);
+      
       // Add a small delay to prevent rapid-fire requests
       const timer = setTimeout(() => {
         fetchMetrics(comparisonPeriod);
@@ -239,22 +239,22 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
   };
 
   const loadExistingData = async () => {
-    console.log('📖 Loading existing data for slug:', reportSlug);
+    
     try {
       // Fetch the main report data which includes keywords and cachedData
       const reportResponse = await fetch(`/api/public/report/${reportSlug}`);
-      console.log('📖 Report response status:', reportResponse.status);
+      
 
       if (reportResponse.ok) {
         const reportData = await reportResponse.json();
-        console.log('📖 Loaded report with keywords:', reportData.keywordPerformance);
+        
         setKeywordData(reportData.keywordPerformance);
 
         // Use cachedData from the report instead of fetching from non-existent /data endpoint
         if (reportData.cachedData) {
-          console.log('📖 Loaded existing cached data:', reportData.cachedData);
+          
           const transformedMetrics = transformLegacyData(reportData.cachedData);
-          console.log('📖 Transformed existing data:', transformedMetrics);
+          
           setMetrics(transformedMetrics);
 
           // Auto-refresh if data is older than 1 hour
@@ -262,7 +262,7 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
           const oneHour = 60 * 60 * 1000; // 1 hour in milliseconds
 
           if (dataAge > oneHour) {
-            console.log('📅 Data is stale, auto-refreshing...');
+            
             // Small delay to let the UI render first
             setTimeout(() => {
               if (!refreshing && !refreshingRef.current) {
@@ -271,7 +271,7 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
             }, 1000);
           }
         } else {
-          console.log('⚠️ No cached data in report, attempting refresh...');
+          
           setTimeout(() => {
             if (!refreshing && !refreshingRef.current) {
               fetchMetrics(comparisonPeriod);
@@ -280,9 +280,9 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
         }
       } else {
         const error = await reportResponse.text();
-        console.error('❌ Failed to load report:', error);
+        
         // If no report data, always try to refresh
-        console.log('🔄 No report data, attempting refresh...');
+        
         setTimeout(() => {
           if (!refreshing && !refreshingRef.current) {
             fetchMetrics(comparisonPeriod);
@@ -290,12 +290,12 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
         }, 1000);
       }
     } catch (error) {
-      console.error('💥 Error loading existing data:', error);
+      
     }
   };
 
   const clearRefreshingState = useCallback(() => {
-    console.log('🧹 Clearing refreshing state');
+    
     setRefreshing(false);
     refreshingRef.current = false;
     
@@ -314,7 +314,7 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
   const fetchMetrics = async (period?: string) => {
     // Prevent multiple simultaneous refresh calls
     if (refreshing || refreshingRef.current) {
-      console.log('🚫 Already refreshing, skipping duplicate request');
+      
       return;
     }
     
@@ -322,17 +322,17 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
     setRefreshing(true);
     refreshingRef.current = true;
     const dateRange = period || comparisonPeriod;
-    console.log('🔄 Starting data refresh for slug:', reportSlug, 'with period:', dateRange);
+    
     
     // Set failsafe timeout to always clear refreshing state
     const failsafeTimeout = setTimeout(() => {
-      console.warn('⚠️ Failsafe timeout triggered - clearing refreshing state');
+      
       clearRefreshingState();
     }, 30000); // 30 second failsafe
     
     try {
       // First try to refresh the data using the working refresh endpoint with timeout
-      console.log('📡 Calling refresh endpoint with date range:', dateRange);
+      
       
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 25000); // 25 second timeout
@@ -345,22 +345,22 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
       });
       
       clearTimeout(timeoutId);
-      console.log('📡 Refresh response status:', refreshResponse.status);
+      
 
       if (refreshResponse.ok) {
         const refreshResult = await refreshResponse.json();
-        console.log('✅ Data refreshed successfully:', refreshResult);
+        
         
         // If the refresh endpoint returns data directly, use it
         if (refreshResult.data) {
-          console.log('📊 Using data from refresh response');
+          
           const transformedMetrics = transformLegacyData(refreshResult.data);
-          console.log('🔄 Transformed metrics:', transformedMetrics);
+          
           setMetrics(transformedMetrics);
           setLastRefresh(new Date());
         } else if (refreshResult.success) {
           // API returned success but no data - fetch from report endpoint
-          console.log('📥 Fetching updated data from report...');
+          
           const dataController = new AbortController();
           const dataTimeoutId = setTimeout(() => dataController.abort(), 10000);
 
@@ -369,57 +369,57 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
           });
 
           clearTimeout(dataTimeoutId);
-          console.log('📥 Report response status:', reportResponse.status);
+          
 
           if (reportResponse.ok) {
             const reportData = await reportResponse.json();
-            console.log('📊 Received report data:', reportData);
+            
 
             if (reportData.cachedData) {
               // Transform the cached data to match our expected format
               const transformedMetrics = transformLegacyData(reportData.cachedData);
-              console.log('🔄 Transformed metrics:', transformedMetrics);
+              
               setMetrics(transformedMetrics);
               setLastRefresh(new Date());
             } else {
-              console.error('❌ No cached data in report');
+              
               throw new Error('No cached data available. Please try refreshing again.');
             }
           } else {
             const dataError = await reportResponse.text();
-            console.error('❌ Report fetch failed:', dataError);
+            
             throw new Error('Unable to fetch updated data. Please try again.');
           }
         }
       } else {
         // Handle different error status codes
         if (refreshResponse.status === 401) {
-          console.warn('🔐 Authentication required - using existing data');
+          
           // Try to load existing cached data instead
           await loadExistingData();
           return; // Exit early, data has been loaded from cache
         }
         
         const errorText = await refreshResponse.text();
-        console.error('❌ Refresh failed:', errorText);
+        
         // Parse error for better display
         try {
           const errorJson = JSON.parse(errorText);
-          console.warn(`Refresh failed: ${errorJson.error || 'Unknown error'}. Using cached data.`);
+          
           // Try to load existing data as fallback
           await loadExistingData();
         } catch {
-          console.warn('Unable to refresh data. Using cached data.');
+          
           await loadExistingData();
         }
       }
     } catch (error: any) {
-      console.error('💥 Error during refresh:', error);
+      
       
       if (error.name === 'AbortError') {
-        console.error('⏱️ Request timed out. The refresh is taking longer than expected.');
+        
       } else {
-        console.error('❌ Network error occurred. Please check your connection and try again.');
+        
       }
       
       // Optionally show user feedback here if you have a toast system
@@ -431,7 +431,7 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
       
       // Always clear the refreshing state using our comprehensive method
       clearRefreshingState();
-      console.log('🏁 Refresh process completed');
+      
     }
   };
 
@@ -489,7 +489,7 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
       const reportData = await reportResponse.json();
       const domain = reportData.client?.domain || reportData.client_name || 'shopdualthreads.com';
       
-      console.log('🔍 Running comprehensive SEO audit for domain:', domain);
+      
       
       const response = await fetch('/api/seo/technical-audit', {
         method: 'POST',
@@ -512,7 +512,7 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
       }
 
       const auditData = await response.json();
-      console.log('✅ SEO audit completed:', auditData);
+      
       setSeoAuditData(auditData);
       
       // Save audit data if we have a report ID
@@ -528,8 +528,8 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
         });
       }
     } catch (error) {
-      console.error('SEO audit error:', error);
-      alert('Failed to run SEO audit. Please try again.');
+      
+      
     } finally {
       setLoadingSEO(false);
     }
@@ -549,9 +549,9 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
     const comparisons = data.comparisons || {};
     const previousPeriod = data.previous_period || {};
 
-    console.log('📊 Transform Data - Current SC:', searchConsole.summary);
-    console.log('📊 Transform Data - Previous Period:', previousPeriod);
-    console.log('📊 Transform Data - Comparisons:', comparisons);
+    
+    
+    
 
     // Current values
     const currentSearchConsole = {
@@ -680,21 +680,21 @@ export default function ComprehensiveDashboard({ reportId, reportSlug, googleAcc
         setAgencyUpdates(data);
       }
     } catch (error) {
-      console.error('Error fetching agency updates:', error);
+      
     }
   };
 
   const fetchCompetitors = async () => {
     try {
-      console.log('📊 Fetching competitors for report slug:', reportSlug);
+      
       const response = await fetch(`/api/reports/${reportSlug}/competitors`);
       if (response.ok) {
         const data = await response.json();
-        console.log('📊 Fetched competitors:', data);
+        
         setCompetitors(data || []);
       }
     } catch (error) {
-      console.error('Error fetching competitors:', error);
+      
     }
   };
 

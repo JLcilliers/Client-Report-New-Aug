@@ -54,9 +54,9 @@ export const authOptionsSimple: NextAuthOptions = {
       return session;
     },
     async signIn({ user, account, profile }) {
-      console.log('=== SIMPLE AUTH SIGN IN ===');
-      console.log('User:', user);
-      console.log('Account provider:', account?.provider);
+      
+      
+      
       return true;
     },
   },

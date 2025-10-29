@@ -97,10 +97,10 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
     async signIn({ user, account, profile }) {
-      console.log('=== SIGN IN ATTEMPT ===');
-      console.log('User:', user);
-      console.log('Account:', account);
-      console.log('Profile:', profile);
+      
+      
+      
+      
       
       // Just allow the sign in - the PrismaAdapter will handle saving the account
       // We'll copy tokens to GoogleTokens table after user is created

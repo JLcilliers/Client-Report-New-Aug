@@ -64,7 +64,7 @@ export class AIReportSummaryGenerator {
         return await this.generateWithAnthropic(prompt);
       }
     } catch (error) {
-      console.error('AI generation failed, using mock summary:', error);
+      
       return this.generateMockSummary(clientName, websiteUrl, metrics);
     }
 

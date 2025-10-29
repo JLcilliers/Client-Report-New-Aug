@@ -4,7 +4,7 @@ import { prisma } from '@/lib/db/prisma';
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
-  console.log('\n========== Database Check START ==========');
+  
   
   const results = {
     queryAll: { success: false, message: '', data: null as any },
@@ -15,19 +15,19 @@ export async function GET() {
 
   try {
     // Test 1: Check Prisma connection
-    console.log('[DB Check] Testing Prisma connection...');
+    
     try {
       await prisma.$connect();
       results.prismaStatus.success = true;
       results.prismaStatus.message = 'Prisma connected successfully';
-      console.log('[DB Check] ✓ Prisma connected');
+      
     } catch (error: any) {
       results.prismaStatus.message = `Connection failed: ${error.message}`;
-      console.error('[DB Check] ✗ Prisma connection failed:', error);
+      
     }
 
     // Test 2: Query all Account records
-    console.log('[DB Check] Querying all Account records...');
+    
     try {
       const accounts = await prisma.account.findMany({
         include: {
@@ -52,33 +52,32 @@ export async function GET() {
         expiresAt: acc.expires_at
       }));
       
-      console.log(`[DB Check] ✓ Query successful: ${accounts.length} accounts found`);
+      
       accounts.forEach((acc, index) => {
-        console.log(`  ${index + 1}. ${acc.providerAccountId} (${acc.provider})`);
       });
     } catch (error: any) {
       results.queryAll.message = `Query failed: ${error.message}`;
-      console.error('[DB Check] ✗ Query failed:', error);
+      
     }
 
     // Test 3: Create a test Account record
-    console.log('[DB Check] Creating test Account record...');
+    
     const testEmail = `test-${Date.now()}@example.com`;
     let createdAccountId: string | null = null;
     
     try {
       // First create a test user
-      console.log('[DB Check] Creating test user...');
+      
       const testUser = await prisma.user.create({
         data: {
           email: testEmail,
           name: 'Test User'
         }
       });
-      console.log('[DB Check] Test user created:', testUser.id);
+      
 
       // Then create the account
-      console.log('[DB Check] Creating test account...');
+      
       const testAccount = await prisma.account.create({
         data: {
           userId: testUser.id,
@@ -101,16 +100,15 @@ export async function GET() {
         providerAccountId: testAccount.providerAccountId
       };
       
-      console.log('[DB Check] ✓ Create successful:', testAccount.id);
+      
     } catch (error: any) {
       results.create.message = `Create failed: ${error.message}`;
-      console.error('[DB Check] ✗ Create failed:', error);
-      console.error('[DB Check] Error details:', JSON.stringify(error, null, 2));
+      
     }
 
     // Test 4: Delete the test record
     if (createdAccountId) {
-      console.log('[DB Check] Deleting test Account record...');
+      
       try {
         // Delete the account
         await prisma.account.delete({
@@ -124,18 +122,17 @@ export async function GET() {
         
         results.delete.success = true;
         results.delete.message = 'Test account deleted successfully';
-        console.log('[DB Check] ✓ Delete successful');
+        
       } catch (error: any) {
         results.delete.message = `Delete failed: ${error.message}`;
-        console.error('[DB Check] ✗ Delete failed:', error);
+        
       }
     } else {
       results.delete.message = 'No test record to delete (create failed)';
-      console.log('[DB Check] ⚠ Skipping delete (no record created)');
     }
 
   } catch (error: any) {
-    console.error('[DB Check] Unexpected error:', error);
+    
     return NextResponse.json({
       error: 'Database check failed',
       message: error.message,
@@ -143,8 +140,8 @@ export async function GET() {
     }, { status: 500 });
   } finally {
     await prisma.$disconnect();
-    console.log('[DB Check] Prisma disconnected');
-    console.log('========== Database Check END ==========\n');
+    
+    
   }
 
   // Determine overall status

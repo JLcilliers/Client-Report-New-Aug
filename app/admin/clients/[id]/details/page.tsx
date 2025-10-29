@@ -94,7 +94,7 @@ export default function ClientDetailsPage() {
         throw new Error('Failed to fetch client details');
       }
     } catch (error) {
-      console.error('Error fetching client:', error);
+      
       toast({
         title: 'Error',
         description: 'Failed to load client details',

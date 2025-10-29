@@ -57,7 +57,7 @@ export async function GET() {
       message: `Synced ${googleAccounts.length} Google account(s) to GoogleTokens table` 
     });
   } catch (error) {
-    console.error('Token sync error:', error);
+    
     return NextResponse.json({ 
       error: 'Failed to sync tokens',
       details: error instanceof Error ? error.message : 'Unknown error'

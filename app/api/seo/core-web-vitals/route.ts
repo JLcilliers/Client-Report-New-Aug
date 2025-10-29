@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
       timestamp: new Date().toISOString()
     });
   } catch (error) {
-    console.error('Core Web Vitals analysis error:', error);
+    
     return NextResponse.json(
       { error: 'Failed to analyze Core Web Vitals' },
       { status: 500 }
@@ -131,7 +131,6 @@ async function measureCoreWebVitals(url: string, device: 'mobile' | 'desktop'): 
       recommendations
     };
   } catch (error) {
-    console.error(`Core Web Vitals measurement error for ${url} (${device}):`, error);
     
     // Return fallback data if API fails
     return {
@@ -299,7 +298,7 @@ export async function GET(request: NextRequest) {
       }
     });
   } catch (error) {
-    console.error('Get Core Web Vitals error:', error);
+    
     return NextResponse.json(
       { error: 'Failed to fetch Core Web Vitals data' },
       { status: 500 }

@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
       }
     });
   } catch (error) {
-    console.error('OAuth callback error:', error);
+    
     return NextResponse.json({ 
       error: 'Failed to process OAuth callback',
       details: error instanceof Error ? error.message : 'Unknown error',

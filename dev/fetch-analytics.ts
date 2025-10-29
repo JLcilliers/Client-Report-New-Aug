@@ -44,8 +44,7 @@ export async function POST(request: NextRequest) {
       const { credentials } = await oauth2Client.refreshAccessToken()
       oauth2Client.setCredentials(credentials)
     } catch (refreshError) {
-      console.log('Token refresh failed, using existing token:', refreshError)
-    }
+      }
     
     // Format dates
     const endDateObj = endDate ? new Date(endDate) : new Date()

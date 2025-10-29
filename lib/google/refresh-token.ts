@@ -11,7 +11,7 @@ export async function refreshGoogleToken(accountId: string): Promise<{
     });
 
     if (!account || !account.refresh_token) {
-      console.error('No refresh token found for account:', accountId);
+      
       return null;
     }
 
@@ -31,7 +31,7 @@ export async function refreshGoogleToken(accountId: string): Promise<{
 
     if (!response.ok) {
       const error = await response.text();
-      console.error('Failed to refresh token:', error);
+      
       return null;
     }
 
@@ -54,7 +54,7 @@ export async function refreshGoogleToken(accountId: string): Promise<{
       expires_at: expires_at,
     };
   } catch (error) {
-    console.error('Error refreshing Google token:', error);
+    
     return null;
   }
 }
@@ -74,14 +74,14 @@ export async function getValidGoogleToken(accountId: string): Promise<string | n
     const isExpired = account.expires_at ? Number(account.expires_at) < (now + 300) : true;
 
     if (isExpired) {
-      console.log('Token expired for account:', accountId, 'Refreshing...');
+      
       const refreshed = await refreshGoogleToken(accountId);
       return refreshed ? refreshed.access_token : null;
     }
 
     return account.access_token;
   } catch (error) {
-    console.error('Error getting valid token:', error);
+    
     return null;
   }
 }

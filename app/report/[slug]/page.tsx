@@ -61,7 +61,6 @@ export default function PublicReportPage() {
       // Only refresh if data is stale (older than 1 hour) AND not currently fetching
       // Don't auto-refresh on every page load or while already refreshing
       if (isDataStale() && !fetchingData) {
-        console.log('Data is stale, refreshing once...')
         refreshData()
       }
     }
@@ -69,21 +68,15 @@ export default function PublicReportPage() {
   
   const fetchReport = async () => {
     try {
-      console.log('Fetching report with slug:', slug)
       const response = await fetch(`/api/public/report/${slug}`)
-      console.log('Response status:', response.status)
-      
       if (!response.ok) {
         const errorData = await response.text()
-        console.error('Error fetching report:', errorData)
         throw new Error('Report not found')
       }
       
       const data = await response.json()
-      console.log('Report data received:', data)
       setReport(data)
     } catch (error: any) {
-      console.error('Error in fetchReport:', error)
       setError(error.message)
     } finally {
       setLoading(false)
@@ -93,7 +86,6 @@ export default function PublicReportPage() {
   const fetchReportData = async () => {
     // Use cachedData from the report that was already fetched
     if (report?.cachedData) {
-      console.log('📊 Using cached data from report:', report.cachedData)
       setReportData({
         search_console: report.cachedData.search_console,
         analytics: report.cachedData.analytics,
@@ -101,8 +93,7 @@ export default function PublicReportPage() {
         last_updated: report.cachedData.fetched_at
       })
     } else {
-      console.log('⚠️ No cached data available in report')
-    }
+      }
   }
 
   const isDataStale = () => {
@@ -117,13 +108,11 @@ export default function PublicReportPage() {
   
   const refreshData = async () => {
     if (!report || fetchingData) {
-      console.log('Already refreshing or no report, skipping...')
       return
     }
 
     setFetchingData(true)
     try {
-      console.log('🔄 Starting data refresh...')
       // Trigger data fetch from Google APIs using the public refresh endpoint
       const response = await fetch(`/api/public/report/${slug}/refresh`, {
         method: 'POST',
@@ -134,20 +123,14 @@ export default function PublicReportPage() {
 
       if (response.ok) {
         const result = await response.json()
-        console.log('✅ Data refreshed successfully')
-
         // Refetch the report to get updated cachedData
         await fetchReport()
         // fetchReportData will be called by the useEffect when report updates
       } else {
         const error = await response.json()
-        console.error('❌ Refresh failed:', error)
-        alert(`Failed to refresh data: ${error.error || 'Unknown error'}`)
-      }
+        }
     } catch (error: any) {
-      console.error('❌ Refresh error:', error)
-      alert('Failed to refresh data. Please try again.')
-    } finally {
+      } finally {
       setFetchingData(false)
     }
   }

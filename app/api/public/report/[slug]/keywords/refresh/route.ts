@@ -83,7 +83,7 @@ export async function POST(
       timestamp: new Date().toISOString()
     });
   } catch (error) {
-    console.error('Manual refresh error:', error);
+    
     return NextResponse.json(
       { error: 'Failed to refresh keywords' },
       { status: 500 }
@@ -168,7 +168,7 @@ async function refreshKeywordData(
       // Rate limiting
       await new Promise(resolve => setTimeout(resolve, 100));
     } catch (error) {
-      console.error(`Error refreshing keyword ${keywordRecord.keyword}:`, error);
+      
     }
   }
 

@@ -116,7 +116,6 @@ export async function GET(request: NextRequest) {
       success: true
     })
   } catch (error: any) {
-    console.error('[AI Brands API] Error:', error)
     return NextResponse.json(
       { error: "Failed to fetch AI brands" },
       { status: 500 }
@@ -183,7 +182,6 @@ export async function POST(request: NextRequest) {
       }
     })
   } catch (error: any) {
-    console.error('[AI Brands API] Create Error:', error)
     return NextResponse.json(
       { error: "Failed to create AI brand", details: error.message },
       { status: 500 }

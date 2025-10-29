@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
+import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -120,11 +121,11 @@ export default function ReportViewPage() {
             <Button variant="outline" size="sm" onClick={copyUrl}>
               <Copy className="h-4 w-4" />
             </Button>
-            <a href={reportUrl} target="_blank" rel="noopener noreferrer">
+            <Link href={`/report/${report.slug}`} target="_blank" rel="noopener noreferrer">
               <Button variant="outline" size="sm">
                 <ExternalLink className="h-4 w-4" />
               </Button>
-            </a>
+            </Link>
           </div>
         </CardContent>
       </Card>

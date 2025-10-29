@@ -62,8 +62,7 @@ export default function ClientFormWithGoogleAccounts({ onSuccess }: ClientFormPr
         }
       }
     } catch (error) {
-      console.error("Failed to fetch Google accounts:", error)
-    }
+      }
   }
 
   const fetchProperties = async (accountId: string) => {
@@ -89,8 +88,7 @@ export default function ClientFormWithGoogleAccounts({ onSuccess }: ClientFormPr
         })))
       }
     } catch (error) {
-      console.error("Failed to fetch properties:", error)
-    }
+      }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {

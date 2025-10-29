@@ -35,7 +35,7 @@ async function ensureScreenshotDir() {
   try {
     await fs.mkdir(CONFIG.screenshotDir, { recursive: true });
   } catch (error) {
-    console.error('Error creating screenshot directory:', error);
+    
   }
 }
 
@@ -46,10 +46,10 @@ async function takeScreenshot(page, name) {
     const filepath = path.join(CONFIG.screenshotDir, filename);
     await page.screenshot({ path: filepath, fullPage: true });
     testResults.screenshots.push({ name, filename, timestamp });
-    console.log(`📸 Screenshot saved: ${filename}`);
+    
     return filepath;
   } catch (error) {
-    console.error(`Error taking screenshot ${name}:`, error);
+    
     return null;
   }
 }
@@ -60,7 +60,7 @@ async function waitAndClick(page, selector, options = {}) {
     await page.click(selector);
     return true;
   } catch (error) {
-    console.error(`Error clicking ${selector}:`, error.message);
+    
     return false;
   }
 }
@@ -93,7 +93,7 @@ async function extractMetrics(page, metricSelectors) {
 
 // Main test functions
 async function testAuthentication(page) {
-  console.log('\n🔐 Testing Authentication...');
+  
   testResults.totalTests++;
   
   try {
@@ -113,16 +113,16 @@ async function testAuthentication(page) {
     };
     
     if (!isLoggedIn && hasLoginButton) {
-      console.log('⚠️  Not authenticated, login required');
+      
       testResults.summary.warnings++;
     } else if (isLoggedIn) {
-      console.log('✅ Already authenticated or no auth required');
+      
       testResults.summary.passed++;
     }
     
     return isLoggedIn;
   } catch (error) {
-    console.error('❌ Authentication test failed:', error);
+    
     testResults.authentication.error = error.message;
     testResults.summary.failed++;
     return false;
@@ -130,7 +130,7 @@ async function testAuthentication(page) {
 }
 
 async function testNavigation(page) {
-  console.log('\n🧭 Testing Navigation...');
+  
   
   const navigationItems = [
     { name: 'Dashboard', selectors: ['a[href="/dashboard"]', 'a:has-text("Dashboard")', 'nav a:has-text("Dashboard")'] },
@@ -149,7 +149,7 @@ async function testNavigation(page) {
       if (await checkElementExists(page, selector)) {
         found = true;
         testResults.navigation.items[item.name] = { found: true, selector };
-        console.log(`✅ Found navigation item: ${item.name}`);
+        
         testResults.summary.passed++;
         break;
       }
@@ -157,7 +157,7 @@ async function testNavigation(page) {
     
     if (!found) {
       testResults.navigation.items[item.name] = { found: false };
-      console.log(`⚠️  Navigation item not found: ${item.name}`);
+      
       testResults.summary.warnings++;
     }
   }
@@ -166,7 +166,7 @@ async function testNavigation(page) {
 }
 
 async function findAndNavigateToReport(page) {
-  console.log('\n📊 Finding and navigating to a report...');
+  
   testResults.totalTests++;
   
   try {
@@ -241,18 +241,18 @@ async function findAndNavigateToReport(page) {
     // Try each strategy
     for (const strategy of reportStrategies) {
       if (await strategy()) {
-        console.log('✅ Successfully navigated to a report');
+        
         testResults.summary.passed++;
         await takeScreenshot(page, 'report-page');
         return true;
       }
     }
     
-    console.log('❌ Could not find or navigate to any report');
+    
     testResults.summary.failed++;
     return false;
   } catch (error) {
-    console.error('❌ Error finding report:', error);
+    
     testResults.errors.push({ context: 'findReport', error: error.message });
     testResults.summary.failed++;
     return false;
@@ -260,7 +260,7 @@ async function findAndNavigateToReport(page) {
 }
 
 async function testReportTabs(page) {
-  console.log('\n📑 Testing Report Tabs...');
+  
   
   const tabs = [
     { name: 'Insights', selectors: ['button:has-text("Insights")', 'a:has-text("Insights")', '[role="tab"]:has-text("Insights")'] },
@@ -275,7 +275,7 @@ async function testReportTabs(page) {
   
   for (const tab of tabs) {
     testResults.totalTests++;
-    console.log(`\n  Testing ${tab.name} tab...`);
+    
     
     let tabFound = false;
     let tabClickable = false;
@@ -297,7 +297,7 @@ async function testReportTabs(page) {
           await takeScreenshot(page, `tab-${tab.name.toLowerCase()}`);
           break;
         } catch (error) {
-          console.error(`    Error clicking ${tab.name} tab:`, error.message);
+          
         }
       }
     }
@@ -310,13 +310,13 @@ async function testReportTabs(page) {
     };
     
     if (tabFound && tabClickable && contentLoaded) {
-      console.log(`  ✅ ${tab.name} tab is functional`);
+      
       testResults.summary.passed++;
     } else if (tabFound) {
-      console.log(`  ⚠️  ${tab.name} tab found but issues with loading`);
+      
       testResults.summary.warnings++;
     } else {
-      console.log(`  ❌ ${tab.name} tab not found`);
+      
       testResults.summary.failed++;
     }
   }
@@ -413,7 +413,7 @@ async function extractTabData(page, tabName) {
     });
     
   } catch (error) {
-    console.error(`    Error extracting data for ${tabName}:`, error.message);
+    
     data.error = error.message;
   }
   
@@ -421,7 +421,7 @@ async function extractTabData(page, tabName) {
 }
 
 async function testCoreWebVitals(page) {
-  console.log('\n🚀 Testing Core Web Vitals Display...');
+  
   testResults.totalTests++;
   
   try {
@@ -429,7 +429,7 @@ async function testCoreWebVitals(page) {
     const technicalTabClicked = await waitAndClick(page, 'button:has-text("Technical"), a:has-text("Technical"), [role="tab"]:has-text("Technical")');
     
     if (!technicalTabClicked) {
-      console.log('  ⚠️  Could not navigate to Technical tab for Core Web Vitals');
+      
       testResults.summary.warnings++;
       return;
     }
@@ -482,9 +482,9 @@ async function testCoreWebVitals(page) {
       }
       
       if (data.found) {
-        console.log(`  ✅ ${metric}: ${data.value} (${data.status || 'no status'})`);
+        `);
       } else {
-        console.log(`  ❌ ${metric}: Not found`);
+        
       }
     }
     
@@ -493,27 +493,27 @@ async function testCoreWebVitals(page) {
     // Check if any vitals were found
     const vitalsFound = Object.values(vitals).filter(v => v.found).length;
     if (vitalsFound >= 3) {
-      console.log(`  ✅ Core Web Vitals display is working (${vitalsFound}/5 metrics found)`);
+      `);
       testResults.summary.passed++;
     } else if (vitalsFound > 0) {
-      console.log(`  ⚠️  Partial Core Web Vitals data (${vitalsFound}/5 metrics found)`);
+      `);
       testResults.summary.warnings++;
     } else {
-      console.log('  ❌ No Core Web Vitals data found');
+      
       testResults.summary.failed++;
     }
     
     await takeScreenshot(page, 'core-web-vitals');
     
   } catch (error) {
-    console.error('❌ Error testing Core Web Vitals:', error);
+    
     testResults.errors.push({ context: 'coreWebVitals', error: error.message });
     testResults.summary.failed++;
   }
 }
 
 async function testPageSpeedData(page) {
-  console.log('\n⚡ Testing PageSpeed Data...');
+  
   testResults.totalTests++;
   
   try {
@@ -564,23 +564,23 @@ async function testPageSpeedData(page) {
     testResults.dataValidation.pageSpeed = pageSpeedData;
     
     if (pageSpeedData.found) {
-      console.log(`  ✅ PageSpeed Score found: ${pageSpeedData.score}`);
-      console.log(`  📊 Additional metrics found: ${Object.keys(pageSpeedData.metrics).length}`);
+      
+      .length}`);
       testResults.summary.passed++;
     } else {
-      console.log('  ❌ PageSpeed data not found');
+      
       testResults.summary.failed++;
     }
     
   } catch (error) {
-    console.error('❌ Error testing PageSpeed data:', error);
+    
     testResults.errors.push({ context: 'pageSpeed', error: error.message });
     testResults.summary.failed++;
   }
 }
 
 async function testExecutiveSummary(page) {
-  console.log('\n📝 Testing Executive Summary...');
+  
   testResults.totalTests++;
   
   try {
@@ -634,26 +634,26 @@ async function testExecutiveSummary(page) {
     testResults.dataValidation.executiveSummary = summaryData;
     
     if (summaryData.found || summaryData.metrics.length > 0) {
-      console.log(`  ✅ Executive Summary found`);
-      console.log(`  📊 Metrics found: ${summaryData.metrics.length}`);
-      console.log(`  💡 Recommendations found: ${summaryData.recommendations.length}`);
+      
+      
+      
       testResults.summary.passed++;
     } else {
-      console.log('  ⚠️  Executive Summary not clearly identified');
+      
       testResults.summary.warnings++;
     }
     
     await takeScreenshot(page, 'executive-summary');
     
   } catch (error) {
-    console.error('❌ Error testing Executive Summary:', error);
+    
     testResults.errors.push({ context: 'executiveSummary', error: error.message });
     testResults.summary.failed++;
   }
 }
 
 async function testDataPopulation(page) {
-  console.log('\n📊 Testing Overall Data Population...');
+  
   testResults.totalTests++;
   
   try {
@@ -707,34 +707,34 @@ async function testDataPopulation(page) {
     const totalDataPoints = dataCheck.emptyValues + dataCheck.populatedValues + dataCheck.nullValues;
     const populationRate = totalDataPoints > 0 ? (dataCheck.populatedValues / totalDataPoints * 100).toFixed(1) : 0;
     
-    console.log(`  📊 Data Population Statistics:`);
-    console.log(`     - Populated values: ${dataCheck.populatedValues}`);
-    console.log(`     - Empty values: ${dataCheck.emptyValues}`);
-    console.log(`     - Null/N/A values: ${dataCheck.nullValues}`);
-    console.log(`     - Loading indicators: ${dataCheck.loadingIndicators}`);
-    console.log(`     - Error messages: ${dataCheck.errorMessages}`);
-    console.log(`     - Population rate: ${populationRate}%`);
+    
+    
+    
+    
+    
+    
+    
     
     if (populationRate > 70) {
-      console.log(`  ✅ Good data population (${populationRate}%)`);
+      `);
       testResults.summary.passed++;
     } else if (populationRate > 30) {
-      console.log(`  ⚠️  Partial data population (${populationRate}%)`);
+      `);
       testResults.summary.warnings++;
     } else {
-      console.log(`  ❌ Poor data population (${populationRate}%)`);
+      `);
       testResults.summary.failed++;
     }
     
   } catch (error) {
-    console.error('❌ Error testing data population:', error);
+    
     testResults.errors.push({ context: 'dataPopulation', error: error.message });
     testResults.summary.failed++;
   }
 }
 
 async function checkConsoleErrors(page) {
-  console.log('\n🔍 Checking for Console Errors...');
+  
   
   const consoleMessages = [];
   
@@ -757,93 +757,93 @@ async function checkConsoleErrors(page) {
   testResults.performance.consoleErrors = consoleMessages;
   
   if (consoleMessages.length === 0) {
-    console.log('  ✅ No console errors detected');
+    
   } else {
-    console.log(`  ⚠️  ${consoleMessages.length} console errors/warnings detected`);
+    
     consoleMessages.slice(0, 5).forEach(msg => {
-      console.log(`     - ${msg.type}: ${msg.text.substring(0, 100)}...`);
+      }...`);
     });
   }
 }
 
 async function generateReport() {
-  console.log('\n' + '='.repeat(80));
-  console.log('📋 COMPREHENSIVE TEST REPORT');
-  console.log('='.repeat(80));
+  );
   
-  console.log('\n📊 TEST SUMMARY:');
-  console.log(`  Total Tests: ${testResults.summary.totalTests}`);
-  console.log(`  ✅ Passed: ${testResults.summary.passed}`);
-  console.log(`  ❌ Failed: ${testResults.summary.failed}`);
-  console.log(`  ⚠️  Warnings: ${testResults.summary.warnings}`);
+  );
+  
+  
+  
+  
+  
+  
   
   const successRate = testResults.summary.totalTests > 0 
     ? (testResults.summary.passed / testResults.summary.totalTests * 100).toFixed(1)
     : 0;
-  console.log(`  Success Rate: ${successRate}%`);
   
-  console.log('\n🔐 AUTHENTICATION:');
-  console.log(`  Status: ${testResults.authentication.status || 'Unknown'}`);
-  console.log(`  URL: ${testResults.authentication.currentUrl || 'N/A'}`);
   
-  console.log('\n📑 TAB FUNCTIONALITY:');
+  
+  
+  
+  
+  
   Object.entries(testResults.tabs).forEach(([tabName, data]) => {
     const status = data.found && data.clickable && data.contentLoaded ? '✅' : 
                    data.found ? '⚠️' : '❌';
-    console.log(`  ${status} ${tabName}: Found=${data.found}, Clickable=${data.clickable}, Content=${data.contentLoaded}`);
+    
     if (data.data?.visibleDataPoints) {
-      console.log(`     Data points: ${data.data.visibleDataPoints}`);
+      
     }
   });
   
-  console.log('\n🚀 CORE WEB VITALS:');
+  
   if (testResults.dataValidation.coreWebVitals) {
     Object.entries(testResults.dataValidation.coreWebVitals).forEach(([metric, data]) => {
       if (data.found) {
-        console.log(`  ✅ ${metric}: ${data.value} (${data.status || 'no status'})`);
+        `);
       } else {
-        console.log(`  ❌ ${metric}: Not found`);
+        
       }
     });
   } else {
-    console.log('  No Core Web Vitals data collected');
+    
   }
   
-  console.log('\n⚡ PAGESPEED:');
+  
   if (testResults.dataValidation.pageSpeed) {
     const ps = testResults.dataValidation.pageSpeed;
     if (ps.found) {
-      console.log(`  ✅ Score: ${ps.score}`);
-      console.log(`  Metrics found: ${Object.keys(ps.metrics).length}`);
+      
+      .length}`);
     } else {
-      console.log('  ❌ PageSpeed data not found');
+      
     }
   }
   
-  console.log('\n📊 DATA POPULATION:');
+  
   if (testResults.dataValidation.overallDataPopulation) {
     const dp = testResults.dataValidation.overallDataPopulation;
     const total = dp.populatedValues + dp.emptyValues + dp.nullValues;
     const rate = total > 0 ? (dp.populatedValues / total * 100).toFixed(1) : 0;
-    console.log(`  Population Rate: ${rate}%`);
-    console.log(`  Populated: ${dp.populatedValues}, Empty: ${dp.emptyValues}, Null: ${dp.nullValues}`);
+    
+    
     if (dp.errorMessages > 0) {
-      console.log(`  ⚠️  Error messages found: ${dp.errorMessages}`);
+      
     }
   }
   
-  console.log('\n📸 SCREENSHOTS:');
-  console.log(`  Total screenshots captured: ${testResults.screenshots.length}`);
-  console.log(`  Location: ${CONFIG.screenshotDir}`);
+  
+  
+  
   
   if (testResults.errors.length > 0) {
-    console.log('\n❌ ERRORS ENCOUNTERED:');
+    
     testResults.errors.forEach(err => {
-      console.log(`  - ${err.context}: ${err.error}`);
+      
     });
   }
   
-  console.log('\n🎯 KEY FINDINGS:');
+  
   
   // Analyze and provide recommendations
   const findings = [];
@@ -881,22 +881,22 @@ async function generateReport() {
     findings.push('✅ All major components appear to be working correctly');
   }
   
-  findings.forEach(finding => console.log(`  ${finding}`));
+  findings.forEach(finding => );
   
-  console.log('\n' + '='.repeat(80));
+  );
   
   // Save report to file
   const reportPath = path.join(__dirname, `test-report-${Date.now()}.json`);
   await fs.writeFile(reportPath, JSON.stringify(testResults, null, 2));
-  console.log(`\n📄 Detailed report saved to: ${reportPath}`);
+  
 }
 
 // Main execution
 async function runComprehensiveTest() {
-  console.log('🚀 Starting Comprehensive Dashboard Test Suite');
-  console.log(`📍 Target URL: ${CONFIG.baseUrl}`);
-  console.log(`⏱️  Timeout: ${CONFIG.timeout}ms`);
-  console.log('');
+  
+  
+  
+  
   
   let browser;
   let page;
@@ -906,7 +906,7 @@ async function runComprehensiveTest() {
     await ensureScreenshotDir();
     
     // Launch browser
-    console.log('🌐 Launching browser...');
+    
     browser = await puppeteer.launch({
       headless: CONFIG.headless,
       slowMo: CONFIG.slowMo,
@@ -945,26 +945,26 @@ async function runComprehensiveTest() {
         await testExecutiveSummary(page);
         await testDataPopulation(page);
       } else {
-        console.log('\n⚠️  Could not access report page - some tests skipped');
+        
       }
     } else {
-      console.log('\n⚠️  Not authenticated - skipping authenticated tests');
+      
     }
     
     // Generate final report
     await generateReport();
     
   } catch (error) {
-    console.error('\n❌ Fatal error during test execution:', error);
+    
     testResults.errors.push({ context: 'fatal', error: error.message, stack: error.stack });
   } finally {
     if (browser) {
-      console.log('\n🔒 Closing browser...');
+      
       await browser.close();
     }
   }
   
-  console.log('\n✅ Test suite completed!');
+  
   
   // Return exit code based on results
   const exitCode = testResults.summary.failed > 0 ? 1 : 0;
@@ -973,6 +973,6 @@ async function runComprehensiveTest() {
 
 // Run the test
 runComprehensiveTest().catch(error => {
-  console.error('Unhandled error:', error);
+  
   process.exit(1);
 });

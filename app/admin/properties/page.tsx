@@ -48,11 +48,8 @@ export default function PropertiesPage() {
 
   const fetchProperties = async () => {
     try {
-      console.log('[Properties Page] Fetching properties...')
       const response = await fetch("/api/google/fetch-properties")
       const data = await response.json()
-      
-      console.log('[Properties Page] Response:', data)
       
       if (data.success && data.accounts) {
         setAccountsProperties(data.accounts)
@@ -74,7 +71,6 @@ export default function PropertiesPage() {
         })
       }
     } catch (error) {
-      console.error("[Properties Page] Error fetching properties:", error)
       toast({
         title: "Error",
         description: "Failed to load properties",

@@ -26,7 +26,6 @@ export default function GoogleAuthButton({ clientId, onSuccess }: GoogleAuthButt
       }
       
     } catch (error: any) {
-      console.error("OAuth error:", error)
       toast({
         title: "Error",
         description: "Failed to initiate Google authorization",

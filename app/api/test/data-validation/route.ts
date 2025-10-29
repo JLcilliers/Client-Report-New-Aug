@@ -18,11 +18,6 @@ export async function GET(request: NextRequest) {
     
     // Test 1: Check optimal date range calculation
     const optimalRange = getOptimalDateRange()
-    console.log('[Test] Optimal date range:', {
-      start: formatDateForGoogleAPI(optimalRange.startDate),
-      end: formatDateForGoogleAPI(optimalRange.endDate),
-      note: 'Adjusted for Search Console 2-3 day delay'
-    })
     
     // Test 2: Check cached data if reportId provided
     let cachedData = null
@@ -201,7 +196,6 @@ export async function GET(request: NextRequest) {
     })
     
   } catch (error: any) {
-    console.error('[Data Validation Test] Error:', error)
     return NextResponse.json({ 
       error: "Data validation test failed",
       details: error.message 

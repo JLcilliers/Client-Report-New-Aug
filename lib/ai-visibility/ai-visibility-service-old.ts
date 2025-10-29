@@ -256,7 +256,7 @@ export class AIVisibilityService {
           }
         }
       } catch (error) {
-        console.error(`Error fetching data for platform ${platform}:`, error);
+        
       }
     }
 

@@ -7,11 +7,8 @@ import { getValidGoogleToken } from '@/lib/google/refresh-token'
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
-  console.log('\n========== Analytics Test Endpoint START ==========')
-  
   try {
     // Step 1: Get a Google account with valid token
-    console.log('[Analytics Test] Step 1: Finding Google account...')
     const accounts = await prisma.account.findMany({
       where: { 
         provider: 'google',
@@ -21,29 +18,17 @@ export async function GET(request: NextRequest) {
     })
     
     if (accounts.length === 0) {
-      console.error('[Analytics Test] No Google accounts found')
       return NextResponse.json({ 
         error: "No Google accounts found",
         step: "account_fetch"
       }, { status: 404 })
     }
     
-    console.log(`[Analytics Test] Found ${accounts.length} Google account(s)`)
     const account = accounts[0]
-    console.log('[Analytics Test] Using account:', {
-      id: account.id,
-      provider: account.provider,
-      providerAccountId: account.providerAccountId,
-      hasRefreshToken: !!account.refresh_token,
-      expiresAt: account.expires_at
-    })
-    
     // Step 2: Get valid access token
-    console.log('[Analytics Test] Step 2: Getting valid access token...')
     const accessToken = await getValidGoogleToken(account.id)
     
     if (!accessToken) {
-      console.error('[Analytics Test] Failed to get valid access token')
       return NextResponse.json({ 
         error: "Failed to get valid access token",
         step: "token_refresh",
@@ -51,10 +36,7 @@ export async function GET(request: NextRequest) {
       }, { status: 401 })
     }
     
-    console.log('[Analytics Test] Got access token, length:', accessToken.length)
-    
     // Step 3: Create OAuth2 client
-    console.log('[Analytics Test] Step 3: Creating OAuth2 client...')
     const oauth2Client = new OAuth2Client(
       process.env.GOOGLE_CLIENT_ID,
       process.env.GOOGLE_CLIENT_SECRET
@@ -65,7 +47,6 @@ export async function GET(request: NextRequest) {
     })
     
     // Step 4: Get Analytics properties first
-    console.log('[Analytics Test] Step 4: Fetching Analytics properties...')
     const analyticsAdmin = google.analyticsadmin('v1beta')
     
     let properties: any[] = []
@@ -74,12 +55,8 @@ export async function GET(request: NextRequest) {
         auth: oauth2Client
       })
       
-      console.log('[Analytics Test] Found Analytics accounts:', accountsResponse.data.accounts?.length || 0)
-      
       if (accountsResponse.data.accounts && accountsResponse.data.accounts.length > 0) {
         for (const analyticsAccount of accountsResponse.data.accounts) {
-          console.log(`[Analytics Test] Fetching properties for account: ${analyticsAccount.displayName}`)
-          
           const propertiesResponse = await analyticsAdmin.properties.list({
             auth: oauth2Client,
             filter: `parent:${analyticsAccount.name}`
@@ -87,12 +64,10 @@ export async function GET(request: NextRequest) {
           
           if (propertiesResponse.data.properties) {
             properties.push(...propertiesResponse.data.properties)
-            console.log(`[Analytics Test] Found ${propertiesResponse.data.properties.length} properties`)
-          }
+            }
         }
       }
     } catch (error: any) {
-      console.error('[Analytics Test] Error fetching Analytics properties:', error.message)
       return NextResponse.json({ 
         error: "Failed to fetch Analytics properties",
         details: error.message,
@@ -101,7 +76,6 @@ export async function GET(request: NextRequest) {
     }
     
     if (properties.length === 0) {
-      console.warn('[Analytics Test] No Analytics properties found for this account')
       return NextResponse.json({ 
         error: "No Analytics properties found",
         step: "properties_check",
@@ -110,16 +84,9 @@ export async function GET(request: NextRequest) {
       }, { status: 404 })
     }
     
-    console.log(`[Analytics Test] Total properties found: ${properties.length}`)
     const property = properties[0]
-    console.log('[Analytics Test] Using property:', {
-      name: property.name,
-      displayName: property.displayName,
-      propertyId: property.name?.split('/').pop()
-    })
     
     // Step 5: Make Analytics Data API call
-    console.log('[Analytics Test] Step 5: Making Analytics Data API call...')
     const analyticsData = google.analyticsdata('v1beta')
     
     // Calculate date range (last 7 days)
@@ -129,10 +96,6 @@ export async function GET(request: NextRequest) {
     
     const formatDate = (date: Date) => date.toISOString().split('T')[0]
     
-    console.log('[Analytics Test] Date range:', {
-      startDate: formatDate(startDate),
-      endDate: formatDate(endDate)
-    })
     
     // Format property name for API call
     let propertyName = property.name
@@ -140,10 +103,7 @@ export async function GET(request: NextRequest) {
       propertyName = `properties/${property.name.split('/').pop()}`
     }
     
-    console.log('[Analytics Test] Formatted property name:', propertyName)
-    
     try {
-      console.log('[Analytics Test] Making API request...')
       const response = await analyticsData.properties.runReport({
         property: propertyName,
         requestBody: {
@@ -161,16 +121,6 @@ export async function GET(request: NextRequest) {
           ]
         },
         auth: oauth2Client
-      })
-      
-      console.log('[Analytics Test] API call successful!')
-      console.log('[Analytics Test] Response data:', {
-        hasData: !!response.data,
-        rowCount: response.data.rows?.length || 0,
-        dimensionHeaders: response.data.dimensionHeaders,
-        metricHeaders: response.data.metricHeaders,
-        propertyQuota: response.data.propertyQuota,
-        metadata: response.data.metadata
       })
       
       // Process the data for summary
@@ -201,8 +151,6 @@ export async function GET(request: NextRequest) {
         })
       }
       
-      console.log('[Analytics Test] Summary:', summary)
-      console.log('========== Analytics Test Endpoint END (SUCCESS) ==========\n')
       
       return NextResponse.json({
         success: true,
@@ -230,14 +178,6 @@ export async function GET(request: NextRequest) {
       })
       
     } catch (error: any) {
-      console.error('[Analytics Test] API call failed:', error)
-      console.error('[Analytics Test] Error details:', {
-        message: error.message,
-        code: error.code,
-        status: error.status,
-        errors: error.errors
-      })
-      console.error('========== Analytics Test Endpoint END (API ERROR) ==========\n')
       
       return NextResponse.json({
         error: "Analytics API call failed",
@@ -259,8 +199,6 @@ export async function GET(request: NextRequest) {
     }
     
   } catch (error: any) {
-    console.error('[Analytics Test] Unexpected error:', error)
-    console.error('========== Analytics Test Endpoint END (UNEXPECTED ERROR) ==========\n')
     
     return NextResponse.json({
       error: "Unexpected error",

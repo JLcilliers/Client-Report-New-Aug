@@ -25,7 +25,7 @@ async function ensureScreenshotDir() {
   try {
     await fs.mkdir(CONFIG.screenshotDir, { recursive: true });
   } catch (error) {
-    console.error('Error creating screenshot directory:', error);
+    
   }
 }
 
@@ -36,16 +36,16 @@ async function takeScreenshot(page, name) {
     const filepath = path.join(CONFIG.screenshotDir, filename);
     await page.screenshot({ path: filepath, fullPage: true });
     results.screenshots.push({ name, filename, timestamp });
-    console.log(`📸 Screenshot: ${filename}`);
+    
     return filepath;
   } catch (error) {
-    console.error(`Error taking screenshot ${name}:`, error.message);
+    
     return null;
   }
 }
 
 async function testPage(page, url, name) {
-  console.log(`\n🔍 Testing ${name}...`);
+  
   const test = { name, url, status: 'pending', data: {} };
   
   try {
@@ -87,14 +87,14 @@ async function testPage(page, url, name) {
       return data;
     });
     
-    console.log(`  ✅ Page loaded successfully`);
-    console.log(`  📊 Found ${test.data.pageContent.dataElements} data elements`);
-    console.log(`  🔗 ${test.data.pageContent.links} links, ${test.data.pageContent.buttons} buttons`);
+    
+    
+    
     
     test.status = 'success';
     
   } catch (error) {
-    console.error(`  ❌ Error: ${error.message}`);
+    
     test.status = 'error';
     test.error = error.message;
     results.errors.push({ page: name, error: error.message });
@@ -105,7 +105,7 @@ async function testPage(page, url, name) {
 }
 
 async function testReportPage(page) {
-  console.log('\n📊 Testing Report Page Functionality...');
+  
   
   try {
     // Try to find a report
@@ -127,12 +127,12 @@ async function testReportPage(page) {
     }
     
     if (!reportFound) {
-      console.log('  ⚠️  No report page found');
+      
       return;
     }
     
     // Test tabs if on report page
-    console.log('\n📑 Testing Report Tabs...');
+    
     const tabs = ['Insights', 'Search', 'Traffic', 'Engagement', 'Technical', 'Visualize'];
     
     for (const tabName of tabs) {
@@ -150,7 +150,7 @@ async function testReportPage(page) {
         
         if (tabFound) {
           await new Promise(resolve => setTimeout(resolve, 2000));
-          console.log(`  ✅ ${tabName} tab clicked`);
+          
           
           // Check for specific content based on tab
           const tabData = await page.evaluate((name) => {
@@ -202,27 +202,27 @@ async function testReportPage(page) {
           }, tabName);
           
           if (tabData.hasContent) {
-            console.log(`    ✅ ${tabName} content detected`);
+            
             if (tabData.metrics.length > 0) {
-              console.log(`    📊 Metrics found: ${tabData.metrics.join(', ')}`);
+              }`);
             }
           } else {
-            console.log(`    ⚠️  ${tabName} content not clearly detected`);
+            
           }
           
           await takeScreenshot(page, `tab-${tabName.toLowerCase()}`);
           
         } else {
-          console.log(`  ❌ ${tabName} tab not found`);
+          
         }
         
       } catch (error) {
-        console.log(`  ❌ Error testing ${tabName} tab: ${error.message}`);
+        
       }
     }
     
     // Test Core Web Vitals specifically
-    console.log('\n🚀 Checking Core Web Vitals...');
+    
     const vitalsData = await page.evaluate(() => {
       const vitals = {};
       const bodyText = document.body.innerText;
@@ -253,64 +253,64 @@ async function testReportPage(page) {
     });
     
     if (Object.keys(vitalsData).length > 0) {
-      console.log('  ✅ Core Web Vitals found:');
+      
       for (const [metric, value] of Object.entries(vitalsData)) {
-        console.log(`    ${metric}: ${value}`);
+        
       }
     } else {
-      console.log('  ⚠️  Core Web Vitals not detected in current view');
+      
     }
     
   } catch (error) {
-    console.error('❌ Error testing report page:', error);
+    
     results.errors.push({ context: 'reportPage', error: error.message });
   }
 }
 
 async function generateReport() {
-  console.log('\n' + '='.repeat(80));
-  console.log('📋 TEST REPORT SUMMARY');
-  console.log('='.repeat(80));
+  );
+  
+  );
   
   const successful = results.tests.filter(t => t.status === 'success').length;
   const failed = results.tests.filter(t => t.status === 'error').length;
   
-  console.log(`\n📊 Results:`);
-  console.log(`  ✅ Successful: ${successful}`);
-  console.log(`  ❌ Failed: ${failed}`);
-  console.log(`  📸 Screenshots: ${results.screenshots.length}`);
   
-  console.log(`\n📄 Pages Tested:`);
+  
+  
+  
+  
+  
   results.tests.forEach(test => {
     const icon = test.status === 'success' ? '✅' : '❌';
-    console.log(`  ${icon} ${test.name}`);
+    
     if (test.data.pageContent) {
-      console.log(`     - Data elements: ${test.data.pageContent.dataElements}`);
-      console.log(`     - Has content: ${test.data.pageContent.hasContent}`);
+      
+      
     }
   });
   
   if (results.errors.length > 0) {
-    console.log(`\n⚠️  Errors:`);
+    
     results.errors.forEach(err => {
-      console.log(`  - ${err.page || err.context}: ${err.error}`);
+      
     });
   }
   
-  console.log('\n' + '='.repeat(80));
+  );
   
   // Save detailed report
   const reportPath = path.join(__dirname, `test-report-${Date.now()}.json`);
   await fs.writeFile(reportPath, JSON.stringify(results, null, 2));
-  console.log(`\n📄 Detailed report saved to: ${reportPath}`);
-  console.log(`📸 Screenshots saved to: ${CONFIG.screenshotDir}`);
+  
+  
 }
 
 // Main execution
 async function runTest() {
-  console.log('🚀 Starting Dashboard Test');
-  console.log(`📍 URL: ${CONFIG.baseUrl}`);
-  console.log('');
+  
+  
+  
   
   let browser;
   
@@ -318,7 +318,7 @@ async function runTest() {
     await ensureScreenshotDir();
     
     // Launch browser
-    console.log('🌐 Launching browser...\n');
+    
     browser = await puppeteer.launch({
       headless: CONFIG.headless,
       slowMo: CONFIG.slowMo,
@@ -349,21 +349,21 @@ async function runTest() {
     await generateReport();
     
   } catch (error) {
-    console.error('\n❌ Fatal error:', error);
+    
     results.errors.push({ context: 'fatal', error: error.message });
   } finally {
     if (browser) {
-      console.log('\n🔒 Closing browser...');
+      
       await browser.close();
     }
   }
   
-  console.log('\n✅ Test completed!');
+  
   process.exit(results.errors.length > 0 ? 1 : 0);
 }
 
 // Run the test
 runTest().catch(error => {
-  console.error('Unhandled error:', error);
+  
   process.exit(1);
 });

@@ -95,7 +95,7 @@ export async function GET(request: NextRequest) {
     });
     
   } catch (error: any) {
-    console.error('[Fetch Properties] Error:', error);
+    
     return NextResponse.json(
       { 
         error: 'Failed to fetch properties',
@@ -112,7 +112,7 @@ async function fetchPropertiesForToken(accessToken: string) {
 
   // Fetch Search Console sites
   try {
-    console.log('[Properties] Fetching Search Console sites...');
+    
     const gscResp = await fetch('https://www.googleapis.com/webmasters/v3/sites', {
       headers: { 
         Authorization: `Bearer ${accessToken}`,
@@ -123,20 +123,20 @@ async function fetchPropertiesForToken(accessToken: string) {
     if (gscResp.ok) {
       const gscJson = await gscResp.json();
       searchConsoleProperties = gscJson.siteEntry ?? [];
-      console.log(`[Properties] Found ${searchConsoleProperties.length} Search Console properties`);
+      
     } else if (gscResp.status === 401) {
-      console.error('[Properties] Unauthorized for Search Console API');
+      
     } else {
       const errorText = await gscResp.text();
-      console.error('[Properties] Search Console error:', gscResp.status, errorText);
+      
     }
   } catch (error) {
-    console.error('[Properties] Search Console fetch error:', error);
+    
   }
 
   // Fetch GA4 properties via Admin API
   try {
-    console.log('[Properties] Fetching Analytics properties...');
+    
     const gaResp = await fetch('https://analyticsadmin.googleapis.com/v1beta/accountSummaries', {
       headers: { 
         Authorization: `Bearer ${accessToken}`,
@@ -153,15 +153,15 @@ async function fetchPropertiesForToken(accessToken: string) {
           account: as.account
         }))
       ) ?? [];
-      console.log(`[Properties] Found ${analyticsProperties.length} Analytics properties`);
+      
     } else if (gaResp.status === 401) {
-      console.error('[Properties] Unauthorized for Analytics API');
+      
     } else {
       const errorText = await gaResp.text();
-      console.error('[Properties] Analytics error:', gaResp.status, errorText);
+      
     }
   } catch (error) {
-    console.error('[Properties] Analytics fetch error:', error);
+    
   }
 
   return {
@@ -205,7 +205,7 @@ export async function POST(request: NextRequest) {
     });
     
   } catch (error: any) {
-    console.error('[Refresh Properties] Error:', error);
+    
     return NextResponse.json(
       { 
         error: 'Failed to refresh properties',

@@ -30,7 +30,7 @@ export async function GET(
       keywordCount: report.keywords.length
     });
   } catch (error) {
-    console.error('Error fetching report:', error);
+    
     return NextResponse.json(
       { error: 'Failed to fetch report' },
       { status: 500 }

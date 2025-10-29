@@ -42,7 +42,7 @@ export default function TestGoogle() {
         fetchAccounts(); // Refresh the list
       }
     } catch (err) {
-      console.error('Failed to delete account:', err);
+      
     }
   };
 

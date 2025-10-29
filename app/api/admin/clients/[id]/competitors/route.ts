@@ -20,7 +20,6 @@ export async function GET(
 
     return NextResponse.json(competitors)
   } catch (error) {
-    console.error('Error fetching competitors:', error)
     return NextResponse.json(
       { error: 'Failed to fetch competitors' },
       { status: 500 }
@@ -70,7 +69,6 @@ export async function POST(
 
     return NextResponse.json(competitor)
   } catch (error) {
-    console.error('Error creating competitor:', error)
     return NextResponse.json(
       { error: 'Failed to create competitor' },
       { status: 500 }

@@ -55,12 +55,8 @@ export async function runVisibilityTests(
 
   // Test each keyword on each enabled platform
   for (const keyword of config.keywords) {
-    console.log(`Testing keyword: "${keyword.prompt}"`)
-
     // Run tests in parallel for all platforms
     const platformTests = config.platforms.map(async (platform) => {
-      console.log(`  - Testing on ${platform}...`)
-
       try {
         switch (platform) {
           case 'chatgpt':
@@ -100,11 +96,9 @@ export async function runVisibilityTests(
             )
 
           default:
-            console.warn(`Unknown platform: ${platform}`)
             return null
         }
       } catch (error: any) {
-        console.error(`Error testing ${platform}:`, error.message)
         return null
       }
     })

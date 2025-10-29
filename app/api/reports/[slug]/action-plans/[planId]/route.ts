@@ -40,7 +40,7 @@ export async function GET(
     
     return NextResponse.json(actionPlan);
   } catch (error: any) {
-    console.error('Failed to fetch action plan:', error);
+    
     return NextResponse.json(
       { error: 'Failed to fetch action plan', details: error.message },
       { status: 500 }
@@ -113,7 +113,7 @@ export async function PUT(
     
     return NextResponse.json(updatedActionPlan);
   } catch (error: any) {
-    console.error('Failed to update action plan:', error);
+    
     return NextResponse.json(
       { error: 'Failed to update action plan', details: error.message },
       { status: 500 }
@@ -148,7 +148,7 @@ export async function DELETE(
     
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    console.error('Failed to delete action plan:', error);
+    
     return NextResponse.json(
       { error: 'Failed to delete action plan', details: error.message },
       { status: 500 }

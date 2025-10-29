@@ -11,8 +11,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    console.log('[Migration] Starting database migration...')
-
     // Run Prisma migration to ensure all tables exist
     // This will create tables based on the Prisma schema
     const result = await prisma.$executeRawUnsafe(`
@@ -48,15 +46,12 @@ export async function GET(request: NextRequest) {
       );
     `
 
-    console.log('[Migration] Migration completed successfully')
-
     return NextResponse.json({ 
       success: true,
       message: 'Migration completed successfully',
       tableExists: tableCheck
     })
   } catch (error: any) {
-    console.error('[Migration] Error:', error)
     return NextResponse.json({ 
       error: 'Migration failed',
       details: error.message 

@@ -167,7 +167,7 @@ export class AIReadinessService {
 
       return await this.getOrCreateProfile(clientReportId);
     } catch (error) {
-      console.error('AI Readiness calculation error:', error);
+      
       throw error;
     }
   }
@@ -226,7 +226,7 @@ export class AIReadinessService {
         totalQueries: rows.length,
       };
     } catch (error) {
-      console.error('Search Console analysis error:', error);
+      
       return {
         featuredSnippetScore: 0,
         questionCoverageScore: 0,
@@ -278,7 +278,7 @@ export class AIReadinessService {
         schemaTypes: structuredData?.details?.items || [],
       };
     } catch (error) {
-      console.error('Schema analysis error:', error);
+      
       return { score: 50, hasSchema: false, schemaTypes: [] };
     }
   }
@@ -331,7 +331,7 @@ export class AIReadinessService {
 
       return { score: Math.max(score, 0) };
     } catch (error) {
-      console.error('Content quality analysis error:', error);
+      
       return { score: 50 };
     }
   }
@@ -375,7 +375,7 @@ export class AIReadinessService {
 
       return { score: Math.min(score, 100) };
     } catch (error) {
-      console.error('E-E-A-T analysis error:', error);
+      
       return { score: 50 };
     }
   }

@@ -92,7 +92,7 @@ export class DataForSEOClient {
 
       return [];
     } catch (error) {
-      console.error('DataForSEO AI Keyword Error:', error);
+      
       return [];
     }
   }
@@ -152,7 +152,7 @@ export class DataForSEOClient {
 
       return responses;
     } catch (error) {
-      console.error('DataForSEO LLM Response Error:', error);
+      
       return [];
     }
   }
@@ -206,7 +206,7 @@ export class DataForSEOClient {
 
       return [];
     } catch (error) {
-      console.error('DataForSEO Google AI Overview Error:', error);
+      
       return [];
     }
   }
@@ -325,7 +325,7 @@ export class DataForSEOClient {
 
       return visibilityData;
     } catch (error) {
-      console.error('Competitor visibility error:', error);
+      
       return {};
     }
   }

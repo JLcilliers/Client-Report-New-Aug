@@ -82,7 +82,6 @@ export default function AIVisibilityDashboard() {
           }
         }
       } catch (error) {
-        console.error("Failed to fetch reports:", error)
         toast.error("Failed to load reports")
       }
     }
@@ -166,7 +165,6 @@ export default function AIVisibilityDashboard() {
           toast.error("Failed to load AI visibility data")
         }
       } catch (error) {
-        console.error("Failed to fetch AI data:", error)
         toast.error("Error loading AI visibility data")
       } finally {
         setLoading(false)

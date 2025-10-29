@@ -61,7 +61,6 @@ export async function withRetry<T>(
         opts.maxDelay
       );
 
-      console.warn(`API call failed (attempt ${attempt + 1}/${opts.maxRetries + 1}), retrying in ${delay}ms...`, error);
 
       // Wait before retrying
       await new Promise(resolve => setTimeout(resolve, delay));

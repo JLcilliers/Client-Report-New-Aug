@@ -118,7 +118,7 @@ export default function ActionPlanDetailPage() {
         setActionPlan(data);
       }
     } catch (error) {
-      console.error('Failed to fetch action plan:', error);
+      
     }
     setLoading(false);
   };
@@ -151,7 +151,7 @@ export default function ActionPlanDetailPage() {
         }
       }
     } catch (error) {
-      console.error('Failed to save action plan:', error);
+      
     }
     setSaving(false);
   };

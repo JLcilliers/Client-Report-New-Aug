@@ -143,7 +143,7 @@ export async function POST(request: NextRequest) {
             .eq('id', googleAccountId);
         }
       } catch (refreshError) {
-        console.error('Token refresh failed:', refreshError);
+        
         return NextResponse.json({ error: 'Authentication failed' }, { status: 401 });
       }
     }
@@ -235,9 +235,9 @@ export async function POST(request: NextRequest) {
       } catch (error: any) {
         const quotaCheck = checkApiQuotaError(error);
         if (quotaCheck.isQuotaError) {
-          console.error(`Search Console API quota exceeded for ${property.property_id}: ${quotaCheck.message}`);
+          
         } else {
-          console.error(`Failed to fetch Search Console data for ${property.property_id}:`, error);
+          
         }
       }
     }
@@ -319,9 +319,9 @@ export async function POST(request: NextRequest) {
       } catch (error: any) {
         const quotaCheck = checkApiQuotaError(error);
         if (quotaCheck.isQuotaError) {
-          console.error(`Analytics API quota exceeded for ${property.property_id}: ${quotaCheck.message}`);
+          
         } else {
-          console.error(`Failed to fetch Analytics data for ${property.property_id}:`, error);
+          
         }
       }
     }
@@ -343,12 +343,12 @@ export async function POST(request: NextRequest) {
       });
 
     if (saveError) {
-      console.error('Failed to save metrics to database:', saveError);
+      
     }
 
     return NextResponse.json(metrics);
   } catch (error) {
-    console.error('Failed to fetch comprehensive metrics:', error);
+    
     return NextResponse.json(
       { error: 'Failed to fetch comprehensive metrics' },
       { status: 500 }
@@ -359,7 +359,7 @@ export async function POST(request: NextRequest) {
 function processSearchConsoleData(current: any, prevWeek: any, prevMonth: any, yearAgo: any) {
   // Validate input data
   if (!current || typeof current !== 'object') {
-    console.warn('Invalid current data for Search Console processing');
+    
     current = { rows: [] };
   }
   if (!prevWeek || typeof prevWeek !== 'object') prevWeek = { rows: [] };

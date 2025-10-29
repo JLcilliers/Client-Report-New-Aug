@@ -44,7 +44,6 @@ async function withTimeout<T>(
     ])
     return result
   } catch (error) {
-    console.warn(`Operation timed out or failed: ${error}`)
     return fallbackValue
   }
 }
@@ -85,7 +84,7 @@ export async function POST(
     }
 
     // Get the Google account tokens from the database
-    console.log('[Report Refresh] Getting tokens for Google account:', report.googleAccountId);
+    
     
     // Import the refresh token helper
     const { getValidGoogleToken } = await import('@/lib/google/refresh-token');
@@ -94,7 +93,7 @@ export async function POST(
     const accessToken = await getValidGoogleToken(report.googleAccountId);
     
     if (!accessToken) {
-      console.log('[Report Refresh] No valid Google tokens - returning cached data');
+      
       
       // Try to return cached data for public viewers
       const cachedData = await prisma.reportCache.findFirst({
@@ -127,7 +126,7 @@ export async function POST(
       }, { status: 401 })
     }
 
-    console.log('[Report Refresh] Got valid access token');
+    
 
     // Get the GoogleTokens record to get the refresh token
     const googleAccount = await prisma.googleTokens.findUnique({
@@ -156,14 +155,7 @@ export async function POST(
       byDevice: [],
     }
 
-    const analyticsResult: any = {
-      summary: {},
-      trafficSources: [],
-      topPages: [],
-      deviceCategories: [],
-      geoLocations: [],
-      userFlow: [],
-    }
+    // analyticsResult will be assigned from Promise.allSettled below (line 282)
 
     const pageSpeedData: any = {
       mobile: null,
@@ -277,16 +269,13 @@ export async function POST(
         previousStartDate.setDate(previousStartDate.getDate() - 7)
     }
     
-    console.log(`Fetching data for ${dateRange || 'month'}: ${startDate.toISOString()} to ${endDate.toISOString()}`)
     const formatDate = (date: Date) => date.toISOString().split('T')[0]
 
     // Parallel fetch of Search Console and Analytics data
-    const [searchConsoleResult, analyticsDataResult] = await Promise.allSettled([
+    const [searchConsoleResult, analyticsResult] = await Promise.allSettled([
       // Search Console data fetch
       report.searchConsolePropertyId ? (async () => {
         const property = report.searchConsolePropertyId
-        console.log('[Search Console] Starting parallel fetch for:', property)
-        
         // Execute all Search Console queries in parallel with individual timeouts
         const [
           overallMetrics,
@@ -407,7 +396,6 @@ export async function POST(
 
           // If aggregated metrics are empty, calculate from all queries
           if (aggregatedMetrics.clicks === 0 && aggregatedMetrics.impressions === 0) {
-            console.log('[Search Console] Aggregating metrics from all queries since overall metrics are empty')
             const allRows = topQueries.value.data.rows || []
             aggregatedMetrics.clicks = allRows.reduce((sum: number, q: any) => sum + (q.clicks || 0), 0)
             aggregatedMetrics.impressions = allRows.reduce((sum: number, q: any) => sum + (q.impressions || 0), 0)
@@ -477,23 +465,17 @@ export async function POST(
         // Validate the Search Console data
         const scValidation = validateSearchConsoleData(searchConsoleData)
         if (!scValidation.isValid) {
-          console.error('[Search Console] Validation failed:', scValidation.issues)
-        }
+          }
         if (scValidation.warnings.length > 0) {
-          console.warn('[Search Console] Warnings:', scValidation.warnings)
-        }
+          }
         if (scValidation.dataFreshness.isStale) {
-          console.warn(`[Search Console] Data is ${scValidation.dataFreshness.daysBehind} days old`)
-        }
-        
-        console.log('[Search Console] Completed with metrics:', aggregatedMetrics)
+          }
         
         return searchConsoleData
       })() : Promise.resolve(null),
       
       // Analytics data fetch
       report.ga4PropertyId ? (async () => {
-        console.log('[Analytics] Starting parallel fetch for:', report.ga4PropertyId)
         const formattedPropertyId = report.ga4PropertyId.startsWith('properties/') 
           ? report.ga4PropertyId 
           : `properties/${report.ga4PropertyId}`
@@ -604,6 +586,22 @@ export async function POST(
             5000
           )
         ])
+        // Initialize analytics result object
+        const analyticsResult = {
+          summary: {
+            sessions: 0,
+            users: 0,
+            newUsers: 0,
+            pageviews: 0,
+            events: 0,
+            bounceRate: 0,
+            avgSessionDuration: 0
+          },
+          trafficSources: [],
+          deviceCategories: [],
+          topCountries: [],
+          topPages: []
+        }
         
         // Process channel data
         if (channelData.status === 'fulfilled' && channelData.value?.data?.rows) {
@@ -693,8 +691,6 @@ export async function POST(
             .slice(0, 10) // Take top 10
           
           analyticsResult.topPages = filteredPages
-          console.log(`[Analytics] Filtered ${pagesData.value.data.rows.length} pages down to ${filteredPages.length} relevant pages`)
-        }
         
         // Calculate percentages
         if (analyticsResult.summary.sessions > 0) {
@@ -704,17 +700,16 @@ export async function POST(
           })
         }
         
-        console.log('[Analytics] Completed with summary:', analyticsResult.summary)
         return analyticsResult
       })() : Promise.resolve(null)
     ])
     
     // Process results from parallel execution
     if (searchConsoleResult.status === 'rejected') {
-      console.error('[Search Console] Failed:', searchConsoleResult.reason)
+      console.error('Search Console fetch rejected:', searchConsoleResult.reason)
     }
-    if (analyticsDataResult.status === 'rejected') {
-      console.error('[Analytics] Failed:', analyticsDataResult.reason)
+    if (analyticsResult.status === 'rejected') {
+      console.error('Analytics fetch rejected:', analyticsResult.reason)
     }
 
 
@@ -734,8 +729,6 @@ export async function POST(
     }
     
     if (domainUrl) {
-      console.log('[PageSpeed] Starting parallel fetch for:', domainUrl)
-      
       // Fetch both mobile and desktop PageSpeed data in parallel with timeouts
       const [mobileResult, desktopResult] = await Promise.allSettled([
         withTimeout(
@@ -769,40 +762,32 @@ export async function POST(
       // Process results
       if (mobileResult.status === 'fulfilled' && mobileResult.value) {
         pageSpeedData.mobile = mobileResult.value
-        console.log('[PageSpeed] Mobile data fetched successfully')
-      } else {
-        console.warn('[PageSpeed] Mobile data fetch failed or timed out')
-      }
+        } else {
+        }
       
       if (desktopResult.status === 'fulfilled' && desktopResult.value) {
         pageSpeedData.desktop = desktopResult.value
-        console.log('[PageSpeed] Desktop data fetched successfully')
-      } else {
-        console.warn('[PageSpeed] Desktop data fetch failed or timed out')
-      }
+        } else {
+        }
       
       if (pageSpeedData.mobile || pageSpeedData.desktop) {
         pageSpeedData.fetchTime = new Date().toISOString()
       }
     } else {
-      console.log('[PageSpeed] No domain URL available to test')
-    }
+      }
 
     // Fetch comparison data for previous period
-    console.log('[Comparison] Fetching data for previous period comparison')
     let previousSearchConsoleData: any = {}
     let previousAnalyticsData: any = {}
     
     // Only fetch comparison data if we have current data
     if ((searchConsoleResult.status === 'fulfilled' && searchConsoleData.summary) || 
-        (analyticsDataResult.status === 'fulfilled' && analyticsResult.summary)) {
+        (analyticsResult.status === 'fulfilled' && analyticsResult.summary)) {
       
       const [previousSearchConsoleResult, previousAnalyticsResult] = await Promise.allSettled([
         // Previous Search Console data
         report.searchConsolePropertyId ? (async () => {
           const property = report.searchConsolePropertyId
-          console.log('[Search Console] Fetching previous period data for:', property)
-          
           try {
             const overallMetricsPrevious = await withTimeout(
               searchconsole.searchanalytics.query({
@@ -829,14 +814,12 @@ export async function POST(
             }
             return {}
           } catch (error) {
-            console.warn('[Search Console] Previous period fetch failed:', error)
             return {}
           }
         })() : Promise.resolve({}),
         
         // Previous Analytics data
         report.ga4PropertyId ? (async () => {
-          console.log('[Analytics] Fetching previous period data for:', report.ga4PropertyId)
           const formattedPropertyId = report.ga4PropertyId.startsWith('properties/') 
             ? report.ga4PropertyId 
             : `properties/${report.ga4PropertyId}`
@@ -908,7 +891,6 @@ export async function POST(
             
             return previousSummary
           } catch (error) {
-            console.warn('[Analytics] Previous period fetch failed:', error)
             return {}
           }
         })() : Promise.resolve({})
@@ -952,12 +934,6 @@ export async function POST(
     const comparisons = {
       [comparisonKey]: comparisonData
     }
-
-    console.log('[Comparison] Calculated comparisons for', comparisonKey, ':', JSON.stringify(comparisons, null, 2))
-    console.log('[Data Summary] Current SC Clicks:', searchConsoleData.summary?.clicks || 0)
-    console.log('[Data Summary] Current Analytics Sessions:', analyticsResult.summary?.sessions || 0)
-    console.log('[Data Summary] Previous SC Clicks:', previousSearchConsoleData?.clicks || 0)
-    console.log('[Data Summary] Previous Analytics Sessions:', previousAnalyticsData?.sessions || 0)
 
     // Combine all data including raw previous period data
     const combinedData = {
@@ -1017,21 +993,15 @@ export async function POST(
           }
         })
         
-        console.log('Successfully cached report data:')
-        console.log('- Search Console data:', !!searchConsoleData.summary?.clicks)
-        console.log('- Analytics data:', !!analyticsResult.summary?.users)
-        console.log('- PageSpeed data:', !!(pageSpeedData.mobile || pageSpeedData.desktop))
         
       } catch (dbError) {
-        console.error('Database caching failed:', dbError)
         // Still return the data even if caching failed
       }
     } else {
-      console.warn('No data collected from any source')
-    }
+      }
 
     const processingTime = Date.now() - startTime;
-    console.log(`[Performance] Total processing time: ${processingTime}ms`);
+    
     
     // Log what data was successfully collected
     const dataStatus = {
@@ -1040,8 +1010,6 @@ export async function POST(
       pageSpeed: !!(pageSpeedData.mobile || pageSpeedData.desktop),
       processingTime: processingTime
     }
-    
-    console.log('[Performance] Data collection status:', dataStatus)
     
     return NextResponse.json({ 
       success: true, 
@@ -1052,7 +1020,7 @@ export async function POST(
     })
   } catch (error: any) {
     const processingTime = Date.now() - startTime;
-    console.error('[Error] Refresh failed after', processingTime, 'ms:', error.message);
+    
     
     // Try to return cached data on error
     try {
@@ -1097,8 +1065,7 @@ export async function POST(
         }
       }
     } catch (cacheError) {
-      console.error('[Error] Failed to retrieve cached data:', cacheError)
-    }
+      }
     
     return NextResponse.json(
       { 

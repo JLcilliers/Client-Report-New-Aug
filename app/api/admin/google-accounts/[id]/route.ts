@@ -29,7 +29,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    console.error('[Google Account Delete] Error:', error);
+    
     return NextResponse.json(
       { 
         error: 'Failed to delete Google account',

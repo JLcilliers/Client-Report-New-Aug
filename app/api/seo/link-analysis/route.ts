@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
     const result = await analyzeLinkStructure(url, checkRedirects, checkBrokenLinks, maxDepth);
     return NextResponse.json(result);
   } catch (error) {
-    console.error('Link analysis error:', error);
+    
     return NextResponse.json(
       { error: 'Failed to analyze link structure' },
       { status: 500 }
@@ -241,7 +241,7 @@ async function analyzeLinkStructure(
       timestamp: new Date().toISOString()
     };
   } catch (error) {
-    console.error(`Link analysis error for ${url}:`, error);
+    
     
     return {
       url,

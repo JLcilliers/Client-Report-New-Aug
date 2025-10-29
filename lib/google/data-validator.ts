@@ -120,8 +120,7 @@ export function validateSearchConsoleData(data: any): DataValidationResult {
         result.dataFreshness.isStale = true
       } else if (daysDiff > 2) {
         // This is normal for Search Console
-        console.log(`Search Console data is ${daysDiff} days behind - this is normal`)
-      }
+        }
     }
   } else {
     result.warnings.push('No date-based data available')
@@ -169,40 +168,18 @@ export function formatCTRForDisplay(ctr: number, isPercentage: boolean = false):
 
 export function debugLogSearchConsoleResponse(response: any, source: string = 'Unknown') {
   console.group(`[Search Console Debug - ${source}]`)
-  console.log('Timestamp:', new Date().toISOString())
   
   if (response?.rows && Array.isArray(response.rows)) {
-    console.log('Total rows:', response.rows.length)
-    
     // Log first 3 rows as sample
-    console.log('Sample data (first 3 rows):')
     response.rows.slice(0, 3).forEach((row: any, index: number) => {
-      console.log(`Row ${index + 1}:`, {
-        keys: row.keys,
-        clicks: row.clicks,
-        impressions: row.impressions,
-        ctr: row.ctr,
-        position: row.position,
-        calculatedCTR: row.impressions > 0 ? (row.clicks / row.impressions) : 0
-      })
     })
-    
+
     // Calculate aggregate metrics
     const totals = response.rows.reduce((acc: any, row: any) => ({
       clicks: acc.clicks + (row.clicks || 0),
       impressions: acc.impressions + (row.impressions || 0)
     }), { clicks: 0, impressions: 0 })
-    
-    console.log('Aggregate totals:', {
-      totalClicks: totals.clicks,
-      totalImpressions: totals.impressions,
-      calculatedCTR: totals.impressions > 0 ? (totals.clicks / totals.impressions) : 0,
-      calculatedCTRPercentage: totals.impressions > 0 ? ((totals.clicks / totals.impressions) * 100).toFixed(2) + '%' : '0%'
-    })
-  } else {
-    console.log('No rows data in response')
-    console.log('Raw response:', response)
-  }
-  
+    }
+
   console.groupEnd()
 }

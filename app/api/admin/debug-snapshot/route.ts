@@ -39,7 +39,7 @@ export async function GET() {
     );
   } catch (e) {
     // Table might not exist yet
-    console.error('google_tokens query failed:', e);
+    
   }
 
   // Get recent logs if Log table exists
@@ -65,7 +65,7 @@ export async function GET() {
       take: 50
     });
   } catch (e) {
-    console.error('logs query failed:', e);
+    
   }
 
   // Get NextAuth sessions

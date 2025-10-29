@@ -185,7 +185,6 @@ export async function GET(
       success: true
     })
   } catch (error: any) {
-    console.error('[AI Brand Detail API] Error:', error)
     return NextResponse.json(
       { error: "Failed to fetch brand data", details: error.message },
       { status: 500 }
@@ -251,7 +250,6 @@ export async function PATCH(
       }
     })
   } catch (error: any) {
-    console.error('[AI Brand Update API] Error:', error)
     return NextResponse.json(
       { error: "Failed to update brand", details: error.message },
       { status: 500 }
@@ -300,7 +298,6 @@ export async function DELETE(
       message: "Brand deleted successfully"
     })
   } catch (error: any) {
-    console.error('[AI Brand Delete API] Error:', error)
     return NextResponse.json(
       { error: "Failed to delete brand", details: error.message },
       { status: 500 }

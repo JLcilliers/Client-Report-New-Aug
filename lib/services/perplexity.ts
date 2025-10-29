@@ -91,7 +91,6 @@ export class PerplexityService {
       const data = await response.json()
       return data
     } catch (error: any) {
-      console.error('Error querying Perplexity:', error)
       throw new Error(`Failed to query Perplexity: ${error.message}`)
     }
   }
@@ -138,7 +137,6 @@ export class PerplexityService {
         context
       }
     } catch (error: any) {
-      console.error('Error checking citation:', error)
       throw error
     }
   }
@@ -162,7 +160,6 @@ export class PerplexityService {
         // Add delay between requests to avoid rate limiting
         await this.delay(1000)
       } catch (error) {
-        console.error(`Error checking keyword "${keyword}":`, error)
         // Continue with next keyword even if one fails
       }
     }

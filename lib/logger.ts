@@ -7,7 +7,6 @@ export async function writeLog(
            userId?: string; accountId?: string; requestId?: string; meta?: any }
 ) {
   // Always echo to console for Vercel logs
-  console.log(JSON.stringify({ ts: new Date().toISOString(), ...entry }));
   if (!enabled) return;
   try { await prisma.log.create({ data: { ...entry } }); } catch (_) { /* swallow */ }
 }

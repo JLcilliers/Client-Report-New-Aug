@@ -35,7 +35,7 @@ export async function GET() {
       sample: googleAccounts.slice(0, 2) // Show first 2 accounts if any
     });
   } catch (error) {
-    console.error('Database test error:', error);
+    
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',

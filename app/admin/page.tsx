@@ -101,8 +101,7 @@ export default function AdminDashboard() {
         })
       }
     } catch (error) {
-      console.error("Error fetching stats:", error)
-    }
+      }
   }
 
   const fetchRecentReports = async () => {
@@ -254,7 +253,7 @@ export default function AdminDashboard() {
                 fetchRecentReports()
               ]);
             } catch (error) {
-              console.error("Error refreshing data:", error);
+              
               toast({
                 title: "Refresh failed",
                 description: "Some data may not have been updated",

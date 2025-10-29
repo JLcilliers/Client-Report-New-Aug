@@ -92,7 +92,6 @@ export async function PATCH(
       message: "Keyword updated successfully"
     })
   } catch (error: any) {
-    console.error('[Keyword API PATCH] Error:', error)
     return NextResponse.json(
       { error: "Failed to update keyword", details: error.message },
       { status: 500 }
@@ -149,7 +148,6 @@ export async function DELETE(
       message: "Keyword deleted successfully"
     })
   } catch (error: any) {
-    console.error('[Keyword API DELETE] Error:', error)
     return NextResponse.json(
       { error: "Failed to delete keyword", details: error.message },
       { status: 500 }

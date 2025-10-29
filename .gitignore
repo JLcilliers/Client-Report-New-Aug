@@ -19,6 +19,16 @@
 .DS_Store
 *.pem
 
+# SSH keys and certificates
+id_rsa
+id_ed25519
+id_ecdsa
+*.key
+*.crt
+*.cer
+*.p12
+*.pfx
+
 # debug
 npm-debug.log*
 yarn-debug.log*
@@ -27,6 +37,8 @@ yarn-error.log*
 # local env files
 .env*.local
 .env
+.env.development
+.env.test
 
 # vercel
 .vercel
@@ -47,6 +59,8 @@ generated/
 *.json
 google_authentication_code_compilation.txt
 new-online-client-reporting-*.json
+*-service-account.json
+service-account*.json
 
 # Prisma
 prisma/dev.db*
@@ -59,4 +73,5 @@ VERCEL_SETUP.md
 set_api_keys.ps1
 zen-mcp-server/
 .env.production
+.env.temp
 Environment Variables.txt

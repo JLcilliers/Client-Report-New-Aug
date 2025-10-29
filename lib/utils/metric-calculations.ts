@@ -11,7 +11,7 @@
 export function calculateCTR(clicks: number, impressions: number): number {
   // Validate inputs
   if (typeof clicks !== 'number' || typeof impressions !== 'number') {
-    console.warn('Invalid inputs for CTR calculation:', { clicks, impressions });
+    
     return 0;
   }
 
@@ -60,7 +60,7 @@ export function calculateAggregateCTR(dataPoints: Array<{ clicks?: number; impre
 export function calculatePercentageChange(current: number, previous: number): number {
   // Validate inputs
   if (typeof current !== 'number' || typeof previous !== 'number') {
-    console.warn('Invalid inputs for percentage change:', { current, previous });
+    
     return 0;
   }
 
@@ -93,7 +93,7 @@ export function calculatePercentageChange(current: number, previous: number): nu
 export function calculatePositionChange(currentPosition: number, previousPosition: number): number {
   // Validate inputs
   if (typeof currentPosition !== 'number' || typeof previousPosition !== 'number') {
-    console.warn('Invalid inputs for position change:', { currentPosition, previousPosition });
+    
     return 0;
   }
 

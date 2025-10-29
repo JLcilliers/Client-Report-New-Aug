@@ -115,7 +115,6 @@ export async function POST(request: NextRequest) {
     return response
     
   } catch (error: any) {
-    console.error('Remember me error:', error)
     return NextResponse.json({ 
       error: "Failed to update session", 
       details: error.message 
@@ -160,7 +159,6 @@ export async function GET(request: NextRequest) {
     })
     
   } catch (error: any) {
-    console.error('Session status check error:', error)
     return NextResponse.json({ 
       error: "Failed to check session status",
       details: error.message

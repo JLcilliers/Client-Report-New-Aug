@@ -79,8 +79,7 @@ export async function POST(request: NextRequest) {
           currentAccessToken = newTokens.access_token
         }
       } catch (refreshError) {
-        console.log('Token refresh failed, using existing token:', refreshError)
-      }
+        }
     }
     
     // Get report details from database if reportId provided
@@ -93,8 +92,7 @@ export async function POST(request: NextRequest) {
         })
         searchConsoleProperties = report?.searchConsolePropertyId ? [report.searchConsolePropertyId] : []
       } catch (dbError) {
-        console.log('Database error, using provided properties:', dbError)
-      }
+        }
     }
     
     // Calculate date range with Search Console's 2-3 day delay in mind
@@ -114,7 +112,6 @@ export async function POST(request: NextRequest) {
       startDate.setDate(endDate.getDate() - 30) // Default to 30 days
     }
     
-    console.log(`[Search Console] Date range: ${formatDateForGoogleAPI(startDate)} to ${formatDateForGoogleAPI(endDate)}`)
     
     const allData: any = {
       summary: {
@@ -261,11 +258,9 @@ export async function POST(request: NextRequest) {
     // Validate the data
     const validation = validateSearchConsoleData(allData)
     if (!validation.isValid) {
-      console.error('[Search Console] Data validation failed:', validation.issues)
-    }
+      }
     if (validation.warnings.length > 0) {
-      console.warn('[Search Console] Data warnings:', validation.warnings)
-    }
+      }
     
     // Calculate average position from all properties
     if (allData.byProperty.length > 0) {
@@ -297,8 +292,7 @@ export async function POST(request: NextRequest) {
           }
         })
       } catch (dbError) {
-        console.log('Database storage failed, returning data anyway:', dbError)
-      }
+        }
     }
     
     return NextResponse.json({

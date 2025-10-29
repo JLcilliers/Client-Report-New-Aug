@@ -7,7 +7,7 @@ async function delay(ms) {
 }
 
 async function testDashboard() {
-  console.log('🚀 Starting simplified dashboard test...\n');
+  
   
   const browser = await puppeteer.launch({
     headless: false,
@@ -20,11 +20,11 @@ async function testDashboard() {
     
     // Enable console logging
     page.on('console', msg => {
-      console.log('Browser console:', msg.text());
+      );
     });
 
     // First, let's check what's available at the root
-    console.log('📍 Checking main page...');
+    
     await page.goto('http://localhost:3000', {
       waitUntil: 'domcontentloaded',
       timeout: 10000
@@ -37,10 +37,10 @@ async function testDashboard() {
       path: 'test-main-page.png',
       fullPage: true 
     });
-    console.log('📸 Screenshot saved: test-main-page.png');
+    
     
     // Check current URL
-    console.log('Current URL:', page.url());
+    );
     
     // Look for links to reports or dashboard
     const links = await page.evaluate(() => {
@@ -51,10 +51,10 @@ async function testDashboard() {
       })).filter(link => link.href);
     });
     
-    console.log('\n📋 Found links:');
+    
     links.forEach(link => {
       if (link.href.includes('report') || link.href.includes('admin') || link.href.includes('dashboard')) {
-        console.log(`  - ${link.text}: ${link.href}`);
+        
       }
     });
     
@@ -65,7 +65,7 @@ async function testDashboard() {
     );
     
     if (reportLink) {
-      console.log(`\n🔗 Navigating to: ${reportLink.href}`);
+      
       await page.goto(reportLink.href, {
         waitUntil: 'networkidle2',
         timeout: 15000
@@ -78,7 +78,7 @@ async function testDashboard() {
         path: 'test-report-page.png',
         fullPage: true 
       });
-      console.log('📸 Screenshot saved: test-report-page.png');
+      
       
       // Check for data on the page
       const pageContent = await page.evaluate(() => {
@@ -92,12 +92,12 @@ async function testDashboard() {
         };
       });
       
-      console.log('\n📊 Page Analysis:');
-      console.log('  Title:', pageContent.title);
-      console.log('  Has Charts:', pageContent.hasCharts ? '✅' : '❌');
-      console.log('  Has Metrics:', pageContent.hasMetrics ? '✅' : '❌');
-      console.log('  Has Tabs:', pageContent.hasTabs ? '✅' : '❌');
-      console.log('  Content Length:', pageContent.textLength, 'characters');
+      
+      
+      
+      
+      
+      
       
       // Look for specific elements
       const elements = await page.evaluate(() => {
@@ -137,17 +137,17 @@ async function testDashboard() {
         };
       });
       
-      console.log('\n🔍 Element Detection:');
-      console.log('  Search Data:', elements.searchData.found ? '✅' : '❌');
-      console.log('  Traffic Data:', elements.trafficData.found ? '✅' : '❌');
-      console.log('  Technical Data:', elements.technicalData.found ? '✅' : '❌');
-      console.log('  Engagement Data:', elements.engagementData.found ? '✅' : '❌');
+      
+      
+      
+      
+      
       
     } else {
-      console.log('\n⚠️ No report links found on the main page');
+      
       
       // Try direct navigation to known routes
-      console.log('\n🔄 Trying direct navigation to /admin/reports...');
+      
       await page.goto('http://localhost:3000/admin/reports', {
         waitUntil: 'domcontentloaded',
         timeout: 10000
@@ -159,16 +159,16 @@ async function testDashboard() {
         path: 'test-admin-reports.png',
         fullPage: true 
       });
-      console.log('📸 Screenshot saved: test-admin-reports.png');
+      
     }
     
   } catch (error) {
-    console.error('❌ Error during test:', error.message);
+    
   } finally {
-    console.log('\n⏸️ Browser will close in 5 seconds...');
+    
     await delay(5000);
     await browser.close();
-    console.log('✅ Test completed!');
+    
   }
 }
 

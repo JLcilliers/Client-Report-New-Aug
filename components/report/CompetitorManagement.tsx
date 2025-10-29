@@ -77,7 +77,7 @@ export default function CompetitorManagement({ reportSlug }: CompetitorManagemen
   const fetchCompetitors = async () => {
     try {
       setLoading(true);
-      console.log('[CompetitorManagement] Fetching competitors for reportSlug:', reportSlug);
+      
       const response = await fetch(`/api/reports/${reportSlug}/competitors`);
       
       if (!response.ok) {
@@ -85,11 +85,11 @@ export default function CompetitorManagement({ reportSlug }: CompetitorManagemen
       }
       
       const data = await response.json();
-      console.log('[CompetitorManagement] Competitors data received:', data);
+      
       setCompetitors(data.competitors || []);
       setBrandName(data.brandName || 'Brand');
     } catch (error) {
-      console.error('Error fetching competitors:', error);
+      
 
       // More specific error handling
       if (error instanceof Error && error.message.includes('Report not found')) {
@@ -118,7 +118,7 @@ export default function CompetitorManagement({ reportSlug }: CompetitorManagemen
 
     setAdding(true);
     try {
-      console.log('[CompetitorManagement] Adding competitor:', { name: formData.name, domain: cleanDomain });
+      
       const response = await fetch(`/api/reports/${reportSlug}/competitors`, {
         method: 'POST',
         headers: {
@@ -141,7 +141,7 @@ export default function CompetitorManagement({ reportSlug }: CompetitorManagemen
       setShowAddDialog(false);
       toast.success('Competitor added successfully');
     } catch (error: any) {
-      console.error('Error adding competitor:', error);
+      
 
       // Show more specific error messages
       if (error.message.includes('already exists')) {
@@ -189,7 +189,7 @@ export default function CompetitorManagement({ reportSlug }: CompetitorManagemen
       setShowEditDialog(false);
       toast.success('Competitor updated successfully');
     } catch (error: any) {
-      console.error('Error updating competitor:', error);
+      
       toast.error(error.message || 'Failed to update competitor');
     } finally {
       setEditing(null);
@@ -216,7 +216,7 @@ export default function CompetitorManagement({ reportSlug }: CompetitorManagemen
       setShowDeleteDialog(false);
       toast.success('Competitor removed successfully');
     } catch (error: any) {
-      console.error('Error deleting competitor:', error);
+      
       toast.error(error.message || 'Failed to delete competitor');
     } finally {
       setDeleting(null);

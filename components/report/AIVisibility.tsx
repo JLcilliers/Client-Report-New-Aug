@@ -91,7 +91,7 @@ export default function AIVisibility({ reportSlug }: AIVisibilityProps) {
       setError(null);
 
       const endpoint = `/api/reports/${reportSlug}/ai-visibility`;
-      console.log(`Fetching AI visibility data from ${endpoint}, forceRefresh: ${forceRefresh}`);
+      
 
       const response = await fetch(endpoint, {
         method: forceRefresh ? 'POST' : 'GET',
@@ -101,19 +101,19 @@ export default function AIVisibility({ reportSlug }: AIVisibilityProps) {
         body: forceRefresh ? JSON.stringify({ forceRefresh: true }) : undefined,
       });
 
-      console.log('Response status:', response.status);
+      
 
       if (!response.ok) {
         const errorData = await response.text();
-        console.error('API Error:', errorData);
+        
         throw new Error(`Failed to fetch AI visibility data: ${response.status}`);
       }
 
       const data = await response.json();
-      console.log('Received data:', data);
+      
       setMetrics(data.data);
     } catch (err) {
-      console.error('Fetch error:', err);
+      
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setLoading(false);
@@ -122,7 +122,7 @@ export default function AIVisibility({ reportSlug }: AIVisibilityProps) {
   };
 
   const handleRefresh = async () => {
-    console.log('Refreshing AI Visibility data...');
+    
     await fetchAIVisibilityData(true);
   };
 

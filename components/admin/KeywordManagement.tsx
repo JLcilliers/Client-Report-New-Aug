@@ -36,7 +36,7 @@ export default function KeywordManagement({
         setKeywords(data.keywords.map((k: any) => k.keyword));
       }
     } catch (error) {
-      console.error('Error fetching keywords:', error);
+      
       toast({
         title: 'Error',
         description: 'Failed to load keywords',
@@ -103,7 +103,7 @@ export default function KeywordManagement({
         description: `${data.count} keywords saved and initial data fetched`,
       });
     } catch (error) {
-      console.error('Error saving keywords:', error);
+      
       toast({
         title: 'Error',
         description: 'Failed to save keywords',

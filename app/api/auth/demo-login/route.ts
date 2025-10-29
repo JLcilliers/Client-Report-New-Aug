@@ -65,7 +65,6 @@ export async function POST(request: NextRequest) {
 
     return response
   } catch (error: any) {
-    console.error('Demo login error:', error)
     return NextResponse.json({
       success: false,
       error: error.message

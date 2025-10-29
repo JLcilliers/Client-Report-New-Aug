@@ -199,7 +199,6 @@ export default function NewAIBrandWizard() {
       toast.success("AI Brand created successfully!")
       router.push(`/admin/ai-brands/${brand.id}`)
     } catch (error) {
-      console.error("Error creating brand:", error)
       toast.error("Failed to create AI brand")
     } finally {
       setLoading(false)
@@ -499,12 +498,15 @@ export default function NewAIBrandWizard() {
                 {AI_PLATFORMS.map((platform) => (
                   <div
                     key={platform.id}
+                    role="button"
+                    tabIndex={0}
                     className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
                       formData.platforms.includes(platform.id)
                         ? 'border-purple-600 bg-purple-50'
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
                     onClick={() => togglePlatform(platform.id)}
+                    onKeyDown={(e) => e.key === 'Enter' && togglePlatform(platform.id)}
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">

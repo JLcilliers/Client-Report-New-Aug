@@ -171,12 +171,15 @@ export default function PropertiesClient({ connection }: PropertiesClientProps) 
                   {filteredSearchConsole.map((property) => (
                     <div
                       key={property.siteUrl}
+                      role="button"
+                      tabIndex={0}
                       className={`p-3 border rounded-lg cursor-pointer transition-colors ${
                         selectedProperties.has(property.siteUrl)
                           ? 'bg-frost border-glacier'
                           : 'hover:bg-gray-50'
                       }`}
                       onClick={() => togglePropertySelection(property.siteUrl)}
+                      onKeyDown={(e) => e.key === 'Enter' && togglePropertySelection(property.siteUrl)}
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
@@ -232,12 +235,15 @@ export default function PropertiesClient({ connection }: PropertiesClientProps) 
                       {account.properties.map((property) => (
                         <div
                           key={property.id}
+                          role="button"
+                          tabIndex={0}
                           className={`p-3 border rounded-lg cursor-pointer transition-colors ${
                             selectedProperties.has(property.id)
                               ? 'bg-frost border-glacier'
                               : 'hover:bg-gray-50'
                           }`}
                           onClick={() => togglePropertySelection(property.id)}
+                          onKeyDown={(e) => e.key === 'Enter' && togglePropertySelection(property.id)}
                         >
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">

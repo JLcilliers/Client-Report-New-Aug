@@ -45,7 +45,7 @@ export async function GET() {
       { headers: { 'Cache-Control': 'no-store' } }
     );
   } catch (error: any) {
-    console.error('[Google Accounts API] Error:', error);
+    
     return NextResponse.json(
       { 
         error: 'Failed to fetch Google accounts',

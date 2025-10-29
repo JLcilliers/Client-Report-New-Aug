@@ -57,7 +57,7 @@ export default function ActionableInsights({ reportId, metrics }: InsightProps) 
         setActionPlans(data);
       }
     } catch (error) {
-      console.error('Failed to fetch action plans:', error);
+      
     }
     setLoading(false);
   };

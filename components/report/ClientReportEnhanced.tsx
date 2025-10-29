@@ -305,7 +305,6 @@ export default function ClientReportEnhanced({ report }: ClientReportEnhancedPro
         const result = await response.json()
         setData(result)
       } catch (err) {
-        console.error('Error fetching report data:', err)
         setError(err instanceof Error ? err.message : 'Failed to load report data')
       } finally {
         setLoading(false)

@@ -10,11 +10,11 @@ export async function PUT(
 ) {
   try {
     const { slug, id } = await params;
-    console.log('[Competitor Update API] Updating competitor:', id, 'for report:', slug);
+    
 
     const body = await request.json();
     const { name, domain, notes } = body;
-    console.log('[Competitor Update API] Request body:', { name, domain, notes });
+    
     
     if (!name || !domain) {
       return NextResponse.json(
@@ -85,7 +85,7 @@ export async function PUT(
     
     return NextResponse.json(updatedCompetitor);
   } catch (error: any) {
-    console.error('Failed to update competitor:', error);
+    
     return NextResponse.json(
       { error: 'Failed to update competitor', details: error.message },
       { status: 500 }
@@ -131,7 +131,7 @@ export async function DELETE(
     
     return NextResponse.json({ message: 'Competitor deleted successfully' });
   } catch (error: any) {
-    console.error('Failed to delete competitor:', error);
+    
     return NextResponse.json(
       { error: 'Failed to delete competitor', details: error.message },
       { status: 500 }

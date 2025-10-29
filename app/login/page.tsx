@@ -53,11 +53,9 @@ export default function LoginPage() {
         // Use window.location for hard redirect to ensure cookies are set
         window.location.href = data.redirectUrl || "/admin"
       } else {
-        console.error("Demo login failed:", data.error)
-      }
+        }
     } catch (err) {
-      console.error("Login error:", err)
-    } finally {
+      } finally {
       setLoading(false)
     }
   }

@@ -9,8 +9,6 @@ export async function GET(
     const { slug } = await params
     const prisma = getPrisma()
 
-    console.log("Looking for report with slug:", slug)
-
     // Get report by shareableId (which is used as the slug)
     let report = await prisma.clientReport.findUnique({
       where: { shareableId: slug },
@@ -27,7 +25,6 @@ export async function GET(
     
     // Fallback: try to find by id if shareableId lookup failed
     if (!report) {
-      console.log("Report not found by shareableId, trying by id:", slug)
       report = await prisma.clientReport.findUnique({
         where: { id: slug },
         include: {
@@ -43,14 +40,11 @@ export async function GET(
     }
     
     if (!report) {
-      console.log("Report not found for slug:", slug)
       return NextResponse.json(
         { error: "Report not found" },
         { status: 404 }
       )
     }
-    
-    console.log("Found report:", report.id)
     
     // Get cached data if available
     let cachedData = null
@@ -71,8 +65,7 @@ export async function GET(
         cachedData = JSON.parse(cache.data)
       }
     } catch (cacheError) {
-      console.log("Cache retrieval error:", cacheError)
-    }
+      }
 
     // Get keyword performance data
     let keywordPerformance = null
@@ -126,8 +119,7 @@ export async function GET(
         }
       }
     } catch (keywordError) {
-      console.log("Error fetching keyword performance:", keywordError)
-    }
+      }
 
     // Return public data only (no sensitive info)
     return NextResponse.json({

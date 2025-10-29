@@ -101,16 +101,12 @@ export default function CreateReportPage() {
 
   const fetchProperties = async (accountId: string) => {
     setLoadingProperties(true)
-    console.log('[Create Report] Fetching properties for account:', accountId)
-    
     try {
       // Fetch properties for the specific account
       const response = await fetch(`/api/google/fetch-properties?accountId=${accountId}`)
       
       if (response.ok) {
         const data = await response.json()
-        console.log('[Create Report] Properties response:', data)
-        
         // Handle the response structure correctly
         if (data.success && data.properties) {
           // Set Search Console properties
@@ -121,8 +117,7 @@ export default function CreateReportPage() {
               permissionLevel: site.permissionLevel
             }))
             setSearchConsoleProperties(properties)
-            console.log('[Create Report] Search Console properties:', properties.length)
-          } else {
+            } else {
             setSearchConsoleProperties([])
           }
           
@@ -136,8 +131,7 @@ export default function CreateReportPage() {
               displayName: prop.displayName || prop.propertyId
             }))
             setAnalyticsProperties(analyticsProps)
-            console.log('[Create Report] Analytics properties:', analyticsProps.length)
-          } else {
+            } else {
             setAnalyticsProperties([])
           }
           
@@ -150,7 +144,6 @@ export default function CreateReportPage() {
             })
           }
         } else if (data.error) {
-          console.error('[Create Report] Error from API:', data.error)
           toast({
             title: "Error loading properties",
             description: data.error === 'No valid access token available' 
@@ -163,7 +156,6 @@ export default function CreateReportPage() {
         }
       } else {
         const errorText = await response.text()
-        console.error('[Create Report] Error response:', errorText)
         toast({
           title: "Error loading properties",
           description: "Failed to load properties for this account",
@@ -173,7 +165,6 @@ export default function CreateReportPage() {
         setAnalyticsProperties([])
       }
     } catch (error) {
-      console.error('[Create Report] Network error:', error)
       toast({
         title: "Network Error",
         description: "Could not connect to fetch properties",

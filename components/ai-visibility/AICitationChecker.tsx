@@ -77,7 +77,6 @@ export default function AICitationChecker({ clientReportId, clientName }: AICita
         description: `Found ${data.summary.citationsFound} citations and ${data.summary.mentionsFound} mentions across ${data.summary.keywordsChecked} keywords.`,
       })
     } catch (error: any) {
-      console.error('Error checking citations:', error)
       toast({
         title: "Error",
         description: error.message || "Failed to check citations",

@@ -10,6 +10,14 @@ const karla = Karla({ subsets: ["latin"], weight: ['300', '400', '500', '600', '
 export const metadata: Metadata = {
   title: "SEO Reporting Platform",
   description: "Comprehensive SEO reporting and analytics platform",
+  robots: {
+    index: false,
+    follow: false,
+    googleBot: {
+      index: false,
+      follow: false,
+    },
+  },
 }
 
 export default function RootLayout({

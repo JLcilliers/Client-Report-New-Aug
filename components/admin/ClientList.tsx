@@ -47,7 +47,6 @@ export default function ClientList() {
         .order("created_at", { ascending: false })
 
       if (clientsError) {
-        console.error("Clients fetch error:", clientsError)
         throw clientsError
       }
 
@@ -56,7 +55,6 @@ export default function ClientList() {
         .select("*")
 
       if (credsError) {
-        console.error("Credentials fetch error:", credsError)
         // Don't throw here, credentials are optional
       }
 
@@ -68,7 +66,6 @@ export default function ClientList() {
       })
       setCredentials(credsMap)
     } catch (error: any) {
-      console.error("Error fetching clients - Full error:", error)
       toast({
         title: "Error",
         description: error.message || "Failed to fetch clients",
@@ -106,7 +103,6 @@ export default function ClientList() {
 
       fetchClients()
     } catch (error: any) {
-      console.error("Error deleting client:", error)
       toast({
         title: "Error",
         description: "Failed to delete client",

@@ -71,7 +71,7 @@ export async function POST(
       insights,
     });
   } catch (error) {
-    console.error('Error generating executive summary:', error);
+    
     return NextResponse.json(
       { error: 'Failed to generate executive summary' },
       { status: 500 }

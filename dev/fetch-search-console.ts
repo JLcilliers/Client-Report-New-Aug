@@ -55,8 +55,7 @@ export async function POST(request: NextRequest) {
         currentAccessToken = newTokens.access_token
       }
     } catch (refreshError) {
-      console.log('Token refresh failed, using existing token:', refreshError)
-    }
+      }
     
     // Get report details from database if reportId provided
     let searchConsoleProperties = properties || []
@@ -68,8 +67,7 @@ export async function POST(request: NextRequest) {
         })
         searchConsoleProperties = report?.searchConsolePropertyId ? [report.searchConsolePropertyId] : []
       } catch (dbError) {
-        console.log('Database error, using provided properties:', dbError)
-      }
+        }
     }
     
     // Calculate date range
@@ -252,8 +250,7 @@ export async function POST(request: NextRequest) {
           }
         })
       } catch (dbError) {
-        console.log('Database storage failed, returning data anyway:', dbError)
-      }
+        }
     }
     
     return NextResponse.json({

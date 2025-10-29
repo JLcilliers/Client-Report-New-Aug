@@ -11,8 +11,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    console.log('[Database Check] Checking database tables...')
-
     // Check which tables exist
     const tables: any = {}
     
@@ -67,7 +65,6 @@ export async function GET(request: NextRequest) {
       }
     })
   } catch (error: any) {
-    console.error('[Database Check] Error:', error)
     return NextResponse.json({ 
       error: 'Database check failed',
       details: error.message 

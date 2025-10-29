@@ -43,7 +43,7 @@ export async function GET(
       total: transformedKeywords.length
     });
   } catch (error) {
-    console.error('Error fetching keywords:', error);
+    
     return NextResponse.json(
       { error: 'Failed to fetch keywords' },
       { status: 500 }
@@ -110,7 +110,7 @@ export async function POST(
       message: `Added ${newKeywords.length} keywords`
     });
   } catch (error) {
-    console.error('Error adding keywords:', error);
+    
     return NextResponse.json(
       { error: 'Failed to add keywords' },
       { status: 500 }

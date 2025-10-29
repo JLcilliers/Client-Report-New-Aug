@@ -123,7 +123,6 @@ export default function BrandSettingsPage() {
         setCompetitors(competitorsData.competitors || [])
       }
     } catch (error: any) {
-      console.error("Error fetching brand data:", error)
       toast.error("Error loading brand data")
     } finally {
       setLoading(false)
@@ -152,7 +151,6 @@ export default function BrandSettingsPage() {
         toast.error(error.error || "Failed to update brand info")
       }
     } catch (error: any) {
-      console.error("Error updating brand:", error)
       toast.error("Error updating brand info")
     } finally {
       setSaving(false)
@@ -186,7 +184,6 @@ export default function BrandSettingsPage() {
         toast.error(error.error || "Failed to add keyword")
       }
     } catch (error: any) {
-      console.error("Error adding keyword:", error)
       toast.error("Error adding keyword")
     }
   }
@@ -204,7 +201,6 @@ export default function BrandSettingsPage() {
         toast.error("Failed to delete keyword")
       }
     } catch (error: any) {
-      console.error("Error deleting keyword:", error)
       toast.error("Error deleting keyword")
     }
   }
@@ -226,7 +222,6 @@ export default function BrandSettingsPage() {
         toast.error("Failed to update keyword")
       }
     } catch (error: any) {
-      console.error("Error toggling keyword:", error)
       toast.error("Error updating keyword")
     }
   }
@@ -258,7 +253,6 @@ export default function BrandSettingsPage() {
         toast.error(error.error || "Failed to add competitor")
       }
     } catch (error: any) {
-      console.error("Error adding competitor:", error)
       toast.error("Error adding competitor")
     }
   }
@@ -276,7 +270,6 @@ export default function BrandSettingsPage() {
         toast.error("Failed to delete competitor")
       }
     } catch (error: any) {
-      console.error("Error deleting competitor:", error)
       toast.error("Error deleting competitor")
     }
   }

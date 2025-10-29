@@ -76,7 +76,6 @@ export async function GET(
       success: true
     })
   } catch (error: any) {
-    console.error('[Competitors API GET] Error:', error)
     return NextResponse.json(
       { error: "Failed to fetch competitors", details: error.message },
       { status: 500 }
@@ -148,7 +147,6 @@ export async function POST(
       message: "Competitor added successfully"
     })
   } catch (error: any) {
-    console.error('[Competitors API POST] Error:', error)
     return NextResponse.json(
       { error: "Failed to add competitor", details: error.message },
       { status: 500 }

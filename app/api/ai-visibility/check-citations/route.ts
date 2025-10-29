@@ -79,8 +79,6 @@ export async function POST(request: NextRequest) {
 
     // Check citations for each keyword
     const keywords = report.keywords.map(k => k.keyword)
-    console.log(`Checking citations for ${keywords.length} keywords...`)
-
     const citationResults = await perplexityService.checkMultipleCitations(
       keywords,
       brandName,
@@ -181,7 +179,6 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error: any) {
-    console.error('Error checking citations:', error)
     return NextResponse.json(
       {
         error: 'Failed to check citations',
@@ -239,7 +236,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(aiProfile)
 
   } catch (error: any) {
-    console.error('Error fetching AI visibility data:', error)
     return NextResponse.json(
       {
         error: 'Failed to fetch AI visibility data',

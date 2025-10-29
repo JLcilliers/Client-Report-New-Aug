@@ -43,7 +43,6 @@ export default function AdminLayout({
           router.push("/login?auth=required")
         }
       } catch (error) {
-        console.error('Auth check failed:', error)
         // Check cookies as fallback
         const hasAuth = document.cookie.includes('session_token') ||
                        document.cookie.includes('google_access_token') ||

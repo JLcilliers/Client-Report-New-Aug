@@ -44,7 +44,7 @@ export default function ReportKeywordsPage() {
         setReport(data);
       }
     } catch (error) {
-      console.error('Failed to fetch report:', error);
+      
     }
   };
 
@@ -57,7 +57,7 @@ export default function ReportKeywordsPage() {
         setKeywords(data.keywords || []);
       }
     } catch (error) {
-      console.error('Failed to fetch keywords:', error);
+      
       toast({
         title: 'Error',
         description: 'Failed to load keywords',

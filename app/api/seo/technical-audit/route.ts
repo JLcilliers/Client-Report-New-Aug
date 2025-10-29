@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
     }
 
     const url = domain.startsWith('http') ? domain : `https://${domain}`;
-    console.log('🔍 Starting comprehensive technical SEO audit for:', url);
+    
     
     // Create audit record in database
     let auditRecord;
@@ -116,13 +116,13 @@ export async function POST(request: NextRequest) {
         }
       });
     } catch (dbError) {
-      console.warn('Failed to create audit record in database:', dbError);
+      
       // Continue without database record for now
       auditRecord = { id: 'temp-id-' + Date.now() };
     }
 
     // Run core audits in parallel (fast ones first)
-    console.log('🚀 Running core audits...');
+    
     const coreAuditPromises = [
       auditRobots(url),
       auditSitemap(url),
@@ -141,14 +141,14 @@ export async function POST(request: NextRequest) {
       contentAudit
     ] = await Promise.all(coreAuditPromises);
 
-    console.log('✅ Core audits completed');
+    
 
     // Run performance audits (slower)
     let pageSpeedAudit = null;
     let coreWebVitalsAudit = null;
     
     if (includePageSpeed || includeCoreWebVitals) {
-      console.log('📊 Running performance audits...');
+      
       const performancePromises = [];
       
       if (includePageSpeed) {
@@ -168,36 +168,36 @@ export async function POST(request: NextRequest) {
     // Run mobile usability audit
     let mobileUsabilityAudit = null;
     if (includeMobileUsability) {
-      console.log('📱 Running mobile usability audit...');
+      
       mobileUsabilityAudit = await auditMobileUsability(url);
     }
 
     // Run crawlability audit
     let crawlabilityAudit = null;
     if (includeCrawlability) {
-      console.log('🕷️ Running crawlability audit...');
+      
       crawlabilityAudit = await auditCrawlability(url);
     }
 
     // Run link analysis (optional, can be slow)
     let linkAnalysisAudit = null;
     if (includeLinkAnalysis) {
-      console.log('🔗 Running link analysis...');
+      
       linkAnalysisAudit = await auditLinkAnalysis(url);
     }
 
     // Run content analysis (optional, can be slow)
     let contentAnalysisAudit = null;
     if (includeContentAnalysis) {
-      console.log('📝 Running content analysis...');
+      
       contentAnalysisAudit = await auditContentAnalysis(url);
     }
 
     // Run enhanced content quality audit
-    console.log('✨ Running enhanced content quality audit...');
+    
     const contentQualityAudit = await auditContentQualityEnhanced(url);
 
-    console.log('🔧 Compiling comprehensive audit...');
+    
 
     // Compile comprehensive audit
     const audit = await compileComprehensiveAudit(
@@ -247,21 +247,17 @@ export async function POST(request: NextRequest) {
           }
         });
       } catch (updateError) {
-        console.warn('Failed to update audit record:', updateError);
+        
       }
     }
 
     audit.auditId = auditRecord.id;
-    console.log('✅ Comprehensive technical SEO audit completed');
+    
 
     return NextResponse.json(audit);
   } catch (error) {
-    console.error('Technical audit error:', error);
-    console.error('Error details:', {
-      name: error instanceof Error ? error.name : 'Unknown',
-      message: error instanceof Error ? error.message : 'Unknown error',
-      stack: error instanceof Error ? error.stack : 'No stack trace'
-    });
+    
+    
     return NextResponse.json(
       { 
         error: 'Failed to perform comprehensive technical audit',
@@ -980,7 +976,7 @@ async function auditPageSpeedComprehensive(url: string, auditId: string) {
       results: data.results || []
     };
   } catch (error) {
-    console.warn('PageSpeed audit failed:', error);
+    
     return { averageScore: 0, mobile: null, desktop: null, results: [] };
   }
 }
@@ -1017,7 +1013,7 @@ async function auditCoreWebVitals(url: string, auditId: string) {
       results
     };
   } catch (error) {
-    console.warn('Core Web Vitals audit failed:', error);
+    
     return { mobile: null, desktop: null, grade: 'poor', results: [] };
   }
 }
@@ -1037,7 +1033,7 @@ async function auditMobileUsability(url: string) {
     const data = await response.json();
     return data.mobileFriendly || { score: 0, issues: [], passedChecks: 0, totalChecks: 0 };
   } catch (error) {
-    console.warn('Mobile Usability audit failed:', error);
+    
     return { score: 0, issues: [], passedChecks: 0, totalChecks: 0 };
   }
 }
@@ -1070,7 +1066,7 @@ async function auditCrawlability(url: string) {
       analysis: data
     };
   } catch (error) {
-    console.warn('Crawlability audit failed:', error);
+    
     return { score: 0, robotsTxt: null, sitemap: null, indexability: null };
   }
 }
@@ -1090,7 +1086,7 @@ async function auditLinkAnalysis(url: string) {
     const data = await response.json();
     return data.linkAnalysis || { internalLinks: null, externalLinks: null, issues: [] };
   } catch (error) {
-    console.warn('Link Analysis audit failed:', error);
+    
     return { internalLinks: null, externalLinks: null, issues: [] };
   }
 }
@@ -1115,7 +1111,7 @@ async function auditContentAnalysis(url: string) {
       analysis: data
     };
   } catch (error) {
-    console.warn('Content Analysis audit failed:', error);
+    
     return { duplicateContent: null, errorPages: null, contentQuality: null };
   }
 }
@@ -1541,11 +1537,11 @@ async function compileComprehensiveAudit(
 // Enhanced PageSpeed audit function with direct PSI v5 API calls
 async function auditPageSpeedEnhanced(url: string) {
   try {
-    console.log('🚀 Running enhanced PageSpeed audit for:', url);
+    
     
     const apiKey = process.env.GOOGLE_PSI_API_KEY || process.env.PAGESPEED_API_KEY;
     if (!apiKey) {
-      console.warn('⚠️ No PSI API key found, using mock data');
+      
       return { mobile: null, desktop: null, averageScore: 0, error: 'No API key' };
     }
 
@@ -1581,7 +1577,7 @@ async function auditPageSpeedEnhanced(url: string) {
       timestamp: new Date().toISOString()
     };
   } catch (error) {
-    console.error('❌ Enhanced PageSpeed audit failed:', error);
+    
     return { mobile: null, desktop: null, averageScore: 0, error: String(error) };
   }
 }
@@ -1589,11 +1585,11 @@ async function auditPageSpeedEnhanced(url: string) {
 // Enhanced Core Web Vitals audit with CrUX API
 async function auditCoreWebVitalsEnhanced(url: string) {
   try {
-    console.log('📊 Running enhanced Core Web Vitals audit for:', url);
+    
     
     const apiKey = process.env.GOOGLE_CRUX_API_KEY || process.env.GOOGLE_PSI_API_KEY || process.env.PAGESPEED_API_KEY;
     if (!apiKey) {
-      console.warn('⚠️ No CrUX API key found, using mock data');
+      
       return { mobile: null, desktop: null, grade: 'poor', error: 'No API key' };
     }
 
@@ -1625,7 +1621,7 @@ async function auditCoreWebVitalsEnhanced(url: string) {
       timestamp: new Date().toISOString()
     };
   } catch (error) {
-    console.error('❌ Enhanced Core Web Vitals audit failed:', error);
+    
     return { mobile: null, desktop: null, grade: 'poor', error: String(error) };
   }
 }
@@ -1633,7 +1629,7 @@ async function auditCoreWebVitalsEnhanced(url: string) {
 // Enhanced Content Quality audit
 async function auditContentQualityEnhanced(url: string) {
   try {
-    console.log('📝 Running enhanced content quality audit for:', url);
+    
     
     const response = await fetch(url, {
       headers: { 'User-Agent': 'Mozilla/5.0 (compatible; SEO-Reporter/1.0)' }
@@ -1690,7 +1686,7 @@ async function auditContentQualityEnhanced(url: string) {
       timestamp: new Date().toISOString()
     };
   } catch (error) {
-    console.error('❌ Enhanced content quality audit failed:', error);
+    
     return {
       score: 0,
       issues: ['Failed to analyze content'],

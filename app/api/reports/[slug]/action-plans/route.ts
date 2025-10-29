@@ -34,7 +34,7 @@ export async function GET(
     
     return NextResponse.json(actionPlans);
   } catch (error: any) {
-    console.error('Failed to fetch action plans:', error);
+    
     return NextResponse.json(
       { error: 'Failed to fetch action plans', details: error.message },
       { status: 500 }
@@ -85,7 +85,7 @@ export async function POST(
     
     return NextResponse.json(actionPlan);
   } catch (error: any) {
-    console.error('Failed to create action plan:', error);
+    
     return NextResponse.json(
       { error: 'Failed to create action plan', details: error.message },
       { status: 500 }

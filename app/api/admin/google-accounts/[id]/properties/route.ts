@@ -32,9 +32,9 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
     if (gscResp.ok) {
       const gscData = await gscResp.json();
       gsc = gscData.siteEntry ?? [];
-      console.log(`[Properties] Found ${gsc.length} Search Console properties`);
+      
     } else {
-      console.error('[Properties] Search Console error:', gscResp.status);
+      
     }
 
     // GA4 - Analytics
@@ -54,9 +54,9 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
           account: as.account
         }))
       ) ?? [];
-      console.log(`[Properties] Found ${ga4.length} Analytics properties`);
+      
     } else {
-      console.error('[Properties] Analytics error:', gaResp.status);
+      
     }
 
     return NextResponse.json({ 
@@ -69,7 +69,7 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
       }
     });
   } catch (e: any) {
-    console.error('[Properties API] Error:', e);
+    
     const msg = String(e?.message ?? e);
     const status = msg.includes('not found') ? 404
                 : msg.includes('no_refresh_token') ? 409

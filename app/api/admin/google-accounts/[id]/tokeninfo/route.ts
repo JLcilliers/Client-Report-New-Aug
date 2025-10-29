@@ -67,7 +67,7 @@ export async function GET(
     });
 
   } catch (error) {
-    console.error('Token info error:', error);
+    
     Sentry.captureException(error);
     
     return NextResponse.json(

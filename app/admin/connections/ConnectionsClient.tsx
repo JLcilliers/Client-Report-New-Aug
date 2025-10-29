@@ -1,10 +1,11 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/use-toast"
-import { 
+import {
   Globe,
   BarChart3,
   CheckCircle,
@@ -77,10 +78,10 @@ export default function ConnectionsClient({ initialConnection }: ConnectionsClie
 
   const connectGoogle = () => {
     setConnecting(true)
-    
+
     // Build OAuth URL for admin connection
     const params = new URLSearchParams({
-      client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "281498391609-8dgdr9pb3ppv2vlll0e7q18ahfoeuqru.apps.googleusercontent.com",
+      client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "",
       redirect_uri: `${window.location.origin}/api/auth/google/admin-callback`,
       response_type: "code",
       scope: [
@@ -234,12 +235,12 @@ export default function ConnectionsClient({ initialConnection }: ConnectionsClie
           </CardHeader>
           <CardContent>
             <div className="flex justify-center py-8">
-              <a href="/admin/properties">
+              <Link href="/admin/properties">
                 <Button variant="outline">
                   <Settings className="h-4 w-4 mr-2" />
                   Manage Properties
                 </Button>
-              </a>
+              </Link>
             </div>
           </CardContent>
         </Card>

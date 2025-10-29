@@ -12,7 +12,7 @@ async function checkReport() {
     }
   });
 
-  console.log(JSON.stringify(reports, null, 2));
+  );
   await prisma.$disconnect();
 }
 

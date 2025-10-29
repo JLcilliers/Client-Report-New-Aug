@@ -14,13 +14,13 @@ export async function GET(request: NextRequest) {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Error fetching accounts:', error);
+      
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
     return NextResponse.json({ accounts: data || [] });
   } catch (error) {
-    console.error('API error:', error);
+    
     return NextResponse.json(
       { error: 'Failed to fetch accounts' },
       { status: 500 }
@@ -46,13 +46,13 @@ export async function DELETE(request: NextRequest) {
       .eq('id', id);
 
     if (error) {
-      console.error('Error deleting account:', error);
+      
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('API error:', error);
+    
     return NextResponse.json(
       { error: 'Failed to delete account' },
       { status: 500 }

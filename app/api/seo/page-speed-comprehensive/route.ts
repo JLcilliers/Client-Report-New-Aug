@@ -111,7 +111,7 @@ export async function POST(request: NextRequest) {
       timestamp: new Date().toISOString()
     });
   } catch (error) {
-    console.error('Page speed analysis error:', error);
+    
     return NextResponse.json(
       { error: 'Failed to analyze page speed' },
       { status: 500 }
@@ -192,7 +192,6 @@ async function analyzePageSpeed(url: string, device: 'mobile' | 'desktop', categ
       timestamp: new Date().toISOString()
     };
   } catch (error) {
-    console.error(`Page speed analysis error for ${url} (${device}):`, error);
     
     return {
       url,
@@ -521,7 +520,7 @@ export async function GET(request: NextRequest) {
       }
     });
   } catch (error) {
-    console.error('Get page speed audits error:', error);
+    
     return NextResponse.json(
       { error: 'Failed to fetch page speed audit data' },
       { status: 500 }

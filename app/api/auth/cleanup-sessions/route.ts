@@ -51,7 +51,6 @@ export async function POST(request: NextRequest) {
     })
     
   } catch (error: any) {
-    console.error('Session cleanup error:', error)
     return NextResponse.json({
       success: false,
       error: "Failed to cleanup sessions",
@@ -121,7 +120,6 @@ export async function GET(request: NextRequest) {
     })
     
   } catch (error: any) {
-    console.error('Session stats error:', error)
     return NextResponse.json({
       error: "Failed to get session statistics",
       details: error.message

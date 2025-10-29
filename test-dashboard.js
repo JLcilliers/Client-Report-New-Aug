@@ -28,9 +28,9 @@ async function takeScreenshot(page, name) {
       path: path.join(screenshotsDir, `${name}.png`),
       fullPage: true 
     });
-    console.log(`📸 Screenshot saved: ${name}.png`);
+    
   } catch (error) {
-    console.error(`Failed to save screenshot ${name}:`, error);
+    
   }
 }
 
@@ -92,10 +92,10 @@ async function testDashboard() {
       });
     });
 
-    console.log('🚀 Starting dashboard tests...\n');
+    
 
     // Navigate to the dashboard
-    console.log('📍 Navigating to dashboard...');
+    
     await page.goto('http://localhost:3000/admin/reports', {
       waitUntil: 'networkidle2',
       timeout: 30000
@@ -106,7 +106,7 @@ async function testDashboard() {
     // Check if we need to select a report first
     const reportLinks = await page.$$('a[href*="/admin/reports/"]');
     if (reportLinks.length > 0) {
-      console.log(`📊 Found ${reportLinks.length} reports, clicking the first one...`);
+      
       await reportLinks[0].click();
       await delay(3000);
       await takeScreenshot(page, '02-report-detail');
@@ -116,7 +116,7 @@ async function testDashboard() {
     const publicReportLink = await page.$('a[href*="/report/"]');
     if (publicReportLink) {
       const reportUrl = await page.evaluate(el => el.href, publicReportLink);
-      console.log(`🔗 Found public report URL: ${reportUrl}`);
+      
       
       // Navigate to the public report
       await page.goto(reportUrl, {
@@ -127,7 +127,7 @@ async function testDashboard() {
       await takeScreenshot(page, '03-public-report-main');
 
       // Test Insights Tab (usually the default)
-      console.log('\n📈 Testing INSIGHTS tab...');
+      
       testResults.insights = {
         url: page.url(),
         checks: []
@@ -155,7 +155,7 @@ async function testDashboard() {
       }
 
       // Test SEARCH tab
-      console.log('\n🔍 Testing SEARCH tab...');
+      
       const searchTab = await page.$('a[href*="search"], button:has-text("Search"), [role="tab"]:has-text("Search")');
       if (searchTab) {
         await searchTab.click();
@@ -174,7 +174,7 @@ async function testDashboard() {
       }
 
       // Test TRAFFIC tab
-      console.log('\n🚦 Testing TRAFFIC tab...');
+      
       const trafficTab = await page.$('a[href*="traffic"], button:has-text("Traffic"), [role="tab"]:has-text("Traffic")');
       if (trafficTab) {
         await trafficTab.click();
@@ -193,7 +193,7 @@ async function testDashboard() {
       }
 
       // Test ENGAGEMENT tab
-      console.log('\n💡 Testing ENGAGEMENT tab...');
+      
       const engagementTab = await page.$('a[href*="engagement"], button:has-text("Engagement"), [role="tab"]:has-text("Engagement")');
       if (engagementTab) {
         await engagementTab.click();
@@ -212,7 +212,7 @@ async function testDashboard() {
       }
 
       // Test TECHNICAL tab (Core Web Vitals & PageSpeed)
-      console.log('\n⚙️ Testing TECHNICAL tab...');
+      
       const technicalTab = await page.$('a[href*="technical"], button:has-text("Technical"), [role="tab"]:has-text("Technical")');
       if (technicalTab) {
         await technicalTab.click();
@@ -245,7 +245,7 @@ async function testDashboard() {
       }
 
       // Test VISUALIZE tab
-      console.log('\n📊 Testing VISUALIZE tab...');
+      
       const visualizeTab = await page.$('a[href*="visualize"], button:has-text("Visualize"), [role="tab"]:has-text("Visualize")');
       if (visualizeTab) {
         await visualizeTab.click();
@@ -273,95 +273,95 @@ async function testDashboard() {
     }
 
     // Generate report
-    console.log('\n📝 Generating test report...\n');
-    console.log('=' .repeat(60));
-    console.log('DASHBOARD TEST RESULTS');
-    console.log('=' .repeat(60));
+    
+    );
+    
+    );
     
     // Insights Tab
-    console.log('\n📈 INSIGHTS TAB:');
+    
     if (testResults.insights.checks) {
       testResults.insights.checks.forEach(check => {
         const status = check.exists && check.hasContent ? '✅' : '❌';
-        console.log(`  ${status} ${check.description}: ${check.exists ? (check.hasContent ? 'Has data' : 'Empty') : 'Not found'}`);
+        : 'Not found'}`);
       });
     }
 
     // Executive Summary
-    console.log('\n📋 EXECUTIVE SUMMARY:');
+    
     if (testResults.executiveSummary.exists) {
-      console.log(`  ✅ Found (${testResults.executiveSummary.length} characters)`);
+      `);
     } else {
-      console.log('  ❌ Not found');
+      
     }
 
     // Search Tab
-    console.log('\n🔍 SEARCH TAB:');
+    
     if (testResults.search.exists) {
       testResults.search.checks?.forEach(check => {
         const status = check.exists && check.hasContent ? '✅' : '❌';
-        console.log(`  ${status} ${check.description}: ${check.exists ? (check.hasContent ? 'Has data' : 'Empty') : 'Not found'}`);
+        : 'Not found'}`);
       });
     } else {
-      console.log('  ❌ Tab not found');
+      
     }
 
     // Traffic Tab
-    console.log('\n🚦 TRAFFIC TAB:');
+    
     if (testResults.traffic.exists) {
       testResults.traffic.checks?.forEach(check => {
         const status = check.exists && check.hasContent ? '✅' : '❌';
-        console.log(`  ${status} ${check.description}: ${check.exists ? (check.hasContent ? 'Has data' : 'Empty') : 'Not found'}`);
+        : 'Not found'}`);
       });
     } else {
-      console.log('  ❌ Tab not found');
+      
     }
 
     // Engagement Tab
-    console.log('\n💡 ENGAGEMENT TAB:');
+    
     if (testResults.engagement.exists) {
       testResults.engagement.checks?.forEach(check => {
         const status = check.exists && check.hasContent ? '✅' : '❌';
-        console.log(`  ${status} ${check.description}: ${check.exists ? (check.hasContent ? 'Has data' : 'Empty') : 'Not found'}`);
+        : 'Not found'}`);
       });
     } else {
-      console.log('  ❌ Tab not found');
+      
     }
 
     // Technical Tab
-    console.log('\n⚙️ TECHNICAL TAB:');
+    
     if (testResults.technical.exists) {
-      console.log('  Core Web Vitals:');
+      
       Object.entries(testResults.technical.coreWebVitals).forEach(([key, check]) => {
         const status = check.exists && check.hasContent ? '✅' : '❌';
-        console.log(`    ${status} ${check.description}: ${check.exists ? (check.hasContent ? 'Has data' : 'Empty') : 'Not found'}`);
+        : 'Not found'}`);
       });
       
-      console.log('  PageSpeed Scores:');
+      
       Object.entries(testResults.technical.pageSpeed).forEach(([key, check]) => {
         const status = check.exists && check.hasContent ? '✅' : '❌';
-        console.log(`    ${status} ${check.description}: ${check.exists ? (check.hasContent ? 'Has data' : 'Empty') : 'Not found'}`);
+        : 'Not found'}`);
       });
     } else {
-      console.log('  ❌ Tab not found');
+      
     }
 
     // Visualize Tab
-    console.log('\n📊 VISUALIZE TAB:');
+    
     if (testResults.visualize.exists) {
       testResults.visualize.checks?.forEach(check => {
         const status = check.exists && check.hasContent ? '✅' : '❌';
-        console.log(`  ${status} ${check.description}: ${check.exists ? (check.hasContent ? 'Has data' : 'Empty') : 'Not found'}`);
+        : 'Not found'}`);
       });
     } else {
-      console.log('  ❌ Tab not found');
+      
     }
 
     // Errors
     if (testResults.errors.length > 0) {
-      console.log('\n⚠️ ERRORS DETECTED:');
+      
       testResults.errors.forEach(error => {
-        console.log(`  - ${error.type}: ${error.message || error.failure}`);
+        
       });
     }
 
@@ -370,11 +370,11 @@ async function testDashboard() {
       path.join(__dirname, 'test-results.json'),
       JSON.stringify(testResults, null, 2)
     );
-    console.log('\n💾 Test results saved to test-results.json');
-    console.log('📸 Screenshots saved to test-screenshots/');
+    
+    
 
   } catch (error) {
-    console.error('❌ Test failed:', error);
+    
     testResults.errors.push({
       type: 'fatal',
       message: error.message,
@@ -382,7 +382,7 @@ async function testDashboard() {
     });
   } finally {
     await browser.close();
-    console.log('\n✅ Test completed!');
+    
   }
 }
 

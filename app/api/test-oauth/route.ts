@@ -24,7 +24,7 @@ export async function GET() {
     // Redirect to Google OAuth
     return NextResponse.redirect(authUrl);
   } catch (error) {
-    console.error('OAuth test error:', error);
+    
     return NextResponse.json({ 
       error: 'Failed to generate auth URL',
       details: error instanceof Error ? error.message : 'Unknown error'

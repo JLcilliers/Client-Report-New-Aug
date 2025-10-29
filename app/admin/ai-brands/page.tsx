@@ -68,7 +68,6 @@ export default function AIBrandsListPage() {
         toast.error("Failed to load AI brands")
       }
     } catch (error) {
-      console.error("Error fetching AI brands:", error)
       toast.error("Error loading AI brands")
     } finally {
       setLoading(false)

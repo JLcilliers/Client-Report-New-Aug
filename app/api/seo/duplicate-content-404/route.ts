@@ -155,7 +155,7 @@ export async function POST(request: NextRequest) {
     );
     return NextResponse.json(result);
   } catch (error) {
-    console.error('Duplicate content and 404 analysis error:', error);
+    
     return NextResponse.json(
       { error: 'Failed to analyze duplicate content and errors' },
       { status: 500 }
@@ -212,7 +212,7 @@ async function analyzeDuplicateContentAndErrors(
       timestamp: new Date().toISOString()
     };
   } catch (error) {
-    console.error(`Duplicate content analysis error for ${url}:`, error);
+    
     
     return {
       url,

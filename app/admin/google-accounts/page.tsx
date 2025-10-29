@@ -49,7 +49,7 @@ export default function GoogleAccountsPage() {
     const success = params.get('success')
     
     if (error) {
-      console.error('[Frontend] OAuth callback error detected:', error);
+      
       toast({
         title: "Authentication Error",
         description: error === 'callback_failed' 
@@ -60,7 +60,7 @@ export default function GoogleAccountsPage() {
       // Clean up URL
       window.history.replaceState({}, '', '/admin/google-accounts')
     } else if (success) {
-      console.log('[Frontend] OAuth callback success detected');
+      
       toast({
         title: "Success",
         description: "Google account connected successfully!",
@@ -73,15 +73,15 @@ export default function GoogleAccountsPage() {
   }, [])
 
   const fetchAccounts = async () => {
-    console.log('[Frontend] Fetching Google accounts...');
+    
     try {
       const response = await fetch('/api/admin/google-accounts')
-      console.log('[Frontend] Fetch response status:', response.status);
+      
       
       if (response.ok) {
         const data = await response.json()
-        console.log('[Frontend] Accounts data received:', data);
-        console.log('[Frontend] Number of accounts:', data.accounts?.length || 0);
+        
+        
         const accountsData = data.accounts || [];
         
         // Auto-refresh expired tokens
@@ -92,7 +92,7 @@ export default function GoogleAccountsPage() {
             
             // If token is expired or will expire in next 5 minutes
             if (expiryDate <= new Date(now.getTime() + 5 * 60000)) {
-              console.log(`[Frontend] Token expired/expiring for account ${account.id}, auto-refreshing...`);
+              
               try {
                 const refreshResponse = await fetch(`/api/admin/google-accounts/${account.id}/refresh`, {
                   method: 'POST'
@@ -100,13 +100,13 @@ export default function GoogleAccountsPage() {
                 
                 if (refreshResponse.ok) {
                   const refreshData = await refreshResponse.json();
-                  console.log(`[Frontend] Token refreshed successfully for account ${account.id}`);
+                  
                   // Update the account with new expiry
                   account.token_expiry = new Date(refreshData.expires_at * 1000).toISOString();
                   account.is_active = true;
                 } else {
                   const errorData = await refreshResponse.json();
-                  console.error(`[Frontend] Failed to refresh token for account ${account.id}:`, errorData);
+                  
                   
                   // If re-authentication is required, mark the account appropriately
                   if (errorData.requiresReauth) {
@@ -116,7 +116,7 @@ export default function GoogleAccountsPage() {
                   }
                 }
               } catch (refreshError) {
-                console.error(`[Frontend] Failed to auto-refresh token for account ${account.id}:`, refreshError);
+                
                 account.is_active = false;
               }
             }
@@ -131,15 +131,15 @@ export default function GoogleAccountsPage() {
         }
       } else {
         const errorText = await response.text();
-        console.error('[Frontend] Failed to fetch accounts!');
-        console.error('  - Status:', response.status);
-        console.error('  - Response:', errorText);
+        
+        
+        
         throw new Error('Failed to fetch accounts')
       }
     } catch (error: any) {
-      console.error('[Frontend] Error fetching accounts:', error);
-      console.error('  - Message:', error.message);
-      console.error('  - Stack:', error.stack);
+      
+      
+      
       
       toast({
         title: "Error",
@@ -152,20 +152,20 @@ export default function GoogleAccountsPage() {
   }
 
   const addNewAccount = () => {
-    console.log('[Frontend] Adding new account...');
-    console.log('[Frontend] Redirecting to OAuth flow: /api/auth/google/add-account');
+    
+    
     // Redirect to OAuth flow
     window.location.href = '/api/auth/google/add-account'
   }
 
   const fetchAllProperties = async (accountsList: GoogleAccount[]) => {
-    console.log('[Frontend] Fetching properties for all accounts...');
+    
     try {
       const response = await fetch('/api/google/fetch-properties');
       
       if (response.ok) {
         const data = await response.json();
-        console.log('[Frontend] Properties data:', data);
+        
         
         // Update accounts with properties
         const updatedAccounts = accountsList.map(account => {
@@ -184,20 +184,20 @@ export default function GoogleAccountsPage() {
         setAccounts(updatedAccounts);
       }
     } catch (error) {
-      console.error('[Frontend] Error fetching properties:', error);
+      
     }
   }
 
   const fetchPropertiesForAccount = async (accountId: string) => {
     setFetchingProperties(accountId);
-    console.log('[Frontend] Fetching properties for account:', accountId);
+    
     
     try {
       const response = await fetch(`/api/google/fetch-properties?accountId=${accountId}`);
       
       if (response.ok) {
         const data = await response.json();
-        console.log('[Frontend] Properties for account:', data);
+        
         
         // Update the specific account with properties
         setAccounts(prevAccounts => 
@@ -221,7 +221,7 @@ export default function GoogleAccountsPage() {
         throw new Error('Failed to fetch properties');
       }
     } catch (error) {
-      console.error('[Frontend] Error fetching properties:', error);
+      
       toast({
         title: "Error",
         description: "Failed to fetch properties",
@@ -263,24 +263,24 @@ export default function GoogleAccountsPage() {
   }
 
   const deleteAccount = async (accountId: string) => {
-    console.log('[Frontend] Delete account requested for ID:', accountId);
+    
     
     if (!confirm('Are you sure you want to remove this Google account?')) {
-      console.log('[Frontend] Delete cancelled by user');
+      
       return
     }
 
-    console.log('[Frontend] Sending DELETE request...');
+    
     try {
       const response = await fetch(`/api/admin/google-accounts/${accountId}`, {
         method: 'DELETE'
       })
       
-      console.log('[Frontend] Delete response status:', response.status);
+      
       
       if (response.ok) {
         const data = await response.json();
-        console.log('[Frontend] Delete response data:', data);
+        
         
         toast({
           title: "Success",
@@ -289,15 +289,15 @@ export default function GoogleAccountsPage() {
         fetchAccounts()
       } else {
         const errorText = await response.text();
-        console.error('[Frontend] Delete failed!');
-        console.error('  - Status:', response.status);
-        console.error('  - Response:', errorText);
+        
+        
+        
         throw new Error('Failed to delete account')
       }
     } catch (error: any) {
-      console.error('[Frontend] Error deleting account:', error);
-      console.error('  - Message:', error.message);
-      console.error('  - Stack:', error.stack);
+      
+      
+      
       
       toast({
         title: "Error",

@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
     const result = await analyzeMobileUsability(url);
     return NextResponse.json(result);
   } catch (error) {
-    console.error('Mobile usability analysis error:', error);
+    
     return NextResponse.json(
       { error: 'Failed to analyze mobile usability' },
       { status: 500 }
@@ -283,7 +283,7 @@ async function analyzeMobileUsability(url: string): Promise<MobileUsabilityResul
       timestamp: new Date().toISOString()
     };
   } catch (error) {
-    console.error(`Mobile usability analysis error for ${url}:`, error);
+    
     
     return {
       url,

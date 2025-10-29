@@ -5,7 +5,7 @@ import { prisma } from '@/lib/db/prisma';
 export const dynamic = 'force-dynamic';
 
 export async function POST() {
-  console.log('[Refresh All] Starting bulk token refresh...');
+  
   
   try {
     // Get all Google accounts with refresh tokens
@@ -18,12 +18,12 @@ export async function POST() {
       }
     });
     
-    console.log(`[Refresh All] Found ${accounts.length} accounts to refresh`);
+    
     
     const results = [];
     
     for (const account of accounts) {
-      console.log(`[Refresh All] Processing account: ${account.providerAccountId}`);
+      
       
       try {
         const oauth2Client = new OAuth2Client(
@@ -37,7 +37,7 @@ export async function POST() {
         
         // Refresh the token
         const { credentials } = await oauth2Client.refreshAccessToken();
-        console.log(`[Refresh All] Token refreshed for ${account.providerAccountId}`);
+        
         
         // Update the account
         await prisma.account.update({
@@ -56,7 +56,7 @@ export async function POST() {
         });
         
       } catch (refreshError: any) {
-        console.error(`[Refresh All] Failed to refresh ${account.providerAccountId}:`, refreshError.message);
+        
         
         results.push({
           accountId: account.id,
@@ -67,7 +67,7 @@ export async function POST() {
       }
     }
     
-    console.log('[Refresh All] Bulk refresh completed');
+    
     
     return NextResponse.json({
       success: true,
@@ -76,7 +76,7 @@ export async function POST() {
     });
     
   } catch (error: any) {
-    console.error('[Refresh All] Error:', error);
+    
     return NextResponse.json(
       { 
         success: false,

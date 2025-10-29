@@ -62,8 +62,7 @@ export class GoogleTokenManager {
           }
         }
       } catch (error) {
-        console.error('Error fetching account tokens:', error)
-      }
+        }
     }
     
     // Try cookie tokens
@@ -88,8 +87,7 @@ export class GoogleTokenManager {
         }
       }
     } catch (error) {
-      console.error('Error reading cookie tokens:', error)
-    }
+      }
     
     // Try user's stored tokens as last resort
     if (userId) {
@@ -124,8 +122,7 @@ export class GoogleTokenManager {
           }
         }
       } catch (error) {
-        console.error('Error fetching user tokens:', error)
-      }
+        }
     }
     
     return {
@@ -162,14 +159,12 @@ export class GoogleTokenManager {
       }
       
       const errorData = await response.json()
-      console.error('Token refresh failed:', errorData)
       return {
         accessToken: null,
         refreshToken: null,
         error: errorData.error_description || 'Token refresh failed'
       }
     } catch (error: any) {
-      console.error('Token refresh error:', error)
       return {
         accessToken: null,
         refreshToken: null,
@@ -185,7 +180,6 @@ export class GoogleTokenManager {
     const tokens = await this.getValidTokens(accountId, userId)
     
     if (!tokens.accessToken) {
-      console.error('No valid access token available')
       return null
     }
     

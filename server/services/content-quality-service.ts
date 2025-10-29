@@ -53,7 +53,7 @@ export class ContentQualityService {
     // Check cache first
     const cached = await this.getCachedData(url);
     if (cached && new Date(cached.expiresAt) > new Date()) {
-      console.log(`📦 Using cached content quality data for ${url}`);
+      
       return {
         ...cached.data,
         fromCache: true
@@ -69,7 +69,7 @@ export class ContentQualityService {
       
       return result;
     } catch (error: any) {
-      console.error(`❌ Content quality analysis error for ${url}:`, error.message);
+      
       
       // Return cached data if available
       if (cached) {
@@ -89,7 +89,7 @@ export class ContentQualityService {
    * Fetch and analyze page content
    */
   private async fetchAndAnalyze(url: string): Promise<ContentQualityResult> {
-    console.log(`🔍 Analyzing content quality for ${url}`);
+    
     
     // Fetch the page HTML
     const response = await fetch(url, {
@@ -490,7 +490,7 @@ export class ContentQualityService {
         expiresAt
       };
     } catch (error) {
-      console.error('Cache retrieval error:', error);
+      
       return null;
     }
   }
@@ -513,9 +513,9 @@ export class ContentQualityService {
           collectedAt: new Date()
         }
       });
-      console.log(`💾 Cached content quality data for ${url}`);
+      
     } catch (error) {
-      console.error('Cache storage error:', error);
+      
     }
   }
 }

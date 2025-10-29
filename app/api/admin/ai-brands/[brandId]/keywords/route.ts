@@ -76,7 +76,6 @@ export async function GET(
       success: true
     })
   } catch (error: any) {
-    console.error('[Keywords API GET] Error:', error)
     return NextResponse.json(
       { error: "Failed to fetch keywords", details: error.message },
       { status: 500 }
@@ -149,7 +148,6 @@ export async function POST(
       message: "Keyword added successfully"
     })
   } catch (error: any) {
-    console.error('[Keywords API POST] Error:', error)
     return NextResponse.json(
       { error: "Failed to add keyword", details: error.message },
       { status: 500 }

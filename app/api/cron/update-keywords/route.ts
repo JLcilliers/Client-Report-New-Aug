@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
         );
         totalUpdated++;
       } catch (clientError: any) {
-        console.error(`Error updating client ${report.id}:`, clientError);
+        
         totalFailed++;
         errors.push({
           reportId: report.id,
@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
       timestamp: new Date().toISOString()
     });
   } catch (error) {
-    console.error('Cron job error:', error);
+    
     return NextResponse.json(
       { error: 'Cron job failed' },
       { status: 500 }
@@ -212,7 +212,7 @@ async function updateClientKeywords(
       // Rate limiting between keyword fetches
       await new Promise(resolve => setTimeout(resolve, 100));
     } catch (keywordError) {
-      console.error(`Error updating keyword ${keywordRecord.keyword}:`, keywordError);
+      
     }
   }
 

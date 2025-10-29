@@ -57,7 +57,7 @@ export default function ActionPlansPage() {
         setActionPlans(data);
       }
     } catch (error) {
-      console.error('Failed to fetch action plans:', error);
+      
     }
     setLoading(false);
   };

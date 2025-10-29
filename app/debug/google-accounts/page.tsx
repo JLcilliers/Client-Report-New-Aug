@@ -18,11 +18,9 @@ export default function DebugGoogleAccountsPage() {
       if (!response.ok) throw new Error('Failed to fetch accounts')
       
       const data = await response.json()
-      console.log('Debug: Fetched accounts:', data)
       setAccounts(data.accounts || [])
       setError(null)
     } catch (err: any) {
-      console.error('Debug: Error fetching accounts:', err)
       setError(err.message)
     } finally {
       setLoading(false)
@@ -38,9 +36,7 @@ export default function DebugGoogleAccountsPage() {
       if (!response.ok) throw new Error('Failed to refresh token')
       await fetchAccounts()
     } catch (err: any) {
-      console.error('Debug: Error refreshing token:', err)
-      alert(`Error refreshing token: ${err.message}`)
-    } finally {
+      } finally {
       setRefreshing(null)
     }
   }
@@ -55,9 +51,7 @@ export default function DebugGoogleAccountsPage() {
       if (!response.ok) throw new Error('Failed to delete account')
       await fetchAccounts()
     } catch (err: any) {
-      console.error('Debug: Error deleting account:', err)
-      alert(`Error deleting account: ${err.message}`)
-    }
+      }
   }
 
   const addAccount = () => {

@@ -62,7 +62,7 @@ export async function GET(
 
     return NextResponse.json(clientData);
   } catch (error) {
-    console.error('Error fetching client:', error);
+    
     return NextResponse.json(
       { error: 'Failed to fetch client details' },
       { status: 500 }
@@ -95,7 +95,7 @@ export async function PATCH(
       client: updated
     });
   } catch (error) {
-    console.error('Error updating client:', error);
+    
     return NextResponse.json(
       { error: 'Failed to update client' },
       { status: 500 }
@@ -156,7 +156,7 @@ export async function DELETE(
         });
       }
     } catch (e) {
-      console.log('No AI visibility data to delete or already deleted:', e);
+      
     }
 
     // Step 2: Delete keyword-related data (deepest nested first)
@@ -221,7 +221,7 @@ export async function DELETE(
         }
       });
     } catch (e) {
-      console.log('Error deleting keyword data:', e);
+      
     }
 
     // Step 3: Delete keyword groups and their performance data
@@ -240,7 +240,7 @@ export async function DELETE(
         where: { clientReportId: params.id }
       });
     } catch (e) {
-      console.log('Error deleting keyword groups:', e);
+      
     }
 
     // Step 4: Delete other client data
@@ -249,7 +249,7 @@ export async function DELETE(
         where: { clientReportId: params.id }
       });
     } catch (e) {
-      console.log('Error deleting cannibalization data:', e);
+      
     }
 
     try {
@@ -257,7 +257,7 @@ export async function DELETE(
         where: { clientReportId: params.id }
       });
     } catch (e) {
-      console.log('Error deleting competitors:', e);
+      
     }
 
     try {
@@ -265,7 +265,7 @@ export async function DELETE(
         where: { clientReportId: params.id }
       });
     } catch (e) {
-      console.log('Error deleting SEO audits:', e);
+      
     }
 
     try {
@@ -273,7 +273,7 @@ export async function DELETE(
         where: { reportId: params.id }
       });
     } catch (e) {
-      console.log('Error deleting cache:', e);
+      
     }
 
     try {
@@ -281,7 +281,7 @@ export async function DELETE(
         where: { reportId: params.id }
       });
     } catch (e) {
-      console.log('Error deleting access logs:', e);
+      
     }
 
     // Finally, delete the client report itself
@@ -294,9 +294,9 @@ export async function DELETE(
       message: 'Client deleted successfully'
     });
   } catch (error: any) {
-    console.error('Error deleting client:', error);
-    console.error('Error code:', error.code);
-    console.error('Error meta:', error.meta);
+    
+    
+    
 
     // Handle specific Prisma errors
     if (error.code === 'P2025') {

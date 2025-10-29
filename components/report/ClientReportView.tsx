@@ -77,7 +77,7 @@ export default function ClientReportView({ report }: ClientReportViewProps) {
       // Generate executive summary (placeholder for AI integration)
       generateExecutiveSummary(analyticsData.data, searchConsoleData.data);
     } catch (error) {
-      console.error('Error fetching report data:', error);
+      
     } finally {
       setLoading(false);
     }
@@ -113,7 +113,7 @@ export default function ClientReportView({ report }: ClientReportViewProps) {
         setExecutiveSummary(fallbackSummary);
       }
     } catch (error) {
-      console.error('Error generating executive summary:', error);
+      
       // Use fallback summary on error
       const fallbackSummary = `
         ${report.clientName}'s digital presence showed positive momentum this reporting period.

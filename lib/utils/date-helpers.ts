@@ -79,7 +79,7 @@ export function getPreviousPeriod(startDate: Date, endDate: Date): { startDate: 
 export function calculatePercentageChange(current: number, previous: number): number {
   // Handle edge cases
   if (typeof current !== 'number' || typeof previous !== 'number') {
-    console.warn('Invalid input to calculatePercentageChange:', { current, previous });
+    
     return 0;
   }
   
@@ -101,7 +101,7 @@ export function calculatePercentageChange(current: number, previous: number): nu
 export function formatPercentage(value: number, decimals: number = 1): string {
   // Handle invalid inputs
   if (typeof value !== 'number' || !isFinite(value)) {
-    console.warn('Invalid value for formatPercentage:', value);
+    
     return '0.0%';
   }
   

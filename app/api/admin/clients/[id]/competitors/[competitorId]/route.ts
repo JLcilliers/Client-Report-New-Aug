@@ -36,7 +36,6 @@ export async function DELETE(
       message: 'Competitor removed successfully'
     })
   } catch (error) {
-    console.error('Error deleting competitor:', error)
     return NextResponse.json(
       { error: 'Failed to delete competitor' },
       { status: 500 }

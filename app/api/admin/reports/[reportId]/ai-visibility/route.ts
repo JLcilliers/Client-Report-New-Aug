@@ -93,7 +93,7 @@ export async function GET(
       lastUpdated: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('Admin AI Visibility GET Error:', error);
+    
     return NextResponse.json(
       { error: 'Failed to fetch AI visibility data' },
       { status: 500 }
@@ -166,7 +166,7 @@ export async function POST(
       lastUpdated: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('Admin AI Visibility POST Error:', error);
+    
     return NextResponse.json(
       { error: 'Failed to update AI visibility data', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }

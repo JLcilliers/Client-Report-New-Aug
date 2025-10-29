@@ -22,7 +22,7 @@ export async function DELETE(
       message: 'Keyword deleted successfully'
     });
   } catch (error) {
-    console.error('Error deleting keyword:', error);
+    
     return NextResponse.json(
       { error: 'Failed to delete keyword' },
       { status: 500 }
@@ -61,7 +61,7 @@ export async function PATCH(
       keyword: updatedKeyword
     });
   } catch (error) {
-    console.error('Error updating keyword:', error);
+    
     return NextResponse.json(
       { error: 'Failed to update keyword' },
       { status: 500 }

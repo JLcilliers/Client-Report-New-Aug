@@ -10,20 +10,10 @@ export const dynamic = 'force-dynamic'
 const analyticsData = google.analyticsdata("v1beta")
 
 export async function POST(request: NextRequest) {
-  console.log('\n========== Analytics Data Fetch START ==========')
-  
   try {
     const { propertyId, startDate, endDate, accountId, reportId } = await request.json()
     
-    console.log('[Analytics] Request params:')
-    console.log('  - Property ID:', propertyId)
-    console.log('  - Start Date:', startDate)
-    console.log('  - End Date:', endDate)
-    console.log('  - Account ID:', accountId)
-    console.log('  - Report ID:', reportId)
-    
     if (!propertyId) {
-      console.error('[Analytics] No property ID provided')
       return NextResponse.json({ error: "Property ID is required" }, { status: 400 })
     }
     
@@ -33,22 +23,18 @@ export async function POST(request: NextRequest) {
     
     // If no accountId but we have reportId, get accountId from report
     if (!effectiveAccountId && reportId) {
-      console.log('[Analytics] Getting account ID from report:', reportId)
       const report = await prisma.clientReport.findUnique({
         where: { id: reportId },
         select: { googleAccountId: true }
       })
       if (report?.googleAccountId) {
         effectiveAccountId = report.googleAccountId
-        console.log('[Analytics] Found account ID from report:', effectiveAccountId)
-      }
+        }
     }
     
     if (effectiveAccountId) {
-      console.log('[Analytics] Using account ID to get token:', effectiveAccountId)
       accessToken = await getValidGoogleToken(effectiveAccountId)
     } else {
-      console.log('[Analytics] No account ID, trying cookies')
       const cookieStore = cookies()
       const tokenCookie = cookieStore.get('google_access_token')
       if (tokenCookie) {
@@ -57,14 +43,11 @@ export async function POST(request: NextRequest) {
     }
     
     if (!accessToken) {
-      console.error('[Analytics] No valid access token found')
       return NextResponse.json({ 
         error: "Google authentication required",
         details: "No valid Google tokens found"
       }, { status: 401 })
     }
-    
-    console.log('[Analytics] Got access token, length:', accessToken.length)
     
     // Create OAuth2 client
     const oauth2Client = new OAuth2Client(
@@ -93,10 +76,6 @@ export async function POST(request: NextRequest) {
       formattedPropertyId = `properties/${propertyId}`;
     }
     
-    console.log('[Analytics] Formatted property ID:', formattedPropertyId)
-    console.log('[Analytics] Date range:', formatDate(startDateObj), 'to', formatDate(endDateObj))
-    console.log('[Analytics] Making Analytics API call...')
-    
     // Fetch Analytics data
     const response = await analyticsData.properties.runReport({
       property: formattedPropertyId,
@@ -121,10 +100,7 @@ export async function POST(request: NextRequest) {
       auth: oauth2Client
     })
     
-    console.log('[Analytics] First API call successful, rows:', response.data.rows?.length || 0)
-    
     // Get top pages data
-    console.log('[Analytics] Fetching top pages...')
     const pagesResponse = await analyticsData.properties.runReport({
       property: formattedPropertyId,
       requestBody: {
@@ -228,14 +204,6 @@ export async function POST(request: NextRequest) {
       }))
     }
     
-    console.log('[Analytics] Data processing complete:')
-    console.log('  - Total users:', analyticsResult.summary.users)
-    console.log('  - Total sessions:', analyticsResult.summary.sessions)
-    console.log('  - Total pageviews:', analyticsResult.summary.pageviews)
-    console.log('  - Traffic sources:', analyticsResult.trafficSources.length)
-    console.log('  - Top pages:', analyticsResult.topPages.length)
-    console.log('========== Analytics Data Fetch END ==========\n')
-    
     return NextResponse.json({
       success: true,
       analytics: analyticsResult,
@@ -247,13 +215,6 @@ export async function POST(request: NextRequest) {
     })
     
   } catch (error: any) {
-    console.error('[Analytics] ERROR:', error)
-    console.error('[Analytics] Error details:')
-    console.error('  - Message:', error.message)
-    console.error('  - Code:', error.code)
-    console.error('  - Status:', error.status)
-    console.error('  - Stack:', error.stack)
-    console.error('========== Analytics Data Fetch END (ERROR) ==========\n')
     
     return NextResponse.json({
       error: "Failed to fetch Analytics data",

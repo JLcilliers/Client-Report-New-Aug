@@ -31,7 +31,6 @@ async function getCurrentUser() {
 
     return user
   } catch (error) {
-    console.error('Error getting current user:', error)
     return null
   }
 }
@@ -68,7 +67,6 @@ export async function GET() {
 
     return NextResponse.json(clients)
   } catch (error: any) {
-    console.error('Error fetching clients:', error)
     return NextResponse.json({
       error: "Failed to fetch clients",
       details: error.message
@@ -144,7 +142,6 @@ export async function POST(request: NextRequest) {
       existing: false
     })
   } catch (error: any) {
-    console.error('Error creating client:', error)
     return NextResponse.json({
       error: "Failed to create client",
       details: error.message

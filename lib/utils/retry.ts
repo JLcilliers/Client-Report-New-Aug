@@ -35,12 +35,10 @@ export async function withRetry<T>(
       
       // Don't retry on certain errors
       if (error.code === 401 || error.code === 403) {
-        console.error(`Authentication error, not retrying: ${error.message}`)
         throw error
       }
       
       if (attempt === maxAttempts) {
-        console.error(`Max retry attempts (${maxAttempts}) reached`)
         break
       }
       
@@ -50,8 +48,6 @@ export async function withRetry<T>(
         maxDelay
       )
       
-      console.log(`Retry attempt ${attempt}/${maxAttempts} after ${delay}ms`)
-      
       if (onRetry) {
         onRetry(attempt, error)
       }
@@ -60,7 +56,6 @@ export async function withRetry<T>(
     }
   }
   
-  console.error('All retry attempts failed:', lastError)
   return null
 }
 
@@ -95,7 +90,6 @@ export async function processBatchWithRecovery<T, R>(
         successful.push(result)
         return { success: true, result }
       } catch (error: any) {
-        console.error(`Error processing item:`, error)
         failed.push({ item, error })
         
         if (onError) {
@@ -154,7 +148,6 @@ export function safeJsonParse<T>(
   try {
     return JSON.parse(json)
   } catch (error) {
-    console.error('JSON parse error:', error)
     return fallback
   }
 }
@@ -169,10 +162,8 @@ export async function savePartialData(
 ): Promise<boolean> {
   try {
     await saveFunction(data)
-    console.log(`Successfully saved ${description}`)
     return true
   } catch (error) {
-    console.error(`Failed to save ${description}:`, error)
     return false
   }
 }

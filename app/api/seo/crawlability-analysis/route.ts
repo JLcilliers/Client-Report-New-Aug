@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
     const result = await analyzeCrawlability(url, { checkSitemap, checkRobots, analyzeCrawlBudget });
     return NextResponse.json(result);
   } catch (error) {
-    console.error('Crawlability analysis error:', error);
+    
     return NextResponse.json(
       { error: 'Failed to analyze crawlability' },
       { status: 500 }
@@ -219,7 +219,7 @@ async function analyzeCrawlability(
       timestamp: new Date().toISOString()
     };
   } catch (error) {
-    console.error(`Crawlability analysis error for ${url}:`, error);
+    
     
     return {
       url,

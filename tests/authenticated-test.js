@@ -31,7 +31,7 @@ async function ensureScreenshotDir() {
   try {
     await fs.mkdir(CONFIG.screenshotDir, { recursive: true });
   } catch (error) {
-    console.error('Error creating screenshot directory:', error);
+    
   }
 }
 
@@ -43,16 +43,16 @@ async function takeScreenshot(page, name) {
     const filepath = path.join(CONFIG.screenshotDir, filename);
     await page.screenshot({ path: filepath, fullPage: true });
     results.screenshots.push({ name, filename, timestamp });
-    console.log(`📸 Screenshot: ${filename}`);
+    
     return filepath;
   } catch (error) {
-    console.error(`Error taking screenshot ${name}:`, error.message);
+    
     return null;
   }
 }
 
 async function authenticate(page) {
-  console.log('\n🔐 Authenticating...');
+  
   
   try {
     // Navigate to homepage
@@ -62,7 +62,7 @@ async function authenticate(page) {
     // Check if already authenticated
     const currentUrl = page.url();
     if (currentUrl.includes('/dashboard')) {
-      console.log('  ✅ Already authenticated');
+      
       results.authentication.status = 'already_authenticated';
       return true;
     }
@@ -75,7 +75,7 @@ async function authenticate(page) {
     });
     
     if (hasDemoButton) {
-      console.log('  🔍 Found Quick Admin Access button');
+      
       
       // Click the demo access button
       await page.evaluate(() => {
@@ -89,7 +89,7 @@ async function authenticate(page) {
       
       const newUrl = page.url();
       if (newUrl.includes('/dashboard') || newUrl !== currentUrl) {
-        console.log('  ✅ Demo authentication successful');
+        
         results.authentication.status = 'demo_auth_success';
         results.authentication.url = newUrl;
         return true;
@@ -103,16 +103,16 @@ async function authenticate(page) {
     });
     
     if (googleButtonExists) {
-      console.log('  ℹ️  Google Sign-in available but requires real authentication');
+      
       results.authentication.status = 'google_auth_available';
     }
     
-    console.log('  ⚠️  Could not authenticate automatically');
+    
     results.authentication.status = 'not_authenticated';
     return false;
     
   } catch (error) {
-    console.error('  ❌ Authentication error:', error.message);
+    
     results.authentication.error = error.message;
     results.errors.push({ context: 'authentication', error: error.message });
     return false;
@@ -120,7 +120,7 @@ async function authenticate(page) {
 }
 
 async function testNavigation(page) {
-  console.log('\n🧭 Testing Navigation...');
+  
   
   const navItems = [
     { name: 'Dashboard', path: '/dashboard' },
@@ -134,7 +134,7 @@ async function testNavigation(page) {
   
   for (const item of navItems) {
     try {
-      console.log(`  Testing ${item.name}...`);
+      
       await page.goto(`${CONFIG.baseUrl}${item.path}`, { waitUntil: 'domcontentloaded', timeout: 15000 });
       await new Promise(resolve => setTimeout(resolve, 2000));
       
@@ -154,14 +154,14 @@ async function testNavigation(page) {
       };
       
       if (response.statusCode !== 404) {
-        console.log(`    ✅ ${item.name} accessible`);
+        
         await takeScreenshot(page, `nav-${item.name}`);
       } else {
-        console.log(`    ⚠️  ${item.name} returned 404`);
+        
       }
       
     } catch (error) {
-      console.log(`    ❌ ${item.name} error: ${error.message}`);
+      
       results.navigation.items[item.name] = {
         accessible: false,
         error: error.message
@@ -171,7 +171,7 @@ async function testNavigation(page) {
 }
 
 async function findAndTestReport(page) {
-  console.log('\n📊 Finding and Testing Reports...');
+  
   
   try {
     // First, try to navigate to reports page
@@ -186,7 +186,7 @@ async function findAndTestReport(page) {
     
     if (!hasReportsContent) {
       // Try to create a demo report or find existing one
-      console.log('  🔍 Looking for existing reports...');
+      
       
       // Try direct report URLs
       const testReportIds = ['1', '2', 'demo', 'test', 'sample'];
@@ -205,7 +205,7 @@ async function findAndTestReport(page) {
           });
           
           if (isValidReport) {
-            console.log(`  ✅ Found valid report: ${id}`);
+            
             results.reports.foundReport = true;
             results.reports.reportId = id;
             await takeScreenshot(page, `report-${id}`);
@@ -217,19 +217,19 @@ async function findAndTestReport(page) {
       }
     }
     
-    console.log('  ⚠️  No valid reports found');
+    
     results.reports.foundReport = false;
     return false;
     
   } catch (error) {
-    console.error('  ❌ Error finding reports:', error.message);
+    
     results.reports.error = error.message;
     return false;
   }
 }
 
 async function testReportTabs(page) {
-  console.log('\n📑 Testing Report Tabs...');
+  
   
   const tabs = [
     { name: 'Insights', expectedContent: ['summary', 'overview', 'performance', 'metrics'] },
@@ -243,7 +243,7 @@ async function testReportTabs(page) {
   results.tabs = {};
   
   for (const tab of tabs) {
-    console.log(`  Testing ${tab.name} tab...`);
+    
     
     try {
       // Try to click the tab
@@ -283,9 +283,9 @@ async function testReportTabs(page) {
         await takeScreenshot(page, `tab-${tab.name}`);
         
         if (contentFound) {
-          console.log(`    ✅ ${tab.name} tab working with content`);
+          
         } else {
-          console.log(`    ⚠️  ${tab.name} tab clicked but content unclear`);
+          
         }
         
         // Special handling for Technical tab - Core Web Vitals
@@ -294,12 +294,12 @@ async function testReportTabs(page) {
         }
         
       } else {
-        console.log(`    ❌ ${tab.name} tab not found`);
+        
         results.tabs[tab.name] = { found: false };
       }
       
     } catch (error) {
-      console.log(`    ❌ Error with ${tab.name} tab: ${error.message}`);
+      
       results.tabs[tab.name] = { found: false, error: error.message };
     }
   }
@@ -366,7 +366,7 @@ async function extractTabData(page, tabName) {
 }
 
 async function testCoreWebVitals(page) {
-  console.log('\n    🚀 Testing Core Web Vitals specifically...');
+  
   
   try {
     const vitals = await page.evaluate(() => {
@@ -423,22 +423,22 @@ async function testCoreWebVitals(page) {
     // Report findings
     const foundVitals = Object.entries(vitals).filter(([_, data]) => data.found);
     if (foundVitals.length > 0) {
-      console.log(`      ✅ Found ${foundVitals.length} Core Web Vitals:`);
+      
       foundVitals.forEach(([metric, data]) => {
-        console.log(`        ${metric}: ${data.value} ${data.status ? `(${data.status})` : ''}`);
+        ` : ''}`);
       });
     } else {
-      console.log('      ⚠️  No Core Web Vitals metrics found');
+      
     }
     
   } catch (error) {
-    console.error('      ❌ Error testing Core Web Vitals:', error.message);
+    
     results.coreWebVitals.error = error.message;
   }
 }
 
 async function testDataPopulation(page) {
-  console.log('\n📊 Testing Overall Data Population...');
+  
   
   try {
     const dataAnalysis = await page.evaluate(() => {
@@ -496,105 +496,105 @@ async function testDataPopulation(page) {
       ? ((dataAnalysis.populatedElements / dataAnalysis.totalDataElements) * 100).toFixed(1)
       : 0;
     
-    console.log(`  📊 Data Analysis:`);
-    console.log(`     Total elements: ${dataAnalysis.totalDataElements}`);
-    console.log(`     Populated: ${dataAnalysis.populatedElements} (${populationRate}%)`);
-    console.log(`     Empty: ${dataAnalysis.emptyElements}`);
-    console.log(`     Tables: ${dataAnalysis.tables}`);
-    console.log(`     Charts: ${dataAnalysis.charts}`);
+    
+    
+    `);
+    
+    
+    
     
     if (populationRate > 60) {
-      console.log(`  ✅ Good data population rate`);
+      
     } else if (populationRate > 30) {
-      console.log(`  ⚠️  Moderate data population rate`);
+      
     } else {
-      console.log(`  ❌ Low data population rate`);
+      
     }
     
   } catch (error) {
-    console.error('  ❌ Error analyzing data:', error.message);
+    
     results.dataValidation.error = error.message;
   }
 }
 
 async function generateFinalReport() {
-  console.log('\n' + '='.repeat(80));
-  console.log('📋 COMPREHENSIVE TEST REPORT - SEARCH INSIGHTS HUB');
-  console.log('='.repeat(80));
+  );
   
-  console.log('\n🔐 AUTHENTICATION:');
-  console.log(`  Status: ${results.authentication.status || 'Unknown'}`);
+  );
+  
+  
+  
   if (results.authentication.url) {
-    console.log(`  URL: ${results.authentication.url}`);
+    
   }
   
-  console.log('\n🧭 NAVIGATION:');
+  
   if (results.navigation.items) {
     Object.entries(results.navigation.items).forEach(([name, data]) => {
       const icon = data.accessible ? '✅' : '❌';
-      console.log(`  ${icon} ${name}: ${data.accessible ? 'Accessible' : 'Not accessible'}`);
+      
     });
   }
   
-  console.log('\n📊 REPORTS:');
-  console.log(`  Report found: ${results.reports.foundReport ? 'Yes' : 'No'}`);
+  
+  
   if (results.reports.reportId) {
-    console.log(`  Report ID: ${results.reports.reportId}`);
+    
   }
   
-  console.log('\n📑 TAB FUNCTIONALITY:');
+  
   if (results.tabs) {
     Object.entries(results.tabs).forEach(([name, data]) => {
       if (data.found && data.clicked && data.contentFound) {
-        console.log(`  ✅ ${name}: Fully functional`);
+        
         if (data.data?.metrics && Object.keys(data.data.metrics).length > 0) {
-          console.log(`     Metrics: ${JSON.stringify(data.data.metrics)}`);
+          }`);
         }
       } else if (data.found && data.clicked) {
-        console.log(`  ⚠️  ${name}: Clickable but content unclear`);
+        
       } else {
-        console.log(`  ❌ ${name}: Not found`);
+        
       }
     });
   }
   
-  console.log('\n🚀 CORE WEB VITALS:');
+  
   if (results.coreWebVitals && Object.keys(results.coreWebVitals).length > 0) {
     Object.entries(results.coreWebVitals).forEach(([metric, data]) => {
       if (data.found) {
-        console.log(`  ✅ ${metric}: ${data.value} ${data.status ? `(${data.status})` : ''}`);
+        ` : ''}`);
       } else if (!data.error) {
-        console.log(`  ❌ ${metric}: Not found`);
+        
       }
     });
   } else {
-    console.log('  ⚠️  No Core Web Vitals data collected');
+    
   }
   
-  console.log('\n📊 DATA VALIDATION:');
+  
   if (results.dataValidation && !results.dataValidation.error) {
     const dv = results.dataValidation;
     const rate = dv.totalDataElements > 0 
       ? ((dv.populatedElements / dv.totalDataElements) * 100).toFixed(1)
       : 0;
-    console.log(`  Population rate: ${rate}%`);
-    console.log(`  Total elements: ${dv.totalDataElements}`);
-    console.log(`  Populated: ${dv.populatedElements}`);
-    console.log(`  Charts: ${dv.charts}, Tables: ${dv.tables}`);
+    
+    
+    
+    
   }
   
-  console.log('\n📸 SCREENSHOTS:');
-  console.log(`  Total captured: ${results.screenshots.length}`);
-  console.log(`  Location: ${CONFIG.screenshotDir}`);
+  
+  
+  
   
   if (results.errors.length > 0) {
-    console.log('\n⚠️  ERRORS:');
+    
     results.errors.forEach(err => {
-      console.log(`  - ${err.context}: ${err.error}`);
+      
     });
   }
   
-  console.log('\n🎯 KEY FINDINGS & RECOMMENDATIONS:');
+  
   
   const findings = [];
   
@@ -658,22 +658,22 @@ async function generateFinalReport() {
     findings.push('✅ All systems functioning normally');
   }
   
-  findings.forEach(finding => console.log(`  ${finding}`));
+  findings.forEach(finding => );
   
-  console.log('\n' + '='.repeat(80));
+  );
   
   // Save detailed report
   const reportPath = path.join(__dirname, `auth-test-report-${Date.now()}.json`);
   await fs.writeFile(reportPath, JSON.stringify(results, null, 2));
-  console.log(`\n📄 Detailed JSON report saved to: ${reportPath}`);
+  
 }
 
 // Main execution
 async function runAuthenticatedTest() {
-  console.log('🚀 Starting Authenticated Dashboard Test');
-  console.log(`📍 URL: ${CONFIG.baseUrl}`);
-  console.log(`🔧 Mode: ${CONFIG.headless ? 'Headless' : 'Browser Visible'}`);
-  console.log('');
+  
+  
+  
+  
   
   let browser;
   
@@ -681,7 +681,7 @@ async function runAuthenticatedTest() {
     await ensureScreenshotDir();
     
     // Launch browser
-    console.log('🌐 Launching browser...');
+    
     browser = await puppeteer.launch({
       headless: CONFIG.headless,
       slowMo: CONFIG.slowMo,
@@ -725,23 +725,23 @@ async function runAuthenticatedTest() {
         await testDataPopulation(page);
       }
     } else {
-      console.log('\n⚠️  Skipping authenticated tests due to authentication failure');
+      
     }
     
     // Generate final report
     await generateFinalReport();
     
   } catch (error) {
-    console.error('\n❌ Fatal error:', error);
+    
     results.errors.push({ context: 'fatal', error: error.message });
   } finally {
     if (browser) {
-      console.log('\n🔒 Closing browser...');
+      
       await browser.close();
     }
   }
   
-  console.log('\n✅ Test completed!');
+  
   
   // Return appropriate exit code
   const hasErrors = results.errors.length > 0;
@@ -754,6 +754,6 @@ async function runAuthenticatedTest() {
 
 // Run the test
 runAuthenticatedTest().catch(error => {
-  console.error('Unhandled error:', error);
+  
   process.exit(1);
 });

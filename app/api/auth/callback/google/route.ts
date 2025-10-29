@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     const error = searchParams.get('error');
 
     if (error) {
-      console.error('OAuth error:', error);
+      
       const baseUrl = request.nextUrl.origin || process.env.NEXT_PUBLIC_URL || 'https://searchsignal.online'
       return NextResponse.redirect(
         `${baseUrl}/admin/google-accounts?error=${error}`
@@ -98,11 +98,11 @@ export async function GET(request: NextRequest) {
     }
 
     if (result.error) {
-      console.error('Database error:', result.error);
+      
       throw result.error;
     }
 
-    console.log('Successfully saved Google account:', result.data.email);
+    
 
     const baseUrl = request.nextUrl.origin || process.env.NEXT_PUBLIC_URL || 'https://searchsignal.online'
     return NextResponse.redirect(
@@ -110,7 +110,7 @@ export async function GET(request: NextRequest) {
     );
 
   } catch (error) {
-    console.error('OAuth callback error:', error);
+    
     const baseUrl = request.nextUrl.origin || process.env.NEXT_PUBLIC_URL || 'https://searchsignal.online'
     return NextResponse.redirect(
       `${baseUrl}/admin/google-accounts?error=callback_failed`

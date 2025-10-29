@@ -102,7 +102,6 @@ export default function BrandDashboard() {
         toast.error("Failed to load brand data")
       }
     } catch (error) {
-      console.error("Error fetching brand data:", error)
       toast.error("Error loading brand data")
     } finally {
       setLoading(false)
@@ -126,7 +125,6 @@ export default function BrandDashboard() {
         setRefreshing(false)
       }
     } catch (error) {
-      console.error("Error refreshing data:", error)
       toast.error("Error starting test")
       setRefreshing(false)
     }

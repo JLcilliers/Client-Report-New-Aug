@@ -10,7 +10,7 @@ export default function TestRefreshPage() {
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
 
   const clearRefreshingState = useCallback(() => {
-    console.log('🧹 Clearing refreshing state using multiple methods');
+    
     
     // Method 1: Direct state update
     setRefreshing(false);
@@ -23,7 +23,7 @@ export default function TestRefreshPage() {
     
     // Method 4: Delayed state clear as failsafe
     setTimeout(() => {
-      console.log('🔄 Failsafe state clear');
+      
       setRefreshing(false);
       refreshingRef.current = false;
     }, 100);
@@ -32,30 +32,30 @@ export default function TestRefreshPage() {
   const simulateRefresh = async () => {
     // Prevent multiple simultaneous refresh calls using both state and ref
     if (refreshing || refreshingRef.current) {
-      console.log('🚫 Already refreshing, skipping duplicate request');
+      
       return;
     }
     
     // Set both state and ref
-    console.log('🔄 Starting refresh process');
+    
     setRefreshing(true);
     refreshingRef.current = true;
     
     // Set multiple failsafe timeouts to always clear refreshing state
     const failsafeTimeout1 = setTimeout(() => {
-      console.warn('⚠️ Primary failsafe timeout triggered - clearing refreshing state');
+      
       clearRefreshingState();
     }, 30000); // 30 second failsafe
     
     const failsafeTimeout2 = setTimeout(() => {
-      console.warn('⚠️ Secondary failsafe timeout triggered - force clearing state');
+      
       setRefreshing(false);
       refreshingRef.current = false;
       setForceRender(prev => prev + 1);
     }, 35000); // 35 second backup failsafe
 
     try {
-      console.log('📡 Simulating API call...');
+      
       
       // Simulate API call with random delay (1-5 seconds)
       const delay = Math.random() * 4000 + 1000;
@@ -63,13 +63,13 @@ export default function TestRefreshPage() {
       
       // Simulate random success/failure
       if (Math.random() > 0.2) {
-        console.log('✅ Refresh completed successfully');
+        
         setLastRefresh(new Date());
       } else {
         throw new Error('Simulated API error');
       }
     } catch (error: any) {
-      console.error('❌ Refresh failed:', error.message);
+      
     } finally {
       // Clear failsafe timeouts
       clearTimeout(failsafeTimeout1);
@@ -77,7 +77,7 @@ export default function TestRefreshPage() {
       
       // Always clear the refreshing state using our comprehensive method
       clearRefreshingState();
-      console.log('🏁 Refresh process completed');
+      
     }
   };
 

@@ -9,7 +9,7 @@ export async function POST(
 ) {
   try {
     const { id } = params;
-    console.log('[Refresh Token] Refreshing token for account:', id);
+    
 
     // First, check if the account exists and has a refresh token
     // Using GoogleTokens table instead of Account table
@@ -26,7 +26,7 @@ export async function POST(
     });
 
     if (!account) {
-      console.error('[Refresh Token] Account not found:', id);
+      
       return NextResponse.json(
         { error: 'Account not found' },
         { status: 404 }
@@ -34,8 +34,8 @@ export async function POST(
     }
 
     if (!account.refresh_token) {
-      console.error('[Refresh Token] No refresh token for account:', id);
-      console.log('[Refresh Token] Account needs re-authentication');
+      
+      
       
       // Mark account as needing re-authentication
       await prisma.googleTokens.update({
@@ -59,7 +59,7 @@ export async function POST(
     const result = await refreshGoogleToken(id);
 
     if (!result) {
-      console.error('[Refresh Token] Token refresh failed for account:', id);
+      
       return NextResponse.json(
         { 
           error: 'Failed to refresh token',
@@ -70,8 +70,7 @@ export async function POST(
       );
     }
 
-    console.log('[Refresh Token] Token refreshed successfully');
-    console.log('[Refresh Token] New expiry:', new Date(result.expires_at * 1000).toISOString());
+    
 
     return NextResponse.json({ 
       success: true,
@@ -80,7 +79,7 @@ export async function POST(
     });
 
   } catch (error: any) {
-    console.error('[Refresh Token] Error:', error);
+    
     return NextResponse.json(
       { 
         error: 'Failed to refresh Google account token',

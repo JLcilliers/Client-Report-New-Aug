@@ -85,9 +85,6 @@ export async function POST(
       )
     }
 
-    console.log(`[AI Test] Starting visibility test for ${brand.brandName}`)
-    console.log(`[AI Test] Testing ${brand.keywords.length} keywords across AI platforms`)
-
     // Determine which platforms to test
     // For now, test all available platforms
     const platforms = ['chatgpt', 'claude', 'perplexity', 'gemini']
@@ -110,9 +107,6 @@ export async function POST(
       })),
       platforms
     })
-
-    console.log(`[AI Test] Completed ${testResults.results.length} tests`)
-    console.log(`[AI Test] Brand mentioned in ${testResults.summary.totalMentions} responses`)
 
     const currentDate = new Date()
 
@@ -230,8 +224,6 @@ export async function POST(
       })
     }
 
-    console.log(`[AI Test] Successfully stored results in database`)
-
     return NextResponse.json({
       success: true,
       message: "Visibility test completed",
@@ -248,7 +240,6 @@ export async function POST(
       }
     })
   } catch (error: any) {
-    console.error('[AI Brand Test API] Error:', error)
     return NextResponse.json(
       { error: "Failed to run visibility test", details: error.message },
       { status: 500 }
