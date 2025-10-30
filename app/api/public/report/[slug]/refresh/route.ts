@@ -29,6 +29,78 @@ interface SearchConsoleMetrics {
   date?: string
 }
 
+interface AnalyticsTrafficSource {
+  source: string
+  users: number
+  sessions: number
+  bounceRate: number
+  avgDuration: number
+  percentage?: number
+}
+
+interface AnalyticsDeviceCategory {
+  device: string
+  sessions: number
+  users: number
+  bounceRate: number
+  avgSessionDuration: number
+}
+
+interface AnalyticsGeoLocation {
+  country: string
+  city: string
+  sessions: number
+  users: number
+}
+
+interface AnalyticsTopPage {
+  page: string
+  sessions: number
+  users: number
+  bounceRate: number
+  avgSessionDuration: number
+}
+
+interface AnalyticsSummary {
+  sessions: number
+  users: number
+  newUsers: number
+  pageviews: number
+  events: number
+  bounceRate: number
+  avgSessionDuration: number
+}
+
+interface AnalyticsResult {
+  summary: AnalyticsSummary
+  trafficSources: AnalyticsTrafficSource[]
+  deviceCategories: AnalyticsDeviceCategory[]
+  geoLocations: AnalyticsGeoLocation[]
+  topPages: AnalyticsTopPage[]
+}
+
+function createEmptyAnalyticsSummary(): AnalyticsSummary {
+  return {
+    sessions: 0,
+    users: 0,
+    newUsers: 0,
+    pageviews: 0,
+    events: 0,
+    bounceRate: 0,
+    avgSessionDuration: 0
+  }
+}
+
+function createEmptyAnalyticsResult(): AnalyticsResult {
+  return {
+    summary: createEmptyAnalyticsSummary(),
+    trafficSources: [],
+    deviceCategories: [],
+    geoLocations: [],
+    topPages: []
+  }
+}
+
 // Helper function to execute with timeout
 async function withTimeout<T>(
   promise: Promise<T>,
@@ -272,7 +344,7 @@ export async function POST(
     const formatDate = (date: Date) => date.toISOString().split('T')[0]
 
     // Parallel fetch of Search Console and Analytics data
-    const [searchConsoleResult, analyticsResult] = await Promise.allSettled([
+    const [searchConsoleResult, analyticsResultOutcome] = await Promise.allSettled([
       // Search Console data fetch
       report.searchConsolePropertyId ? (async () => {
         const property = report.searchConsolePropertyId
@@ -587,21 +659,7 @@ export async function POST(
           )
         ])
         // Initialize analytics result object
-        const analyticsResult = {
-          summary: {
-            sessions: 0,
-            users: 0,
-            newUsers: 0,
-            pageviews: 0,
-            events: 0,
-            bounceRate: 0,
-            avgSessionDuration: 0
-          },
-          trafficSources: [],
-          deviceCategories: [],
-          topCountries: [],
-          topPages: []
-        }
+        const analyticsResult = createEmptyAnalyticsResult()
         
         // Process channel data
         if (channelData.status === 'fulfilled' && channelData.value?.data?.rows) {
@@ -691,6 +749,7 @@ export async function POST(
             .slice(0, 10) // Take top 10
           
           analyticsResult.topPages = filteredPages
+        }
         
         // Calculate percentages
         if (analyticsResult.summary.sessions > 0) {
@@ -703,13 +762,18 @@ export async function POST(
         return analyticsResult
       })() : Promise.resolve(null)
     ])
+
+    const analyticsResult: AnalyticsResult | null =
+      analyticsResultOutcome.status === 'fulfilled' && analyticsResultOutcome.value
+        ? analyticsResultOutcome.value
+        : null
     
     // Process results from parallel execution
     if (searchConsoleResult.status === 'rejected') {
       console.error('Search Console fetch rejected:', searchConsoleResult.reason)
     }
-    if (analyticsResult.status === 'rejected') {
-      console.error('Analytics fetch rejected:', analyticsResult.reason)
+    if (analyticsResultOutcome.status === 'rejected') {
+      console.error('Analytics fetch rejected:', analyticsResultOutcome.reason)
     }
 
 
@@ -782,7 +846,7 @@ export async function POST(
     
     // Only fetch comparison data if we have current data
     if ((searchConsoleResult.status === 'fulfilled' && searchConsoleData.summary) || 
-        (analyticsResult.status === 'fulfilled' && analyticsResult.summary)) {
+        (analyticsResultOutcome.status === 'fulfilled' && analyticsResult?.summary)) {
       
       const [previousSearchConsoleResult, previousAnalyticsResult] = await Promise.allSettled([
         // Previous Search Console data
@@ -907,7 +971,10 @@ export async function POST(
     // Calculate comparisons - map the dateRange to the correct comparison type
     const comparisonData = {
       searchConsole: calculateSearchConsoleComparisons(searchConsoleData.summary, previousSearchConsoleData),
-      analytics: calculateAnalyticsComparisons(analyticsResult.summary, previousAnalyticsData)
+      analytics: calculateAnalyticsComparisons(
+        analyticsResult?.summary ?? createEmptyAnalyticsSummary(),
+        previousAnalyticsData
+      )
     }
 
     // Map dateRange to the correct comparison key for frontend compatibility
@@ -963,9 +1030,11 @@ export async function POST(
     
 
     // Store combined data using ReportCache model with partial save support
+    const analyticsSummary = analyticsResult?.summary
+
     const hasData = (
       (searchConsoleData.summary && Object.keys(searchConsoleData.summary).length > 0) ||
-      (analyticsResult.summary && Object.keys(analyticsResult.summary).length > 0) ||
+      (analyticsSummary && Object.keys(analyticsSummary).length > 0) ||
       (pageSpeedData.mobile || pageSpeedData.desktop)
     )
     
@@ -1006,7 +1075,7 @@ export async function POST(
     // Log what data was successfully collected
     const dataStatus = {
       searchConsole: !!(searchConsoleData.summary?.clicks || searchConsoleData.summary?.impressions),
-      analytics: !!(analyticsResult.summary?.users || analyticsResult.summary?.sessions),
+      analytics: !!(analyticsSummary?.users || analyticsSummary?.sessions),
       pageSpeed: !!(pageSpeedData.mobile || pageSpeedData.desktop),
       processingTime: processingTime
     }
